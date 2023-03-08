@@ -1,0 +1,37 @@
+name: main
+
+on:
+  push:
+    branches: [ "main" ]
+    tags:
+      - '*'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Generate ignition files
+      run: |
+        mkdir dist
+        podman run --rm -v ./rack-blade/boot.bu:/config.bu:z quay.io/coreos/butane:release --pretty --strict /config.bu > ./dist/rack-blade-boot.ign
+
+    - name: Embed ignition files in ISO images
+      run: |
+        iso=$(podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data quay.io/coreos/coreos-installer:release download -f iso 2>/dev/null)
+        podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data quay.io/coreos/coreos-installer:release iso customize --live-ignition ./dist/rack-blade-boot.ign -o ./dist/rack-blade.iso $iso
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          dist/rack-blade-boot.ign
+          dist/rack-blade.iso
