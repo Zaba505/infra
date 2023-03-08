@@ -1,5 +1,9 @@
 variant: fcos
 version: 1.4.0
+ignition:
+  config:
+    replace:
+      source: https://github.com/Zaba505/infra/releases/latest/download/rack-blade-runtime.ign
 passwd:
   users:
     - name: core

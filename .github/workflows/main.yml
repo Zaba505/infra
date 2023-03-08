@@ -19,11 +19,12 @@ jobs:
       run: |
         mkdir dist
         podman run --rm -v ./rack-blade/boot.bu:/config.bu:z quay.io/coreos/butane:release --pretty --strict /config.bu > ./dist/rack-blade-boot.ign
+        podman run --rm -v ./rack-blade/runtime.bu:/config.bu:z quay.io/coreos/butane:release --pretty --strict /config.bu > ./dist/rack-blade-runtime.ign
 
     - name: Embed ignition files in ISO images
       run: |
         iso=$(podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data quay.io/coreos/coreos-installer:release download -f iso 2>/dev/null)
-        podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data quay.io/coreos/coreos-installer:release iso customize --live-ignition ./dist/rack-blade-boot.ign -o ./dist/rack-blade.iso $iso
+        podman run --security-opt label=disable --pull=always --rm -v .:/data -w /data quay.io/coreos/coreos-installer:release iso customize --live-ignition ./dist/rack-blade-boot.ign -o ./dist/rack-blade-boot.iso $iso
 
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -31,4 +32,5 @@ jobs:
       with:
         files: |
           dist/rack-blade-boot.ign
-          dist/rack-blade.iso
+          dist/rack-blade-runtime.ign
+          dist/rack-blade-boot.iso
