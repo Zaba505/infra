@@ -1,0 +1,9 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "tftp",
+    srcs = ["tftp.go"],
+    importpath = "github.com/Zaba505/infra/pxe/tftp",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_z5labs_app//:app"],
+)

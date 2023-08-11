@@ -6,8 +6,13 @@ load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 go_library(
     name = "pxe_lib",
     srcs = ["main.go"],
+    embedsrcs = ["config.yaml"],
     importpath = "github.com/Zaba505/infra/pxe",
     visibility = ["//visibility:private"],
+    deps = [
+        "//pxe/tftp",
+        "@com_github_z5labs_app//:app",
+    ],
 )
 
 go_binary(
@@ -24,8 +29,8 @@ pkg_tar(
 oci_image(
     name = "image",
     base = "@distroless_base",
-    tars = [":tar"],
     entrypoint = ["/pxe"],
+    tars = [":tar"],
 )
 
 # This is the target that should be released to the target platform

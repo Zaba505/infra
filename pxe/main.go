@@ -1,7 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	_ "embed"
+
+	"github.com/Zaba505/infra/pxe/tftp"
+
+	"github.com/z5labs/app"
+)
+
+//go:embed config.yaml
+var cfgFile []byte
 
 func main() {
-	fmt.Println("hello")
+	app.New(
+		app.WithRuntimeBuilderFunc(tftp.BuildRuntime),
+		app.Config(bytes.NewReader(cfgFile)),
+	).Run()
 }
