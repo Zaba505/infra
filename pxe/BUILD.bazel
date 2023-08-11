@@ -1,0 +1,14 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "pxe_lib",
+    srcs = ["main.go"],
+    importpath = "github.com/Zaba505/infra/pxe",
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "pxe",
+    embed = [":pxe_lib"],
+    visibility = ["//visibility:public"],
+)
