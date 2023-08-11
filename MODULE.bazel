@@ -1,8 +1,10 @@
 module(name = "com_github_zaba505_infra", version = "1.0")
 
 bazel_dep(name = "gazelle", version = "0.32.0")
-
 bazel_dep(name = "rules_go", version = "0.41.0")
+bazel_dep(name = "rules_oci", version = "1.2.0")
+bazel_dep(name = "rules_pkg", version = "0.9.1")
+bazel_dep(name = "aspect_bazel_lib", version = "1.33.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.20.3")
@@ -15,4 +17,13 @@ use_repo(
     go_deps,
 )
 
-bazel_dep(name = "rules_oci", version = "1.2.0")
+oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
+
+oci.pull(
+    name = "distroless_base",
+    image = "gcr.io/distroless/base",
+    digest = "sha256:ccaef5ee2f1850270d453fdf700a5392534f8d1a8ca2acda391fbb6a06b81c86",
+    platforms = ["linux/amd64", "linux/arm64"],
+)
+
+use_repo(oci, "distroless_base")

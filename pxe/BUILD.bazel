@@ -1,4 +1,7 @@
+load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 
 go_library(
     name = "pxe_lib",
@@ -11,4 +14,35 @@ go_binary(
     name = "pxe",
     embed = [":pxe_lib"],
     visibility = ["//visibility:public"],
+)
+
+pkg_tar(
+    name = "tar",
+    srcs = [":pxe"],
+)
+
+oci_image(
+    name = "image",
+    base = "@distroless_base",
+    tars = [":tar"],
+    entrypoint = ["/pxe"],
+)
+
+# This is the target that should be released to the target platform
+platform_transition_filegroup(
+    name = "transitioned_image",
+    srcs = [":image"],
+    target_platform = select({
+        "@platforms//cpu:arm64": "@rules_go//go/toolchain:linux_arm64",
+        "@platforms//cpu:x86_64": "@rules_go//go/toolchain:linux_amd64",
+    }),
+)
+
+# $ bazel build //pxe:tarball
+# $ docker load --input $(bazel cquery --output=files //pxe:tarball)
+# $ docker run --rm ghcr.io/zaba505/infra/pxe:latest
+oci_tarball(
+    name = "tarball",
+    image = ":image",
+    repo_tags = ["ghcr.io/zaba505/infra/pxe:latest"],
 )
