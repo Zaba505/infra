@@ -1,0 +1,7 @@
+tftp:
+  port: {{.Env.TFTP_PORT}}
+  blockSize: {{.Env.TFTP_BLOCK_SIZE}}
+  retries: {{.Env.TFTP_RETRIES}}
+  timeout: {{.Env.TFTP_TIMEOUT}}
+github:
+  token: {{.Env.GITHUB_TOKEN}}

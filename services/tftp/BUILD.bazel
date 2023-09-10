@@ -4,32 +4,33 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 
 go_library(
-    name = "pxe_lib",
+    name = "tftp_lib",
     srcs = ["main.go"],
     embedsrcs = ["config.yaml"],
-    importpath = "github.com/Zaba505/infra/pxe",
+    importpath = "github.com/Zaba505/infra/services/tftp",
     visibility = ["//visibility:private"],
     deps = [
-        "//pxe/tftp",
+        "//services/tftp/service",
         "@com_github_z5labs_app//:app",
     ],
 )
 
 go_binary(
-    name = "pxe",
-    embed = [":pxe_lib"],
+    name = "tftp",
+    embed = [":tftp_lib"],
+    pure = "on",
     visibility = ["//visibility:public"],
 )
 
 pkg_tar(
     name = "tar",
-    srcs = [":pxe"],
+    srcs = [":tftp"],
 )
 
 oci_image(
     name = "image",
     base = "@distroless_base",
-    entrypoint = ["/pxe"],
+    entrypoint = ["/tftp"],
     tars = [":tar"],
 )
 
@@ -43,11 +44,11 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel build //pxe:tarball
-# $ docker load --input $(bazel cquery --output=files //pxe:tarball)
-# $ docker run --rm ghcr.io/zaba505/infra/pxe:latest
+# $ bazel build //services/tftp:tarball
+# $ podman load --input $(bazel cquery --output=files //services/tftp:tarball)
+# $ podman run --rm -eTFTP_PORT=8000 -eTFTP_BLOCK_SIZE=4096 -eTFTP_RETRIES=2 -eTFTP_TIMEOUT=10s -eGITHUB_TOKEN=abc ghcr.io/zaba505/infra/tftp:latest
 oci_tarball(
     name = "tarball",
     image = ":image",
-    repo_tags = ["ghcr.io/zaba505/infra/pxe:latest"],
+    repo_tags = ["ghcr.io/zaba505/infra/tftp:latest"],
 )
