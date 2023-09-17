@@ -1,0 +1,24 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "service",
+    # keep
+    srcs = [
+        "service.go",
+    ] + select({
+        "//rules/deploy:gcp": ["otel_gcp.go"],
+        "//conditions:default": ["otel_local.go"],
+    }),
+    importpath = "github.com/Zaba505/infra/services/machinemgmt/service",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/oteltrace",
+        "@com_github_uptrace_opentelemetry_go_extra_otelzap//:otelzap",
+        "@com_github_z5labs_app//:app",
+        "@io_opentelemetry_go_contrib_instrumentation_net_http_otelhttp//:otelhttp",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_golang_x_sync//errgroup",
+        "@org_uber_go_zap//:zap",
+    ],
+)

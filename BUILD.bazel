@@ -1,0 +1,4 @@
+load("@gazelle//:def.bzl", "gazelle")
+
+# gazelle:prefix github.com/Zaba505/infra
+gazelle(name = "gazelle")
