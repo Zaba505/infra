@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Generate build version
+        id: info
+        run: |
+          formatted_date=$(date +'%Y.%m.%d')
+          time=$(date +'%H%M%S')
+          short_commit_id=$(git rev-parse --short HEAD)
+          echo "build_version=${formatted_date}.${time}.${short_commit_id}" >> $GITHUB_OUTPUT
+
+      - name: Tag repo with build version
+        run: |
+          tag=${{ steps.info.outputs.build_version }}
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git tag "${tag}"
+          git push origin --tags
+
+      - name: Setup bazelisk
+        uses: bazelbuild/setup-bazelisk@v2
+
+      - name: Mount bazel cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: bazel
+  
+      - name: Fetch dependencies
+        run: bazel fetch //...
+
+      - name: Build
+        run: bazel build //...
+      
+      - name: Test
+        run: bazel test //...
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish images
+        run: |
+          tarballTargets=$(bazel query "kind(oci_tarball, //...)")
+          while IFS=';' read -ra tarballs; do
+            for tarball in "${tarballs[@]}"; do
+              bazel build $tarball
+              tarFiles=$(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files $tarball)
+              img=$(docker load -q --input $tarFiles)
+              imgWithTag=${img#"Loaded image: "}
+              imgAndTag=(${imgWithTag//:/ })
+              img=${imgAndTag[0]}
+              tag=${imgAndTag[1]}
+              docker tag $imgWithTag "$img:${{ steps.info.outputs.build_version }}"
+              docker push -a $img
+            done
+          done <<< "$tarballTargets"

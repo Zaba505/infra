@@ -1,0 +1,6 @@
+config_setting(
+    name = "gcp",
+    flag_values = {
+        "@rules_go//go/config:tags": "gcp",
+    },
+)
