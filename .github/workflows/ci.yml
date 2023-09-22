@@ -46,7 +46,7 @@ jobs:
         run: bazel fetch //...
 
       - name: Build
-        run: bazel build //...
+        run: bazel build //... --@rules_go//go/config:tags="gcp"
 
       - name: Test
         run: bazel test //...
@@ -63,7 +63,7 @@ jobs:
           tarballTargets=$(bazel query "kind(oci_tarball, //...)")
           while IFS=';' read -ra tarballs; do
             for tarball in "${tarballs[@]}"; do
-              bazel build $tarball
+              bazel build $tarball --@rules_go//go/config:tags="gcp"
               tarFiles=$(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files $tarball)
               img=$(docker load -q --input $tarFiles)
               imgWithTag=${img#"Loaded image: "}
