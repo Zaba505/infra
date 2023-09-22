@@ -45,8 +45,8 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel build //services/machinemgmt:tarball --define VERSION=0.0.0
-# $ podman load --input $(bazel cquery --output=files //services/machinemgmt:tarball)
+# $ bazel build //services/machinemgmt:tarball
+# $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/machinemgmt:tarball)
 # $ podman run --rm -p8080:8080 -eHTTP_PORT=8080 ghcr.io/zaba505/infra/machinemgmt:latest
 oci_tarball(
     name = "tarball",
