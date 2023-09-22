@@ -1,0 +1,27 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+# keep
+go_library(
+    name = "oteltrace",
+    srcs = [
+        "oteltrace.go",
+    ] + select({
+        "//rules/deploy:gcp": ["gcp.go"],
+        "//conditions:default": ["local.go"],
+    }),
+    importpath = "github.com/Zaba505/infra/pkg/oteltrace",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@io_opentelemetry_go_otel//semconv/v1.21.0:v1_21_0",
+        "@io_opentelemetry_go_otel_exporters_stdout_stdouttrace//:stdouttrace",
+        "@io_opentelemetry_go_otel_sdk//resource",
+        "@io_opentelemetry_go_otel_sdk//trace",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ] + select({
+        "//rules/deploy:gcp": [
+            "@com_github_googlecloudplatform_opentelemetry_operations_go_exporter_trace//:trace",
+            "@io_opentelemetry_go_contrib_detectors_gcp//:gcp",
+        ],
+        "//conditions:default": [],
+    }),
+)
