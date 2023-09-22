@@ -33,7 +33,8 @@ use_repo(
     "io_opentelemetry_go_otel_trace",
     "org_golang_x_sync",
     "org_uber_go_zap",
-    "io_opentelemetry_go_otel_exporters_stdout_stdouttrace"
+    "io_opentelemetry_go_otel_exporters_stdout_stdouttrace",
+    "com_github_stretchr_testify",
 )
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")
