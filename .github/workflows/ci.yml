@@ -32,6 +32,13 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git tag "${tag}"
           git push origin --tags
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+  
+      - name: Terraform Lint
+        id: fmt
+        run: terraform -chdir=gcp fmt -check
 
       - name: Setup bazelisk
         uses: bazelbuild/setup-bazelisk@v2
