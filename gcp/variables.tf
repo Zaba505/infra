@@ -3,7 +3,7 @@ variable "machine-image-service-account-id" {
   default = "machine-image-sa"
 
   validation {
-    condition     = can(regex("^[a-z]([-a-z0-9]*[a-z0-9])$"))
+    condition     = can(regex("^[a-z]([-a-z0-9]*[a-z0-9])$", var.machine-image-service-account-id))
     error_message = "The Service Account ID must comply with RFC1035"
   }
 }
@@ -17,7 +17,7 @@ variable "machine-image-service-image" {
 }
 
 variable "machine-image-service-cpu-limit" {
-  type    = "number"
+  type    = number
   default = 1
 }
 
@@ -42,7 +42,7 @@ variable "machine-image-service-max-request-timeout" {
   description = "Max allowed time for an instance to respond to a request. A duration in seconds with up to nine fractional digits."
 
   validation {
-    condition     = var.machine-image-service-timeout > 0
+    condition     = var.machine-image-service-max-request-timeout > 0
     error_message = "Max request timeout must be greater than zero."
   }
 }
