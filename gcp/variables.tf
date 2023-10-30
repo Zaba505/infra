@@ -31,7 +31,7 @@ variable "machine-image-service-max-instance-count" {
   default = null
 
   validation {
-    condition     = var.machine-image-service-max-instance-count > 0
+    condition     = var.machine-image-service-max-instance-count != null ? var.machine-image-service-max-instance-count > 0 : true
     error_message = "Max instance count must be greater than zero."
   }
 }
