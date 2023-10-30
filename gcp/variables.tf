@@ -27,8 +27,8 @@ variable "machine-image-service-memory-limit" {
 }
 
 variable "machine-image-service-max-instance-count" {
-  type     = number
-  nullable = true
+  type    = number
+  default = null
 
   validation {
     condition     = var.machine-image-service-max-instance-count > 0
