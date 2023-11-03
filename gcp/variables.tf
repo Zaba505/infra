@@ -1,7 +1,3 @@
-variable "container-images-registry-location" {
-  type = string
-}
-
 variable "machine-image-service-account-id" {
   type    = string
   default = "machine-image-sa"
