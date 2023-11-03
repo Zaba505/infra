@@ -8,11 +8,11 @@ terraform {
 }
 
 resource "google_artifact_registry_repository" "container-images" {
-  description = "Container images"
+  description   = "Container images"
   repository_id = "container-images"
-  location = var.container-images-registry-location
-  format = "DOCKER"
-  mode = "STANDARD_REPOSITORY"
+  location      = var.container-images-registry-location
+  format        = "DOCKER"
+  mode          = "STANDARD_REPOSITORY"
 }
 
 resource "google_service_account" "machine_image_service" {
