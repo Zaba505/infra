@@ -2,11 +2,12 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
 	"strconv"
+	"sync/atomic"
 
+	"github.com/Zaba505/infra/pkg/httpvalidate"
 	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"github.com/z5labs/app"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -26,6 +27,9 @@ type runtime struct {
 
 	// http
 	port uint
+
+	started atomic.Bool
+	healthy atomic.Bool
 }
 
 func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
@@ -61,9 +65,21 @@ func (rt *runtime) Run(ctx context.Context) error {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle(
-		"/hello",
-		otelhttp.WithRouteTag("/hello", http.HandlerFunc(rt.helloHandler)),
+	registerEndpoint(
+		mux,
+		"/health/startup",
+		httpvalidate.Request(
+			http.HandlerFunc(rt.startupHandler),
+			httpvalidate.ForMethods(http.MethodGet),
+		),
+	)
+	registerEndpoint(
+		mux,
+		"/health/liveness",
+		httpvalidate.Request(
+			http.HandlerFunc(rt.livenessHandler),
+			httpvalidate.ForMethods(http.MethodGet),
+		),
 	)
 
 	s := &http.Server{
@@ -93,6 +109,8 @@ func (rt *runtime) Run(ctx context.Context) error {
 	})
 	g.Go(func() error {
 		rt.log.Info("started serving")
+		rt.started.Store(true)
+		rt.healthy.Store(true)
 		return s.Serve(conn)
 	})
 
@@ -103,6 +121,27 @@ func (rt *runtime) Run(ctx context.Context) error {
 	return err
 }
 
-func (rt *runtime) helloHandler(w http.ResponseWriter, req *http.Request) {
-	fmt.Fprintf(w, "Hello, world!")
+func registerEndpoint(mux *http.ServeMux, path string, h http.Handler) {
+	mux.Handle(
+		path,
+		otelhttp.WithRouteTag(path, h),
+	)
+}
+
+func (rt *runtime) startupHandler(w http.ResponseWriter, req *http.Request) {
+	started := rt.started.Load()
+	if started {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusServiceUnavailable)
+}
+
+func (rt *runtime) livenessHandler(w http.ResponseWriter, req *http.Request) {
+	healthy := rt.healthy.Load()
+	if healthy {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusServiceUnavailable)
 }
