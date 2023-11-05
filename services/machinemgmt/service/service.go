@@ -30,6 +30,7 @@ type runtime struct {
 
 	started atomic.Bool
 	healthy atomic.Bool
+	serving atomic.Bool
 }
 
 func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
@@ -81,6 +82,14 @@ func (rt *runtime) Run(ctx context.Context) error {
 			httpvalidate.ForMethods(http.MethodGet),
 		),
 	)
+	registerEndpoint(
+		mux,
+		"/health/readiness",
+		httpvalidate.Request(
+			http.HandlerFunc(rt.readinessHandler),
+			httpvalidate.ForMethods(http.MethodGet),
+		),
+	)
 
 	s := &http.Server{
 		Handler: otelhttp.NewHandler(mux, "machinemgmt", otelhttp.WithMessageEvents(otelhttp.ReadEvents, otelhttp.WriteEvents)),
@@ -111,6 +120,7 @@ func (rt *runtime) Run(ctx context.Context) error {
 		rt.log.Info("started serving")
 		rt.started.Store(true)
 		rt.healthy.Store(true)
+		rt.serving.Store(true)
 		return s.Serve(conn)
 	})
 
@@ -128,6 +138,7 @@ func registerEndpoint(mux *http.ServeMux, path string, h http.Handler) {
 	)
 }
 
+// report whether this service is ready to begin accepting traffic
 func (rt *runtime) startupHandler(w http.ResponseWriter, req *http.Request) {
 	started := rt.started.Load()
 	if started {
@@ -137,9 +148,20 @@ func (rt *runtime) startupHandler(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusServiceUnavailable)
 }
 
+// report whether this service is healthy or needs to be restarted
 func (rt *runtime) livenessHandler(w http.ResponseWriter, req *http.Request) {
 	healthy := rt.healthy.Load()
 	if healthy {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusServiceUnavailable)
+}
+
+// report whether this service is able to accept traffic
+func (rt *runtime) readinessHandler(w http.ResponseWriter, req *http.Request) {
+	serving := rt.serving.Load()
+	if serving {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
