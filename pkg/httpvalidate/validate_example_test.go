@@ -1,0 +1,86 @@
+package httpvalidate
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+)
+
+func ExampleRequest() {
+	h := Request(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "Hello, world!")
+		}),
+		ForMethods(http.MethodGet),
+	)
+
+	ls, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	s := &http.Server{
+		Handler: h,
+	}
+	defer s.Shutdown(context.Background())
+
+	go func() {
+		s.Serve(ls)
+	}()
+
+	resp, err := http.Get(fmt.Sprintf("http://%s", ls.Addr()))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	fmt.Println(string(b))
+	//Output: Hello, world!
+}
+
+func ExampleRequest_validationFailed() {
+	h := Request(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprintf(w, "Hello, world!")
+		}),
+		ForMethods(http.MethodGet),
+	)
+
+	ls, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	s := &http.Server{
+		Handler: h,
+	}
+	defer s.Shutdown(context.Background())
+
+	go func() {
+		s.Serve(ls)
+	}()
+
+	resp, err := http.Post(fmt.Sprintf("http://%s", ls.Addr()), "application/json", nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer resp.Body.Close()
+
+	fmt.Println(resp.StatusCode)
+	//Output: 405
+}
