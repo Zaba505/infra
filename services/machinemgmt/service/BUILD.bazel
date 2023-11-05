@@ -12,6 +12,7 @@ go_library(
     importpath = "github.com/Zaba505/infra/services/machinemgmt/service",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/httpvalidate",
         "//pkg/oteltrace",
         "@com_github_uptrace_opentelemetry_go_extra_otelzap//:otelzap",
         "@com_github_z5labs_app//:app",

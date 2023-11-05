@@ -39,8 +39,16 @@ resource "google_cloud_run_v2_service" "machine_image_service" {
         cpu_idle = false // TODO: maybe change this since liveness probes will allocate cpu anyways
       }
 
+      dynamic "env" {
+        for_each = var.machine-image-service-env-vars
+        content {
+          name  = env.value["name"]
+          value = env.value["value"]
+        }
+      }
+
       ports {
-        container_port = "8080"
+        container_port = one([for env_var in var.machine-image-service-env-vars : env_var.value if env_var.name == "HTTP_PORT"])
       }
 
       startup_probe {
