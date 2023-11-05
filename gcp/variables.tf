@@ -1,3 +1,7 @@
+variable "gcp-project-id" {
+  type = string
+}
+
 variable "machine-image-service-account-id" {
   type    = string
   default = "machine-image-sa"

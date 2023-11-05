@@ -8,8 +8,15 @@ terraform {
 }
 
 resource "google_service_account" "machine_image_service" {
-  account_id  = var.machine-image-service-account-id
-  description = "Machine Image Service Account for accessing the boot images storage bucket."
+  account_id   = var.machine-image-service-account-id
+  display_name = "machine-image-sa"
+  description  = "Machine Image Service Account for accessing the boot images storage bucket."
+}
+
+resource "google_project_iam_member" "machine_image_service_cloud_trace" {
+  project = var.gcp-project-id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.machine_image_service.email}"
 }
 
 resource "google_storage_bucket_access_control" "boot_images" {
