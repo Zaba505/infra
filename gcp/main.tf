@@ -42,8 +42,8 @@ resource "google_cloud_run_v2_service" "machine_image_service" {
       dynamic "env" {
         for_each = var.machine-image-service-env-vars
         content {
-          name  = env.name
-          value = env.value
+          name  = env.value["name"]
+          value = env.value["value"]
         }
       }
 
