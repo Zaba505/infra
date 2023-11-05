@@ -18,12 +18,12 @@ variable "machine-image-service-image" {
 
 variable "machine-image-service-env-vars" {
   type = list(object({
-    name = string
+    name  = string
     value = string
   }))
   default = [
     {
-      name = "HTTP_PORT"
+      name  = "HTTP_PORT"
       value = "8080"
     }
   ]
