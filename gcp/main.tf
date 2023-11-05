@@ -8,8 +8,15 @@ terraform {
 }
 
 resource "google_service_account" "machine_image_service" {
-  account_id  = var.machine-image-service-account-id
-  description = "Machine Image Service Account for accessing the boot images storage bucket."
+  account_id   = var.machine-image-service-account-id
+  display_name = "machine-image-sa"
+  description  = "Machine Image Service Account for accessing the boot images storage bucket."
+}
+
+resource "google_project_iam_member" "machine_image_service_cloud_trace" {
+  project = var.gcp-project-id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.machine_image_service.email}"
 }
 
 resource "google_storage_bucket_access_control" "boot_images" {
@@ -39,8 +46,16 @@ resource "google_cloud_run_v2_service" "machine_image_service" {
         cpu_idle = false // TODO: maybe change this since liveness probes will allocate cpu anyways
       }
 
+      dynamic "env" {
+        for_each = var.machine-image-service-env-vars
+        content {
+          name  = env.value["name"]
+          value = env.value["value"]
+        }
+      }
+
       ports {
-        container_port = "8080"
+        container_port = one([for env_var in var.machine-image-service-env-vars : env_var.value if env_var.name == "HTTP_PORT"])
       }
 
       startup_probe {

@@ -1,3 +1,7 @@
+variable "gcp-project-id" {
+  type = string
+}
+
 variable "machine-image-service-account-id" {
   type    = string
   default = "machine-image-sa"
@@ -14,6 +18,19 @@ variable "machine-image-service-location" {
 
 variable "machine-image-service-image" {
   type = string
+}
+
+variable "machine-image-service-env-vars" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+  default = [
+    {
+      name  = "HTTP_PORT"
+      value = "8080"
+    }
+  ]
 }
 
 variable "machine-image-service-cpu-limit" {
