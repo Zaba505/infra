@@ -10,15 +10,24 @@ type Option interface {
 	apply(any)
 }
 
-type CommonOption func(*commonOptions)
+type CommonOption interface {
+	Option
+	applyCommon(*commonOptions)
+}
 
-func (f CommonOption) apply(v any) {
+type commonOptionFunc func(*commonOptions)
+
+func (f commonOptionFunc) apply(v any) {
 	co := v.(*commonOptions)
 	f(co)
 }
 
+func (f commonOptionFunc) applyCommon(co *commonOptions) {
+	f(co)
+}
+
 func Logger(logger *zap.Logger) CommonOption {
-	return func(co *commonOptions) {
+	return commonOptionFunc(func(co *commonOptions) {
 		co.log = logger
-	}
+	})
 }

@@ -27,27 +27,36 @@ type storageOptions struct {
 	newHasher func() hash.Hash
 }
 
-type StorageServiceOption func(*storageOptions)
+type StorageServiceOption interface {
+	Option
+	applyStorage(*storageOptions)
+}
 
-func (f StorageServiceOption) apply(v any) {
+type storageServiceOptionFunc func(*storageOptions)
+
+func (f storageServiceOptionFunc) apply(v any) {
 	so := v.(*storageOptions)
 	f(so)
 }
 
+func (f storageServiceOptionFunc) applyStorage(so *storageOptions) {
+	f(so)
+}
+
+func (f commonOptionFunc) applyStorage(so *storageOptions) {
+	f(so.commonOptions)
+}
+
 func GoogleCloudBucket(bucket *storage.BucketHandle) StorageServiceOption {
-	return func(so *storageOptions) {
+	return storageServiceOptionFunc(func(so *storageOptions) {
 		so.bucket = bucket
-	}
+	})
 }
 
 func ObjectHasher(newHasher func() hash.Hash) StorageServiceOption {
-	return func(so *storageOptions) {
+	return storageServiceOptionFunc(func(so *storageOptions) {
 		so.newHasher = newHasher
-	}
-}
-
-type objectHandle interface {
-	NewReader(context.Context) (*storage.Reader, error)
+	})
 }
 
 // StorageService
@@ -68,7 +77,12 @@ func NewStorageService(opts ...Option) *StorageService {
 		newHasher: sha256.New,
 	}
 	for _, opt := range opts {
-		opt.apply(sOpts)
+		switch x := opt.(type) {
+		case StorageServiceOption:
+			x.applyStorage(sOpts)
+		default:
+			x.apply(sOpts)
+		}
 	}
 	s := &StorageService{
 		log: otelzap.New(sOpts.log),
