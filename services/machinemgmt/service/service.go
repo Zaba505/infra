@@ -2,12 +2,19 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"strconv"
 	"sync/atomic"
 
 	"github.com/Zaba505/infra/pkg/httpvalidate"
+	"github.com/Zaba505/infra/services/machinemgmt/service/backend"
+
+	"cloud.google.com/go/storage"
 	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"github.com/z5labs/app"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
@@ -20,10 +27,19 @@ type config struct {
 	Http struct {
 		Port uint `config:"port"`
 	} `config:"http"`
+
+	Storage struct {
+		Bucket string `config:"bucket"`
+	} `config:"storage"`
+}
+
+type storageClient interface {
+	GetBootstrapImage(context.Context, *backend.GetBootstrapImageRequest) (*backend.GetBootstrapImageResponse, error)
 }
 
 type runtime struct {
-	log *otelzap.Logger
+	log    *otelzap.Logger
+	listen func(string, string) (net.Listener, error)
 
 	// http
 	port uint
@@ -31,6 +47,8 @@ type runtime struct {
 	started atomic.Bool
 	healthy atomic.Bool
 	serving atomic.Bool
+
+	storage storageClient
 }
 
 func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
@@ -52,15 +70,29 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 	}
 	otel.SetTracerProvider(tp)
 
+	gs, err := storage.NewClient(context.Background())
+	if err != nil {
+		logger.Error("failed to create storage client", zap.Error(err))
+		return nil, err
+	}
+	bucket := gs.Bucket(cfg.Storage.Bucket)
+	storageService := backend.NewStorageService(
+		backend.Logger(logger),
+		backend.GoogleCloudBucket(bucket),
+		backend.ObjectHasher(sha256.New),
+	)
+
 	rt := &runtime{
-		log:  otelzap.New(logger),
-		port: cfg.Http.Port,
+		log:     otelzap.New(logger),
+		listen:  net.Listen,
+		port:    cfg.Http.Port,
+		storage: storageService,
 	}
 	return rt, nil
 }
 
 func (rt *runtime) Run(ctx context.Context) error {
-	conn, err := net.Listen("tcp", ":"+strconv.FormatUint(uint64(rt.port), 10))
+	conn, err := rt.listen("tcp", ":"+strconv.FormatUint(uint64(rt.port), 10))
 	if err != nil {
 		return err
 	}
@@ -88,6 +120,15 @@ func (rt *runtime) Run(ctx context.Context) error {
 		httpvalidate.Request(
 			http.HandlerFunc(rt.readinessHandler),
 			httpvalidate.ForMethods(http.MethodGet),
+		),
+	)
+	registerEndpoint(
+		mux,
+		"/bootstrap/image",
+		httpvalidate.Request(
+			http.HandlerFunc(rt.bootstrapImageHandler),
+			httpvalidate.ForMethods(http.MethodGet),
+			httpvalidate.ExactParams("id"),
 		),
 	)
 
@@ -166,4 +207,30 @@ func (rt *runtime) readinessHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusServiceUnavailable)
+}
+
+func (rt *runtime) bootstrapImageHandler(w http.ResponseWriter, req *http.Request) {
+	ctx := req.Context()
+	params := req.URL.Query()
+	imageId := params.Get("id")
+	resp, err := rt.storage.GetBootstrapImage(ctx, &backend.GetBootstrapImageRequest{
+		ID: imageId,
+	})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		rt.log.Ctx(ctx).Error("failed to get bootstrap image", zap.String("image_id", imageId), zap.Error(err))
+		return
+	}
+	defer resp.Body.Close()
+
+	base64Hash := base64.URLEncoding.EncodeToString(resp.Hash)
+	w.Header().Add("ETag", fmt.Sprintf("sha256/%s", base64Hash))
+	w.Header().Add("Content-Type", "application/octet")
+
+	_, err = io.Copy(w, resp.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		rt.log.Ctx(ctx).Error("failed to write image to response", zap.String("image_id", imageId), zap.Error(err))
+		return
+	}
 }
