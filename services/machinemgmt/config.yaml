@@ -1,2 +1,5 @@
 http:
   port: {{.Env.HTTP_PORT}}
+
+storage:
+  bucket: {{.Env.IMAGE_BUCKET_NAME}}
