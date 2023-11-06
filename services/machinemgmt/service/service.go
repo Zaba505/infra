@@ -19,6 +19,8 @@ import (
 	"github.com/z5labs/app"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
@@ -210,15 +212,20 @@ func (rt *runtime) readinessHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (rt *runtime) bootstrapImageHandler(w http.ResponseWriter, req *http.Request) {
-	ctx := req.Context()
 	params := req.URL.Query()
 	imageId := params.Get("id")
-	resp, err := rt.storage.GetBootstrapImage(ctx, &backend.GetBootstrapImageRequest{
+
+	spanCtx, span := otel.Tracer("service").Start(req.Context(), "runtime.bootstrapImageHandler", trace.WithAttributes(
+		attribute.String("image.id", imageId),
+	))
+	defer span.End()
+
+	resp, err := rt.storage.GetBootstrapImage(spanCtx, &backend.GetBootstrapImageRequest{
 		ID: imageId,
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		rt.log.Ctx(ctx).Error("failed to get bootstrap image", zap.String("image_id", imageId), zap.Error(err))
+		rt.log.Ctx(spanCtx).Error("failed to get bootstrap image", zap.String("image_id", imageId), zap.Error(err))
 		return
 	}
 	defer resp.Body.Close()
@@ -230,7 +237,7 @@ func (rt *runtime) bootstrapImageHandler(w http.ResponseWriter, req *http.Reques
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		rt.log.Ctx(ctx).Error("failed to write image to response", zap.String("image_id", imageId), zap.Error(err))
+		rt.log.Ctx(spanCtx).Error("failed to write image to response", zap.String("image_id", imageId), zap.Error(err))
 		return
 	}
 }
