@@ -27,7 +27,7 @@ resource "google_project_iam_member" "machine_image_service_cloud_storage" {
   condition {
     title      = "only_cloud_storage"
     expression = <<-EOL
-      resource.service == 'storage.googleapis.com
+      resource.service == 'storage.googleapis.com'
       && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object')
       && resource.name.startsWith('projects/_/buckets/${google_storage_bucket.boot_images.name}')
     EOL
