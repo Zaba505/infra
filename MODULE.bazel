@@ -35,6 +35,8 @@ use_repo(
     "org_uber_go_zap",
     "io_opentelemetry_go_otel_exporters_stdout_stdouttrace",
     "com_github_stretchr_testify",
+    "com_github_googleapis_gax_go_v2",
+    "com_google_cloud_go_storage",
 )
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")

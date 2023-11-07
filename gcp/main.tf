@@ -19,10 +19,31 @@ resource "google_project_iam_member" "machine_image_service_cloud_trace" {
   member  = "serviceAccount:${google_service_account.machine_image_service.email}"
 }
 
+resource "google_project_iam_member" "machine_image_service_cloud_storage" {
+  project = var.gcp-project-id
+  role    = "roles/run.serviceAgent"
+  member  = "serviceAccount:${google_service_account.machine_image_service.email}"
+
+  condition {
+    title      = "only_cloud_storage"
+    expression = <<-EOL
+      resource.service == 'storage.googleapis.com
+      && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object')
+      && resource.name.startsWith('projects/_/buckets/${google_storage_bucket.boot_images.name}')
+    EOL
+  }
+}
+
 resource "google_storage_bucket_access_control" "boot_images" {
   bucket = google_storage_bucket.boot_images.name
   role   = "READER"
-  entity = google_service_account.machine_image_service.email
+  entity = "user-${google_service_account.machine_image_service.email}"
+}
+
+resource "google_storage_default_object_access_control" "boot_images" {
+  bucket = google_storage_bucket.boot_images.name
+  role   = "READER"
+  entity = "user-${google_service_account.machine_image_service.email}"
 }
 
 resource "google_cloud_run_v2_service" "machine_image_service" {
