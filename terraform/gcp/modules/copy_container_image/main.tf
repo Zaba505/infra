@@ -21,7 +21,7 @@ resource "docker_image" "source" {
 }
 
 resource "docker_tag" "destination" {
-  source_image = docker_image.machinemgmt_service.name
+  source_image = docker_image.source.name
 
   target_image = local.destination-image
 }
