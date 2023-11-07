@@ -22,7 +22,13 @@ resource "google_project_iam_member" "machine_image_service_cloud_trace" {
 resource "google_storage_bucket_access_control" "boot_images" {
   bucket = google_storage_bucket.boot_images.name
   role   = "READER"
-  entity = google_service_account.machine_image_service.email
+  entity = "user-${google_service_account.machine_image_service.email}"
+}
+
+resource "google_storage_default_object_access_control" "boot_images" {
+  bucket = google_storage_bucket.boot_images.name
+  role   = "READER"
+  entity = "user-${google_service_account.machine_image_service.email}"
 }
 
 resource "google_cloud_run_v2_service" "machine_image_service" {
