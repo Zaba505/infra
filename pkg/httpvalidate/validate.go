@@ -52,3 +52,41 @@ func ForMethods(methods ...string) Validator {
 		return false
 	})
 }
+
+// MinimumParams
+func MinimumParams(names ...string) Validator {
+	minNumOfParams := len(names)
+	return ValidatorFunc(func(w http.ResponseWriter, r *http.Request) bool {
+		params := r.URL.Query()
+		if len(params) < minNumOfParams {
+			w.WriteHeader(http.StatusBadRequest)
+			return false
+		}
+		for _, name := range names {
+			if !params.Has(name) {
+				w.WriteHeader(http.StatusBadRequest)
+				return false
+			}
+		}
+		return true
+	})
+}
+
+// ExactParams
+func ExactParams(names ...string) Validator {
+	exactNumOfParams := len(names)
+	return ValidatorFunc(func(w http.ResponseWriter, r *http.Request) bool {
+		params := r.URL.Query()
+		if len(params) != exactNumOfParams {
+			w.WriteHeader(http.StatusBadRequest)
+			return false
+		}
+		for _, name := range names {
+			if !params.Has(name) {
+				w.WriteHeader(http.StatusBadRequest)
+				return false
+			}
+		}
+		return true
+	})
+}
