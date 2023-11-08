@@ -56,7 +56,9 @@ module "access_control" {
   source = "./modules/access_control"
 
   boot-image-storage-bucket-name = module.storage.bucket_name
-  boot-image-service-account-emails = [
-    module.machinemgmt.service_account_email
-  ]
+  boot-image-service-accounts = {
+    machinemgmt = {
+      email = module.machinemgmt.service_account_email
+    }
+  }
 }
