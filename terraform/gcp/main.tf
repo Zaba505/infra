@@ -23,7 +23,7 @@ resource "google_artifact_registry_repository" "container_images" {
 module "copy_container_image" {
   source = "./modules/copy_container_image"
 
-  source-image         = "github.com/Zaba505/infra/machinemgmt:${var.machine-image-service-image-tag}"
+  source-image         = "ghcr.io/zaba505/infra/machinemgmt:${var.machine-image-service-image-tag}"
   destination-registry = "${google_artifact_registry_repository.container_images.location}-docker.pkg.dev/${var.gcp-project-id}/${google_artifact_registry_repository.container_images.repository_id}"
 }
 
