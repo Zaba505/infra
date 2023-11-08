@@ -24,13 +24,13 @@ jobs:
           time=$(date +'%H%M%S')
           short_commit_id=$(git rev-parse --short HEAD)
           echo "build_version=${formatted_date}.${time}.${short_commit_id}" >> $GITHUB_OUTPUT
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-  
+
       - name: Terraform Lint
         id: fmt
-        run: terraform -chdir=gcp fmt -check
+        run: terraform -chdir=terraform/gcp fmt -recursive -check
 
       - name: Setup bazelisk
         uses: bazelbuild/setup-bazelisk@v2

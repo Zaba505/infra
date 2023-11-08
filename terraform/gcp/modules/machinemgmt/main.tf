@@ -29,21 +29,9 @@ resource "google_project_iam_member" "machine_image_service_cloud_storage" {
     expression = <<-EOL
       resource.service == 'storage.googleapis.com'
       && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object')
-      && resource.name.startsWith('projects/_/buckets/${google_storage_bucket.boot_images.name}')
+      && resource.name.startsWith('projects/_/buckets/${var.boot-image-bucket-name}')
     EOL
   }
-}
-
-resource "google_storage_bucket_access_control" "boot_images" {
-  bucket = google_storage_bucket.boot_images.name
-  role   = "READER"
-  entity = "user-${google_service_account.machine_image_service.email}"
-}
-
-resource "google_storage_default_object_access_control" "boot_images" {
-  bucket = google_storage_bucket.boot_images.name
-  role   = "READER"
-  entity = "user-${google_service_account.machine_image_service.email}"
 }
 
 resource "google_cloud_run_v2_service" "machine_image_service" {
@@ -114,41 +102,5 @@ resource "google_cloud_run_v2_service" "machine_image_service" {
   traffic {
     percent = 100
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
-  }
-}
-
-resource "google_storage_bucket" "boot_images" {
-  name     = var.boot-image-bucket-name
-  location = var.boot-image-bucket-location
-
-  force_destroy            = true
-  public_access_prevention = "enforced"
-
-  autoclass {
-    enabled = true
-  }
-
-  versioning {
-    enabled = true
-  }
-
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-
-    condition {
-      days_since_noncurrent_time = 7
-    }
-  }
-
-  lifecycle_rule {
-    action {
-      type = "Delete"
-    }
-
-    condition {
-      num_newer_versions = 1
-    }
   }
 }
