@@ -36,6 +36,9 @@ module "storage" {
 
 module "machinemgmt" {
   source = "./modules/machinemgmt"
+  depends_on = [
+    module.copy_container_image
+  ]
 
   gcp-project-id = var.gcp-project-id
 
