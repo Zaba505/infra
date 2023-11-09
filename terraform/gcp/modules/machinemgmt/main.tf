@@ -35,10 +35,12 @@ resource "google_project_iam_member" "machine_image_service_cloud_storage" {
 }
 
 resource "google_cloud_run_v2_service" "machine_image_service" {
-  name        = "vm-machine-image-service"
+  count = length(var.machine-image-service-locations)
+
+  name        = "vm-machine-image-service-${var.machine-image-service-locations[count.index]}"
   description = "API service for fetching machine boot images"
 
-  location = var.machine-image-service-location
+  location = var.machine-image-service-locations[count.index]
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
@@ -52,7 +54,7 @@ resource "google_cloud_run_v2_service" "machine_image_service" {
           cpu    = var.machine-image-service-cpu-limit
           memory = var.machine-image-service-memory-limit
         }
-        cpu_idle = false // TODO: maybe change this since liveness probes will allocate cpu anyways
+        cpu_idle = false
       }
 
       dynamic "env" {

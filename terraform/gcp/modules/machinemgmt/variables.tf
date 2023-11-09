@@ -12,8 +12,8 @@ variable "machine-image-service-account-id" {
   }
 }
 
-variable "machine-image-service-location" {
-  type = string
+variable "machine-image-service-locations" {
+  type = list(string)
 }
 
 variable "machine-image-service-image" {
