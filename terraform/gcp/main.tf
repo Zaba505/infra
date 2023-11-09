@@ -46,7 +46,7 @@ module "machinemgmt" {
 
   machine-image-service-account-id              = "machine-mgmt-sa"
   machine-image-service-image                   = module.copy_container_image.destination-image
-  machine-image-service-location                = var.machine-image-service-location
+  machine-image-service-locations               = var.machine-image-service-locations
   machine-image-service-cpu-limit               = 1
   machine-image-service-memory-limit            = "512Mi"
   machine-image-service-env-vars                = var.machine-image-service-env-vars
