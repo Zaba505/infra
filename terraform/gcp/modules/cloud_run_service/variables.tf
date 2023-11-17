@@ -1,3 +1,16 @@
+variable "artifact_registry_id" {
+  type = string
+}
+
+variable "access" {
+  type = object({
+    cloud_storage = optional(object({
+      bucket_name = string
+    }))
+  })
+  default = {}
+}
+
 variable "name" {
   type = string
 }
@@ -12,7 +25,10 @@ variable "locations" {
 }
 
 variable "image" {
-  type = string
+  type = object({
+    name = string
+    tag  = optional(string, "latest")
+  })
 }
 
 variable "env_vars" {

@@ -7,26 +7,66 @@ terraform {
   }
 }
 
+locals {
+  artifact_registry_locations = {
+    for loc in var.locations : loc =>
+    startswith(loc, "us") || startswith(loc, "europe") || startswith(loc, "asia") ? split("-", loc)[0] : loc
+  }
+}
+
+data "google_project" "default" {}
+
+module "copy_image_to_gcr" {
+  for_each = toset(var.locations)
+
+  source = "../copy_container_image"
+
+  source-image         = "${var.image.name}:${var.image.tag}"
+  destination-registry = "${local.artifact_registry_locations[each.value]}-docker.pkg.dev/${data.google_project.default.project_id}/${var.artifact_registry_id}"
+}
+
 resource "google_service_account" "api" {
   account_id   = "${var.name}-sa"
   display_name = "${var.name}-sa"
-  description  = "Machine Image Service Account for accessing the boot images storage bucket."
+}
+
+resource "google_project_iam_member" "cloud_trace" {
+  project = data.google_project.default.project_id
+  role    = "roles/cloudtrace.agent"
+  member  = "serviceAccount:${google_service_account.api.email}"
+}
+
+resource "google_project_iam_member" "cloud_storage" {
+  count = var.access.cloud_storage != null ? 1 : 0
+
+  project = data.google_project.default.project_id
+  role    = "roles/run.serviceAgent"
+  member  = "serviceAccount:${google_service_account.api.email}"
+
+  condition {
+    title      = "only_cloud_storage"
+    expression = <<-EOL
+      resource.service == 'storage.googleapis.com'
+      && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object')
+      && resource.name.startsWith('projects/_/buckets/${var.access.cloud_storage.bucket_name}')
+    EOL
+  }
 }
 
 resource "google_cloud_run_v2_service" "api" {
-  count = length(var.locations)
+  for_each = toset(var.locations)
 
   name        = var.name
   description = var.description
 
-  location = var.locations[count.index]
+  location = each.value
   ingress  = "INGRESS_TRAFFIC_ALL"
 
   template {
     service_account = google_service_account.api.email
 
     containers {
-      image = var.image
+      image = module.copy_image_to_gcr[each.value].destination-image
 
       resources {
         limits = {
