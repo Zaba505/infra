@@ -32,12 +32,14 @@ jobs:
         id: fmt
         run: terraform -chdir=terraform/gcp fmt -recursive -check
 
-      - name: Mount bazel cache
+      - name: Mount Bazel cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/bazel
-          key: bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
   
       - name: Fetch dependencies
         run: bazel fetch //...
