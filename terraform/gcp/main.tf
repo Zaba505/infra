@@ -65,3 +65,20 @@ module "access_control" {
     }
   }
 }
+
+module "gateway" {
+  source = "./modules/gateway"
+
+  domains = var.domains
+  apis = {
+    "machine-image-service" = {
+      paths = [
+        "/bootstrap/image"
+      ]
+      cloud_run = {
+        service_name = "vm-machine-image-service"
+        locations    = var.machine-image-service-locations
+      }
+    }
+  }
+}
