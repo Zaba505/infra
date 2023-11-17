@@ -38,8 +38,11 @@ module "storage" {
 
 module "machine_image_service" {
   source = "./modules/cloud_run_service"
+  depends_on = [
+    google_artifact_registry_repository.container_images
+  ]
 
-  artifact_registry_id = google_artifact_registry_repository.container_images.repository_id
+  artifact_registry_id = "docker-infra"
 
   access = {
     cloud_storage = {
@@ -66,8 +69,11 @@ module "machine_image_service" {
 
 module "lb_sink_service" {
   source = "./modules/cloud_run_service"
+  depends_on = [
+    google_artifact_registry_repository.container_images
+  ]
 
-  artifact_registry_id = google_artifact_registry_repository.container_images.repository_id
+  artifact_registry_id = "docker-infra"
 
   name        = "lb-sink-service"
   description = "Respond to all unmatched routes by the Load Balancer"
@@ -91,8 +97,8 @@ module "access_control" {
 
   boot-image-storage-bucket-name = module.storage.bucket_name
   boot-image-service-accounts = {
-    machinemgmt = {
-      email = module.machinemgmt.service_account_email
+    machine_image_service = {
+      email = module.machine_image_service.service_account_email
     }
   }
 }

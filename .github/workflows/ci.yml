@@ -42,7 +42,7 @@ jobs:
             ${{ runner.os }}-bazel-
   
       - name: Fetch dependencies
-        run: bazel fetch //...
+        run: bazel fetch //... --@rules_go//go/config:tags="gcp"
 
       - name: Build
         run: bazel build //... --@rules_go//go/config:tags="gcp"
