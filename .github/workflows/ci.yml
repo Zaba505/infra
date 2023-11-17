@@ -32,17 +32,12 @@ jobs:
         id: fmt
         run: terraform -chdir=terraform/gcp fmt -recursive -check
 
-      - name: Setup bazelisk
-        uses: bazelbuild/setup-bazelisk@v2
-
       - name: Mount bazel cache
         uses: actions/cache@v3
         with:
           path: |
             ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
-          restore-keys: |
-            ${{ runner.os }}-bazel-
+          key: bazel
   
       - name: Fetch dependencies
         run: bazel fetch //...
@@ -51,7 +46,7 @@ jobs:
         run: bazel build //... --@rules_go//go/config:tags="gcp"
 
       - name: Test
-        run: bazel test //...
+        run: bazel test //... --@rules_go//go/config:tags="gcp"
 
       - name: Tag repo with build version
         run: |
