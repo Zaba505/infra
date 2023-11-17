@@ -76,3 +76,54 @@ variable "machine-image-service-max-concurrent-requests" {
     error_message = "Max concurrent requests must be greater than zero."
   }
 }
+
+variable "lb-sink-service-image-tag" {
+  type = string
+}
+
+variable "lb-sink-service-locations" {
+  type = list(string)
+}
+
+variable "lb-sink-service-env-vars" {
+  type = list(object({
+    name  = string
+    value = string
+  }))
+}
+
+variable "lb-sink-service-max-instance-count" {
+  type    = number
+  default = null
+
+  validation {
+    condition     = var.lb-sink-service-max-instance-count != null ? var.lb-sink-service-max-instance-count > 0 : true
+    error_message = "Max instance count must be greater than zero."
+  }
+}
+
+variable "lb-sink-service-max-concurrent-requests" {
+  type        = number
+  default     = 10
+  description = "Max concurrent requests per instance."
+
+  validation {
+    condition     = var.lb-sink-service-max-concurrent-requests > 0
+    error_message = "Max concurrent requests must be greater than zero."
+  }
+}
+
+variable "lb-sink-service-max-request-timeout" {
+  type        = number
+  default     = 10
+  description = "Max allowed time for an instance to respond to a request. A duration in seconds with up to nine fractional digits."
+
+  validation {
+    condition     = var.lb-sink-service-max-request-timeout > 0
+    error_message = "Max request timeout must be greater than zero."
+  }
+}
+
+variable "domains" {
+  type = list(string)
+}
