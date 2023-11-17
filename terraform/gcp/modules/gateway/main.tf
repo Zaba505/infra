@@ -33,6 +33,32 @@ resource "google_compute_managed_ssl_certificate" "global_gateway" {
 }
 
 resource "google_compute_region_network_endpoint_group" "default" {
+  for_each = { for loc in var.default_service.locations : "${var.default_service.name}-${loc}-neg" => loc }
+
+  name                  = each.key
+  network_endpoint_type = "SERVERLESS"
+  region                = each.value
+
+  cloud_run {
+    service = var.default_service.name
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  name                  = var.default_service.name
+  protocol              = "HTTPS"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  dynamic "backend" {
+    for_each = toset(var.default_service.locations)
+
+    content {
+      group = google_compute_region_network_endpoint_group.default["${name}-${backend.key}-neg"]
+    }
+  }
+}
+
+resource "google_compute_region_network_endpoint_group" "api" {
   for_each = local.api_region_neg_configs
 
   name                  = each.key
@@ -44,7 +70,7 @@ resource "google_compute_region_network_endpoint_group" "default" {
   }
 }
 
-resource "google_compute_backend_service" "default" {
+resource "google_compute_backend_service" "api" {
   for_each = var.apis
 
   name                  = each.key
@@ -55,13 +81,15 @@ resource "google_compute_backend_service" "default" {
     for_each = each.value.cloud_run.locations
 
     content {
-      group = google_compute_region_network_endpoint_group.default["${name}-${backend.key}-neg"]
+      group = google_compute_region_network_endpoint_group.api["${name}-${backend.key}-neg"]
     }
   }
 }
 
 resource "google_compute_url_map" "apis" {
   name = "apis"
+
+  default_service = google_compute_backend_service.default.id
 
   host_rule {
     hosts        = var.domains
@@ -76,7 +104,7 @@ resource "google_compute_url_map" "apis" {
 
       content {
         paths   = path_rule.value["paths"]
-        service = google_compute_backend_service.default[path_rule.key].id
+        service = google_compute_backend_service.api[path_rule.key].id
       }
     }
   }
