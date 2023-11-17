@@ -1,5 +1,5 @@
-variable "container-images-registry-location" {
-  type = string
+variable "locations" {
+  type = list(string)
 }
 
 variable "boot-image-bucket-name" {
@@ -7,10 +7,6 @@ variable "boot-image-bucket-name" {
 }
 
 variable "boot-image-bucket-location" {
-  type = string
-}
-
-variable "gcp-project-id" {
   type = string
 }
 
@@ -22,10 +18,6 @@ variable "machine-image-service-account-id" {
     condition     = can(regex("^[a-z]([-a-z0-9]*[a-z0-9])$", var.machine-image-service-account-id))
     error_message = "The Service Account ID must comply with RFC1035"
   }
-}
-
-variable "machine-image-service-locations" {
-  type = list(string)
 }
 
 variable "machine-image-service-image-tag" {
@@ -79,10 +71,6 @@ variable "machine-image-service-max-concurrent-requests" {
 
 variable "lb-sink-service-image-tag" {
   type = string
-}
-
-variable "lb-sink-service-locations" {
-  type = list(string)
 }
 
 variable "lb-sink-service-env-vars" {

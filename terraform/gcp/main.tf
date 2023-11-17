@@ -12,26 +12,21 @@ terraform {
   }
 }
 
+locals {
+  artifact_registry_locations = values({
+    for loc in var.locations : loc =>
+    startswith(loc, "us") || startswith(loc, "europe") || startswith(loc, "asia") ? split("-", loc)[0] : loc
+  })
+}
+
 resource "google_artifact_registry_repository" "container_images" {
+  for_each = toset(local.artifact_registry_locations)
+
   description   = "Container images"
   repository_id = "docker-infra"
-  location      = var.container-images-registry-location
+  location      = each.value
   format        = "DOCKER"
   mode          = "STANDARD_REPOSITORY"
-}
-
-module "copy_machinemgmt_image" {
-  source = "./modules/copy_container_image"
-
-  source-image         = "ghcr.io/zaba505/infra/machinemgmt:${var.machine-image-service-image-tag}"
-  destination-registry = "${google_artifact_registry_repository.container_images.location}-docker.pkg.dev/${var.gcp-project-id}/${google_artifact_registry_repository.container_images.repository_id}"
-}
-
-module "copy_lb_sink_image" {
-  source = "./modules/copy_container_image"
-
-  source-image         = "ghcr.io/zaba505/infra/lb-sink:${var.lb-sink-service-image-tag}"
-  destination-registry = "${google_artifact_registry_repository.container_images.location}-docker.pkg.dev/${var.gcp-project-id}/${google_artifact_registry_repository.container_images.repository_id}"
 }
 
 module "storage" {
@@ -41,39 +36,48 @@ module "storage" {
   boot-image-bucket-location = var.boot-image-bucket-location
 }
 
-module "machinemgmt" {
-  source = "./modules/machinemgmt"
-  depends_on = [
-    module.copy_machinemgmt_image
-  ]
+module "machine_image_service" {
+  source = "./modules/cloud_run_service"
 
-  gcp-project-id = var.gcp-project-id
+  artifact_registry_id = google_artifact_registry_repository.container_images.repository_id
 
-  boot-image-bucket-name = module.storage.bucket_name
+  access = {
+    cloud_storage = {
+      bucket_name = module.storage.bucket_name
+    }
+  }
 
-  machine-image-service-account-id              = "machine-mgmt-sa"
-  machine-image-service-image                   = module.copy_machinemgmt_image.destination-image
-  machine-image-service-locations               = var.machine-image-service-locations
-  machine-image-service-cpu-limit               = 1
-  machine-image-service-memory-limit            = "512Mi"
-  machine-image-service-env-vars                = var.machine-image-service-env-vars
-  machine-image-service-max-instance-count      = var.machine-image-service-max-instance-count
-  machine-image-service-max-concurrent-requests = var.machine-image-service-max-concurrent-requests
-  machine-image-service-max-request-timeout     = var.machine-image-service-max-request-timeout
+  name        = "machine-image-service"
+  description = "API service for fetching machine boot images"
+
+  image = {
+    name = "ghcr.io/zaba505/infra/machinemgmt"
+    tag  = var.machine-image-service-image-tag
+  }
+
+  locations               = var.locations
+  cpu_limit               = 1
+  memory_limit            = "512Mi"
+  env_vars                = var.machine-image-service-env-vars
+  max_instance_count      = var.machine-image-service-max-instance-count
+  max_concurrent_requests = var.machine-image-service-max-concurrent-requests
+  max_request_timeout     = var.machine-image-service-max-request-timeout
 }
 
 module "lb_sink_service" {
   source = "./modules/cloud_run_service"
-  depends_on = [
-    module.copy_lb_sink_image
-  ]
 
-  name        = "lb-sink"
+  artifact_registry_id = google_artifact_registry_repository.container_images.repository_id
+
+  name        = "lb-sink-service"
   description = "Respond to all unmatched routes by the Load Balancer"
 
-  image = module.copy_lb_sink_image.destination-image
+  image = {
+    name = "ghcr.io/zaba505/infra/lb-sink"
+    tag  = var.lb-sink-service-image-tag
+  }
 
-  locations               = var.lb-sink-service-locations
+  locations               = var.locations
   cpu_limit               = 1
   memory_limit            = "512Mi"
   env_vars                = var.lb-sink-service-env-vars
