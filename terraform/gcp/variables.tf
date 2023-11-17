@@ -76,3 +76,7 @@ variable "machine-image-service-max-concurrent-requests" {
     error_message = "Max concurrent requests must be greater than zero."
   }
 }
+
+variable "domains" {
+  type = list(string)
+}
