@@ -107,7 +107,7 @@ module "gateway" {
   source = "./modules/gateway"
   depends_on = [
     module.lb_sink_service,
-    module.machinemgmt
+    module.machine_image_service
   ]
 
   domains = var.domains
@@ -123,8 +123,8 @@ module "gateway" {
         "/bootstrap/image"
       ]
       cloud_run = {
-        service_name = "vm-machine-image-service"
-        locations    = module.machinemgmt.machine-image-service-locations
+        service_name = module.machine_image_service.name
+        locations    = module.machine_image_service.locations
       }
     }
   }
