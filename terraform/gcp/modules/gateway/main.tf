@@ -15,7 +15,7 @@ locals {
         service_name = api.cloud_run.service_name
       }
     }
-  ])
+  ]...)
 }
 
 resource "google_compute_global_address" "gateway_ipv4" {
