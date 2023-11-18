@@ -53,7 +53,7 @@ resource "google_compute_backend_service" "default" {
     for_each = toset(var.default_service.locations)
 
     content {
-      group = google_compute_region_network_endpoint_group.default["${name}-${backend.key}-neg"]
+      group = google_compute_region_network_endpoint_group.default["${name}-${backend.key}-neg"].id
     }
   }
 }
@@ -81,7 +81,7 @@ resource "google_compute_backend_service" "api" {
     for_each = each.value.cloud_run.locations
 
     content {
-      group = google_compute_region_network_endpoint_group.api["${name}-${backend.key}-neg"]
+      group = google_compute_region_network_endpoint_group.api["${name}-${backend.key}-neg"].id
     }
   }
 }
