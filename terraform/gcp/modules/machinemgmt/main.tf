@@ -37,7 +37,7 @@ resource "google_project_iam_member" "machine_image_service_cloud_storage" {
 resource "google_cloud_run_v2_service" "machine_image_service" {
   count = length(var.machine-image-service-locations)
 
-  name        = "vm-machine-image-service-${var.machine-image-service-locations[count.index]}"
+  name        = "vm-machine-image-service"
   description = "API service for fetching machine boot images"
 
   location = var.machine-image-service-locations[count.index]
