@@ -14,7 +14,7 @@ locals {
   }
 }
 
-data "google_project" "default" {}
+data "google_client_config" "default" {}
 
 module "copy_image_to_gcr" {
   for_each = toset(var.locations)
@@ -22,7 +22,7 @@ module "copy_image_to_gcr" {
   source = "../copy_container_image"
 
   source-image         = "${var.image.name}:${var.image.tag}"
-  destination-registry = "${local.artifact_registry_locations[each.value]}-docker.pkg.dev/${data.google_project.default.project_id}/${var.artifact_registry_id}"
+  destination-registry = "${local.artifact_registry_locations[each.value]}-docker.pkg.dev/${data.google_client_config.default.project}/${var.artifact_registry_id}"
 }
 
 resource "google_service_account" "api" {
@@ -31,7 +31,7 @@ resource "google_service_account" "api" {
 }
 
 resource "google_project_iam_member" "cloud_trace" {
-  project = data.google_project.default.project_id
+  project = data.google_client_config.default.project
   role    = "roles/cloudtrace.agent"
   member  = "serviceAccount:${google_service_account.api.email}"
 }
@@ -39,7 +39,7 @@ resource "google_project_iam_member" "cloud_trace" {
 resource "google_project_iam_member" "cloud_storage" {
   count = var.access.cloud_storage != null ? 1 : 0
 
-  project = data.google_project.default.project_id
+  project = data.google_client_config.default.project
   role    = "roles/run.serviceAgent"
   member  = "serviceAccount:${google_service_account.api.email}"
 
