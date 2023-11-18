@@ -12,19 +12,21 @@ terraform {
   }
 }
 
-resource "google_artifact_registry_repository" "container_images" {
-  description   = "Container images"
-  repository_id = "docker-infra"
-  location      = var.container-images-registry-location
-  format        = "DOCKER"
-  mode          = "STANDARD_REPOSITORY"
+locals {
+  artifact_registry_locations = values({
+    for loc in var.locations : loc =>
+    startswith(loc, "us") || startswith(loc, "europe") || startswith(loc, "asia") ? split("-", loc)[0] : loc
+  })
 }
 
-module "copy_container_image" {
-  source = "./modules/copy_container_image"
+resource "google_artifact_registry_repository" "container_images" {
+  for_each = toset(local.artifact_registry_locations)
 
-  source-image         = "ghcr.io/zaba505/infra/machinemgmt:${var.machine-image-service-image-tag}"
-  destination-registry = "${google_artifact_registry_repository.container_images.location}-docker.pkg.dev/${var.gcp-project-id}/${google_artifact_registry_repository.container_images.repository_id}"
+  description   = "Container images"
+  repository_id = "docker-infra"
+  location      = each.value
+  format        = "DOCKER"
+  mode          = "STANDARD_REPOSITORY"
 }
 
 module "storage" {
@@ -34,25 +36,60 @@ module "storage" {
   boot-image-bucket-location = var.boot-image-bucket-location
 }
 
-module "machinemgmt" {
-  source = "./modules/machinemgmt"
+module "machine_image_service" {
+  source = "./modules/cloud_run_service"
   depends_on = [
-    module.copy_container_image
+    google_artifact_registry_repository.container_images
   ]
 
-  gcp-project-id = var.gcp-project-id
+  artifact_registry_id = "docker-infra"
 
-  boot-image-bucket-name = module.storage.bucket_name
+  access = {
+    cloud_storage = {
+      bucket_name = module.storage.bucket_name
+    }
+  }
 
-  machine-image-service-account-id              = "machine-mgmt-sa"
-  machine-image-service-image                   = module.copy_container_image.destination-image
-  machine-image-service-locations               = var.machine-image-service-locations
-  machine-image-service-cpu-limit               = 1
-  machine-image-service-memory-limit            = "512Mi"
-  machine-image-service-env-vars                = var.machine-image-service-env-vars
-  machine-image-service-max-instance-count      = var.machine-image-service-max-instance-count
-  machine-image-service-max-concurrent-requests = var.machine-image-service-max-concurrent-requests
-  machine-image-service-max-request-timeout     = var.machine-image-service-max-request-timeout
+  name        = "machine-image-service"
+  description = "API service for fetching machine boot images"
+
+  image = {
+    name = "ghcr.io/zaba505/infra/machinemgmt"
+    tag  = var.machine-image-service-image-tag
+  }
+
+  locations               = var.locations
+  cpu_limit               = 1
+  memory_limit            = "512Mi"
+  env_vars                = var.machine-image-service-env-vars
+  max_instance_count      = var.machine-image-service-max-instance-count
+  max_concurrent_requests = var.machine-image-service-max-concurrent-requests
+  max_request_timeout     = var.machine-image-service-max-request-timeout
+}
+
+module "lb_sink_service" {
+  source = "./modules/cloud_run_service"
+  depends_on = [
+    google_artifact_registry_repository.container_images
+  ]
+
+  artifact_registry_id = "docker-infra"
+
+  name        = "lb-sink-service"
+  description = "Respond to all unmatched routes by the Load Balancer"
+
+  image = {
+    name = "ghcr.io/zaba505/infra/lb-sink"
+    tag  = var.lb-sink-service-image-tag
+  }
+
+  locations               = var.locations
+  cpu_limit               = 1
+  memory_limit            = "512Mi"
+  env_vars                = var.lb-sink-service-env-vars
+  max_instance_count      = var.lb-sink-service-max-instance-count
+  max_concurrent_requests = var.lb-sink-service-max-concurrent-requests
+  max_request_timeout     = var.lb-sink-service-max-request-timeout
 }
 
 module "access_control" {
@@ -60,8 +97,35 @@ module "access_control" {
 
   boot-image-storage-bucket-name = module.storage.bucket_name
   boot-image-service-accounts = {
-    machinemgmt = {
-      email = module.machinemgmt.service_account_email
+    machine_image_service = {
+      email = module.machine_image_service.service_account_email
+    }
+  }
+}
+
+module "gateway" {
+  source = "./modules/gateway"
+  depends_on = [
+    module.lb_sink_service,
+    module.machine_image_service
+  ]
+
+  domains = var.domains
+
+  default_service = {
+    name      = module.lb_sink_service.name
+    locations = module.lb_sink_service.locations
+  }
+
+  apis = {
+    "machine-image-service" = {
+      paths = [
+        "/bootstrap/image"
+      ]
+      cloud_run = {
+        service_name = module.machine_image_service.name
+        locations    = module.machine_image_service.locations
+      }
     }
   }
 }
