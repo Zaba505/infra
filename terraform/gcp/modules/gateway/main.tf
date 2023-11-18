@@ -19,7 +19,7 @@ locals {
 }
 
 resource "google_compute_global_address" "gateway_ipv4" {
-  name         = "global_gateway_ipv4"
+  name         = "global-gateway-ipv4"
   ip_version   = "IPV4"
   address_type = "EXTERNAL"
 }
