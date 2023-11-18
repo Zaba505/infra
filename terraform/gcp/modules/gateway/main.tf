@@ -99,6 +99,8 @@ resource "google_compute_url_map" "apis" {
   path_matcher {
     name = "apis"
 
+    default_service = google_compute_backend_service.default.id
+
     dynamic "path_rule" {
       for_each = var.apis
 
