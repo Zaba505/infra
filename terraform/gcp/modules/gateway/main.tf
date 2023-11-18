@@ -128,7 +128,7 @@ resource "google_compute_global_forwarding_rule" "ipv4" {
   name                  = "apis"
   ip_address            = google_compute_global_address.ipv4.id
   ip_version            = "IPV4"
-  port_range            = "80"
+  port_range            = "443"
   target                = google_compute_target_https_proxy.apis.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
 }
@@ -137,7 +137,7 @@ resource "google_compute_global_forwarding_rule" "ipv6" {
   name                  = "apis"
   ip_address            = google_compute_global_address.ipv6.id
   ip_version            = "IPV6"
-  port_range            = "80"
+  port_range            = "443"
   target                = google_compute_target_https_proxy.apis.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
 }
