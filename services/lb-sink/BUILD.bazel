@@ -4,34 +4,34 @@ load("@rules_pkg//:pkg.bzl", "pkg_tar")
 load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
 
 go_library(
-    name = "machinemgmt_lib",
+    name = "lb-sink_lib",
     srcs = ["main.go"],
     embedsrcs = ["config.yaml"],
-    importpath = "github.com/Zaba505/infra/services/machinemgmt",
+    importpath = "github.com/Zaba505/infra/services/lb-sink",
     visibility = ["//visibility:private"],
     deps = [
-        "//services/machinemgmt/service",
+        "//services/lb-sink/service",
         "@com_github_z5labs_app//:app",
     ],
 )
 
 go_binary(
-    name = "machinemgmt",
-    embed = [":machinemgmt_lib"],
+    name = "lb-sink",
+    embed = [":lb-sink_lib"],
     pure = "on",
     visibility = ["//visibility:public"],
 )
 
 pkg_tar(
     name = "tar",
-    srcs = [":machinemgmt"],
+    srcs = [":lb-sink"],
 )
 
 # TODO: add labels
 oci_image(
     name = "image",
     base = "@distroless_base",
-    entrypoint = ["/machinemgmt"],
+    entrypoint = ["/lb-sink"],
     tars = [":tar"],
 )
 
@@ -45,14 +45,14 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel build //services/machinemgmt:tarball
-# $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/machinemgmt:tarball)
-# $ podman run --rm -p8080:8080 -eHTTP_PORT=8080 ghcr.io/zaba505/infra/machinemgmt:latest
+# $ bazel build //services/lb-sink:tarball
+# $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/lb-sink:tarball)
+# $ podman run --rm -p8080:8080 -eHTTP_PORT=8080 ghcr.io/zaba505/infra/lb-sink:latest
 oci_tarball(
     name = "tarball",
     image = ":image",
     repo_tags = [
-        "ghcr.io/zaba505/infra/machinemgmt:latest",
+        "ghcr.io/zaba505/infra/lb-sink:latest",
     ],
     tags = ["manual"],
 )
