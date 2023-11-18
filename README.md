@@ -8,6 +8,7 @@ flowchart TB
     loadBalancer["Load balancer"]
     bootImages[("Machine boot images")]
     imageService["Machine Image service"]
+    sinkService["Unknown Route service"]
 
     cloudflare --> homeRouter
     subgraph one [Home]
@@ -17,6 +18,7 @@ flowchart TB
     cloudflare --> loadBalancer
     subgraph two [Cloud]
     loadBalancer --> imageService
+    loadBalancer --> sinkService
     imageService --> bootImages
     end
 ```
