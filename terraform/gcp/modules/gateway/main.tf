@@ -125,7 +125,7 @@ resource "google_compute_target_https_proxy" "apis" {
 }
 
 resource "google_compute_global_forwarding_rule" "ipv4" {
-  name                  = "apis"
+  name                  = "apis-ipv4"
   ip_address            = google_compute_global_address.ipv4.id
   port_range            = "443"
   target                = google_compute_target_https_proxy.apis.id
@@ -133,7 +133,7 @@ resource "google_compute_global_forwarding_rule" "ipv4" {
 }
 
 resource "google_compute_global_forwarding_rule" "ipv6" {
-  name                  = "apis"
+  name                  = "apis-ipv6"
   ip_address            = google_compute_global_address.ipv6.id
   port_range            = "443"
   target                = google_compute_target_https_proxy.apis.id
