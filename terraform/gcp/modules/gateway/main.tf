@@ -18,9 +18,15 @@ locals {
   ]...)
 }
 
-resource "google_compute_global_address" "gateway_ipv4" {
+resource "google_compute_global_address" "ipv4" {
   name         = "global-gateway-ipv4"
   ip_version   = "IPV4"
+  address_type = "EXTERNAL"
+}
+
+resource "google_compute_global_address" "ipv6" {
+  name         = "global-gateway-ipv6"
+  ip_version   = "IPV6"
   address_type = "EXTERNAL"
 }
 
@@ -118,9 +124,20 @@ resource "google_compute_target_https_proxy" "apis" {
   ssl_certificates = [google_compute_managed_ssl_certificate.global_gateway.id]
 }
 
-resource "google_compute_global_forwarding_rule" "apis" {
+resource "google_compute_global_forwarding_rule" "ipv4" {
   name                  = "apis"
-  target                = google_compute_target_https_proxy.apis.id
+  ip_address            = google_compute_global_address.ipv4.id
+  ip_version            = "IPV4"
   port_range            = "80"
+  target                = google_compute_target_https_proxy.apis.id
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+}
+
+resource "google_compute_global_forwarding_rule" "ipv6" {
+  name                  = "apis"
+  ip_address            = google_compute_global_address.ipv6.id
+  ip_version            = "IPV6"
+  port_range            = "80"
+  target                = google_compute_target_https_proxy.apis.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
 }
