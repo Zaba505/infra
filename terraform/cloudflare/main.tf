@@ -12,17 +12,21 @@ data "cloudflare_zone" "default" {
 }
 
 resource "cloudflare_record" "ipv4" {
+  for_each = var.records
+
   zone_id = data.cloudflare_zone.default.id
-  name    = var.record_name
-  value   = var.ipv4_address
+  name    = each.key
+  value   = each.value.ipv4_address
   type    = "A"
   proxied = true
 }
 
 resource "cloudflare_record" "ipv6" {
+  for_each = var.records
+
   zone_id = data.cloudflare_zone.default.id
-  name    = var.record_name
-  value   = var.ipv6_address
+  name    = each.key
+  value   = each.value.ipv6_address
   type    = "AAAA"
   proxied = true
 }
