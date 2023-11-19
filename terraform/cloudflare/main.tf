@@ -20,8 +20,6 @@ resource "cloudflare_record" "ipv4" {
 }
 
 resource "cloudflare_record" "ipv6" {
-  count = var.ipv6_address != null ? 1 : 0
-
   zone_id = data.cloudflare_zone.default.id
   name    = var.record_name
   value   = var.ipv6_address

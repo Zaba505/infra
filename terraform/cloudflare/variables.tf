@@ -11,7 +11,5 @@ variable "ipv4_address" {
 }
 
 variable "ipv6_address" {
-  type     = string
-  default  = null
-  nullable = true
+  type = string
 }
