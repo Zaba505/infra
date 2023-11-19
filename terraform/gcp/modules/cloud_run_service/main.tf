@@ -60,7 +60,7 @@ resource "google_cloud_run_v2_service" "api" {
   description = var.description
 
   location = each.value
-  ingress  = "INGRESS_TRAFFIC_ALL"
+  ingress  = "INGRESS_TRAFFIC_INTERNAL_LOAD_BALANCER"
 
   template {
     service_account = google_service_account.api.email
@@ -124,4 +124,16 @@ resource "google_cloud_run_v2_service" "api" {
     percent = 100
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
   }
+}
+
+resource "google_cloud_run_v2_service_iam_binding" "unauthenticated" {
+  for_each = toset([for loc in var.locations : loc if var.unauthenticated])
+
+  project  = google_cloud_run_v2_service.api[each.value].project
+  name     = google_cloud_run_v2_service.api[each.value].name
+  location = google_cloud_run_v2_service.api[each.value].location
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
 }

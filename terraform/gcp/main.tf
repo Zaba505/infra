@@ -78,6 +78,10 @@ module "lb_sink_service" {
   name        = "lb-sink-service"
   description = "Respond to all unmatched routes by the Load Balancer"
 
+  # this service is unauthenticated so people don't know that the request
+  # is even making it to a service. The service will immediately return a 503
+  unauthenticated = true
+
   image = {
     name = "ghcr.io/zaba505/infra/lb-sink"
     tag  = var.lb-sink-service-image-tag
