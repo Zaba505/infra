@@ -16,7 +16,7 @@ resource "cloudflare_record" "ipv4" {
 
   zone_id = data.cloudflare_zone.default.id
   name    = each.key
-  value   = each.value.ipv4_address
+  value   = each.value.ipv4
   type    = "A"
   proxied = true
 }
@@ -26,7 +26,7 @@ resource "cloudflare_record" "ipv6" {
 
   zone_id = data.cloudflare_zone.default.id
   name    = each.key
-  value   = each.value.ipv6_address
+  value   = each.value.ipv6
   type    = "AAAA"
   proxied = true
 }
