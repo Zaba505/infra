@@ -2,7 +2,12 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.3.0"
+      version = ">= 5.6.0"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.6.0"
     }
 
     docker = {
@@ -107,6 +112,40 @@ module "access_control" {
   }
 }
 
+module "rootca" {
+  source = "./modules/rootca"
+
+  organization_name = var.organization_name
+  domains           = var.domains
+}
+
+module "lb_cacert" {
+  source = "./modules/cacert"
+
+  name                     = "global-lb-cacert"
+  organization             = var.organization_name
+  common_name              = ""
+  location                 = "us-east1"
+  algorithm                = "RSA"
+  lifetime                 = "31104000s"
+  privateca_pool_name      = module.rootca.ca_pool_name
+  certificate_authority_id = module.rootca.certificate_authority_id
+}
+
+module "client_cacert" {
+  source   = "./modules/cacert"
+  for_each = var.clients
+
+  name                     = each.key
+  organization             = var.organization_name
+  common_name              = var.common_name
+  location                 = "us-east1"
+  algorithm                = each.value.algorithm
+  lifetime                 = each.value.lifetime
+  privateca_pool_name      = module.rootca.ca_pool_name
+  certificate_authority_id = module.rootca.certificate_authority_id
+}
+
 module "gateway" {
   source = "./modules/gateway"
   depends_on = [
@@ -115,6 +154,8 @@ module "gateway" {
   ]
 
   domains = var.domains
+
+  root_pem_certificate = module.lb_cacert.pem_certificate
 
   default_service = {
     name      = module.lb_sink_service.name
