@@ -141,7 +141,7 @@ module "client_cacert" {
   common_name              = var.common_name
   location                 = "us-east1"
   algorithm                = each.value.algorithm
-  lifetime                 = each.value.algorithm
+  lifetime                 = each.value.lifetime
   privateca_pool_name      = module.rootca.ca_pool_name
   certificate_authority_id = module.rootca.certificate_authority_id
 }
