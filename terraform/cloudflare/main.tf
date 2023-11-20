@@ -30,3 +30,21 @@ resource "cloudflare_record" "ipv6" {
   type    = "AAAA"
   proxied = true
 }
+
+resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
+  for_each = var.records
+
+  zone_id = data.cloudflare_zone.default.id
+  type    = "per-hostname"
+
+  certificate = each.value.certificate
+  private_key = each.value.private_key
+}
+
+resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
+  for_each = var.records
+
+  zone_id  = data.cloudflare_zone.default.id
+  enabled  = true
+  hostname = "${each.key}.${var.domain_name}"
+}

@@ -112,6 +112,21 @@ variable "lb-sink-service-max-request-timeout" {
   }
 }
 
+variable "organization_name" {
+  type = string
+}
+
+variable "common_name" {
+  type = string
+}
+
 variable "domains" {
   type = list(string)
+}
+
+variable "clients" {
+  type = map(object({
+    algorithm = string
+    lifetime  = string
+  }))
 }
