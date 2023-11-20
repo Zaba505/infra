@@ -11,6 +11,11 @@ variable "access" {
   default = {}
 }
 
+variable "unauthenticated" {
+  type    = bool
+  default = false
+}
+
 variable "name" {
   type = string
 }
