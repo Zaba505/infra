@@ -7,9 +7,9 @@ output "global_ipv6_address" {
 }
 
 output "client_cacert_pem_certificates" {
-  value = module.client_cacert[*].pem_certificate
+  value = { for key, mod in module.client_cacert : key => mod.pem_certificate }
 }
 
 output "client_cacert_pem_private_keys" {
-  value = module.client_cacert[*].private_key_pem
+  value = { for key, mod in module.client_cacert : key => mod.private_key_pem }
 }
