@@ -2,6 +2,10 @@ variable "domains" {
   type = list(string)
 }
 
+variable "root_pem_certificate" {
+  type = string
+}
+
 variable "default_service" {
   type = object({
     name      = string
