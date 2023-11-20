@@ -32,6 +32,10 @@ resource "cloudflare_record" "ipv6" {
 }
 
 resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
+  depends_on = [
+    cloudflare_record.ipv4,
+    cloudflare_record.ipv6
+  ]
   for_each = var.records
 
   zone_id = data.cloudflare_zone.default.id
@@ -42,6 +46,10 @@ resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
 }
 
 resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
+  depends_on = [
+    cloudflare_record.ipv4,
+    cloudflare_record.ipv6
+  ]
   for_each = var.records
 
   zone_id  = data.cloudflare_zone.default.id
