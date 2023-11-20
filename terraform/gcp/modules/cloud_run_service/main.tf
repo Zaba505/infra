@@ -129,9 +129,9 @@ resource "google_cloud_run_v2_service" "api" {
 resource "google_cloud_run_v2_service_iam_binding" "unauthenticated" {
   for_each = toset([for loc in var.locations : loc if var.unauthenticated])
 
-  project  = google_cloud_run_v2_service.api[each.value].project
-  name     = google_cloud_run_v2_service.api[each.value].name
-  location = google_cloud_run_v2_service.api[each.value].location
+  project  = google_cloud_run_v2_service.api[each.key].project
+  name     = google_cloud_run_v2_service.api[each.key].name
+  location = google_cloud_run_v2_service.api[each.key].location
   role     = "roles/run.invoker"
   members = [
     "allUsers"
