@@ -4,6 +4,11 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 5.6.0"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.1"
+    }
   }
 }
 
@@ -20,11 +25,15 @@ resource "tls_cert_request" "default" {
   }
 }
 
+resource "random_id" "default" {
+  byte_length = 8
+}
+
 resource "google_privateca_certificate" "default" {
   pool                  = var.privateca_pool_name
   location              = var.location
   certificate_authority = var.certificate_authority_id
   lifetime              = var.lifetime
-  name                  = var.name
+  name                  = "${var.name}-${random_id.default.hex}"
   pem_csr               = tls_cert_request.default.cert_request_pem
 }
