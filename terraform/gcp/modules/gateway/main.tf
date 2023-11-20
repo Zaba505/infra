@@ -2,7 +2,12 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.3.0"
+      version = ">= 5.6.0"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.6.0"
     }
   }
 }
@@ -133,6 +138,8 @@ resource "google_certificate_manager_trust_config" "default" {
 }
 
 resource "google_network_security_server_tls_policy" "default" {
+  provider = google-beta
+
   name       = "global-mtls-policy"
   location   = "global"
   allow_open = "false"
