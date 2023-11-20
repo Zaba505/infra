@@ -4,7 +4,9 @@ variable "domain_name" {
 
 variable "records" {
   type = map(object({
-    ipv4 = string
-    ipv6 = string
+    ipv4        = string
+    ipv6        = string
+    certificate = string
+    private_key = string
   }))
 }
