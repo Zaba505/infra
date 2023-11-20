@@ -12,7 +12,7 @@ terraform {
   }
 }
 
-resource "random_id" "ca_pool_name" {
+resource "random_id" "default" {
   byte_length = 8
 }
 
