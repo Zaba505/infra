@@ -4,11 +4,20 @@ terraform {
       source  = "hashicorp/google"
       version = ">= 5.6.0"
     }
+
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.1"
+    }
   }
 }
 
+resource "random_id" "ca_pool_name" {
+  byte_length = 8
+}
+
 resource "google_privateca_ca_pool" "default" {
-  name     = "global-private-ca"
+  name     = "global-private-ca-${random_id.default.hex}"
   tier     = "ENTERPRISE"
   location = "us-east1"
 
