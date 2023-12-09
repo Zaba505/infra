@@ -17,12 +17,21 @@ import (
 	apphttp "github.com/z5labs/app/http"
 	"github.com/z5labs/app/http/httpvalidate"
 	"github.com/z5labs/app/pkg/otelconfig"
+	"github.com/z5labs/app/pkg/otelslog"
+	"github.com/z5labs/app/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
 type config struct {
+	OTel struct {
+		GCP struct {
+			ProjectId   string `config:"projectId"`
+			ServiceName string `config:"serviceName"`
+		} `config:"gcp"`
+	} `config:"otel"`
+
 	Http struct {
 		Port uint `config:"port"`
 	} `config:"http"`
@@ -62,18 +71,23 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 		backend.ObjectHasher(sha256.New),
 	)
 
+	var otelIniter otelconfig.Initializer = otelconfig.Noop
+	if cfg.OTel.GCP.ProjectId != "" {
+		otelIniter = otelconfig.GoogleCloud(
+			otelconfig.ProjectId(cfg.OTel.GCP.ProjectId),
+			otelconfig.ServiceName(cfg.OTel.GCP.ServiceName),
+		)
+	}
+
 	rt := apphttp.NewRuntime(
 		apphttp.ListenOnPort(cfg.Http.Port),
 		apphttp.LogHandler(logger.Handler()),
-		apphttp.TracerProvider(otelconfig.GoogleCloud(
-			otelconfig.ProjectId(os.Getenv("GOOGLE_CLOUD_PROJECT")),
-			otelconfig.ServiceName("machinemgmt"),
-		)),
+		apphttp.TracerProvider(otelIniter),
 		apphttp.Handle(
 			"/bootstrap/image",
 			httpvalidate.Request(
 				http.Handler(&bootstrapImageHandler{
-					log:     logger,
+					log:     otelslog.New(logger),
 					storage: storageService,
 				}),
 				httpvalidate.ForMethods(http.MethodGet),
@@ -106,8 +120,8 @@ func (h *bootstrapImageHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		h.log.ErrorContext(
 			spanCtx,
 			"failed to get bootstrap image",
-			slog.String("image_id", imageId),
-			slog.Any("error", err),
+			slogfield.String("image_id", imageId),
+			slogfield.Error(err),
 		)
 		return
 	}
@@ -123,8 +137,8 @@ func (h *bootstrapImageHandler) ServeHTTP(w http.ResponseWriter, req *http.Reque
 		h.log.ErrorContext(
 			spanCtx,
 			"failed to write image to response",
-			slog.String("image_id", imageId),
-			slog.Any("error", err),
+			slogfield.String("image_id", imageId),
+			slogfield.Error(err),
 		)
 		return
 	}

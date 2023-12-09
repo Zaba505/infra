@@ -11,6 +11,8 @@ go_library(
         "@com_github_z5labs_app//http",
         "@com_github_z5labs_app//http/httpvalidate",
         "@com_github_z5labs_app//pkg/otelconfig",
+        "@com_github_z5labs_app//pkg/otelslog",
+        "@com_github_z5labs_app//pkg/slogfield",
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",

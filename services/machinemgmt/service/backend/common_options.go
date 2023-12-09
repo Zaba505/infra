@@ -2,6 +2,8 @@ package backend
 
 import (
 	"log/slog"
+
+	"github.com/z5labs/app/pkg/otelslog"
 )
 
 type commonOptions struct {
@@ -30,6 +32,6 @@ func (f commonOptionFunc) applyCommon(co *commonOptions) {
 
 func Logger(logger *slog.Logger) CommonOption {
 	return commonOptionFunc(func(co *commonOptions) {
-		co.log = logger
+		co.log = otelslog.New(logger)
 	})
 }

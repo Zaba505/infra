@@ -11,6 +11,13 @@ import (
 )
 
 type config struct {
+	OTel struct {
+		GCP struct {
+			ProjectId   string `config:"projectId"`
+			ServiceName string `config:"serviceName"`
+		} `config:"gcp"`
+	} `config:"otel"`
+
 	Http struct {
 		Port uint `config:"port"`
 	} `config:"http"`
@@ -30,13 +37,18 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 		},
 	)
 
+	var otelIniter otelconfig.Initializer = otelconfig.Noop
+	if cfg.OTel.GCP.ProjectId != "" {
+		otelIniter = otelconfig.GoogleCloud(
+			otelconfig.ProjectId(cfg.OTel.GCP.ProjectId),
+			otelconfig.ServiceName(cfg.OTel.GCP.ServiceName),
+		)
+	}
+
 	rt := apphttp.NewRuntime(
 		apphttp.ListenOnPort(cfg.Http.Port),
 		apphttp.LogHandler(logHandler),
-		apphttp.TracerProvider(otelconfig.GoogleCloud(
-			otelconfig.ProjectId(os.Getenv("GOOGLE_CLOUD_PROJECT")),
-			otelconfig.ServiceName("lb-sink"),
-		)),
+		apphttp.TracerProvider(otelIniter),
 		apphttp.Handle("/", &unavailableHandler{}),
 	)
 	return rt, nil
