@@ -1,9 +1,11 @@
 package backend
 
-import "go.uber.org/zap"
+import (
+	"log/slog"
+)
 
 type commonOptions struct {
-	log *zap.Logger
+	log *slog.Logger
 }
 
 type Option interface {
@@ -26,7 +28,7 @@ func (f commonOptionFunc) applyCommon(co *commonOptions) {
 	f(co)
 }
 
-func Logger(logger *zap.Logger) CommonOption {
+func Logger(logger *slog.Logger) CommonOption {
 	return commonOptionFunc(func(co *commonOptions) {
 		co.log = logger
 	})

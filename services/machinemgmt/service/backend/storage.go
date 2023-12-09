@@ -8,16 +8,15 @@ import (
 	"hash"
 	"hash/crc32"
 	"io"
+	"log/slog"
 	"sync"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/googleapis/gax-go/v2"
-	"github.com/uptrace/opentelemetry-go-extra/otelzap"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
-	"go.uber.org/zap"
 )
 
 type storageOptions struct {
@@ -61,7 +60,7 @@ func ObjectHasher(newHasher func() hash.Hash) StorageServiceOption {
 
 // StorageService
 type StorageService struct {
-	log     *otelzap.Logger
+	log     *slog.Logger
 	bufPool *sync.Pool
 
 	bucket    *storage.BucketHandle
@@ -72,7 +71,7 @@ type StorageService struct {
 func NewStorageService(opts ...Option) *StorageService {
 	sOpts := &storageOptions{
 		commonOptions: &commonOptions{
-			log: zap.NewNop(),
+			log: slog.Default(),
 		},
 		newHasher: sha256.New,
 	}
@@ -85,7 +84,7 @@ func NewStorageService(opts ...Option) *StorageService {
 		}
 	}
 	s := &StorageService{
-		log: otelzap.New(sOpts.log),
+		log: sOpts.log,
 		bufPool: &sync.Pool{
 			New: func() any {
 				return new(bytes.Buffer)
@@ -124,20 +123,31 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 
 	attrs, err := obj.Attrs(spanCtx)
 	if err != nil { // TODO: check if error tells object doesn't exist
-		s.log.Ctx(spanCtx).Error("failed to get object attributes", zap.String("image_id", req.ID), zap.Error(err))
+		s.log.ErrorContext(
+			spanCtx,
+			"failed to get object attributes",
+			slog.String("image_id", req.ID),
+			slog.Any("error", err),
+		)
 		return nil, ObjectReadError{Cause: err}
 	}
 
 	r, err := obj.NewReader(spanCtx)
 	if err != nil {
-		s.log.Ctx(spanCtx).Error("failed to construct object reader", zap.String("image_id", req.ID), zap.Error(err))
+		s.log.ErrorContext(
+			spanCtx,
+			"failed to construct object reader",
+			slog.String("image_id", req.ID),
+			slog.Any("error", err),
+		)
 		return nil, ObjectReadError{Cause: err}
 	}
-	s.log.Ctx(spanCtx).Info(
+	s.log.InfoContext(
+		spanCtx,
 		"reading bootstrap image",
-		zap.String("image_id", req.ID),
-		zap.Int64("object_bytes", attrs.Size),
-		zap.Int64("object_generation", attrs.Generation),
+		slog.String("image_id", req.ID),
+		slog.Int64("object_bytes", attrs.Size),
+		slog.Int64("object_generation", attrs.Generation),
 	)
 
 	hasher := s.newHasher()
@@ -145,40 +155,44 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 	buf, _ := s.bufPool.Get().(*bytes.Buffer)
 	n, err := copyAllAndClose(io.MultiWriter(crc32, hasher, buf), r)
 	if err != nil {
-		s.log.Ctx(spanCtx).Error(
+		s.log.ErrorContext(
+			spanCtx,
 			"failed to copy object to buffer",
-			zap.String("image_id", req.ID),
-			zap.Int64("object_bytes", attrs.Size),
-			zap.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Int64("object_bytes", attrs.Size),
+			slog.Any("error", err),
 		)
 		return nil, ObjectReadError{Cause: err}
 	}
 	if n != attrs.Size {
-		s.log.Ctx(spanCtx).Error(
+		s.log.ErrorContext(
+			spanCtx,
 			"failed to copy entire object to buffer",
-			zap.String("image_id", req.ID),
-			zap.Int64("object_bytes", attrs.Size),
-			zap.Int64("copied_bytes", n),
-			zap.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Int64("object_bytes", attrs.Size),
+			slog.Int64("copied_bytes", n),
+			slog.Any("error", err),
 		)
 		return nil, ObjectReadError{Cause: io.ErrShortWrite}
 	}
 	checksum := crc32.Sum32()
 	if checksum != attrs.CRC32C {
-		s.log.Ctx(spanCtx).Error(
+		s.log.ErrorContext(
+			spanCtx,
 			"crc32 checksum mismatch",
-			zap.String("image_id", req.ID),
-			zap.Uint32("computed_checksum", checksum),
-			zap.Uint32("object_checksum", attrs.CRC32C),
-			zap.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Uint64("computed_checksum", uint64(checksum)),
+			slog.Uint64("object_checksum", uint64(attrs.CRC32C)),
+			slog.Any("error", err),
 		)
 		return nil, ChecksumMismatchError{}
 	}
-	s.log.Ctx(spanCtx).Info(
+	s.log.InfoContext(
+		spanCtx,
 		"read bootstrap image",
-		zap.String("image_id", req.ID),
-		zap.Int64("object_bytes", attrs.Size),
-		zap.Int64("object_generation", attrs.Generation),
+		slog.String("image_id", req.ID),
+		slog.Int64("object_bytes", attrs.Size),
+		slog.Int64("object_generation", attrs.Generation),
 	)
 
 	resp := &GetBootstrapImageResponse{

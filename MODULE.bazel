@@ -7,7 +7,7 @@ bazel_dep(name = "rules_pkg", version = "0.9.1")
 bazel_dep(name = "aspect_bazel_lib", version = "2.0.1")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.20.3")
+go_sdk.download(version = "1.21.4")
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")
@@ -27,7 +27,6 @@ use_repo(
     "com_github_uptrace_opentelemetry_go_extra_otelzap",
     "com_github_z5labs_app",
     "io_opentelemetry_go_contrib_detectors_gcp",
-    "io_opentelemetry_go_contrib_instrumentation_net_http_otelhttp",
     "io_opentelemetry_go_otel",
     "io_opentelemetry_go_otel_sdk",
     "io_opentelemetry_go_otel_trace",
