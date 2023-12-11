@@ -12,6 +12,7 @@ go_library(
     deps = [
         "//services/lb-sink/service",
         "@com_github_z5labs_app//:app",
+        "@com_github_z5labs_app//pkg/otelconfig",
     ],
 )
 

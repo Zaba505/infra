@@ -11,11 +11,11 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_googleapis_gax_go_v2//:gax-go",
-        "@com_github_uptrace_opentelemetry_go_extra_otelzap//:otelzap",
+        "@com_github_z5labs_app//pkg/otelslog",
+        "@com_github_z5labs_app//pkg/slogfield",
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",
         "@io_opentelemetry_go_otel_trace//:trace",
-        "@org_uber_go_zap//:zap",
     ],
 )
