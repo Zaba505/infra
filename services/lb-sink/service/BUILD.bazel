@@ -8,7 +8,6 @@ go_library(
     deps = [
         "@com_github_z5labs_app//:app",
         "@com_github_z5labs_app//http",
-        "@com_github_z5labs_app//pkg/otelconfig",
     ],
 )
 

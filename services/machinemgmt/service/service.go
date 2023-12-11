@@ -16,7 +16,6 @@ import (
 	"github.com/z5labs/app"
 	apphttp "github.com/z5labs/app/http"
 	"github.com/z5labs/app/http/httpvalidate"
-	"github.com/z5labs/app/pkg/otelconfig"
 	"github.com/z5labs/app/pkg/otelslog"
 	"github.com/z5labs/app/pkg/slogfield"
 	"go.opentelemetry.io/otel"
@@ -66,28 +65,19 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 	}
 	bucket := gs.Bucket(cfg.Storage.Bucket)
 	storageService := backend.NewStorageService(
-		backend.Logger(logger),
+		backend.Logger(logger.Handler()),
 		backend.GoogleCloudBucket(bucket),
 		backend.ObjectHasher(sha256.New),
 	)
 
-	var otelIniter otelconfig.Initializer = otelconfig.Noop
-	if cfg.OTel.GCP.ProjectId != "" {
-		otelIniter = otelconfig.GoogleCloud(
-			otelconfig.ProjectId(cfg.OTel.GCP.ProjectId),
-			otelconfig.ServiceName(cfg.OTel.GCP.ServiceName),
-		)
-	}
-
 	rt := apphttp.NewRuntime(
 		apphttp.ListenOnPort(cfg.Http.Port),
 		apphttp.LogHandler(logger.Handler()),
-		apphttp.TracerProvider(otelIniter),
 		apphttp.Handle(
 			"/bootstrap/image",
 			httpvalidate.Request(
 				http.Handler(&bootstrapImageHandler{
-					log:     otelslog.New(logger),
+					log:     otelslog.New(logger.Handler()),
 					storage: storageService,
 				}),
 				httpvalidate.ForMethods(http.MethodGet),

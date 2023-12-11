@@ -30,8 +30,8 @@ func (f commonOptionFunc) applyCommon(co *commonOptions) {
 	f(co)
 }
 
-func Logger(logger *slog.Logger) CommonOption {
+func Logger(h slog.Handler) CommonOption {
 	return commonOptionFunc(func(co *commonOptions) {
-		co.log = otelslog.New(logger)
+		co.log = otelslog.New(h)
 	})
 }

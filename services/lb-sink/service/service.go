@@ -7,7 +7,6 @@ import (
 
 	"github.com/z5labs/app"
 	apphttp "github.com/z5labs/app/http"
-	"github.com/z5labs/app/pkg/otelconfig"
 )
 
 type config struct {
@@ -37,18 +36,9 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 		},
 	)
 
-	var otelIniter otelconfig.Initializer = otelconfig.Noop
-	if cfg.OTel.GCP.ProjectId != "" {
-		otelIniter = otelconfig.GoogleCloud(
-			otelconfig.ProjectId(cfg.OTel.GCP.ProjectId),
-			otelconfig.ServiceName(cfg.OTel.GCP.ServiceName),
-		)
-	}
-
 	rt := apphttp.NewRuntime(
 		apphttp.ListenOnPort(cfg.Http.Port),
 		apphttp.LogHandler(logHandler),
-		apphttp.TracerProvider(otelIniter),
 		apphttp.Handle("/", &unavailableHandler{}),
 	)
 	return rt, nil

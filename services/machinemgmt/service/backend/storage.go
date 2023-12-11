@@ -73,7 +73,7 @@ type StorageService struct {
 func NewStorageService(opts ...Option) *StorageService {
 	sOpts := &storageOptions{
 		commonOptions: &commonOptions{
-			log: otelslog.New(slog.Default()),
+			log: otelslog.New(nil),
 		},
 		newHasher: sha256.New,
 	}
