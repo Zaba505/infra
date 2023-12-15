@@ -6,17 +6,17 @@ import (
 
 	"github.com/Zaba505/infra/services/lb-sink/service"
 
-	"github.com/z5labs/app"
-	"github.com/z5labs/app/pkg/otelconfig"
+	"github.com/z5labs/bedrock"
+	"github.com/z5labs/bedrock/pkg/otelconfig"
 )
 
 //go:embed config.yaml
 var cfg []byte
 
 func main() {
-	app.New(
-		app.Config(bytes.NewReader(cfg)),
-		app.InitTracerProvider(func(bc app.BuildContext) (otelconfig.Initializer, error) {
+	bedrock.New(
+		bedrock.Config(bytes.NewReader(cfg)),
+		bedrock.InitTracerProvider(func(bc bedrock.BuildContext) (otelconfig.Initializer, error) {
 			var cfg struct {
 				OTel struct {
 					GCP struct {
@@ -39,6 +39,6 @@ func main() {
 			}
 			return otelIniter, nil
 		}),
-		app.WithRuntimeBuilderFunc(service.BuildRuntime),
+		bedrock.WithRuntimeBuilderFunc(service.BuildRuntime),
 	).Run()
 }

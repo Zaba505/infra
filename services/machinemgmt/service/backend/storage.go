@@ -14,8 +14,8 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/googleapis/gax-go/v2"
-	"github.com/z5labs/app/pkg/otelslog"
-	"github.com/z5labs/app/pkg/slogfield"
+	"github.com/z5labs/bedrock/pkg/otelslog"
+	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"

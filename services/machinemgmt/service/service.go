@@ -13,11 +13,11 @@ import (
 	"github.com/Zaba505/infra/services/machinemgmt/service/backend"
 
 	"cloud.google.com/go/storage"
-	"github.com/z5labs/app"
-	apphttp "github.com/z5labs/app/http"
-	"github.com/z5labs/app/http/httpvalidate"
-	"github.com/z5labs/app/pkg/otelslog"
-	"github.com/z5labs/app/pkg/slogfield"
+	"github.com/z5labs/bedrock"
+	brhttp "github.com/z5labs/bedrock/http"
+	"github.com/z5labs/bedrock/http/httpvalidate"
+	"github.com/z5labs/bedrock/pkg/otelslog"
+	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -44,7 +44,7 @@ type storageClient interface {
 	GetBootstrapImage(context.Context, *backend.GetBootstrapImageRequest) (*backend.GetBootstrapImageResponse, error)
 }
 
-func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
+func BuildRuntime(bc bedrock.BuildContext) (bedrock.Runtime, error) {
 	var cfg config
 	err := bc.Config.Unmarshal(&cfg)
 	if err != nil {
@@ -70,10 +70,10 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 		backend.ObjectHasher(sha256.New),
 	)
 
-	rt := apphttp.NewRuntime(
-		apphttp.ListenOnPort(cfg.Http.Port),
-		apphttp.LogHandler(logger.Handler()),
-		apphttp.Handle(
+	rt := brhttp.NewRuntime(
+		brhttp.ListenOnPort(cfg.Http.Port),
+		brhttp.LogHandler(logger.Handler()),
+		brhttp.Handle(
 			"/bootstrap/image",
 			httpvalidate.Request(
 				http.Handler(&bootstrapImageHandler{

@@ -3,7 +3,7 @@ package backend
 import (
 	"log/slog"
 
-	"github.com/z5labs/app/pkg/otelslog"
+	"github.com/z5labs/bedrock/pkg/otelslog"
 )
 
 type commonOptions struct {

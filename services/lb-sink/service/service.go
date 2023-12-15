@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/z5labs/app"
-	apphttp "github.com/z5labs/app/http"
+	"github.com/z5labs/bedrock"
+	brhttp "github.com/z5labs/bedrock/http"
 )
 
 type config struct {
@@ -22,7 +22,7 @@ type config struct {
 	} `config:"http"`
 }
 
-func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
+func BuildRuntime(bc bedrock.BuildContext) (bedrock.Runtime, error) {
 	var cfg config
 	err := bc.Config.Unmarshal(&cfg)
 	if err != nil {
@@ -36,10 +36,10 @@ func BuildRuntime(bc app.BuildContext) (app.Runtime, error) {
 		},
 	)
 
-	rt := apphttp.NewRuntime(
-		apphttp.ListenOnPort(cfg.Http.Port),
-		apphttp.LogHandler(logHandler),
-		apphttp.Handle("/", &unavailableHandler{}),
+	rt := brhttp.NewRuntime(
+		brhttp.ListenOnPort(cfg.Http.Port),
+		brhttp.LogHandler(logHandler),
+		brhttp.Handle("/", &unavailableHandler{}),
 	)
 	return rt, nil
 }
