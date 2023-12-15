@@ -11,7 +11,8 @@ go_library(
     visibility = ["//visibility:private"],
     deps = [
         "//services/lb-sink/service",
-        "@com_github_z5labs_app//:app",
+        "@com_github_z5labs_bedrock//:bedrock",
+        "@com_github_z5labs_bedrock//pkg/otelconfig",
     ],
 )
 
