@@ -1,0 +1,11 @@
+logging:
+  level: {{env "LOG_LEVEL" | default "INFO"}}
+
+otel:
+  service_name: {{env "SERVICE_NAME"}}
+  service_version: {{env "SERVICE_VERSION"}}
+  gcp:
+    project_id: {{env "GOOGLE_CLOUD_PROJECT"}}
+
+http:
+  port: {{env "HTTP_PORT"}}

@@ -8,59 +8,39 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"os"
 
+	"github.com/Zaba505/infra/pkg/framework"
 	"github.com/Zaba505/infra/services/machinemgmt/service/backend"
 
 	"cloud.google.com/go/storage"
-	"github.com/z5labs/bedrock"
-	brhttp "github.com/z5labs/bedrock/http"
 	"github.com/z5labs/bedrock/http/httpvalidate"
-	"github.com/z5labs/bedrock/pkg/otelslog"
 	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 )
 
-type config struct {
-	OTel struct {
-		GCP struct {
-			ProjectId   string `config:"projectId"`
-			ServiceName string `config:"serviceName"`
-		} `config:"gcp"`
-	} `config:"otel"`
-
-	Http struct {
-		Port uint `config:"port"`
-	} `config:"http"`
+type Config struct {
+	framework.Config `config:",squash"`
 
 	Storage struct {
 		Bucket string `config:"bucket"`
 	} `config:"storage"`
 }
 
-type storageClient interface {
-	GetBootstrapImage(context.Context, *backend.GetBootstrapImageRequest) (*backend.GetBootstrapImageResponse, error)
-}
-
-func BuildRuntime(bc bedrock.BuildContext) (bedrock.Runtime, error) {
-	var cfg config
-	err := bc.Config.Unmarshal(&cfg)
+func Init(ctx context.Context) (http.Handler, error) {
+	var cfg Config
+	err := framework.UnmarshalConfigFromContext(ctx, &cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	logger := slog.New(slog.NewJSONHandler(
-		os.Stderr,
-		&slog.HandlerOptions{
-			AddSource: true,
-		},
-	))
+	logHandler := cfg.LogHandler()
+	logger := slog.New(logHandler)
 
 	gs, err := storage.NewClient(context.Background())
 	if err != nil {
-		logger.Error("failed to create storage client", slog.Any("error", err))
+		logger.ErrorContext(ctx, "failed to create storage client", slogfield.Error(err))
 		return nil, err
 	}
 	bucket := gs.Bucket(cfg.Storage.Bucket)
@@ -70,22 +50,23 @@ func BuildRuntime(bc bedrock.BuildContext) (bedrock.Runtime, error) {
 		backend.ObjectHasher(sha256.New),
 	)
 
-	rt := brhttp.NewRuntime(
-		brhttp.ListenOnPort(cfg.Http.Port),
-		brhttp.LogHandler(logger.Handler()),
-		brhttp.Handle(
-			"/bootstrap/image",
-			httpvalidate.Request(
-				http.Handler(&bootstrapImageHandler{
-					log:     otelslog.New(logger.Handler()),
-					storage: storageService,
-				}),
-				httpvalidate.ForMethods(http.MethodGet),
-				httpvalidate.ExactParams("id"),
-			),
+	mux := http.NewServeMux()
+	mux.Handle(
+		"/bootstrap/image",
+		httpvalidate.Request(
+			http.Handler(&bootstrapImageHandler{
+				log:     logger,
+				storage: storageService,
+			}),
+			httpvalidate.ForMethods(http.MethodGet),
+			httpvalidate.ExactParams("id"),
 		),
 	)
-	return rt, nil
+	return mux, nil
+}
+
+type storageClient interface {
+	GetBootstrapImage(context.Context, *backend.GetBootstrapImageRequest) (*backend.GetBootstrapImageResponse, error)
 }
 
 type bootstrapImageHandler struct {

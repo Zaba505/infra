@@ -1,7 +1,0 @@
-otel:
-  gcp:
-    projectId: {{env "GOOGLE_CLOUD_PROJECT"}}
-    serviceName: {{env "SERVICE_NAME" | default "lb-sink"}}
-
-http:
-  port: {{.Env.HTTP_PORT}}
