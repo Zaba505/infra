@@ -26,7 +26,7 @@ jobs:
           echo "build_version=${formatted_date}.${time}.${short_commit_id}" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Lint
         id: fmt
