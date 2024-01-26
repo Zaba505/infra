@@ -1,10 +1,2 @@
-otel:
-  gcp:
-    projectId: {{env "GOOGLE_CLOUD_PROJECT"}}
-    serviceName: {{env "SERVICE_NAME" | default "machinemgmt"}}
-
-http:
-  port: {{env "HTTP_PORT" | default 8080}}
-
 storage:
   bucket: {{env "IMAGE_BUCKET_NAME"}}

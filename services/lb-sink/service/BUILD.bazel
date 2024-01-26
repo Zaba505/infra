@@ -5,10 +5,6 @@ go_library(
     srcs = ["service.go"],
     importpath = "github.com/Zaba505/infra/services/lb-sink/service",
     visibility = ["//visibility:public"],
-    deps = [
-        "@com_github_z5labs_bedrock//:bedrock",
-        "@com_github_z5labs_bedrock//http",
-    ],
 )
 
 go_test(
