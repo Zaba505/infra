@@ -6,11 +6,9 @@ go_library(
     importpath = "github.com/Zaba505/infra/services/machinemgmt/service",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/framework",
         "//services/machinemgmt/service/backend",
-        "@com_github_z5labs_bedrock//:bedrock",
-        "@com_github_z5labs_bedrock//http",
         "@com_github_z5labs_bedrock//http/httpvalidate",
-        "@com_github_z5labs_bedrock//pkg/otelslog",
         "@com_github_z5labs_bedrock//pkg/slogfield",
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//:otel",
