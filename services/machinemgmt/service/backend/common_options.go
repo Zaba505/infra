@@ -1,9 +1,13 @@
 package backend
 
-import "go.uber.org/zap"
+import (
+	"log/slog"
+
+	"github.com/z5labs/bedrock/pkg/otelslog"
+)
 
 type commonOptions struct {
-	log *zap.Logger
+	log *slog.Logger
 }
 
 type Option interface {
@@ -26,8 +30,8 @@ func (f commonOptionFunc) applyCommon(co *commonOptions) {
 	f(co)
 }
 
-func Logger(logger *zap.Logger) CommonOption {
+func Logger(h slog.Handler) CommonOption {
 	return commonOptionFunc(func(co *commonOptions) {
-		co.log = logger
+		co.log = otelslog.New(h)
 	})
 }

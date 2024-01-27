@@ -4,16 +4,16 @@ import (
 	"bytes"
 	_ "embed"
 
+	"github.com/Zaba505/infra/pkg/framework"
 	"github.com/Zaba505/infra/services/machinemgmt/service"
-	"github.com/z5labs/app"
 )
 
 //go:embed config.yaml
-var cfg []byte
+var cfgSrc []byte
 
 func main() {
-	app.New(
-		app.Config(bytes.NewReader(cfg)),
-		app.WithRuntimeBuilderFunc(service.BuildRuntime),
-	).Run()
+	framework.RunHttp(
+		bytes.NewReader(cfgSrc),
+		service.Init,
+	)
 }

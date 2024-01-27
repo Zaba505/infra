@@ -26,14 +26,14 @@ jobs:
           echo "build_version=${formatted_date}.${time}.${short_commit_id}" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Lint
         id: fmt
         run: terraform -chdir=terraform/gcp fmt -recursive -check
 
       - name: Mount Bazel cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/bazel
@@ -42,13 +42,13 @@ jobs:
             ${{ runner.os }}-bazel-
   
       - name: Fetch dependencies
-        run: bazel fetch //... --@rules_go//go/config:tags="gcp"
+        run: bazel fetch //...
 
       - name: Build
-        run: bazel build //... --@rules_go//go/config:tags="gcp"
+        run: bazel build //...
 
       - name: Test
-        run: bazel test //... --@rules_go//go/config:tags="gcp"
+        run: bazel test //...
 
       - name: Tag repo with build version
         run: |
@@ -70,7 +70,7 @@ jobs:
           tarballTargets=$(bazel query "kind(oci_tarball, //...)")
           while IFS=';' read -ra tarballs; do
             for tarball in "${tarballs[@]}"; do
-              bazel build $tarball --@rules_go//go/config:tags="gcp"
+              bazel build $tarball
               tarFiles=$(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files $tarball)
               img=$(docker load -q --input $tarFiles)
               imgWithTag=${img#"Loaded image: "}

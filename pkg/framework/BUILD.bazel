@@ -1,0 +1,20 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "framework",
+    srcs = ["framework.go"],
+    embedsrcs = ["base_config.yaml"],
+    importpath = "github.com/Zaba505/infra/pkg/framework",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_z5labs_bedrock//:bedrock",
+        "@com_github_z5labs_bedrock//http",
+        "@com_github_z5labs_bedrock//pkg/lifecycle",
+        "@com_github_z5labs_bedrock//pkg/otelconfig",
+        "@com_github_z5labs_bedrock//pkg/otelslog",
+        "@com_github_z5labs_bedrock//pkg/slogfield",
+        "@io_opentelemetry_go_contrib_detectors_gcp//:gcp",
+        "@io_opentelemetry_go_otel//semconv/v1.24.0:v1_24_0",
+        "@io_opentelemetry_go_otel_sdk//resource",
+    ],
+)
