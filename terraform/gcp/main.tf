@@ -2,12 +2,22 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.3.0"
+      version = ">= 5.6.0"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.6.0"
     }
 
     docker = {
       source  = "kreuzwerker/docker"
       version = "3.0.2"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = ">= 3.5.1"
     }
   }
 }
@@ -115,6 +125,8 @@ module "gateway" {
   ]
 
   domains = var.domains
+
+  root_pem_certificate = var.root_pem_certificate
 
   default_service = {
     name      = module.lb_sink_service.name
