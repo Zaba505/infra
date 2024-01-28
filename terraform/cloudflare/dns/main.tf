@@ -7,26 +7,43 @@ terraform {
   }
 }
 
+locals {
+  a_records = { for name, record in var.records : name => record.ipv4 if record.ipv4 != null }
+
+  aaaa_records = { for name, record in var.records : name => record.ipv6 if record.ipv6 != null }
+
+  secured_records = merge(
+    { for name, record in local.a_records : name => {
+      certificate = record.certificate,
+      private_key = record.private_key
+    } if record.certificate != null },
+    { for name, record in local.aaaa_records : name => {
+      certificate = record.certificate,
+      private_key = record.private_key
+    } if record.certificate != null }
+  )
+}
+
 data "cloudflare_zone" "default" {
   name = var.domain_name
 }
 
 resource "cloudflare_record" "ipv4" {
-  for_each = var.records
+  for_each = local.a_records
 
   zone_id = data.cloudflare_zone.default.id
   name    = each.key
-  value   = each.value.ipv4
+  value   = each.value.address
   type    = "A"
   proxied = true
 }
 
 resource "cloudflare_record" "ipv6" {
-  for_each = var.records
+  for_each = local.aaaa_records
 
   zone_id = data.cloudflare_zone.default.id
   name    = each.key
-  value   = each.value.ipv6
+  value   = each.value.address
   type    = "AAAA"
   proxied = true
 }
@@ -36,7 +53,7 @@ resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
     cloudflare_record.ipv4,
     cloudflare_record.ipv6
   ]
-  for_each = var.records
+  for_each = local.secured_records
 
   zone_id = data.cloudflare_zone.default.id
   type    = "per-hostname"
@@ -50,7 +67,7 @@ resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
     cloudflare_record.ipv4,
     cloudflare_record.ipv6
   ]
-  for_each = var.records
+  for_each = local.secured_records
 
   zone_id  = data.cloudflare_zone.default.id
   enabled  = true
