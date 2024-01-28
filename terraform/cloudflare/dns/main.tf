@@ -44,13 +44,13 @@ resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
     cloudflare_record.ipv4,
     cloudflare_record.ipv6
   ]
-  for_each = local.secured_records
+  for_each = keys(local.secured_records)
 
   zone_id = data.cloudflare_zone.default.id
   type    = "per-hostname"
 
-  certificate = each.value.pem
-  private_key = each.value.private_key
+  certificate = local.secured_records[each.key].pem
+  private_key = local.secured_records[each.key].private_key
 }
 
 resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
@@ -58,7 +58,7 @@ resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
     cloudflare_record.ipv4,
     cloudflare_record.ipv6
   ]
-  for_each = local.secured_records
+  for_each = keys(local.secured_records)
 
   zone_id  = data.cloudflare_zone.default.id
   enabled  = true
