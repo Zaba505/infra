@@ -12,7 +12,9 @@ variable "records" {
       address = string
     }))
 
-    certificate = optional(string)
-    private_key = optional(string)
+    certificate = optional(object({
+      pem         = string
+      private_key = string
+    }))
   }))
 }

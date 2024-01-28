@@ -12,10 +12,7 @@ locals {
 
   aaaa_records = { for name, record in var.records : name => record.ipv6 if record.ipv6 != null }
 
-  secured_records = { for name, record in var.records : name => {
-    certificate = record.certificate,
-    private_key = record.private_key
-  } if record.certificate != null }
+  secured_records = { for name, record in var.records : name => record.certificate if record.certificate != null }
 }
 
 data "cloudflare_zone" "default" {
@@ -52,7 +49,7 @@ resource "cloudflare_authenticated_origin_pulls_certificate" "per_hostname" {
   zone_id = data.cloudflare_zone.default.id
   type    = "per-hostname"
 
-  certificate = each.value.certificate
+  certificate = each.value.pem
   private_key = each.value.private_key
 }
 
