@@ -12,16 +12,10 @@ locals {
 
   aaaa_records = { for name, record in var.records : name => record.ipv6 if record.ipv6 != null }
 
-  secured_records = merge(
-    { for name, record in local.a_records : name => {
-      certificate = record.certificate,
-      private_key = record.private_key
-    } if record.certificate != null },
-    { for name, record in local.aaaa_records : name => {
-      certificate = record.certificate,
-      private_key = record.private_key
-    } if record.certificate != null }
-  )
+  secured_records = { for name, record in var.records : name => {
+    certificate = record.certificate,
+    private_key = record.private_key
+  } if record.certificate != null }
 }
 
 data "cloudflare_zone" "default" {

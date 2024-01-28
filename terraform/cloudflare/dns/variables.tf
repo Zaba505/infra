@@ -5,15 +5,14 @@ variable "domain_name" {
 variable "records" {
   type = map(object({
     ipv4 = optional(object({
-      address     = string
-      certificate = optional(string)
-      private_key = optional(string)
+      address = string
     }))
 
     ipv6 = optional(object({
-      address     = string
-      certificate = optional(string)
-      private_key = optional(string)
+      address = string
     }))
+
+    certificate = optional(string)
+    private_key = optional(string)
   }))
 }
