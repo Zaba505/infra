@@ -6,6 +6,10 @@ output "certificate_pem" {
   value = acme_certificate.certificate.certificate_pem
 }
 
+output "issuer_pem" {
+  value = acme_certificate.certificate.issuer_pem
+}
+
 output "full_certificate_pem" {
   value = "${acme_certificate.certificate.certificate_pem}${acme_certificate.certificate.issuer_pem}"
 }
