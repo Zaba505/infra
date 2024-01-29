@@ -13,7 +13,8 @@ terraform {
 }
 
 resource "tls_private_key" "reg_private_key" {
-  algorithm = "ED25519"
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "acme_registration" "reg" {
