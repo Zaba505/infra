@@ -2,7 +2,12 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.3.0"
+      version = ">= 5.6.0"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.6.0"
     }
   }
 }
@@ -118,10 +123,37 @@ resource "google_compute_url_map" "apis" {
   }
 }
 
+resource "google_certificate_manager_trust_config" "default" {
+  name     = "global-trust-config"
+  location = "global"
+
+  trust_stores {
+    trust_anchors {
+      pem_certificate = var.root_pem_certificate
+    }
+    intermediate_cas {
+      pem_certificate = var.root_pem_certificate
+    }
+  }
+}
+
+resource "google_network_security_server_tls_policy" "default" {
+  provider = google-beta
+
+  name       = "global-mtls-policy"
+  location   = "global"
+  allow_open = "false"
+  mtls_policy {
+    client_validation_mode         = "REJECT_INVALID"
+    client_validation_trust_config = google_certificate_manager_trust_config.default.id
+  }
+}
+
 resource "google_compute_target_https_proxy" "apis" {
-  name             = "apis"
-  url_map          = google_compute_url_map.apis.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.global_gateway.id]
+  name              = "apis"
+  url_map           = google_compute_url_map.apis.id
+  ssl_certificates  = [google_compute_managed_ssl_certificate.global_gateway.id]
+  server_tls_policy = google_network_security_server_tls_policy.default.id
 }
 
 resource "google_compute_global_forwarding_rule" "ipv4" {

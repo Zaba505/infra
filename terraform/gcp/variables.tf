@@ -115,3 +115,7 @@ variable "lb-sink-service-max-request-timeout" {
 variable "domains" {
   type = list(string)
 }
+
+variable "root_pem_certificate" {
+  type = string
+}
