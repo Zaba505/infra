@@ -125,3 +125,29 @@ resource "google_cloud_run_v2_service" "api" {
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
   }
 }
+
+resource "google_compute_region_network_endpoint_group" "api" {
+  for_each = var.locations
+
+  name = "${var.name}-${each.value}-neg"
+  network_endpoint_type = "SERVERLESS"
+  region = each.value
+
+  cloud_run {
+    service = var.name
+  }
+}
+
+resource "google_compute_backend_service" "api" {
+  name = var.name
+  protocol = "HTTPS"
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  dynamic "backend" {
+    for_each = var.locations
+
+    content {
+      group = google_compute_region_network_endpoint_group.api["${var.name}-${each.value}-neg"].id
+    }
+  }
+}
