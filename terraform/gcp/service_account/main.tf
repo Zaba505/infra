@@ -39,7 +39,7 @@ resource "google_project_iam_member" "cloud_storage" {
     title      = "only_cloud_storage"
     expression = <<-EOL
       resource.service == 'storage.googleapis.com'
-      && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object)
+      && (resource.type == 'storage.googleapis.com/Bucket' || resource.type == 'storage.googleapis.com/Object')
       && (${local.cloud_storage_resource_name_condition})
     EOL
   }
