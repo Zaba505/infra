@@ -50,9 +50,9 @@ resource "google_artifact_registry_repository" "docker" {
 }
 
 locals {
-  destination_registries = [
-    for loc in var.gcp_locations : "${loc}-docker.pkg.dev/${data.google_client_config.default.project}/${google_artifact_registry_repository.docker[loc].registry_id}"
-  ]
+  destination_registries = {
+    for loc in var.gcp_locations : loc => "${loc}-docker.pkg.dev/${data.google_client_config.default.project}/${google_artifact_registry_repository.docker[loc].registry_id}"
+  }
 }
 
 module "acme_registration" {
@@ -114,7 +114,7 @@ module "machine_mgmt_service" {
 
   name                  = "machine-mgmt-service"
   description           = "Service for fetching machine boot images"
-  service_account_email = module.machine_image_service_sa.service_account_email
+  service_account_email = module.machine_mgmt_service_sa.service_account_email
   location              = each.value
 
   image = {
@@ -165,9 +165,9 @@ module "gateway" {
   domain = "machine.${var.domain_zone}"
 
   default_service = [
-    for reg in local.destination_registries : {
+    for loc, reg in local.destination_registries : {
       image = {
-        name = module.module.copy_default_service_image_to_artifact_registry[reg].destination-image-name
+        name = module.copy_default_service_image_to_artifact_registry[reg].destination-image-name
         tag  = var.default_service.image_tag
       }
       location                    = loc
