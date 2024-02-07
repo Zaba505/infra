@@ -51,7 +51,7 @@ resource "google_artifact_registry_repository" "docker" {
 
 locals {
   destination_registries = {
-    for loc in var.gcp_locations : loc => "${loc}-docker.pkg.dev/${data.google_client_config.default.project}/${google_artifact_registry_repository.docker[loc].registry_id}"
+    for loc in var.gcp_locations : loc => "${loc}-docker.pkg.dev/${data.google_client_config.default.project}/${google_artifact_registry_repository.docker[loc].name}"
   }
 }
 
