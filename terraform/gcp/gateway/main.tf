@@ -97,11 +97,11 @@ locals {
 resource "google_compute_region_network_endpoint_group" "default_service" {
   depends_on = [module.default_service]
 
-  for_each = toset(local.default_service_locations)
+  for_each = local.default_service_negs
 
-  name                  = local.default_service_negs[each.value]
+  name                  = each.value
   network_endpoint_type = "SERVERLESS"
-  region                = each.value
+  region                = each.key
 
   cloud_run {
     service = local.default_service_name
@@ -117,7 +117,7 @@ resource "google_compute_backend_service" "default_service" {
     for_each = local.default_service_negs
 
     content {
-      group = google_compute_region_network_endpoint_group.default_service[backend.value].id
+      group = google_compute_region_network_endpoint_group.default_service[backend.key].id
     }
   }
 }
