@@ -86,10 +86,20 @@ module "default_service" {
   max_request_timeout_seconds = each.value.max_request_timeout_seconds
 }
 
+locals {
+  default_service_locations = [for v in var.default_service : v.location]
+
+  default_service_negs = {
+    for loc in local.default_service_locations : loc => "${local.default_service_name}-${loc}-neg"
+  }
+}
+
 resource "google_compute_region_network_endpoint_group" "default_service" {
   depends_on = [module.default_service]
 
-  name                  = "${local.default_service_name}-${each.value}-neg"
+  for_each = toset(local.default_service_locations)
+
+  name                  = local.default_service_negs[each.value]
   network_endpoint_type = "SERVERLESS"
   region                = each.value
 
@@ -104,10 +114,10 @@ resource "google_compute_backend_service" "default_service" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   dynamic "backend" {
-    for_each = toset([for v in var.default_service : v.location])
+    for_each = local.default_service_negs
 
     content {
-      group = google_compute_region_network_endpoint_group.api["${local.default_service_name}-${each.value}-neg"].id
+      group = google_compute_region_network_endpoint_group.api[backend.value].id
     }
   }
 }
@@ -132,7 +142,7 @@ resource "google_compute_backend_service" "cloud_run" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   dynamic "backend" {
-    for_each = each.value.locations
+    for_each = toset(each.value.locations)
 
     content {
       group = google_compute_region_network_endpoint_group.cloud_run["${each.key}-${backend.value}-neg"].id
