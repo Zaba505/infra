@@ -166,7 +166,7 @@ module "gateway" {
   default_service = [
     for loc, reg in local.destination_registries : {
       image = {
-        name = module.copy_default_service_image_to_artifact_registry[reg].destination-image-name
+        name = module.copy_default_service_image_to_artifact_registry[loc].destination-image-name
         tag  = var.default_service.image_tag
       }
       location                    = loc
