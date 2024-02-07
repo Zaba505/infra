@@ -29,7 +29,7 @@ resource "google_project_iam_member" "cloud_trace" {
 }
 
 resource "google_project_iam_member" "cloud_storage" {
-  count = length(var.cloud_storage.length) > 0 ? 1 : 0
+  count = length(var.cloud_storage.buckets) > 0 ? 1 : 0
 
   project = data.google_client_config.default.project
   role    = "roles/run.serviceAgent"
@@ -46,7 +46,7 @@ resource "google_project_iam_member" "cloud_storage" {
 }
 
 resource "google_storage_bucket_access_control" "this" {
-  for_each = var.cloud_storage.buckets
+  for_each = toset(var.cloud_storage.buckets)
 
   bucket = each.value
   role   = "READER"
@@ -54,7 +54,7 @@ resource "google_storage_bucket_access_control" "this" {
 }
 
 resource "google_storage_default_object_access_control" "this" {
-  for_each = var.cloud_storage.buckets
+  for_each = toset(var.cloud_storage.buckets)
 
   bucket = each.value
   role   = "READER"

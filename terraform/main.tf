@@ -2,17 +2,37 @@ terraform {
   required_providers {
     acme = {
       source  = "vancluever/acme"
-      version = "2.19"
+      version = ">= 2.19"
+    }
+
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = ">= 4.19.0"
+    }
+
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = ">= 3.0.2"
+    }
+
+    google = {
+      source  = "hashicorp/google"
+      version = ">= 5.6.0"
+    }
+
+    google-beta = {
+      source  = "hashicorp/google-beta"
+      version = ">= 5.6.0"
     }
 
     random = {
       source  = "hashicorp/random"
-      version = "3.6.0"
+      version = ">= 3.6.0"
     }
 
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.5"
+      version = ">= 4.0.5"
     }
   }
 }
@@ -20,7 +40,7 @@ terraform {
 data "google_client_config" "default" {}
 
 resource "google_artifact_registry_repository" "docker" {
-  for_each = var.gcp_locations
+  for_each = toset(var.gcp_locations)
 
   format        = "DOCKER"
   repository_id = "docker-infra"
@@ -53,13 +73,13 @@ module "cloudflare_to_gcp_client_cert" {
 }
 
 resource "random_uuid" "machine_boot_image_bucket_name" {
-  for_each = var.gcp_locations
+  for_each = toset(var.gcp_locations)
 }
 
 module "machine_image_bucket" {
   source = "./gcp/cloud_storage"
 
-  for_each = var.gcp_locations
+  for_each = toset(var.gcp_locations)
 
   bucket-name     = random_uuid.machine_boot_image_bucket_name[each.value].result
   bucket-location = each.value
@@ -90,7 +110,7 @@ module "copy_machine_mgmt_image_to_artifact_registry" {
 module "machine_mgmt_service" {
   source = "./gcp/cloud_run"
 
-  for_each = var.gcp_locations
+  for_each = toset(var.gcp_locations)
 
   name                  = "machine-mgmt-service"
   description           = "Service for fetching machine boot images"
