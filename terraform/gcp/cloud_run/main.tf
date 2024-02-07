@@ -18,7 +18,7 @@ resource "google_cloud_run_v2_service" "this" {
     service_account = var.service_account_email
 
     containers {
-      image = "${image.name}:${image.tag}"
+      image = "${var.image.name}:${var.image.tag}"
 
       resources {
         limits = {
@@ -29,7 +29,7 @@ resource "google_cloud_run_v2_service" "this" {
       }
 
       dynamic "env" {
-        for_each = var.env_vars[each.value]
+        for_each = var.env_vars
         content {
           name  = env.value["name"]
           value = env.value["value"]

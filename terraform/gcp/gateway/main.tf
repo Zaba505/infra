@@ -49,12 +49,12 @@ module "default_service_account" {
 module "default_service" {
   source = "../cloud_run"
 
-  for_each = var.default_service
+  for_each = { for v in var.default_service : v.location => v }
 
   name                  = local.default_service_name
   description           = "Service for sinking all unknown requests to"
   service_account_email = module.default_service_account.service_account_email
-  location              = each.value.location
+  location              = each.key
 
   image = {
     name = each.value.image.name
@@ -104,7 +104,7 @@ resource "google_compute_backend_service" "default_service" {
   load_balancing_scheme = "EXTERNAL_MANAGED"
 
   dynamic "backend" {
-    for_each = var.default_service.locations
+    for_each = toset([for v in var.default_service : v.location])
 
     content {
       group = google_compute_region_network_endpoint_group.api["${local.default_service_name}-${each.value}-neg"].id
@@ -143,7 +143,7 @@ resource "google_compute_backend_service" "cloud_run" {
 resource "google_compute_url_map" "apis" {
   name = "apis"
 
-  default_service = module.default_service.google_compute_backend_service_id
+  default_service = google_compute_backend_service.default_service.id
 
   host_rule {
     hosts        = [var.domain]
@@ -153,7 +153,7 @@ resource "google_compute_url_map" "apis" {
   path_matcher {
     name = "apis"
 
-    default_service = var.default_service.google_compute_backend_service_id
+    default_service = google_compute_backend_service.default_service.id
 
     dynamic "path_rule" {
       for_each = var.cloud_run
