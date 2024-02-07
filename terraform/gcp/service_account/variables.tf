@@ -9,9 +9,9 @@ variable "cloud_trace" {
 
 variable "cloud_storage" {
   type = object({
-    buckets = list(string)
+    buckets = map(string)
   })
   default = {
-    buckets = []
+    buckets = {}
   }
 }

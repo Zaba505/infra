@@ -46,7 +46,7 @@ resource "google_project_iam_member" "cloud_storage" {
 }
 
 resource "google_storage_bucket_access_control" "this" {
-  for_each = toset(var.cloud_storage.buckets)
+  for_each = var.cloud_storage.buckets
 
   bucket = each.value
   role   = "READER"
@@ -54,7 +54,7 @@ resource "google_storage_bucket_access_control" "this" {
 }
 
 resource "google_storage_default_object_access_control" "this" {
-  for_each = toset(var.cloud_storage.buckets)
+  for_each = var.cloud_storage.buckets
 
   bucket = each.value
   role   = "READER"

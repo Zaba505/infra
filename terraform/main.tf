@@ -93,7 +93,7 @@ module "machine_mgmt_service_sa" {
   cloud_trace = true
 
   cloud_storage = {
-    buckets = [for loc in var.gcp_locations : random_uuid.machine_boot_image_bucket_name[loc].result]
+    buckets = { for loc in var.gcp_locations : loc => random_uuid.machine_boot_image_bucket_name[loc].result }
   }
 }
 
