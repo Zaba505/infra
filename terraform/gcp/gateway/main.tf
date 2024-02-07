@@ -117,7 +117,7 @@ resource "google_compute_backend_service" "default_service" {
     for_each = local.default_service_negs
 
     content {
-      group = google_compute_region_network_endpoint_group.api[backend.value].id
+      group = google_compute_region_network_endpoint_group.default_service[backend.value].id
     }
   }
 }

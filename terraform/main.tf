@@ -93,10 +93,9 @@ module "machine_mgmt_service_sa" {
   cloud_trace = true
 
   cloud_storage = {
-    buckets = random_uuid.machine_boot_image_bucket_name[*].result
+    buckets = [for loc in var.gcp_locations : random_uuid.machine_boot_image_bucket_name[loc].result]
   }
 }
-
 
 module "copy_machine_mgmt_image_to_artifact_registry" {
   source = "./copy_container_image"
