@@ -8,8 +8,8 @@ terraform {
 }
 
 resource "google_storage_bucket" "boot_images" {
-  name     = var.boot-image-bucket-name
-  location = var.boot-image-bucket-location
+  name     = var.bucket-name
+  location = var.bucket-location
 
   force_destroy            = true
   public_access_prevention = "enforced"
