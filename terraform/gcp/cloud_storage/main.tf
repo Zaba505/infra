@@ -2,14 +2,14 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.3.0"
+      version = ">= 5.6.0"
     }
   }
 }
 
 resource "google_storage_bucket" "boot_images" {
-  name     = var.boot-image-bucket-name
-  location = var.boot-image-bucket-location
+  name     = var.bucket-name
+  location = var.bucket-location
 
   force_destroy            = true
   public_access_prevention = "enforced"
