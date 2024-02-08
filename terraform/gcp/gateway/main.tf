@@ -172,9 +172,6 @@ resource "google_certificate_manager_trust_config" "instance" {
     trust_anchors {
       pem_certificate = var.ca_certificate_pem
     }
-    intermediate_cas {
-      pem_certificate = var.ca_certificate_pem
-    }
   }
 }
 

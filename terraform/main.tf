@@ -87,6 +87,9 @@ module "machine_image_bucket" {
 
 module "machine_mgmt_service_sa" {
   source = "./gcp/service_account"
+  depends_on = [
+    module.machine_image_bucket
+  ]
 
   name = "machine-mgmt-service-sa"
 
