@@ -1,10 +1,5 @@
 terraform {
   required_providers {
-    acme = {
-      source  = "vancluever/acme"
-      version = ">= 2.19"
-    }
-
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = ">= 4.19.0"
@@ -52,23 +47,6 @@ resource "google_artifact_registry_repository" "docker" {
 locals {
   destination_registries = {
     for loc in var.gcp_locations : loc => "${loc}-docker.pkg.dev/${data.google_client_config.default.project}/${google_artifact_registry_repository.docker[loc].name}"
-  }
-}
-
-module "acme_registration" {
-  source = "./letsencrypt/acme_registration"
-
-  email_address = var.email_address
-}
-
-module "cloudflare_to_gcp_client_cert" {
-  source = "./letsencrypt/acme_cert"
-
-  account_private_key_pem = module.acme_registration.account_private_key_pem
-  common_name             = "machine.${var.domain_zone}"
-
-  dns_challenge = {
-    cloudflare = {}
   }
 }
 
