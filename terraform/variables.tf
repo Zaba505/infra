@@ -6,11 +6,6 @@ variable "domain_zone" {
   type = string
 }
 
-variable "cloudflare_ca_certificate_pem" {
-  type      = string
-  sensitive = true
-}
-
 variable "gcp_locations" {
   type = list(string)
 }

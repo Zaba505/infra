@@ -145,12 +145,16 @@ module "origin_ca_cert" {
   hostname = "machine.${var.domain_zone}"
 }
 
+data "cloudflare_origin_ca_root_certificate" "rsa" {
+  algorithm = "rsa"
+}
+
 module "gateway" {
   source = "./gcp/gateway"
 
   domain = "machine.${var.domain_zone}"
 
-  ca_certificate_pem = var.cloudflare_ca_certificate_pem
+  ca_certificate_pem = data.cloudflare_origin_ca_root_certificate.rsa.cert_pem
 
   lb_certificate = {
     pem         = module.origin_ca_cert.ca_certificate_pem
@@ -182,6 +186,12 @@ module "gateway" {
   }
 }
 
+module "client_ca_cert" {
+  source = "./cloudflare/mtls"
+
+  hostname = "machine.${var.domain_zone}"
+}
+
 module "cloudflare_dns" {
   source = "./cloudflare/dns"
 
@@ -192,6 +202,11 @@ module "cloudflare_dns" {
       // Only use IPV6 when proxying requests from Cloudflare to GCP
       ipv6 = {
         address = module.gateway.global_ipv6_address
+      }
+
+      certificate = {
+        pem         = module.client_ca_cert.ca_certificate_pem
+        private_key = module.client_ca_cert.ca_private_key
       }
     }
   }
