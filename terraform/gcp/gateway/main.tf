@@ -211,6 +211,8 @@ resource "google_compute_ssl_certificate" "global_gateway" {
 }
 
 resource "google_compute_target_https_proxy" "instance" {
+  provider = google-beta
+
   name              = "apis"
   url_map           = google_compute_url_map.apis.id
   ssl_certificates  = [google_compute_ssl_certificate.global_gateway.id]
