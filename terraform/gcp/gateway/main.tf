@@ -227,6 +227,6 @@ resource "google_compute_global_forwarding_rule" "ipv6" {
   name                  = "apis-ipv6"
   ip_address            = google_compute_global_address.ipv6.id
   port_range            = "443"
-  target                = google_compute_target_https_proxy.apis.id
+  target                = google_compute_target_https_proxy.instance.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
 }
