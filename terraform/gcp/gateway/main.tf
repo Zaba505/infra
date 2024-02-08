@@ -162,30 +162,30 @@ resource "google_compute_url_map" "apis" {
   }
 }
 
-resource "google_certificate_manager_trust_config" "instance" {
-  provider = google-beta
+# resource "google_certificate_manager_trust_config" "instance" {
+#   provider = google-beta
 
-  name     = "global-gateway-trust-config"
-  location = "global"
+#   name     = "global-gateway-trust-config"
+#   location = "global"
 
-  trust_stores {
-    trust_anchors {
-      pem_certificate = var.ca_certificate_pem
-    }
-  }
-}
+#   trust_stores {
+#     trust_anchors {
+#       pem_certificate = var.ca_certificate_pem
+#     }
+#   }
+# }
 
-resource "google_network_security_server_tls_policy" "instance" {
-  provider = google-beta
+# resource "google_network_security_server_tls_policy" "instance" {
+#   provider = google-beta
 
-  name       = "global-gateway-tls-policy"
-  location   = "global"
-  allow_open = false
-  mtls_policy {
-    client_validation_mode         = "REJECT_INVALID"
-    client_validation_trust_config = google_certificate_manager_trust_config.instance.id
-  }
-}
+#   name       = "global-gateway-tls-policy"
+#   location   = "global"
+#   allow_open = false
+#   mtls_policy {
+#     client_validation_mode         = "REJECT_INVALID"
+#     client_validation_trust_config = google_certificate_manager_trust_config.instance.id
+#   }
+# }
 
 // Using with Target HTTPS Proxies
 //
@@ -210,10 +210,10 @@ resource "google_compute_ssl_certificate" "global_gateway" {
 resource "google_compute_target_https_proxy" "instance" {
   provider = google-beta
 
-  name              = "apis"
-  url_map           = google_compute_url_map.apis.id
-  ssl_certificates  = [google_compute_ssl_certificate.global_gateway.id]
-  server_tls_policy = google_network_security_server_tls_policy.instance.id
+  name             = "apis"
+  url_map          = google_compute_url_map.apis.id
+  ssl_certificates = [google_compute_ssl_certificate.global_gateway.id]
+  # server_tls_policy = google_network_security_server_tls_policy.instance.id
 }
 
 resource "google_compute_global_address" "ipv6" {
