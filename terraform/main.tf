@@ -158,10 +158,23 @@ module "copy_default_service_image_to_artifact_registry" {
   destination-registry = each.value
 }
 
+module "origin_ca_cert" {
+  source = "./cloudflare/mtls"
+
+  hostname = "machine.${var.domain_zone}"
+}
+
 module "gateway" {
   source = "./gcp/gateway"
 
   domain = "machine.${var.domain_zone}"
+
+  ca_certificate_pem = var.cloudflare_ca_certificate_pem
+
+  lb_certificate = {
+    pem         = module.origin_ca_cert.ca_certificate_pem
+    private_key = module.origin_ca_cert.ca_private_key
+  }
 
   default_service = [
     for loc, reg in local.destination_registries : {

@@ -25,20 +25,6 @@ locals {
   ]...)
 }
 
-resource "google_compute_global_address" "ipv6" {
-  name         = "global-gateway-ipv6"
-  ip_version   = "IPV6"
-  address_type = "EXTERNAL"
-}
-
-resource "google_compute_managed_ssl_certificate" "global_gateway" {
-  name = "global-gateway-ssl-cert"
-
-  managed {
-    domains = [var.domain]
-  }
-}
-
 module "default_service_account" {
   source = "../service_account"
 
@@ -176,10 +162,65 @@ resource "google_compute_url_map" "apis" {
   }
 }
 
-resource "google_compute_target_https_proxy" "apis" {
-  name             = "apis"
-  url_map          = google_compute_url_map.apis.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.global_gateway.id]
+resource "google_certificate_manager_trust_config" "instance" {
+  provider = google-beta
+
+  name     = "global-gateway-trust-config"
+  location = "global"
+
+  trust_stores {
+    trust_anchors {
+      pem_certificate = var.ca_certificate_pem
+    }
+    intermediate_cas {
+      pem_certificate = var.ca_certificate_pem
+    }
+  }
+}
+
+resource "google_network_security_server_tls_policy" "instance" {
+  provider = google-beta
+
+  name       = "global-gateway-tls-policy"
+  location   = "global"
+  allow_open = false
+  mtls_policy {
+    client_validation_mode         = "REJECT_INVALID"
+    client_validation_trust_config = google_certificate_manager_trust_config.instance.id
+  }
+}
+
+// Using with Target HTTPS Proxies
+//
+// SSL certificates cannot be updated after creation. In order to apply
+// the specified configuration, Terraform will destroy the existing
+// resource and create a replacement. To effectively use an SSL
+// certificate resource with a Target HTTPS Proxy resource, it's
+// recommended to specify create_before_destroy in a lifecycle block.
+// Either omit the Instance Template name attribute, specify a partial
+// name with name_prefix, or use random_id resource. Example:
+resource "google_compute_ssl_certificate" "global_gateway" {
+  name_prefix = "global-gateway-ssl-cert-"
+
+  certificate = var.lb_certificate.pem
+  private_key = var.lb_certificate.private_key
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_compute_target_https_proxy" "instance" {
+  name              = "apis"
+  url_map           = google_compute_url_map.apis.id
+  ssl_certificates  = [google_compute_ssl_certificate.global_gateway.id]
+  server_tls_policy = google_network_security_server_tls_policy.instance.id
+}
+
+resource "google_compute_global_address" "ipv6" {
+  name         = "global-gateway-ipv6"
+  ip_version   = "IPV6"
+  address_type = "EXTERNAL"
 }
 
 resource "google_compute_global_forwarding_rule" "ipv6" {

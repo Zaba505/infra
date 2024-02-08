@@ -2,6 +2,17 @@ variable "domain" {
   type = string
 }
 
+variable "lb_certificate" {
+  type = object({
+    pem         = string
+    private_key = string
+  })
+}
+
+variable "ca_certificate_pem" {
+  type = string
+}
+
 variable "cloud_run" {
   type = map(object({
     locations = list(string)
