@@ -13,6 +13,8 @@ locals {
   aaaa_records = { for name, record in var.records : name => record.ipv6 if record.ipv6 != null }
 
   secured_records = { for name, record in var.records : name => record.certificate if record.certificate != null }
+
+  mtls_records = [for name, record in var.records : name if record.enable_mtls]
 }
 
 data "cloudflare_zone" "default" {
@@ -58,7 +60,7 @@ resource "cloudflare_authenticated_origin_pulls" "per_hostname" {
     cloudflare_record.ipv4,
     cloudflare_record.ipv6
   ]
-  for_each = nonsensitive(toset(keys(var.records)))
+  for_each = toset(local.mtls_records)
 
   zone_id  = data.cloudflare_zone.default.id
   enabled  = true

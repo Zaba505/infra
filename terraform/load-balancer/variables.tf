@@ -1,7 +1,3 @@
-variable "email_address" {
-  type = string
-}
-
 variable "domain_zone" {
   type = string
 }
@@ -10,8 +6,8 @@ variable "ca_certificate_pems" {
   type = list(string)
 }
 
-variable "gcp_locations" {
-  type = list(string)
+variable "destination_registries" {
+  type = map(string)
 }
 
 variable "default_service" {
@@ -25,12 +21,9 @@ variable "default_service" {
   })
 }
 
-variable "machine_mgmt_service" {
-  type = object({
-    image_tag               = optional(string, "latest")
-    cpu_limit               = optional(number, 1)
-    memory_limit            = optional(string, "512Mi")
-    max_instance_count      = optional(number, 1)
-    max_concurrent_requests = optional(number, 10)
-  })
+variable "cloud_run" {
+  type = map(object({
+    locations = list(string)
+    paths     = list(string)
+  }))
 }
