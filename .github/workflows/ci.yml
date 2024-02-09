@@ -2,9 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - '**.bazel'
+      - '.bazelversion'
+      - '.bazelrc'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - '**.go'
+      - '**.bazel'
+      - '.bazelversion'
+      - '.bazelrc'
 
 permissions:
   contents: write
@@ -25,19 +37,12 @@ jobs:
           short_commit_id=$(git rev-parse --short HEAD)
           echo "build_version=${formatted_date}.${time}.${short_commit_id}" >> $GITHUB_OUTPUT
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-
-      - name: Terraform Lint
-        id: fmt
-        run: terraform -chdir=terraform/gcp fmt -recursive -check
-
       - name: Mount Bazel cache
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache/bazel
-          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel') }}
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'MODULE.bazel') }}
           restore-keys: |
             ${{ runner.os }}-bazel-
   
