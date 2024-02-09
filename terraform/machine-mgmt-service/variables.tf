@@ -6,10 +6,6 @@ variable "destination_registries" {
   type = map(string)
 }
 
-variable "machine_boot_image_buckets" {
-  type = map(string)
-}
-
 variable "image_tag" {
   type = string
 }
