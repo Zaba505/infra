@@ -9,8 +9,8 @@ variable "lb_certificate" {
   })
 }
 
-variable "ca_certificate_pem" {
-  type = string
+variable "ca_certificate_pems" {
+  type = list(string)
 }
 
 variable "cloud_run" {

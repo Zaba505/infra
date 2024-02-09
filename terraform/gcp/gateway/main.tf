@@ -169,8 +169,12 @@ resource "google_certificate_manager_trust_config" "instance" {
   location = "global"
 
   trust_stores {
-    trust_anchors {
-      pem_certificate = var.ca_certificate_pem
+    dynamic "trust_anchors" {
+      for_each = toset(var.ca_certificate_pems)
+
+      content {
+        pem_certificate = trust_anchors.value
+      }
     }
   }
 }
