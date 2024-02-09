@@ -1,0 +1,27 @@
+name: terraform
+
+on:
+  pull_request:
+    branches: 
+      - main
+    paths:
+      - '**.tf'
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Lint
+        id: fmt
+        run: terraform -chdir=terraform/gcp fmt -recursive -check
