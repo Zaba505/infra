@@ -4,6 +4,8 @@ variable "domain_name" {
 
 variable "records" {
   type = map(object({
+    enable_mtls = bool
+
     ipv4 = optional(object({
       address = string
     }))
