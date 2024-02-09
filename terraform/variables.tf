@@ -6,9 +6,8 @@ variable "domain_zone" {
   type = string
 }
 
-variable "extra_ca_certificate_pems" {
+variable "ca_certificate_pems" {
   type = list(string)
-  default = []
 }
 
 variable "gcp_locations" {

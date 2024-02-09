@@ -145,19 +145,12 @@ module "origin_ca_cert" {
   hostname = "machine.${var.domain_zone}"
 }
 
-data "cloudflare_origin_ca_root_certificate" "rsa" {
-  algorithm = "rsa"
-}
-
 module "gateway" {
   source = "./gcp/gateway"
 
   domain = "machine.${var.domain_zone}"
 
-  ca_certificate_pems = concat(
-    [data.cloudflare_origin_ca_root_certificate.rsa.cert_pem],
-    var.extra_ca_certificate_pems
-  )
+  ca_certificate_pems = var.ca_certificate_pems
 
   lb_certificate = {
     pem         = module.origin_ca_cert.ca_certificate_pem
@@ -180,7 +173,7 @@ module "gateway" {
   ]
 
   cloud_run = {
-    "machinemgmt-service" = {
+    "machine-mgmt-service" = {
       locations = var.gcp_locations
       paths = [
         "/bootstrap/image"
