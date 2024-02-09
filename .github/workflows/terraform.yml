@@ -24,4 +24,4 @@ jobs:
 
       - name: Terraform Lint
         id: fmt
-        run: terraform -chdir=terraform/gcp fmt -recursive -check
+        run: terraform fmt -recursive -check
