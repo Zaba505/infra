@@ -84,6 +84,7 @@ resource "google_cloud_run_v2_service" "this" {
 resource "google_cloud_run_v2_service_iam_binding" "public_access" {
   count = var.unsecured ? 1 : 0
 
+  project  = google_cloud_run_v2_service.this.project
   name     = google_cloud_run_v2_service.this.name
   location = google_cloud_run_v2_service.this.location
   role     = "roles/run.invoker"
