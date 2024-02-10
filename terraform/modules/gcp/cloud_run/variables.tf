@@ -11,6 +11,11 @@ variable "service_account_email" {
   type = string
 }
 
+variable "unsecured" {
+  type    = bool
+  default = false
+}
+
 variable "location" {
   type = string
 }
