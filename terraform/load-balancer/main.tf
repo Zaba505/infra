@@ -79,6 +79,7 @@ module "default_service" {
   description           = "Service for sinking all unknown requests to"
   service_account_email = module.default_service_account.service_account_email
   location              = each.key
+  unsecured             = true
 
   image = {
     name = each.value.image.name

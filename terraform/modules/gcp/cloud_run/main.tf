@@ -80,3 +80,14 @@ resource "google_cloud_run_v2_service" "this" {
     type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
   }
 }
+
+resource "google_cloud_run_v2_service_iam_binding" "public_access" {
+  count = var.unsecured ? 1 : 0
+
+  name     = google_cloud_run_v2_service.this.name
+  location = google_cloud_run_v2_service.this.location
+  role     = "roles/run.invoker"
+  members = [
+    "allUsers"
+  ]
+}
