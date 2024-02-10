@@ -81,12 +81,9 @@ resource "google_cloud_run_v2_service" "this" {
   }
 }
 
-resource "google_cloud_run_v2_service_iam_binding" "public_access" {
-  count = var.unsecured ? 1 : 0
-
-  project  = google_cloud_run_v2_service.this.project
-  name     = google_cloud_run_v2_service.this.name
+resource "google_cloud_run_service_iam_binding" "default" {
   location = google_cloud_run_v2_service.this.location
+  service  = google_cloud_run_v2_service.this.name
   role     = "roles/run.invoker"
   members = [
     "allUsers"
