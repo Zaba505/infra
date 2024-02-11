@@ -52,7 +52,11 @@ sequenceDiagram
     server ->> router: DHCP
     router -->> server: PXE boot image uri
     server ->> pi: request boot image over FTP
-    pi -->> server: bootstrap PXE to iPXE boot image
+    pi ->> cloudflare: proxy over HTTPS and mTLS
+    cloudflare ->> gcp: proxy over mTLS
+    gcp -->> cloudflare: bootstrap PXE to iPXE boot image
+    cloudflare -->> pi: 
+    pi -->> server: 
     server ->> cloudflare: chain load machine specific boot script over mTLS
     cloudflare ->> gcp: proxy over mTLS
     gcp -->> cloudflare: machine specific iPXE boot script
@@ -61,12 +65,12 @@ sequenceDiagram
 
 ## Services
 
-### Bootstrap iPXE service
+### Boot Image Proxy service
 
-This service runs on a Raspberry Pi in my home network and is responsible for responding
-to FTP requests from the servers during boot up. It responds with a custom built iPXE image
-that bootstraps a PXE environment into iPXE. After bootstrapping into iPXE, it executes a
-custom iPXE script which chainloads a machine specific boot script over an mTLS connection.
+This service runs on a Raspberry Pi in my home network and is responsible for proxying
+FTP based boot image requests from the servers to HTTPS requests that are then sent
+to the Machine Management service. This service also uses mTLS when reaching out to
+the Machine Management service.
 
 ### Machine Management Service
 
