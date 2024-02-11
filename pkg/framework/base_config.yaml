@@ -9,3 +9,6 @@ otel:
 
 http:
   port: {{env "HTTP_PORT"}}
+
+ftp:
+  port: {{env "FTP_PORT"}}
