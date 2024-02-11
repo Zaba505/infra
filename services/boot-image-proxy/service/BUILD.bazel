@@ -1,0 +1,15 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "service",
+    srcs = ["service.go"],
+    importpath = "github.com/Zaba505/infra/services/boot-image-proxy/service",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/framework",
+        "@com_github_z5labs_bedrock//http/httpclient",
+        "@com_github_z5labs_bedrock//pkg/slogfield",
+        "@io_goftp_server_v2//:server",
+        "@io_opentelemetry_go_otel//:otel",
+    ],
+)
