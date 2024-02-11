@@ -7,7 +7,8 @@ flowchart LR
     https["HTTP(S)"]
     cloudflare["Cloudflare"]
     homeRouter["Router"]
-    homeLab["Home Lab Cluster"]
+    homeLab["Home Lab Server(s)"]
+    imageProxy["Boot Image Proxy service"]
     k8s["Kubernetes"]
     loadBalancer["Load balancer"]
     bootImages[("Machine boot images")]
@@ -22,6 +23,7 @@ flowchart LR
     subgraph one [Home]
         homeRouter --> homeLab
         homeLab --> k8s
+        homeLab --> imageProxy
     end
 
     subgraph two [Cloud]
@@ -32,6 +34,7 @@ flowchart LR
 
     cloudflare -->|mTLS| loadBalancer
     cloudflare -->|mTLS| homeRouter
+    imageProxy --> |mTLS| cloudflare
 ```
 
 ## Network Boot Procedure
