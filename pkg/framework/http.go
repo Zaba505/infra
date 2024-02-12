@@ -3,70 +3,26 @@ package framework
 import (
 	"bytes"
 	"context"
-	_ "embed"
 	"io"
 	"log/slog"
 	"net/http"
-	"os"
-	"sync"
 
 	"github.com/z5labs/bedrock"
 	bdhttp "github.com/z5labs/bedrock/http"
 	"github.com/z5labs/bedrock/pkg/lifecycle"
 	"github.com/z5labs/bedrock/pkg/otelconfig"
-	"github.com/z5labs/bedrock/pkg/otelslog"
 	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-type Config struct {
-	Logging struct {
-		Level slog.Level `config:"level"`
-	} `config:"logging"`
-
-	OTel struct {
-		ServiceName    string `config:"service_name"`
-		ServiceVersion string `config:"service_version"`
-		GCP            struct {
-			ProjectID string `config:"project_id"`
-		} `config:"gcp"`
-	} `config:"otel"`
-
-	HTTP struct {
-		Port uint `config:"port"`
-	} `config:"http"`
-}
-
-var (
-	logHandler     slog.Handler
-	logHandlerInit sync.Once
-)
-
-func (c *Config) LogHandler() slog.Handler {
-	logHandlerInit.Do(func() {
-		logHandler = otelslog.NewHandler(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level:     c.Logging.Level,
-			AddSource: true,
-		}))
-	})
-	return logHandler
-}
-
-func UnmarshalConfigFromContext(ctx context.Context, v any) error {
-	m := bedrock.ConfigFromContext(ctx)
-	return m.Unmarshal(v)
-}
-
-//go:embed base_config.yaml
-var baseCfg []byte
-
 func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 	bedrock.New(
 		bedrock.Config(bytes.NewReader(baseCfg)),
 		bedrock.Config(cfg),
 		bedrock.Hooks(
+			initLogHandler(),
 			lifecycle.ManageOTel(func(ctx context.Context) (otelconfig.Initializer, error) {
 				var cfg Config
 				err := UnmarshalConfigFromContext(ctx, &cfg)
@@ -108,7 +64,7 @@ func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 				return nil, err
 			}
 
-			logHandler := cfg.LogHandler()
+			logHandler := LogHandler()
 			logger := slog.New(logHandler)
 
 			h, err := f(ctx)
