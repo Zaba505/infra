@@ -1,4 +1,4 @@
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 
 go_library(
     name = "service",
@@ -11,5 +11,15 @@ go_library(
         "@com_github_z5labs_bedrock//pkg/slogfield",
         "@io_goftp_server_v2//:server",
         "@io_opentelemetry_go_otel//:otel",
+    ],
+)
+
+go_test(
+    name = "service_test",
+    srcs = ["service_test.go"],
+    embed = [":service"],
+    deps = [
+        "//pkg/framework/frameworktest",
+        "@com_github_stretchr_testify//assert",
     ],
 )

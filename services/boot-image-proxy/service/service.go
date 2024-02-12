@@ -24,6 +24,37 @@ type Config struct {
 	} `config:"proxy"`
 }
 
+type builder struct {
+	unmarshalConfig func(context.Context, any) error
+}
+
+func Init(ctx context.Context) (server.Driver, error) {
+	b := builder{
+		unmarshalConfig: framework.UnmarshalConfigFromContext,
+	}
+	return b.build(ctx)
+}
+
+func (b builder) build(ctx context.Context) (server.Driver, error) {
+	logHandler := framework.LogHandler()
+	log := slog.New(logHandler)
+
+	var cfg Config
+	err := b.unmarshalConfig(ctx, &cfg)
+	if err != nil {
+		log.ErrorContext(ctx, "failed to unmarshal config", slogfield.Error(err))
+		return nil, err
+	}
+
+	d := &httpProxyDriver{
+		log:                   log,
+		http:                  httpclient.New(),
+		target:                cfg.Proxy.Target,
+		newRequestWithContext: http.NewRequestWithContext,
+	}
+	return d, nil
+}
+
 type httpClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
@@ -32,25 +63,16 @@ type httpProxyDriver struct {
 	log    *slog.Logger
 	http   httpClient
 	target string
+
+	newRequestWithContext func(context.Context, string, string, io.Reader) (*http.Request, error)
 }
 
-func Init(ctx context.Context) (server.Driver, error) {
-	logHandler := framework.LogHandler()
-	log := slog.New(logHandler)
+type httpStatusError struct {
+	status int
+}
 
-	var cfg Config
-	err := framework.UnmarshalConfigFromContext(ctx, &cfg)
-	if err != nil {
-		log.ErrorContext(ctx, "failed to unmarshal config", slogfield.Error(err))
-		return nil, err
-	}
-
-	d := &httpProxyDriver{
-		log:    log,
-		http:   httpclient.New(),
-		target: cfg.Proxy.Target,
-	}
-	return d, nil
+func (e httpStatusError) Error() string {
+	return fmt.Sprintf("unexpected http status code from backend: %d", e.status)
 }
 
 // GetFile implements server.Driver.
@@ -58,7 +80,7 @@ func (d *httpProxyDriver) GetFile(ctx *server.Context, path string, offset int64
 	spanCtx, span := otel.Tracer("service").Start(context.Background(), "httpProxyDriver.GetFile")
 	defer span.End()
 
-	req, err := http.NewRequestWithContext(spanCtx, http.MethodGet, fmt.Sprintf("https://%s/%s", d.target, path), nil)
+	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, fmt.Sprintf("https://%s/%s", d.target, path), nil)
 	if err != nil {
 		d.log.ErrorContext(spanCtx, "failed to construct http request", slogfield.Error(err))
 		return 0, nil, err
@@ -76,7 +98,7 @@ func (d *httpProxyDriver) GetFile(ctx *server.Context, path string, offset int64
 			"received unexpected http status code from backend",
 			slogfield.Int("http_status_code", resp.StatusCode),
 		)
-		return 0, nil, errors.New("unexpected http status code")
+		return 0, nil, httpStatusError{status: resp.StatusCode}
 	}
 
 	return resp.ContentLength, resp.Body, nil
