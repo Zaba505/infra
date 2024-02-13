@@ -6,9 +6,3 @@ otel:
   service_version: {{env "SERVICE_VERSION"}}
   gcp:
     project_id: {{env "GOOGLE_CLOUD_PROJECT"}}
-
-http:
-  port: {{env "HTTP_PORT"}}
-
-ftp:
-  port: {{env "FTP_PORT"}}

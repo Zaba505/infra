@@ -47,7 +47,7 @@ platform_transition_filegroup(
 
 # $ bazel build //services/boot-image-proxy:tarball
 # $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/boot-image-proxy:tarball)
-# $ podman run --rm -p8080:8080 -eFTP_PORT=8080 ghcr.io/zaba505/infra/boot-image-proxy:latest
+# $ podman run --rm -p8080:8080 -eCOMMAND_PORT=8080 -ePASSIVE_START_PORT=7000 -ePASSIVE_END_PORT=8000 ghcr.io/zaba505/infra/boot-image-proxy:latest
 oci_tarball(
     name = "tarball",
     image = ":image",

@@ -3,62 +3,31 @@ package framework
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"io"
 	"log/slog"
 	"net/http"
 
 	"github.com/z5labs/bedrock"
 	bdhttp "github.com/z5labs/bedrock/http"
-	"github.com/z5labs/bedrock/pkg/lifecycle"
-	"github.com/z5labs/bedrock/pkg/otelconfig"
 	"github.com/z5labs/bedrock/pkg/slogfield"
-	"go.opentelemetry.io/contrib/detectors/gcp"
-	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
-	bedrock.New(
-		bedrock.Config(bytes.NewReader(baseCfg)),
-		bedrock.Config(cfg),
-		bedrock.Hooks(
-			initLogHandler(),
-			lifecycle.ManageOTel(func(ctx context.Context) (otelconfig.Initializer, error) {
-				var cfg Config
-				err := UnmarshalConfigFromContext(ctx, &cfg)
-				if err != nil {
-					return nil, err
-				}
+//go:embed http_config.yaml
+var httpConfigSrc []byte
 
-				var otelIniter otelconfig.Initializer = otelconfig.Noop
-				if cfg.OTel.GCP.ProjectID != "" {
-					res, err := resource.New(
-						context.Background(),
-						resource.WithDetectors(gcp.NewDetector()),
-						resource.WithAttributes(
-							semconv.ServiceName(cfg.OTel.ServiceName),
-							semconv.ServiceVersion(cfg.OTel.ServiceVersion),
-						),
-					)
-					if err != nil {
-						return nil, err
-					}
-					res, err = resource.Merge(
-						resource.Default(),
-						res,
-					)
-					if err != nil {
-						return nil, err
-					}
-					otelIniter = otelconfig.GoogleCloud(
-						otelconfig.GoogleCloudProjectId(cfg.OTel.GCP.ProjectID),
-					)
-				}
-				return otelIniter, nil
-			}),
-		),
-		bedrock.WithRuntimeBuilderFunc(func(ctx context.Context) (bedrock.Runtime, error) {
-			var cfg Config
+type HttpConfig struct {
+	Config `config:",squash"`
+
+	HTTP struct {
+		Port uint `config:"port"`
+	} `config:"http"`
+}
+
+func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
+	run(
+		bedrock.RuntimeBuilderFunc(func(ctx context.Context) (bedrock.Runtime, error) {
+			var cfg HttpConfig
 			err := UnmarshalConfigFromContext(ctx, &cfg)
 			if err != nil {
 				return nil, err
@@ -80,5 +49,7 @@ func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 			)
 			return rt, nil
 		}),
-	).Run()
+		bedrock.Config(bytes.NewReader(httpConfigSrc)),
+		bedrock.Config(cfg),
+	)
 }

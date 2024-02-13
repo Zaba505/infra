@@ -7,9 +7,11 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/framework",
+        "@com_github_fclairamb_ftpserverlib//:ftpserverlib",
+        "@com_github_spf13_afero//:afero",
+        "@com_github_spf13_afero//mem",
         "@com_github_z5labs_bedrock//http/httpclient",
         "@com_github_z5labs_bedrock//pkg/slogfield",
-        "@io_goftp_server_v2//:server",
         "@io_opentelemetry_go_otel//:otel",
     ],
 )
@@ -18,8 +20,5 @@ go_test(
     name = "service_test",
     srcs = ["service_test.go"],
     embed = [":service"],
-    deps = [
-        "//pkg/framework/frameworktest",
-        "@com_github_stretchr_testify//assert",
-    ],
+    deps = ["@com_github_stretchr_testify//assert"],
 )

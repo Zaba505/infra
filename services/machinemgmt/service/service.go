@@ -21,7 +21,7 @@ import (
 )
 
 type Config struct {
-	framework.Config `config:",squash"`
+	framework.HttpConfig `config:",squash"`
 
 	Storage struct {
 		Bucket string `config:"bucket"`

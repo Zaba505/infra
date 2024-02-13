@@ -2,22 +2,25 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/Zaba505/infra/pkg/framework"
+
+	ftpserver "github.com/fclairamb/ftpserverlib"
+	"github.com/spf13/afero"
+	"github.com/spf13/afero/mem"
 	"github.com/z5labs/bedrock/http/httpclient"
 	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
-	"goftp.io/server/v2"
 )
 
 type Config struct {
-	framework.Config `config:",squash"`
+	framework.FtpConfig `config:",squash"`
 
 	Proxy struct {
 		Target string `config:"target"`
@@ -28,14 +31,14 @@ type builder struct {
 	unmarshalConfig func(context.Context, any) error
 }
 
-func Init(ctx context.Context) (server.Driver, error) {
+func Init(ctx context.Context) (ftpserver.ClientDriver, error) {
 	b := builder{
 		unmarshalConfig: framework.UnmarshalConfigFromContext,
 	}
 	return b.build(ctx)
 }
 
-func (b builder) build(ctx context.Context) (server.Driver, error) {
+func (b builder) build(ctx context.Context) (ftpserver.ClientDriver, error) {
 	logHandler := framework.LogHandler()
 	log := slog.New(logHandler)
 
@@ -75,21 +78,28 @@ func (e httpStatusError) Error() string {
 	return fmt.Sprintf("unexpected http status code from backend: %d", e.status)
 }
 
-// GetFile implements server.Driver.
-func (d *httpProxyDriver) GetFile(ctx *server.Context, path string, offset int64) (int64, io.ReadCloser, error) {
+// Open implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Open(name string) (afero.File, error) {
+	return d.OpenFile(name, 0, 0)
+}
+
+// OpenFile implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afero.File, error) {
 	spanCtx, span := otel.Tracer("service").Start(context.Background(), "httpProxyDriver.GetFile")
 	defer span.End()
 
-	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, fmt.Sprintf("https://%s/%s", d.target, path), nil)
+	d.log.InfoContext(spanCtx, "getting file from backend", slogfield.String("path", name))
+
+	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, fmt.Sprintf("https://%s/%s", d.target, name), nil)
 	if err != nil {
 		d.log.ErrorContext(spanCtx, "failed to construct http request", slogfield.Error(err))
-		return 0, nil, err
+		return nil, err
 	}
 
 	resp, err := d.http.Do(req)
 	if err != nil {
 		d.log.ErrorContext(spanCtx, "http request failed", slogfield.Error(err))
-		return 0, nil, err
+		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -98,45 +108,119 @@ func (d *httpProxyDriver) GetFile(ctx *server.Context, path string, offset int64
 			"received unexpected http status code from backend",
 			slogfield.Int("http_status_code", resp.StatusCode),
 		)
-		return 0, nil, httpStatusError{status: resp.StatusCode}
+		return nil, httpStatusError{status: resp.StatusCode}
 	}
+	defer resp.Body.Close()
 
-	return resp.ContentLength, resp.Body, nil
+	file := mem.NewFileHandle(mem.CreateFile(name))
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		d.log.ErrorContext(
+			spanCtx,
+			"failed to copy response body to inmemory file",
+			slogfield.Error(err),
+		)
+		return nil, err
+	}
+	return file, nil
 }
 
-var errUnsupported = errors.New("unsupported")
-
-// DeleteDir implements server.Driver.
-func (*httpProxyDriver) DeleteDir(*server.Context, string) error {
-	return errUnsupported
+// Chmod implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Chmod(name string, mode fs.FileMode) error {
+	d.log.Info("chmod")
+	return nil
 }
 
-// DeleteFile implements server.Driver.
-func (*httpProxyDriver) DeleteFile(*server.Context, string) error {
-	return errUnsupported
+// Chown implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Chown(name string, uid int, gid int) error {
+	d.log.Info("chown")
+	return nil
 }
 
-// ListDir implements server.Driver.
-func (*httpProxyDriver) ListDir(*server.Context, string, func(fs.FileInfo) error) error {
-	return errUnsupported
+// Chtimes implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Chtimes(name string, atime time.Time, mtime time.Time) error {
+	d.log.Info("chtimes")
+	return nil
 }
 
-// MakeDir implements server.Driver.
-func (*httpProxyDriver) MakeDir(*server.Context, string) error {
-	return errUnsupported
+// Create implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Create(name string) (afero.File, error) {
+	d.log.Info("create")
+	return nil, nil
 }
 
-// PutFile implements server.Driver.
-func (*httpProxyDriver) PutFile(*server.Context, string, io.Reader, int64) (int64, error) {
-	return 0, errUnsupported
+// Mkdir implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Mkdir(name string, perm fs.FileMode) error {
+	d.log.Info("mkdir")
+	return nil
 }
 
-// Rename implements server.Driver.
-func (*httpProxyDriver) Rename(*server.Context, string, string) error {
-	return errUnsupported
+// MkdirAll implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) MkdirAll(path string, perm fs.FileMode) error {
+	d.log.Info("mkdir all")
+	return nil
 }
 
-// Stat implements server.Driver.
-func (*httpProxyDriver) Stat(*server.Context, string) (fs.FileInfo, error) {
-	return nil, errUnsupported
+// Name implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Name() string {
+	d.log.Info("name")
+	return ""
+}
+
+// Remove implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Remove(name string) error {
+	d.log.Info("remove")
+	return nil
+}
+
+// RemoveAll implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) RemoveAll(path string) error {
+	d.log.Info("remove all")
+	return nil
+}
+
+// Rename implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Rename(oldname string, newname string) error {
+	d.log.Info("rename")
+	return nil
+}
+
+type fileInfo struct {
+	name string
+}
+
+// Stat implements ftpserver.ClientDriver.
+func (d *httpProxyDriver) Stat(name string) (fs.FileInfo, error) {
+	d.log.Info("stat")
+	return fileInfo{name: name}, nil
+}
+
+// IsDir implements fs.FileInfo.
+func (fileInfo) IsDir() bool {
+	return false
+}
+
+// ModTime implements fs.FileInfo.
+func (fileInfo) ModTime() time.Time {
+	return time.Now()
+}
+
+// Mode implements fs.FileInfo.
+func (fileInfo) Mode() fs.FileMode {
+	return fs.ModePerm
+}
+
+// Name implements fs.FileInfo.
+func (fi fileInfo) Name() string {
+	return fi.name
+}
+
+// Size implements fs.FileInfo.
+func (fileInfo) Size() int64 {
+	return 10
+}
+
+// Sys implements fs.FileInfo.
+func (fileInfo) Sys() any {
+	return nil
 }
