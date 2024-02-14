@@ -47,13 +47,25 @@ func (d *mainDriver) GetSettings() (*ftpserver.Settings, error) {
 		)
 		return nil, err
 	}
+	d.log.Info(
+		"listening for command connections",
+		slogfield.Uint("command_port", d.cfg.FTP.CommandPort),
+		slog.Group(
+			"passive_port_range",
+			slogfield.Uint("start", d.cfg.FTP.PassivePortRange.Start),
+			slogfield.Uint("end", d.cfg.FTP.PassivePortRange.End),
+		),
+	)
+
 	settings := &ftpserver.Settings{
 		Listener:          ls,
+		PublicHost:        "0.0.0.0",
 		DisableActiveMode: true,
 		PassiveTransferPortRange: &ftpserver.PortRange{
 			Start: int(d.cfg.FTP.PassivePortRange.Start),
 			End:   int(d.cfg.FTP.PassivePortRange.End),
 		},
+		DefaultTransferType: ftpserver.TransferTypeBinary,
 	}
 	return settings, nil
 }
