@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"net/http"
+	"path"
 	"time"
 
 	"github.com/Zaba505/infra/pkg/framework"
@@ -88,22 +89,24 @@ func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afe
 	spanCtx, span := otel.Tracer("service").Start(context.Background(), "httpProxyDriver.GetFile")
 	defer span.End()
 
-	d.log.InfoContext(spanCtx, "getting file from backend", slogfield.String("path", name))
+	endpoint := "https://" + path.Join(d.target, name)
+	log := d.log.With(slogfield.String("endpoint", endpoint))
+	log.InfoContext(spanCtx, "getting file from backend")
 
-	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, fmt.Sprintf("https://%s/%s", d.target, name), nil)
+	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		d.log.ErrorContext(spanCtx, "failed to construct http request", slogfield.Error(err))
+		log.ErrorContext(spanCtx, "failed to construct http request", slogfield.Error(err))
 		return nil, err
 	}
 
 	resp, err := d.http.Do(req)
 	if err != nil {
-		d.log.ErrorContext(spanCtx, "http request failed", slogfield.Error(err))
+		log.ErrorContext(spanCtx, "http request failed", slogfield.Error(err))
 		return nil, err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		d.log.ErrorContext(
+		log.ErrorContext(
 			spanCtx,
 			"received unexpected http status code from backend",
 			slogfield.Int("http_status_code", resp.StatusCode),
@@ -111,17 +114,19 @@ func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afe
 		return nil, httpStatusError{status: resp.StatusCode}
 	}
 	defer resp.Body.Close()
+	log.InfoContext(spanCtx, "received successful response from backend")
 
 	file := mem.NewFileHandle(mem.CreateFile(name))
-	_, err = io.Copy(file, resp.Body)
+	n, err := io.Copy(file, resp.Body)
 	if err != nil {
-		d.log.ErrorContext(
+		log.ErrorContext(
 			spanCtx,
 			"failed to copy response body to inmemory file",
 			slogfield.Error(err),
 		)
 		return nil, err
 	}
+	log.InfoContext(spanCtx, "read file from backend", slogfield.Int64("file_size_in_bytes", n))
 	return file, nil
 }
 
