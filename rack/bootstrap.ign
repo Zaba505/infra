@@ -1,0 +1,27 @@
+{
+  "ignition": {
+    "version": "3.4.0"
+  },
+  "passwd": {
+    "users": [
+      {
+        "name": "core",
+        "sshAuthorizedKeys": [
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuFbBk3OXce5ncgaBJqjX2E8uB+YbXjsz3xTOfexweK carson@z5-whitedragon"
+        ]
+      }
+    ]
+  },
+  "storage": {
+    "files": [
+      {
+        "path": "/etc/hostname",
+        "contents": {
+          "compression": "",
+          "source": "data:,coreos"
+        },
+        "mode": 420
+      }
+    ]
+  }
+}

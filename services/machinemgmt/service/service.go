@@ -21,7 +21,7 @@ import (
 )
 
 type Config struct {
-	framework.Config `config:",squash"`
+	framework.HttpConfig `config:",squash"`
 
 	Storage struct {
 		Bucket string `config:"bucket"`
@@ -35,7 +35,7 @@ func Init(ctx context.Context) (http.Handler, error) {
 		return nil, err
 	}
 
-	logHandler := cfg.LogHandler()
+	logHandler := framework.LogHandler()
 	logger := slog.New(logHandler)
 
 	gs, err := storage.NewClient(context.Background())
