@@ -9,6 +9,10 @@ on:
       - '**.bazel'
       - '.bazelversion'
       - '.bazelrc'
+      - 'go.mod'
+      - 'go.sum'
+      - 'MODULE.bazel'
+      - 'MODULE.bazel.lock'
   pull_request:
     branches:
       - main
@@ -17,6 +21,10 @@ on:
       - '**.bazel'
       - '.bazelversion'
       - '.bazelrc'
+      - 'go.mod'
+      - 'go.sum'
+      - 'MODULE.bazel'
+      - 'MODULE.bazel.lock'
 
 permissions:
   contents: write
