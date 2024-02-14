@@ -1,0 +1,9 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "frameworktest",
+    srcs = ["frameworktest.go"],
+    importpath = "github.com/Zaba505/infra/pkg/framework/frameworktest",
+    visibility = ["//visibility:public"],
+    deps = ["@com_github_z5labs_bedrock//pkg/noop"],
+)
