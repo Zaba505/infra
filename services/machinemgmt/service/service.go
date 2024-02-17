@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"path"
 
 	"github.com/Zaba505/infra/pkg/framework"
 	"github.com/Zaba505/infra/services/machinemgmt/service/backend"
@@ -52,14 +53,13 @@ func Init(ctx context.Context) (http.Handler, error) {
 
 	mux := http.NewServeMux()
 	mux.Handle(
-		"/bootstrap/image",
+		"/bootstrap/image/",
 		httpvalidate.Request(
 			http.Handler(&bootstrapImageHandler{
 				log:     logger,
 				storage: storageService,
 			}),
 			httpvalidate.ForMethods(http.MethodGet),
-			httpvalidate.ExactParams("id"),
 		),
 	)
 	return mux, nil
@@ -75,8 +75,11 @@ type bootstrapImageHandler struct {
 }
 
 func (h *bootstrapImageHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	params := req.URL.Query()
-	imageId := params.Get("id")
+	imageId := path.Base(req.URL.Path)
+	if imageId == "." || imageId == "/" {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 
 	spanCtx, span := otel.Tracer("service").Start(req.Context(), "runtime.bootstrapImageHandler", trace.WithAttributes(
 		attribute.String("image.id", imageId),
