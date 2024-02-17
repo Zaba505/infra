@@ -1,0 +1,13 @@
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPuFbBk3OXce5ncgaBJqjX2E8uB+YbXjsz3xTOfexweK carson@z5-whitedragon
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: coreos
