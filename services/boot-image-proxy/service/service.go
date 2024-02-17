@@ -126,6 +126,7 @@ func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afe
 		)
 		return nil, err
 	}
+	file.Seek(0, 0)
 	log.InfoContext(spanCtx, "read file from backend", slogfield.Int64("file_size_in_bytes", n))
 	return file, nil
 }
@@ -190,42 +191,42 @@ func (d *httpProxyDriver) Rename(oldname string, newname string) error {
 	return nil
 }
 
-type fileInfo struct {
+type dirInfo struct {
 	name string
 }
 
 // Stat implements ftpserver.ClientDriver.
 func (d *httpProxyDriver) Stat(name string) (fs.FileInfo, error) {
-	d.log.Info("stat")
-	return fileInfo{name: name}, nil
+	d.log.Info("stat", slogfield.String("path", name))
+	return dirInfo{name: name}, nil
 }
 
 // IsDir implements fs.FileInfo.
-func (fileInfo) IsDir() bool {
-	return false
+func (dirInfo) IsDir() bool {
+	return true
 }
 
 // ModTime implements fs.FileInfo.
-func (fileInfo) ModTime() time.Time {
+func (dirInfo) ModTime() time.Time {
 	return time.Now()
 }
 
 // Mode implements fs.FileInfo.
-func (fileInfo) Mode() fs.FileMode {
-	return fs.ModePerm
+func (dirInfo) Mode() fs.FileMode {
+	return fs.ModeDir
 }
 
 // Name implements fs.FileInfo.
-func (fi fileInfo) Name() string {
+func (fi dirInfo) Name() string {
 	return fi.name
 }
 
 // Size implements fs.FileInfo.
-func (fileInfo) Size() int64 {
-	return 10
+func (dirInfo) Size() int64 {
+	return 0
 }
 
 // Sys implements fs.FileInfo.
-func (fileInfo) Sys() any {
+func (dirInfo) Sys() any {
 	return nil
 }
