@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.38.0
 	github.com/googleapis/gax-go/v2 v2.12.1
 	github.com/stretchr/testify v1.8.4
-	github.com/z5labs/bedrock v0.0.9
+	github.com/z5labs/bedrock v0.1.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.23.0
 	go.opentelemetry.io/otel v1.23.1
 	go.opentelemetry.io/otel/sdk v1.23.1
