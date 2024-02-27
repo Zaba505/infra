@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go/storage v1.38.0
-	github.com/googleapis/gax-go/v2 v2.12.1
+	github.com/googleapis/gax-go/v2 v2.12.2
 	github.com/stretchr/testify v1.8.4
 	github.com/z5labs/bedrock v0.2.2
 	go.opentelemetry.io/contrib/detectors/gcp v1.24.0
