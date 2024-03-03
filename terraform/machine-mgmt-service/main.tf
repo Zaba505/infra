@@ -89,6 +89,7 @@ module "machine_mgmt_service" {
   description           = "Service for fetching machine boot images"
   service_account_email = module.machine_mgmt_service_sa.service_account_email
   location              = each.value
+  unsecured             = true
 
   image = {
     name = module.copy_machine_mgmt_image_to_artifact_registry[each.value].destination-image-name

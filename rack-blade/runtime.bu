@@ -1,7 +1,0 @@
-variant: fcos
-version: 1.4.0
-passwd:
-  users:
-    - name: core
-      ssh_authorized_keys:
-        - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIECro1+siPNnv4iA078ov0OJEP6+0KgouufjB6F+SXr0 cakub6@gmx.com
