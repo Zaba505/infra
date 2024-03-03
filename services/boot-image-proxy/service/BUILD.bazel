@@ -1,0 +1,24 @@
+load("@rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "service",
+    srcs = ["service.go"],
+    importpath = "github.com/Zaba505/infra/services/boot-image-proxy/service",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/framework",
+        "@com_github_fclairamb_ftpserverlib//:ftpserverlib",
+        "@com_github_spf13_afero//:afero",
+        "@com_github_spf13_afero//mem",
+        "@com_github_z5labs_bedrock//http/httpclient",
+        "@com_github_z5labs_bedrock//pkg/slogfield",
+        "@io_opentelemetry_go_otel//:otel",
+    ],
+)
+
+go_test(
+    name = "service_test",
+    srcs = ["service_test.go"],
+    embed = [":service"],
+    deps = ["@com_github_stretchr_testify//assert"],
+)
