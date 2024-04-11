@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/z5labs/bedrock"
+	"github.com/z5labs/bedrock/pkg/config/configtmpl"
 	"github.com/z5labs/bedrock/pkg/lifecycle"
 	"github.com/z5labs/bedrock/pkg/noop"
 	"github.com/z5labs/bedrock/pkg/otelconfig"
@@ -46,6 +47,8 @@ func run(rb bedrock.RuntimeBuilder, opts ...bedrock.Option) error {
 			append(
 				[]bedrock.Option{
 					bedrock.Hooks(defaultHooksWith()...),
+					bedrock.ConfigTemplateFunc("env", configtmpl.Env),
+					bedrock.ConfigTemplateFunc("default", configtmpl.Default),
 					bedrock.Config(bytes.NewReader(frameworkCfgSrc)),
 					bedrock.WithRuntimeBuilder(rb),
 				},
