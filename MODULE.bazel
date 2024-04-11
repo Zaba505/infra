@@ -1,13 +1,13 @@
 module(name = "com_github_zaba505_infra", version = "1.0")
 
-bazel_dep(name = "gazelle", version = "0.35.0")
-bazel_dep(name = "rules_go", version = "0.45.1")
-bazel_dep(name = "rules_oci", version = "1.6.0")
-bazel_dep(name = "rules_pkg", version = "0.10.0")
-bazel_dep(name = "aspect_bazel_lib", version = "2.3.0")
+bazel_dep(name = "gazelle", version = "0.36.0")
+bazel_dep(name = "rules_go", version = "0.46.0")
+bazel_dep(name = "rules_oci", version = "1.7.5")
+bazel_dep(name = "rules_pkg", version = "0.10.1")
+bazel_dep(name = "aspect_bazel_lib", version = "2.7.0")
 
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
-go_sdk.download(version = "1.21.4")
+go_sdk.download(version = "1.22.2")
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps")
 go_deps.from_file(go_mod = "//:go.mod")

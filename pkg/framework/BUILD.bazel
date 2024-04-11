@@ -18,6 +18,7 @@ go_library(
         "@com_github_fclairamb_ftpserverlib//:ftpserverlib",
         "@com_github_z5labs_bedrock//:bedrock",
         "@com_github_z5labs_bedrock//http",
+        "@com_github_z5labs_bedrock//pkg/config/configtmpl",
         "@com_github_z5labs_bedrock//pkg/lifecycle",
         "@com_github_z5labs_bedrock//pkg/noop",
         "@com_github_z5labs_bedrock//pkg/otelconfig",

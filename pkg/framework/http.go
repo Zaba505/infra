@@ -10,6 +10,7 @@ import (
 
 	"github.com/z5labs/bedrock"
 	bdhttp "github.com/z5labs/bedrock/http"
+	"github.com/z5labs/bedrock/pkg/config/configtmpl"
 	"github.com/z5labs/bedrock/pkg/slogfield"
 )
 
@@ -49,6 +50,8 @@ func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 			)
 			return rt, nil
 		}),
+		bedrock.ConfigTemplateFunc("env", configtmpl.Env),
+		bedrock.ConfigTemplateFunc("default", configtmpl.Default),
 		bedrock.Config(bytes.NewReader(httpConfigSrc)),
 		bedrock.Config(cfg),
 	)
