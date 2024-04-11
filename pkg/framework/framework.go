@@ -12,6 +12,7 @@ import (
 
 	"github.com/z5labs/bedrock"
 	bdhttp "github.com/z5labs/bedrock/http"
+	"github.com/z5labs/bedrock/pkg/config/configtmpl"
 	"github.com/z5labs/bedrock/pkg/lifecycle"
 	"github.com/z5labs/bedrock/pkg/otelconfig"
 	"github.com/z5labs/bedrock/pkg/otelslog"
@@ -64,6 +65,8 @@ var baseCfg []byte
 
 func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 	bedrock.New(
+		bedrock.ConfigTemplateFunc("env", configtmpl.Env),
+		bedrock.ConfigTemplateFunc("default", configtmpl.Default),
 		bedrock.Config(bytes.NewReader(baseCfg)),
 		bedrock.Config(cfg),
 		bedrock.Hooks(
