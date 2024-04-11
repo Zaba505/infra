@@ -1,12 +1,13 @@
 module github.com/Zaba505/infra
 
 go 1.22
+toolchain go1.22.2
 
 require (
 	cloud.google.com/go/storage v1.40.0
 	github.com/googleapis/gax-go/v2 v2.12.3
 	github.com/stretchr/testify v1.9.0
-	github.com/z5labs/bedrock v0.3.3
+	github.com/z5labs/bedrock v0.4.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.25.0
 	go.opentelemetry.io/otel v1.25.0
 	go.opentelemetry.io/otel/sdk v1.25.0
