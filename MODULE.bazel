@@ -31,6 +31,9 @@ use_repo(
     "com_google_cloud_go_storage",
     "io_opentelemetry_go_contrib_detectors_gcp",
     "io_opentelemetry_go_otel_sdk",
+    "org_golang_x_sync",
+    "com_github_fclairamb_ftpserverlib",
+    "com_github_spf13_afero",
 )
 
 oci = use_extension("@rules_oci//oci:extensions.bzl", "oci")

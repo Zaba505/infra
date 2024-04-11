@@ -41,7 +41,7 @@ func TestBootstrapImageHandler(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "http://example.com?id=1", nil)
+			r := httptest.NewRequest(http.MethodGet, "http://example.com/1", nil)
 
 			h.ServeHTTP(w, r)
 
@@ -68,7 +68,7 @@ func TestBootstrapImageHandler(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "http://example.com?id=1", nil)
+			r := httptest.NewRequest(http.MethodGet, "http://example.com/1", nil)
 
 			h.ServeHTTP(w, r)
 
@@ -94,7 +94,7 @@ func TestBootstrapImageHandler(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest(http.MethodGet, "http://example.com?id=1", nil)
+			r := httptest.NewRequest(http.MethodGet, "http://example.com/1", nil)
 
 			h.ServeHTTP(w, r)
 
