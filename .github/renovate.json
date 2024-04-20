@@ -27,5 +27,8 @@
             "matchManagers": ["terraform"],
             "addLabels": ["terraform"]
         }
+    ],
+    "postUpdateOptions": [
+        "gomodTidy"
     ]
 }
