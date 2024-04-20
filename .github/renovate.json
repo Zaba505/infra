@@ -1,5 +1,6 @@
 {
     "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+    "schedule": ["before 4am"],
     "baseBranches": ["main"],
     "enabledManagers": [
         "bazel-module",
