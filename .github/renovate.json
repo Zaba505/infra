@@ -1,0 +1,30 @@
+{
+    "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+    "baseBranches": ["main"],
+    "enabledManagers": [
+        "bazel-module",
+        "bazelisk",
+        "github-actions",
+        "gomod",
+        "terraform"
+    ],
+    "labels": ["dependencies"],
+    "packageRules": [
+        {
+            "matchManagers": ["bazel-module", "bazelisk"],
+            "addLabels": ["bazel"]
+        },
+        {
+            "matchManagers": ["github-actions"],
+            "addLabels": ["github-actions"]
+        },
+        {
+            "matchManagers": ["gomod"],
+            "addLabels": ["go"]
+        },
+        {
+            "matchManagers": ["terraform"],
+            "addLabels": ["terraform"]
+        }
+    ]
+}
