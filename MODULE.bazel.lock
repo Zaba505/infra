@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "4e3a90cf76ede436d6da590497c18fdec776c4465274dfd48a4e441c13528caf",
+  "moduleFileHash": "a04a46bed728f66a40910612be6ada7fa502d7def836ad09a8219a7e9f844602",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -69,7 +69,10 @@
             "com_github_googleapis_gax_go_v2": "com_github_googleapis_gax_go_v2",
             "com_google_cloud_go_storage": "com_google_cloud_go_storage",
             "io_opentelemetry_go_contrib_detectors_gcp": "io_opentelemetry_go_contrib_detectors_gcp",
-            "io_opentelemetry_go_otel_sdk": "io_opentelemetry_go_otel_sdk"
+            "io_opentelemetry_go_otel_sdk": "io_opentelemetry_go_otel_sdk",
+            "org_golang_x_sync": "org_golang_x_sync",
+            "com_github_fclairamb_ftpserverlib": "com_github_fclairamb_ftpserverlib",
+            "com_github_spf13_afero": "com_github_spf13_afero"
           },
           "devImports": [],
           "tags": [
@@ -110,7 +113,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 36,
+            "line": 39,
             "column": 20
           },
           "imports": {
@@ -132,7 +135,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 38,
+                "line": 41,
                 "column": 9
               }
             }
@@ -2154,33 +2157,13 @@
         }
       }
     },
-    "@@bazel_tools//tools/test:extensions.bzl%remote_coverage_tools_extension": {
-      "general": {
-        "bzlTransitiveDigest": "cizrA62cv8WUgb0cCmx5B6PRijtr/I4TAWxg/4caNGU=",
-        "accumulatedFileDigests": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "remote_coverage_tools": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "bazel_tools~remote_coverage_tools_extension~remote_coverage_tools",
-              "sha256": "7006375f6756819b7013ca875eab70a541cf7d89142d9c511ed78ea4fefa38af",
-              "urls": [
-                "https://mirror.bazel.build/bazel_coverage_output_generator/releases/coverage_output_generator-v2.6.zip"
-              ]
-            }
-          }
-        }
-      }
-    },
     "@@gazelle~0.36.0//:extensions.bzl%go_deps": {
       "general": {
         "bzlTransitiveDigest": "5w/+hCsj9uXtksd+s3Sqkhjqb/2Pnj4OJjvJDBbUfL8=",
         "accumulatedFileDigests": {
-          "@@//:go.mod": "0acda100b6c3656065e25f8c0a54602999604835059bd484c7cc84831c2f5f4d",
+          "@@//:go.mod": "38a70660ffaad8f1726fade072a463322dea6602f8422b3ef0255b96111da4a9",
           "@@rules_go~0.46.0//:go.sum": "d56fdb19b21a5f12bcf625c49432371ac39c2def0f564098fbda107f7c080f40",
-          "@@//:go.sum": "cd21462ca758cb009c2dfb7546ed2fb21b9a3aceaddf5ae7aa97e05dc7762bca",
+          "@@//:go.sum": "d652027bafa7988341b45a480357a906541f50ac59dc9ef5d5e0f5894ba58d40",
           "@@gazelle~0.36.0//:go.mod": "3bdf577b31bd67ce2b7bc1c438077c421395278e79b2e95e8de7d7942d0297d7",
           "@@rules_go~0.46.0//:go.mod": "de22304b720f7f61350ec1c9739de6c0a1b1103fd22bfeb6e92c6c843ddc6d6e",
           "@@gazelle~0.36.0//:go.sum": "14df932fff1ea6aa2b9ac6ad53b8acf3d1cffe44e3375e75d1c4c9d2a86d3473"
@@ -2217,6 +2200,22 @@
               "sum": "h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nosvA=",
               "replace": "",
               "version": "v1.7.0"
+            }
+          },
+          "com_github_hashicorp_go_retryablehttp": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_hashicorp_go_retryablehttp",
+              "importpath": "github.com/hashicorp/go-retryablehttp",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:bJj+Pj19UZMIweq/iie+1u5YCdGrnxCT9yvm0e+Nd5M=",
+              "replace": "",
+              "version": "v0.7.5"
             }
           },
           "com_github_spf13_cobra": {
@@ -2296,9 +2295,9 @@
               "build_extra_args": [],
               "patches": [],
               "patch_args": [],
-              "sum": "h1:c0vyKkb6yr3KR7jEfJaOSv4lG7xPkbN6r52aJz1d8a8=",
+              "sum": "h1:/RIbNt/Zr7rVhIkQhooTxCxFcdWLGIKnZA4IXNFSrvo=",
               "replace": "",
-              "version": "v0.0.0-20231206192017-f3f8817b8deb"
+              "version": "v0.0.0-20240205201215-2c58cdc269a3"
             }
           },
           "org_golang_x_net": {
@@ -2365,22 +2364,6 @@
               "version": "v0.19.0"
             }
           },
-          "com_github_googleapis_enterprise_certificate_proxy": {
-            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
-            "ruleClassName": "go_repository",
-            "attributes": {
-              "name": "gazelle~0.36.0~go_deps~com_github_googleapis_enterprise_certificate_proxy",
-              "importpath": "github.com/googleapis/enterprise-certificate-proxy",
-              "build_directives": [],
-              "build_file_generation": "auto",
-              "build_extra_args": [],
-              "patches": [],
-              "patch_args": [],
-              "sum": "h1:Vie5ybvEvT75RniqhfFxPRy3Bf7vr3h0cechB90XaQs=",
-              "replace": "",
-              "version": "v0.3.2"
-            }
-          },
           "org_golang_x_sync": {
             "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
             "ruleClassName": "go_repository",
@@ -2395,6 +2378,22 @@
               "sum": "h1:YsImfSBoP9QPYL0xyKJPq0gcaJdG3rInoqxTWbfQu9M=",
               "replace": "",
               "version": "v0.7.0"
+            }
+          },
+          "com_github_googleapis_enterprise_certificate_proxy": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_googleapis_enterprise_certificate_proxy",
+              "importpath": "github.com/googleapis/enterprise-certificate-proxy",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:Vie5ybvEvT75RniqhfFxPRy3Bf7vr3h0cechB90XaQs=",
+              "replace": "",
+              "version": "v0.3.2"
             }
           },
           "com_github_golang_mock": {
@@ -2424,9 +2423,25 @@
               "build_extra_args": [],
               "patches": [],
               "patch_args": [],
-              "sum": "h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=",
+              "sum": "h1:LWAJwfNvjQZCFIDKWYQaM62NcYeYViCmWIwmOStowAI=",
               "replace": "",
-              "version": "v2.1.0"
+              "version": "v2.1.1"
+            }
+          },
+          "com_github_sony_gobreaker": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_sony_gobreaker",
+              "importpath": "github.com/sony/gobreaker",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:dRCvqm0P490vZPmy7ppEk2qCnCieBooFJ+YoXGYB+yg=",
+              "replace": "",
+              "version": "v0.5.0"
             }
           },
           "io_opentelemetry_go_otel": {
@@ -2459,6 +2474,22 @@
               "sum": "h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=",
               "replace": "",
               "version": "v1.0.4"
+            }
+          },
+          "com_github_fclairamb_ftpserverlib": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_fclairamb_ftpserverlib",
+              "importpath": "github.com/fclairamb/ftpserverlib",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:PqzyD6YxS5sdb4fAdXUFSODTo8DelsVAOh3LgeR4VXs=",
+              "replace": "",
+              "version": "v0.22.0"
             }
           },
           "com_google_cloud_go_storage": {
@@ -3107,6 +3138,22 @@
               "version": "v0.46.0"
             }
           },
+          "com_github_hashicorp_go_cleanhttp": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_hashicorp_go_cleanhttp",
+              "importpath": "github.com/hashicorp/go-cleanhttp",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:035FKYIWjmULyFRBKPs8TBQoi0x6d9G4xc9neXJWAZQ=",
+              "replace": "",
+              "version": "v0.5.2"
+            }
+          },
           "org_golang_google_genproto_googleapis_rpc": {
             "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
             "ruleClassName": "go_repository",
@@ -3299,6 +3346,22 @@
               "version": "v1.22.0"
             }
           },
+          "com_github_fclairamb_go_log": {
+            "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "name": "gazelle~0.36.0~go_deps~com_github_fclairamb_go_log",
+              "importpath": "github.com/fclairamb/go-log",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:rLtdSG9x2pK41AIAnE8WYpl05xBJfw1ZyYxZaXFcBsM=",
+              "replace": "",
+              "version": "v0.4.1"
+            }
+          },
           "io_opentelemetry_go_contrib_instrumentation_google_golang_org_grpc_otelgrpc": {
             "bzlFile": "@@gazelle~0.36.0//internal:go_repository.bzl",
             "ruleClassName": "go_repository",
@@ -3354,13 +3417,16 @@
               "name": "gazelle~0.36.0~go_deps~bazel_gazelle_go_repository_config",
               "importpaths": {
                 "com_google_cloud_go_storage": "cloud.google.com/go/storage",
+                "com_github_fclairamb_ftpserverlib": "github.com/fclairamb/ftpserverlib",
                 "com_github_googleapis_gax_go_v2": "github.com/googleapis/gax-go/v2",
+                "com_github_spf13_afero": "github.com/spf13/afero",
                 "com_github_stretchr_testify": "github.com/stretchr/testify",
                 "com_github_z5labs_bedrock": "github.com/z5labs/bedrock",
                 "io_opentelemetry_go_contrib_detectors_gcp": "go.opentelemetry.io/contrib/detectors/gcp",
                 "io_opentelemetry_go_otel": "go.opentelemetry.io/otel",
                 "io_opentelemetry_go_otel_sdk": "go.opentelemetry.io/otel/sdk",
                 "io_opentelemetry_go_otel_trace": "go.opentelemetry.io/otel/trace",
+                "org_golang_x_sync": "golang.org/x/sync",
                 "com_google_cloud_go": "cloud.google.com/go",
                 "com_google_cloud_go_compute": "cloud.google.com/go/compute",
                 "com_google_cloud_go_compute_metadata": "cloud.google.com/go/compute/metadata",
@@ -3371,6 +3437,7 @@
                 "com_github_googlecloudplatform_opentelemetry_operations_go_internal_resourcemapping": "github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping",
                 "com_github_cenkalti_backoff_v4": "github.com/cenkalti/backoff/v4",
                 "com_github_davecgh_go_spew": "github.com/davecgh/go-spew",
+                "com_github_fclairamb_go_log": "github.com/fclairamb/go-log",
                 "com_github_felixge_httpsnoop": "github.com/felixge/httpsnoop",
                 "com_github_fsnotify_fsnotify": "github.com/fsnotify/fsnotify",
                 "com_github_go_logr_logr": "github.com/go-logr/logr",
@@ -3381,6 +3448,8 @@
                 "com_github_google_uuid": "github.com/google/uuid",
                 "com_github_googleapis_enterprise_certificate_proxy": "github.com/googleapis/enterprise-certificate-proxy",
                 "com_github_grpc_ecosystem_grpc_gateway_v2": "github.com/grpc-ecosystem/grpc-gateway/v2",
+                "com_github_hashicorp_go_cleanhttp": "github.com/hashicorp/go-cleanhttp",
+                "com_github_hashicorp_go_retryablehttp": "github.com/hashicorp/go-retryablehttp",
                 "com_github_hashicorp_hcl": "github.com/hashicorp/hcl",
                 "com_github_inconshreveable_mousetrap": "github.com/inconshreveable/mousetrap",
                 "com_github_magiconair_properties": "github.com/magiconair/properties",
@@ -3389,8 +3458,8 @@
                 "com_github_pmezard_go_difflib": "github.com/pmezard/go-difflib",
                 "com_github_sagikazarmark_locafero": "github.com/sagikazarmark/locafero",
                 "com_github_sagikazarmark_slog_shim": "github.com/sagikazarmark/slog-shim",
+                "com_github_sony_gobreaker": "github.com/sony/gobreaker",
                 "com_github_sourcegraph_conc": "github.com/sourcegraph/conc",
-                "com_github_spf13_afero": "github.com/spf13/afero",
                 "com_github_spf13_cast": "github.com/spf13/cast",
                 "com_github_spf13_cobra": "github.com/spf13/cobra",
                 "com_github_spf13_pflag": "github.com/spf13/pflag",
@@ -3409,7 +3478,6 @@
                 "org_golang_x_exp": "golang.org/x/exp",
                 "org_golang_x_net": "golang.org/x/net",
                 "org_golang_x_oauth2": "golang.org/x/oauth2",
-                "org_golang_x_sync": "golang.org/x/sync",
                 "org_golang_x_sys": "golang.org/x/sys",
                 "org_golang_x_text": "golang.org/x/text",
                 "org_golang_x_time": "golang.org/x/time",
@@ -3528,13 +3596,16 @@
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
             "com_google_cloud_go_storage",
+            "com_github_fclairamb_ftpserverlib",
             "com_github_googleapis_gax_go_v2",
+            "com_github_spf13_afero",
             "com_github_stretchr_testify",
             "com_github_z5labs_bedrock",
             "io_opentelemetry_go_contrib_detectors_gcp",
             "io_opentelemetry_go_otel",
             "io_opentelemetry_go_otel_sdk",
-            "io_opentelemetry_go_otel_trace"
+            "io_opentelemetry_go_otel_trace",
+            "org_golang_x_sync"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO"
