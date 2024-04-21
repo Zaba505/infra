@@ -1,7 +1,6 @@
 module github.com/Zaba505/infra
 
-go 1.22
-toolchain go1.22.2
+go 1.22.2
 
 require (
 	cloud.google.com/go/storage v1.40.0
