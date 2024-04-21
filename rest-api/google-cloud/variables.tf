@@ -1,10 +1,27 @@
+variable "project_id" {
+  type = string
+}
+
 variable "name" {
   type = string
 }
 
 variable "description" {
-  type    = string
-  default = ""
+  type = string
+}
+
+variable "cloud_trace" {
+  type    = bool
+  default = false
+}
+
+variable "cloud_storage" {
+  type = object({
+    buckets = map(string)
+  })
+  default = {
+    buckets = {}
+  }
 }
 
 variable "service_account_email" {

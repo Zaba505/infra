@@ -2,12 +2,16 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.6.0"
+      version = "5.25.0"
     }
   }
 }
 
-resource "google_cloud_run_v2_service" "this" {
+provider "google" {
+  project = var.project_id
+}
+
+resource "google_cloud_run_v2_service" "rest_api" {
   name        = var.name
   description = var.description
 
@@ -84,8 +88,8 @@ resource "google_cloud_run_v2_service" "this" {
 resource "google_cloud_run_v2_service_iam_binding" "default" {
   count = var.unsecured ? 1 : 0
 
-  location = google_cloud_run_v2_service.this.location
-  name     = google_cloud_run_v2_service.this.name
+  location = google_cloud_run_v2_service.rest_api.location
+  name     = google_cloud_run_v2_service.rest_api.name
   role     = "roles/run.invoker"
   members = [
     "allUsers"
