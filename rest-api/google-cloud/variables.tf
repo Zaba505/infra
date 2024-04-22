@@ -44,11 +44,8 @@ variable "image" {
   })
 }
 
-variable "env_vars" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
+variable "env" {
+  type = map(string)
 }
 
 variable "cpu_limit" {
