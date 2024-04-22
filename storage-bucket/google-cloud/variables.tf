@@ -11,6 +11,6 @@ variable "location" {
 }
 
 variable "force_destroy" {
-  type = bool
+  type    = bool
   default = true
 }
