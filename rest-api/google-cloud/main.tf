@@ -1,6 +1,4 @@
 terraform {
-  backend "gcs" {}
-
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -21,10 +19,6 @@ locals {
   // then any keys in var.env will override the
   // values in local.default_env if the keys match
   envs = merge(local.default_env, var.env)
-}
-
-provider "google" {
-  project = var.project_id
 }
 
 resource "google_cloud_run_v2_service" "rest_api" {

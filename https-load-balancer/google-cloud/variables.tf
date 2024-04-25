@@ -1,11 +1,3 @@
-variable "project_id" {
-  type = string
-}
-
-variable "cloudflare_api_token" {
-  type = string
-}
-
 variable "ipv6_address" {
   type = string
 }

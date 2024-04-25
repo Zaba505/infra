@@ -1,7 +1,3 @@
-variable "cloudflare_api_token" {
-  type = string
-}
-
 variable "domain_name" {
   type = string
 }

@@ -1,6 +1,4 @@
 terraform {
-  backend "gcs" {}
-
   required_providers {
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -22,18 +20,6 @@ terraform {
       version = "4.0.5"
     }
   }
-}
-
-provider "cloudflare" {
-  api_token = var.cloudflare_api_token
-}
-
-provider "google" {
-  project = var.project_id
-}
-
-provider "google-beta" {
-  project = var.project_id
 }
 
 locals {
