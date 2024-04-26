@@ -25,19 +25,19 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
     # Custom Go version because of: https://github.com/github/codeql/issues/13992#issuecomment-1711721716
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5
       with:
         go-version: '1.22'
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
+      uses: github/codeql-action/init@d39d31e687223d841ef683f52467bd88e9b21c14 # v3
       with:
         languages: ${{ matrix.language }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+      uses: github/codeql-action/analyze@d39d31e687223d841ef683f52467bd88e9b21c14 # v3
       with:
         category: "/language:${{matrix.language}}"

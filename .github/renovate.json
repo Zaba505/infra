@@ -14,19 +14,23 @@
     "packageRules": [
         {
             "matchManagers": ["bazel-module", "bazelisk"],
-            "addLabels": ["bazel"]
+            "addLabels": ["bazel"],
+            "enabled": true
         },
         {
             "matchManagers": ["github-actions"],
-            "addLabels": ["github-actions"]
+            "addLabels": ["github-actions"],
+            "enabled": true
         },
         {
             "matchManagers": ["gomod"],
-            "addLabels": ["go"]
+            "addLabels": ["go"],
+            "enabled": true
         },
         {
             "matchManagers": ["terraform"],
-            "addLabels": ["terraform"]
+            "addLabels": ["terraform"],
+            "enabled": true
         }
     ],
     "postUpdateOptions": [
