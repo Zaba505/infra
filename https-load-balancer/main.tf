@@ -93,27 +93,40 @@ resource "google_compute_backend_service" "cloud_run" {
   }
 }
 
+locals {
+  hosts_to_cloud_run_services = transpose({ for name, cr in var.cloud_run : name => cr.hosts })
+}
+
 resource "google_compute_url_map" "https" {
   name = "https"
 
   default_service = google_compute_backend_service.default_service.id
 
-  host_rule {
-    hosts        = var.hosts
-    path_matcher = "https"
+  dynamic "host_rule" {
+    for_each = local.hosts_to_cloud_run_services
+
+    content {
+      hosts        = [host_rule.key]
+      path_matcher = host_rule.key
+    }
   }
 
-  path_matcher {
-    name = "https"
+  dynamic "path_matcher" {
+    for_each = local.hosts_to_cloud_run_services
 
-    default_service = google_compute_backend_service.default_service.id
+    content {
+      name = path_matcher.key
 
-    dynamic "path_rule" {
-      for_each = var.cloud_run
+      default_service = google_compute_backend_service.default_service.id
 
-      content {
-        paths   = path_rule.value["paths"]
-        service = google_compute_backend_service.cloud_run[path_rule.key].id
+      dynamic "path_rule" {
+        for_each = path_matcher.value
+
+        content {
+          service = google_compute_backend_service.cloud_run[path_rule.key].id
+
+          paths = var.cloud_run[path_rule.key].paths
+        }
       }
     }
   }
@@ -122,7 +135,7 @@ resource "google_compute_url_map" "https" {
 resource "google_certificate_manager_trust_config" "lb_https" {
   provider = google-beta
 
-  name     = "lb-https-trust-config"
+  name     = "${var.name}-trust-config"
   location = "global"
 
   trust_stores {
@@ -139,7 +152,7 @@ resource "google_certificate_manager_trust_config" "lb_https" {
 resource "google_network_security_server_tls_policy" "lb_https" {
   provider = google-beta
 
-  name       = "lb-https-tls-policy"
+  name       = "${var.name}-tls-policy"
   location   = "global"
   allow_open = false
   mtls_policy {
@@ -156,13 +169,15 @@ resource "tls_cert_request" "instance" {
   private_key_pem = tls_private_key.instance.private_key_pem
 
   subject {
-    common_name = var.hosts[0]
+    # TODO: figure out to properly handle multiple host names
+    common_name = local.hosts_to_cloud_run_services[0]
   }
 }
 
 resource "cloudflare_origin_ca_certificate" "lb_https" {
+  # TODO: figure out to properly handle multiple host names and multiple CSRs
   csr                  = tls_cert_request.instance.cert_request_pem
-  hostnames            = var.hosts
+  hostnames            = keys(local.hosts_to_cloud_run_services)
   request_type         = "origin-rsa"
   requested_validity   = 365
   min_days_for_renewal = 30
@@ -178,7 +193,7 @@ resource "cloudflare_origin_ca_certificate" "lb_https" {
 // Either omit the Instance Template name attribute, specify a partial
 // name with name_prefix, or use random_id resource. Example:
 resource "google_compute_ssl_certificate" "lb_https" {
-  name_prefix = "lb-https-ssl-cert-"
+  name_prefix = "${var.name}-ssl-cert-"
 
   certificate = cloudflare_origin_ca_certificate.lb_https.certificate
   private_key = tls_private_key.instance.private_key_pem
@@ -191,20 +206,20 @@ resource "google_compute_ssl_certificate" "lb_https" {
 resource "google_compute_target_https_proxy" "lb_https" {
   provider = google-beta
 
-  name              = "lb-https"
+  name              = var.name
   url_map           = google_compute_url_map.https.id
   ssl_certificates  = [google_compute_ssl_certificate.lb_https.id]
   server_tls_policy = google_network_security_server_tls_policy.lb_https.id
 }
 
 resource "google_compute_global_address" "ipv6" {
-  name         = var.name
+  name         = "${var.name}-ipv6-addr"
   ip_version   = "IPV6"
   address_type = "EXTERNAL"
 }
 
 resource "google_compute_global_forwarding_rule" "lb_https_ipv6" {
-  name                  = "lb-https-ipv6"
+  name                  = var.name
   ip_address            = google_compute_global_address.ipv6.address
   port_range            = "443"
   target                = google_compute_target_https_proxy.lb_https.id

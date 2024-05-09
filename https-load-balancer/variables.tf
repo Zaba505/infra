@@ -2,10 +2,6 @@ variable "name" {
   type = string
 }
 
-variable "hosts" {
-  type = list(string)
-}
-
 variable "ca_certificate_pems" {
   type = list(string)
 }
@@ -19,6 +15,7 @@ variable "default_service" {
 
 variable "cloud_run" {
   type = map(object({
+    hosts     = list(string)
     locations = list(string)
     paths     = list(string)
   }))
