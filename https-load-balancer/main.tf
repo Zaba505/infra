@@ -197,9 +197,15 @@ resource "google_compute_target_https_proxy" "lb_https" {
   server_tls_policy = google_network_security_server_tls_policy.lb_https.id
 }
 
+resource "google_compute_global_address" "ipv6" {
+  name         = var.name
+  ip_version   = "IPV6"
+  address_type = "EXTERNAL"
+}
+
 resource "google_compute_global_forwarding_rule" "lb_https_ipv6" {
   name                  = "lb-https-ipv6"
-  ip_address            = var.ipv6_address
+  ip_address            = google_compute_global_address.ipv6.address
   port_range            = "443"
   target                = google_compute_target_https_proxy.lb_https.id
   load_balancing_scheme = "EXTERNAL_MANAGED"

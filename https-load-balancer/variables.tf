@@ -1,4 +1,4 @@
-variable "ipv6_address" {
+variable "name" {
   type = string
 }
 
