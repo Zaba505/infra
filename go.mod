@@ -8,7 +8,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.4
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.9.0
-	github.com/z5labs/bedrock v0.4.6
+	github.com/z5labs/bedrock v0.4.8
 	go.opentelemetry.io/contrib/detectors/gcp v1.26.0
 	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/sdk v1.26.0
@@ -72,7 +72,7 @@ require (
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
-	google.golang.org/api v0.178.0 // indirect
+	google.golang.org/api v0.180.0 // indirect
 	google.golang.org/genproto v0.0.0-20240509183442-62759503f434 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240509183442-62759503f434 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240509183442-62759503f434 // indirect
