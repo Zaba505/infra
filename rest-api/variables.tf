@@ -3,8 +3,21 @@ variable "name" {
 }
 
 variable "description" {
-  type    = string
-  default = ""
+  type = string
+}
+
+variable "cloud_trace" {
+  type    = bool
+  default = false
+}
+
+variable "cloud_storage" {
+  type = object({
+    buckets = map(string)
+  })
+  default = {
+    buckets = {}
+  }
 }
 
 variable "service_account_email" {
@@ -27,11 +40,8 @@ variable "image" {
   })
 }
 
-variable "env_vars" {
-  type = list(object({
-    name  = string
-    value = string
-  }))
+variable "env" {
+  type = map(string)
 }
 
 variable "cpu_limit" {

@@ -2,12 +2,26 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 5.6.0"
+      version = "5.25.0"
     }
   }
 }
 
-resource "google_cloud_run_v2_service" "this" {
+locals {
+  default_env = {
+    "LOG_LEVEL"       = "INFO",
+    "SERVICE_NAME"    = var.name
+    "SERVICE_VERSION" = var.image.tag
+    "HTTP_PORT"       = "8080"
+  }
+
+  // since var.env appears later in the args,
+  // then any keys in var.env will override the
+  // values in local.default_env if the keys match
+  envs = merge(local.default_env, var.env)
+}
+
+resource "google_cloud_run_v2_service" "rest_api" {
   name        = var.name
   description = var.description
 
@@ -29,17 +43,17 @@ resource "google_cloud_run_v2_service" "this" {
       }
 
       dynamic "env" {
-        for_each = var.env_vars
+        for_each = local.envs
         content {
-          name  = env.value["name"]
-          value = env.value["value"]
+          name  = env.key
+          value = env.value
         }
       }
 
       ports {
         container_port = coalesce(
-          one([for env_var in var.env_vars : env_var.value if env_var.name == "HTTP_PORT"]),
-          80
+          one([for k, v in local.envs : v if k == "HTTP_PORT"]),
+          8080
         )
       }
 
@@ -84,8 +98,8 @@ resource "google_cloud_run_v2_service" "this" {
 resource "google_cloud_run_v2_service_iam_binding" "default" {
   count = var.unsecured ? 1 : 0
 
-  location = google_cloud_run_v2_service.this.location
-  name     = google_cloud_run_v2_service.this.name
+  location = google_cloud_run_v2_service.rest_api.location
+  name     = google_cloud_run_v2_service.rest_api.name
   role     = "roles/run.invoker"
   members = [
     "allUsers"
