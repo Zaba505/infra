@@ -21,6 +21,8 @@ locals {
   envs = merge(local.default_env, var.env)
 }
 
+data "google_project" "default" {}
+
 resource "google_cloud_run_v2_service" "rest_api" {
   name        = var.name
   description = var.description
@@ -32,7 +34,7 @@ resource "google_cloud_run_v2_service" "rest_api" {
     service_account = var.service_account_email
 
     containers {
-      image = "${var.image.name}:${var.image.tag}"
+      image = "${var.location}-docker.pkg.dev/${data.google_project.default.name}/${var.image.artifact_registry_name}/${var.image.name}:${var.image.tag}"
 
       resources {
         limits = {

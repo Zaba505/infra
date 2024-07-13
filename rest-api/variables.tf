@@ -35,8 +35,9 @@ variable "location" {
 
 variable "image" {
   type = object({
-    name = string
-    tag  = string
+    artifact_registry_name = string
+    name                   = string
+    tag                    = string
   })
 }
 
