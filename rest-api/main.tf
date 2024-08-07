@@ -61,7 +61,7 @@ resource "google_cloud_run_v2_service" "rest_api" {
 
       startup_probe {
         initial_delay_seconds = 0
-        timeout_seconds       = 1
+        timeout_seconds       = 30
         period_seconds        = 10
         failure_threshold     = 3
 
@@ -72,7 +72,7 @@ resource "google_cloud_run_v2_service" "rest_api" {
 
       liveness_probe {
         initial_delay_seconds = 0
-        timeout_seconds       = 1
+        timeout_seconds       = 30
         period_seconds        = 10
         failure_threshold     = 3
 
