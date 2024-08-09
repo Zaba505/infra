@@ -46,6 +46,12 @@ func RunHttp(cfg io.Reader, f func(context.Context) (http.Handler, error)) {
 				bdhttp.LogHandler(logHandler),
 				bdhttp.ListenOnPort(cfg.HTTP.Port),
 				bdhttp.Handle("/", h),
+				bdhttp.HandleFunc("/health/startup", func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(200)
+				}),
+				bdhttp.HandleFunc("/health/liveness", func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(200)
+				}),
 			)
 			return rt, nil
 		}),
