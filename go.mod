@@ -8,7 +8,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.12.4
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.9.0
-	github.com/z5labs/bedrock v0.4.8
+	github.com/z5labs/bedrock v0.4.9
 	go.opentelemetry.io/contrib/detectors/gcp v1.26.0
 	go.opentelemetry.io/otel v1.26.0
 	go.opentelemetry.io/otel/sdk v1.26.0
