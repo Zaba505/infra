@@ -1,4 +1,12 @@
 #############
+# Hugo      #
+#############
+
+docs/public/
+docs/resources/_gen/
+docs/.hugo_build.lock
+
+#############
 # Terraform #
 #############
 
