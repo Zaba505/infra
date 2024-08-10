@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	cloud.google.com/go/storage v1.43.0
-	github.com/fclairamb/ftpserverlib v0.24.0
+	github.com/fclairamb/ftpserverlib v0.24.1
 	github.com/googleapis/gax-go/v2 v2.13.0
 	github.com/spf13/afero v1.11.0
 	github.com/stretchr/testify v1.9.0
