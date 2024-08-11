@@ -1,10 +1,17 @@
 #############
+# Node      #
+#############
+node_modules/
+
+#############
 # Hugo      #
 #############
 
 docs/public/
 docs/resources/_gen/
 docs/.hugo_build.lock
+docs/package.json
+docs/package-lock.json
 
 #############
 # Terraform #
