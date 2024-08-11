@@ -30,7 +30,7 @@ jobs:
         run: sudo snap install dart-sass
 
       - name: Install docsy prerequisites
-        run: npm install -g postcss postcss-cli autoprefixer
+        run: npm install -D postcss postcss-cli autoprefixer
 
       - name: Setup Pages
         id: pages
