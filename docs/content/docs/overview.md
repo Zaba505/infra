@@ -20,7 +20,7 @@ flowchart TD
 
 ## Cloudflare
 
-Cloudflare is leveraged as both a DNS registrar and HTTP(s) proxy
+Cloudflare is leveraged as both a DNS provider and HTTP(s) proxy
 to services hosted on the [Public Cloud](#public-cloud) and [Home Lab](#home-lab).
 The primary goals of leveraging Cloudflare are the following:
 
