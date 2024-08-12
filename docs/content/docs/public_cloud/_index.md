@@ -165,3 +165,7 @@ flowchart TB
     cloudRun --> cloudLogging
     cloudRun --> cloudStorage
 ```
+
+This is core of the network boot procedure for the homelab physical infrastructure. It is
+responsible for serving the appropriate boot scripts and images from [Cloud Storage](https://cloud.google.com/storage)
+based on unique machine requests.
