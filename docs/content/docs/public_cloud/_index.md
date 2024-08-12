@@ -25,6 +25,20 @@ flowchart TB
 The above diagram documents the high level architecture deployed on [Google Cloud](https://cloud.google.com).
 All services are a part of the network boot process for the home lab physical infrastracture.
 
+### Google Cloud Products
+
+Below is a possibly exhaustive list of Google Cloud products used:
+
+- [Artifact Registry](https://cloud.google.com/artifact-registry/)
+- [Cloud Run](https://cloud.google.com/run)
+- [Cloud Storage](https://cloud.google.com/storage)
+- [Cloud Logging](https://cloud.google.com/logging)
+- [Cloud Monitoring](https://cloud.google.com/monitoring)
+- [Cloud Trace](https://cloud.google.com/trace)
+- [IAM](https://cloud.google.com/security/products/iam)
+- [Certificate Manager](https://cloud.google.com/certificate-manager/docs/overview)
+- [Cloud Load Balancing](https://cloud.google.com/load-balancing)
+
 ## HTTP(s) Load Balancer
 
 ```mermaid
@@ -101,6 +115,13 @@ flowchart TB
 
     cloudRun --> cloudLogging
 ```
+
+Vault is deployed within Google Cloud to help store secret values such as the mTLS related
+certificates used by [Cloudflare]({{% ref "/docs/cloudflare/" %}}) and the [HTTP(s) Load Balancer](#https-load-balancer).
+The biggest priority with introducing Vault into the architecture is to allow for the decoupling
+of secret management from any singular provider. It also allows for direct integration with Terraform,
+which reduces the footprint of what is interacting with secrets e.g. Github Actions secrets can only
+be used directly in workflow YAML and not Terraform.
 
 ## Load Balancer Sink Service
 
