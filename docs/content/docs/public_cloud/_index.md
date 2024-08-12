@@ -8,6 +8,7 @@ title: Public Cloud
 flowchart TB
     cloudflare["Cloudflare"]
     loadBalancer["HTTP(s) Load Balancer"]
+    vault["Hashicorp Vault"]
     lbsink["Load Balancer Sink Service"]
     machineMgmt["Machine Management Service"]
     objectStore["Object Storage"]
@@ -16,6 +17,7 @@ flowchart TB
 
     loadBalancer -->|Unknown Route| lbsink
     loadBalancer --> machineMgmt
+    loadBalancer --> vault
 
     machineMgmt --> objectStore
 ```
@@ -24,6 +26,81 @@ The above diagram documents the high level architecture deployed on [Google Clou
 All services are a part of the network boot process for the home lab physical infrastracture.
 
 ## HTTP(s) Load Balancer
+
+```mermaid
+flowchart TB
+    ipv6["Global External IPv6 Address"]
+    forwarding["Global Forwarding Rule"]
+    httpsProxy["HTTP(s) Proxy Target"]
+    urlMap["URL map"]
+    sslCerts["SSL Certificates"]
+    tlsPolicy["Server TLS Policy"]
+    trustConfig["Certificate Manager Trust Config"]
+    trustAnchor["Trust Anchor aka Root Client CA"]
+    hostRule["Host Rule"]
+    pathMatcher["Path Matcher"]
+    backendService["Backend Service"]
+    neg["Serverless Network Endpoint Group (NEG)"]
+    cloudRun["Cloud Run"]
+
+    forwarding --> ipv6
+    forwarding --> httpsProxy
+
+    httpsProxy --> urlMap
+    httpsProxy --> sslCerts
+    httpsProxy --> tlsPolicy
+
+    tlsPolicy --> trustConfig
+
+    trustConfig --> trustAnchor
+
+    urlMap --> hostRule
+
+    hostRule --> pathMatcher
+
+    pathMatcher --> backendService
+
+    backendService --> neg
+
+    neg --> cloudRun
+```
+
+### Forwarding Rule
+
+The forwarding rule is what connects the external IP address to an actual HTTP(s) reverse
+proxy. Thus, making the load balancer callable from the internet.
+
+### HTTP(s) Proxy Target
+
+The reverse proxy target is made up of 3 key components:
+
+- **Server TLS Policy:** Defines client certificate validation for mTLS support.
+- **SSL certificates:** The certificates that the load balancer hands out to clients for TLS connections.
+- **URL map:** Relates HTTP hosts and paths to backend services.
+
+### URL map
+
+The URL map allows for multi-host, multi-path configurations where each path can map
+to a distinct backend service.
+
+For each path matcher, a default service is also required to handle unmatched paths. That's
+where the [Load Balancer Sink Service](#load-balancer-sink-service) comes in to play.
+
+## Hashicorp Vault
+
+```mermaid
+flowchart TB
+    sa["Service Account"]
+    artifactRegistry["Artifact Registry"]
+    cloudRun["Cloud Run"]
+    cloudLogging["Cloud Logging"]
+
+    sa --> cloudRun
+
+    artifactRegistry --> cloudRun
+
+    cloudRun --> cloudLogging
+```
 
 ## Load Balancer Sink Service
 
@@ -37,7 +114,7 @@ flowchart TB
 
     sa --> cloudRun
 
-    artifactRegistry -->|OCI Image| cloudRun
+    artifactRegistry --> cloudRun
 
     cloudRun --> cloudTrace
     cloudRun --> cloudLogging
@@ -61,7 +138,7 @@ flowchart TB
 
     sa --> cloudRun
 
-    artifactRegistry -->|OCI Image| cloudRun
+    artifactRegistry --> cloudRun
 
     cloudRun --> cloudTrace
     cloudRun --> cloudLogging
