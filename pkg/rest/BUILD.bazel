@@ -1,0 +1,20 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "rest",
+    srcs = ["rest.go"],
+    embedsrcs = ["default_config.yaml"],
+    importpath = "github.com/Zaba505/infra/pkg/rest",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_z5labs_bedrock//:bedrock",
+        "@com_github_z5labs_bedrock//pkg/app",
+        "@com_github_z5labs_bedrock//pkg/config",
+        "@com_github_z5labs_bedrock//rest",
+        "@com_github_z5labs_bedrock//rest/endpoint",
+        "@io_opentelemetry_go_otel//propagation",
+        "@io_opentelemetry_go_otel_log//:log",
+        "@io_opentelemetry_go_otel_metric//:metric",
+        "@io_opentelemetry_go_otel_trace//:trace",
+    ],
+)

@@ -10,7 +10,7 @@ go_library(
     importpath = "github.com/Zaba505/infra/services/lb-sink",
     visibility = ["//visibility:private"],
     deps = [
-        "//pkg/framework",
+        "//pkg/rest",
         "//services/lb-sink/service",
     ],
 )

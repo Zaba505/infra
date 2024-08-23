@@ -1,0 +1,14 @@
+logging:
+  level: {{env "LOG_LEVEL" | default "INFO"}}
+
+otel:
+  service_name: {{env "SERVICE_NAME"}}
+  service_version: {{env "SERVICE_VERSION"}}
+  gcp:
+    project_id: {{env "GOOGLE_CLOUD_PROJECT"}}
+
+ftp:
+  command_port: {{env "COMMAND_PORT" | default 21}}
+  passive_port_range:
+    start: {{env "PASSIVE_START_PORT"}}
+    end: {{env "PASSIVE_END_PORT"}}

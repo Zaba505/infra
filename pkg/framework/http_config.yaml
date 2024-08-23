@@ -1,2 +1,0 @@
-http:
-  port: {{env "HTTP_PORT"}}
