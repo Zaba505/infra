@@ -1,4 +1,4 @@
-package service
+package proxy
 
 import (
 	"context"
@@ -10,65 +10,52 @@ import (
 	"path"
 	"time"
 
-	"github.com/Zaba505/infra/pkg/framework"
-
-	ftpserver "github.com/fclairamb/ftpserverlib"
 	"github.com/spf13/afero"
 	"github.com/spf13/afero/mem"
-	"github.com/z5labs/bedrock/http/httpclient"
-	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 )
 
-type Config struct {
-	framework.FtpConfig `config:",squash"`
+type Option func(*HttpDriver)
 
-	Proxy struct {
-		Target string `config:"target"`
-	} `config:"proxy"`
+func Logger(log *slog.Logger) Option {
+	return func(hd *HttpDriver) {
+		hd.log = log
+	}
 }
 
-type builder struct {
-	unmarshalConfig func(context.Context, any) error
+func HttpClient(c *http.Client) Option {
+	return func(hd *HttpDriver) {
+		hd.http = c
+	}
 }
 
-func Init(ctx context.Context) (ftpserver.ClientDriver, error) {
-	b := builder{
-		unmarshalConfig: framework.UnmarshalConfigFromContext,
+func HttpTarget(s string) Option {
+	return func(hd *HttpDriver) {
+		hd.target = s
 	}
-	return b.build(ctx)
-}
-
-func (b builder) build(ctx context.Context) (ftpserver.ClientDriver, error) {
-	logHandler := framework.LogHandler()
-	log := slog.New(logHandler)
-
-	var cfg Config
-	err := b.unmarshalConfig(ctx, &cfg)
-	if err != nil {
-		log.ErrorContext(ctx, "failed to unmarshal config", slogfield.Error(err))
-		return nil, err
-	}
-
-	d := &httpProxyDriver{
-		log:                   log,
-		http:                  httpclient.New(),
-		target:                cfg.Proxy.Target,
-		newRequestWithContext: http.NewRequestWithContext,
-	}
-	return d, nil
 }
 
 type httpClient interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
-type httpProxyDriver struct {
+type HttpDriver struct {
 	log    *slog.Logger
 	http   httpClient
 	target string
 
 	newRequestWithContext func(context.Context, string, string, io.Reader) (*http.Request, error)
+}
+
+func NewHttpDriver(opts ...Option) *HttpDriver {
+	hd := &HttpDriver{
+		http:                  http.DefaultClient,
+		newRequestWithContext: http.NewRequestWithContext,
+	}
+	for _, opt := range opts {
+		opt(hd)
+	}
+	return hd
 }
 
 type httpStatusError struct {
@@ -80,28 +67,28 @@ func (e httpStatusError) Error() string {
 }
 
 // Open implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Open(name string) (afero.File, error) {
+func (d *HttpDriver) Open(name string) (afero.File, error) {
 	return d.OpenFile(name, 0, 0)
 }
 
 // OpenFile implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afero.File, error) {
-	spanCtx, span := otel.Tracer("service").Start(context.Background(), "httpProxyDriver.GetFile")
+func (d *HttpDriver) OpenFile(name string, flag int, perm fs.FileMode) (afero.File, error) {
+	spanCtx, span := otel.Tracer("service").Start(context.Background(), "HttpDriver.GetFile")
 	defer span.End()
 
 	endpoint := "https://" + path.Join(d.target, name)
-	log := d.log.With(slogfield.String("endpoint", endpoint))
+	log := d.log.With(slog.String("endpoint", endpoint))
 	log.InfoContext(spanCtx, "getting file from backend")
 
 	req, err := d.newRequestWithContext(spanCtx, http.MethodGet, endpoint, nil)
 	if err != nil {
-		log.ErrorContext(spanCtx, "failed to construct http request", slogfield.Error(err))
+		log.ErrorContext(spanCtx, "failed to construct http request", slog.String("error", err.Error()))
 		return nil, err
 	}
 
 	resp, err := d.http.Do(req)
 	if err != nil {
-		log.ErrorContext(spanCtx, "http request failed", slogfield.Error(err))
+		log.ErrorContext(spanCtx, "http request failed", slog.String("error", err.Error()))
 		return nil, err
 	}
 
@@ -109,7 +96,7 @@ func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afe
 		log.ErrorContext(
 			spanCtx,
 			"received unexpected http status code from backend",
-			slogfield.Int("http_status_code", resp.StatusCode),
+			slog.Int("http_status_code", resp.StatusCode),
 		)
 		return nil, httpStatusError{status: resp.StatusCode}
 	}
@@ -122,71 +109,71 @@ func (d *httpProxyDriver) OpenFile(name string, flag int, perm fs.FileMode) (afe
 		log.ErrorContext(
 			spanCtx,
 			"failed to copy response body to inmemory file",
-			slogfield.Error(err),
+			slog.String("error", err.Error()),
 		)
 		return nil, err
 	}
 	file.Seek(0, 0)
-	log.InfoContext(spanCtx, "read file from backend", slogfield.Int64("file_size_in_bytes", n))
+	log.InfoContext(spanCtx, "read file from backend", slog.Int64("file_size_in_bytes", n))
 	return file, nil
 }
 
 // Chmod implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Chmod(name string, mode fs.FileMode) error {
+func (d *HttpDriver) Chmod(name string, mode fs.FileMode) error {
 	d.log.Info("chmod")
 	return nil
 }
 
 // Chown implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Chown(name string, uid int, gid int) error {
+func (d *HttpDriver) Chown(name string, uid int, gid int) error {
 	d.log.Info("chown")
 	return nil
 }
 
 // Chtimes implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Chtimes(name string, atime time.Time, mtime time.Time) error {
+func (d *HttpDriver) Chtimes(name string, atime time.Time, mtime time.Time) error {
 	d.log.Info("chtimes")
 	return nil
 }
 
 // Create implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Create(name string) (afero.File, error) {
+func (d *HttpDriver) Create(name string) (afero.File, error) {
 	d.log.Info("create")
 	return nil, nil
 }
 
 // Mkdir implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Mkdir(name string, perm fs.FileMode) error {
+func (d *HttpDriver) Mkdir(name string, perm fs.FileMode) error {
 	d.log.Info("mkdir")
 	return nil
 }
 
 // MkdirAll implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) MkdirAll(path string, perm fs.FileMode) error {
+func (d *HttpDriver) MkdirAll(path string, perm fs.FileMode) error {
 	d.log.Info("mkdir all")
 	return nil
 }
 
 // Name implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Name() string {
+func (d *HttpDriver) Name() string {
 	d.log.Info("name")
 	return ""
 }
 
 // Remove implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Remove(name string) error {
+func (d *HttpDriver) Remove(name string) error {
 	d.log.Info("remove")
 	return nil
 }
 
 // RemoveAll implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) RemoveAll(path string) error {
+func (d *HttpDriver) RemoveAll(path string) error {
 	d.log.Info("remove all")
 	return nil
 }
 
 // Rename implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Rename(oldname string, newname string) error {
+func (d *HttpDriver) Rename(oldname string, newname string) error {
 	d.log.Info("rename")
 	return nil
 }
@@ -196,8 +183,8 @@ type dirInfo struct {
 }
 
 // Stat implements ftpserver.ClientDriver.
-func (d *httpProxyDriver) Stat(name string) (fs.FileInfo, error) {
-	d.log.Info("stat", slogfield.String("path", name))
+func (d *HttpDriver) Stat(name string) (fs.FileInfo, error) {
+	d.log.Info("stat", slog.String("path", name))
 	return dirInfo{name: name}, nil
 }
 

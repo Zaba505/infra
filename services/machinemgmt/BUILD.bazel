@@ -10,8 +10,8 @@ go_library(
     importpath = "github.com/Zaba505/infra/services/machinemgmt",
     visibility = ["//visibility:private"],
     deps = [
-        "//pkg/framework",
-        "//services/machinemgmt/service",
+        "//pkg/rest",
+        "//services/machinemgmt/app",
     ],
 )
 

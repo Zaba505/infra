@@ -10,8 +10,8 @@ go_library(
     importpath = "github.com/Zaba505/infra/services/boot-image-proxy",
     visibility = ["//visibility:private"],
     deps = [
-        "//pkg/framework",
-        "//services/boot-image-proxy/service",
+        "//pkg/ftp",
+        "//services/boot-image-proxy/app",
     ],
 )
 

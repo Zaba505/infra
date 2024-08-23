@@ -1,5 +1,0 @@
-ftp:
-  command_port: {{env "COMMAND_PORT" | default 21}}
-  passive_port_range:
-    start: {{env "PASSIVE_START_PORT"}}
-    end: {{env "PASSIVE_END_PORT"}}

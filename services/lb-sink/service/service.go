@@ -3,15 +3,28 @@ package service
 import (
 	"context"
 	"net/http"
+
+	"github.com/Zaba505/infra/pkg/rest"
 )
 
-func Init(ctx context.Context) (http.Handler, error) {
-	return &unavailableHandler{}, nil
+type Config struct{}
+
+func Init(ctx context.Context, cfg Config) ([]rest.Endpoint, error) {
+	endpoints := []rest.Endpoint{
+		rest.Get(
+			"/",
+			&unavailableHandler{},
+			rest.StatusCode(http.StatusServiceUnavailable),
+		),
+	}
+	return endpoints, nil
 }
 
 type unavailableHandler struct{}
 
-// report 503 Service Unavailable for all requests
-func (h *unavailableHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	w.WriteHeader(http.StatusServiceUnavailable)
+type Empty struct{}
+
+func (*unavailableHandler) Handle(_ context.Context, _ *Empty) (*Empty, error) {
+	// TODO: repond with 503
+	return &Empty{}, nil
 }
