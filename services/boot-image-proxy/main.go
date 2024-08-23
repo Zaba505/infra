@@ -4,13 +4,13 @@ import (
 	"bytes"
 	_ "embed"
 
-	"github.com/Zaba505/infra/pkg/framework"
-	"github.com/Zaba505/infra/services/boot-image-proxy/service"
+	"github.com/Zaba505/infra/pkg/ftp"
+	"github.com/Zaba505/infra/services/boot-image-proxy/app"
 )
 
 //go:embed config.yaml
 var configSrc []byte
 
 func main() {
-	framework.RunFTP(bytes.NewReader(configSrc), service.Init)
+	ftp.Run(bytes.NewReader(configSrc), app.Init)
 }

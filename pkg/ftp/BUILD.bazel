@@ -1,0 +1,20 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "ftp",
+    srcs = ["ftp.go"],
+    embedsrcs = ["default_config.yaml"],
+    importpath = "github.com/Zaba505/infra/pkg/ftp",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_fclairamb_ftpserverlib//:ftpserverlib",
+        "@com_github_z5labs_bedrock//:bedrock",
+        "@com_github_z5labs_bedrock//pkg/app",
+        "@com_github_z5labs_bedrock//pkg/config",
+        "@io_opentelemetry_go_otel//propagation",
+        "@io_opentelemetry_go_otel_log//:log",
+        "@io_opentelemetry_go_otel_metric//:metric",
+        "@io_opentelemetry_go_otel_trace//:trace",
+        "@org_golang_x_sync//errgroup",
+    ],
+)

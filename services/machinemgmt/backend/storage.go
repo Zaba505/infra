@@ -14,8 +14,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/googleapis/gax-go/v2"
-	"github.com/z5labs/bedrock/pkg/otelslog"
-	"github.com/z5labs/bedrock/pkg/slogfield"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -72,10 +70,8 @@ type StorageService struct {
 // NewStorageService
 func NewStorageService(opts ...Option) *StorageService {
 	sOpts := &storageOptions{
-		commonOptions: &commonOptions{
-			log: otelslog.New(nil),
-		},
-		newHasher: sha256.New,
+		commonOptions: &commonOptions{},
+		newHasher:     sha256.New,
 	}
 	for _, opt := range opts {
 		switch x := opt.(type) {
@@ -128,8 +124,8 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 		s.log.ErrorContext(
 			spanCtx,
 			"failed to get object attributes",
-			slogfield.String("image_id", req.ID),
-			slogfield.Error(err),
+			slog.String("image_id", req.ID),
+			slog.String("error", err.Error()),
 		)
 		return nil, ObjectReadError{Cause: err}
 	}
@@ -139,17 +135,17 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 		s.log.ErrorContext(
 			spanCtx,
 			"failed to construct object reader",
-			slogfield.String("image_id", req.ID),
-			slogfield.Error(err),
+			slog.String("image_id", req.ID),
+			slog.String("error", err.Error()),
 		)
 		return nil, ObjectReadError{Cause: err}
 	}
 	s.log.InfoContext(
 		spanCtx,
 		"reading bootstrap image",
-		slogfield.String("image_id", req.ID),
-		slogfield.Int64("object_bytes", attrs.Size),
-		slogfield.Int64("object_generation", attrs.Generation),
+		slog.String("image_id", req.ID),
+		slog.Int64("object_bytes", attrs.Size),
+		slog.Int64("object_generation", attrs.Generation),
 	)
 
 	hasher := s.newHasher()
@@ -160,9 +156,9 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 		s.log.ErrorContext(
 			spanCtx,
 			"failed to copy object to buffer",
-			slogfield.String("image_id", req.ID),
-			slogfield.Int64("object_bytes", attrs.Size),
-			slogfield.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Int64("object_bytes", attrs.Size),
+			slog.String("error", err.Error()),
 		)
 		return nil, ObjectReadError{Cause: err}
 	}
@@ -170,10 +166,10 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 		s.log.ErrorContext(
 			spanCtx,
 			"failed to copy entire object to buffer",
-			slogfield.String("image_id", req.ID),
-			slogfield.Int64("object_bytes", attrs.Size),
-			slogfield.Int64("copied_bytes", n),
-			slogfield.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Int64("object_bytes", attrs.Size),
+			slog.Int64("copied_bytes", n),
+			slog.String("error", err.Error()),
 		)
 		return nil, ObjectReadError{Cause: io.ErrShortWrite}
 	}
@@ -182,19 +178,19 @@ func (s *StorageService) GetBootstrapImage(ctx context.Context, req *GetBootstra
 		s.log.ErrorContext(
 			spanCtx,
 			"crc32 checksum mismatch",
-			slogfield.String("image_id", req.ID),
-			slogfield.Uint32("computed_checksum", checksum),
-			slogfield.Uint32("object_checksum", attrs.CRC32C),
-			slogfield.Error(err),
+			slog.String("image_id", req.ID),
+			slog.Any("computed_checksum", checksum),
+			slog.Any("object_checksum", attrs.CRC32C),
+			slog.String("error", err.Error()),
 		)
 		return nil, ChecksumMismatchError{}
 	}
 	s.log.InfoContext(
 		spanCtx,
 		"read bootstrap image",
-		slogfield.String("image_id", req.ID),
-		slogfield.Int64("object_bytes", attrs.Size),
-		slogfield.Int64("object_generation", attrs.Generation),
+		slog.String("image_id", req.ID),
+		slog.Int64("object_bytes", attrs.Size),
+		slog.Int64("object_generation", attrs.Generation),
 	)
 
 	resp := &GetBootstrapImageResponse{

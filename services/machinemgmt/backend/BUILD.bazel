@@ -7,12 +7,10 @@ go_library(
         "error.go",
         "storage.go",
     ],
-    importpath = "github.com/Zaba505/infra/services/machinemgmt/service/backend",
+    importpath = "github.com/Zaba505/infra/services/machinemgmt/backend",
     visibility = ["//visibility:public"],
     deps = [
         "@com_github_googleapis_gax_go_v2//:gax-go",
-        "@com_github_z5labs_bedrock//pkg/otelslog",
-        "@com_github_z5labs_bedrock//pkg/slogfield",
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",
