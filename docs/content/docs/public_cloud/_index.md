@@ -5,6 +5,14 @@ title: Public Cloud
 ## Overview
 
 ```mermaid
+%%{
+    init: {
+        "flowchart": {
+            "wrappingWidth": "300"
+        }
+    }
+}%%
+
 flowchart TB
     cloudflare["Cloudflare"]
     loadBalancer["HTTP(s) Load Balancer"]
@@ -42,6 +50,14 @@ Below is a possibly exhaustive list of Google Cloud products used:
 ## HTTP(s) Load Balancer
 
 ```mermaid
+%%{
+    init: {
+        "flowchart": {
+            "wrappingWidth": "350"
+        }
+    }
+}%%
+
 flowchart TB
     ipv6["Global External IPv6 Address"]
     forwarding["Global Forwarding Rule"]
