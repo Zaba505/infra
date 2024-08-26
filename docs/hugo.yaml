@@ -8,7 +8,6 @@ module:
   imports:
     - path: "github.com/google/docsy"
 
-
 enableRobotsTXT: true
 
 # Will give values to .Lastmod etc.
@@ -53,6 +52,7 @@ params:
     from_year: 2024
 
   ui:
+    showLightDarkModeMenu: true
     breadcrumb_disable: false
     navbar_logo: false
     navbar_translucent_over_cover_disable: false
