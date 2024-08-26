@@ -120,8 +120,8 @@ github.com/yudai/gojsondiff v1.0.0 h1:27cbfqXLVEJ1o8I6v3y9lg8Ydm53EKqHXAOMxEGlCO
 github.com/yudai/gojsondiff v1.0.0/go.mod h1:AY32+k2cwILAkW1fbgxQ5mUmMiZFgLIV+FBNExI05xg=
 github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 h1:BHyfKlQyqbsFN5p3IfnEUduWvb9is428/nNb5L3U01M=
 github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82/go.mod h1:lgjkn3NuSvDfVJdfcVVdX+jpBxNmX4rDAzaS45IcYoM=
-github.com/z5labs/bedrock v0.9.0 h1:dZYtZnpifrMq87vMtEKChh7CMldqAPIvxDTPEirfn6A=
-github.com/z5labs/bedrock v0.9.0/go.mod h1:MGzeSur7G9Prw933U+wgZA/Zn2yeDnF5M+nNsW4YzBU=
+github.com/z5labs/bedrock v0.9.1 h1:B9E687By9mfNE05A4IV+WGk5eMk4wSviYO+WMnLhwis=
+github.com/z5labs/bedrock v0.9.1/go.mod h1:dzD/IYmKTUfMvmuYvgSGO3yQH7vTw+LuDlMXVnTtvIc=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0 h1:r6I7RJCN86bpD/FQwedZ0vSixDpwuWREjW9oRMsmqDc=
