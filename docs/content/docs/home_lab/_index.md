@@ -12,8 +12,6 @@ flowchart TB
     serverA["Server A"]
     serverB["Server B"]
     serverC["Server C"]
-    pi["Raspberry Pi"]
-    cloud["Public Cloud"]
 
     cloudflare -->|example.com| router
 
@@ -22,9 +20,6 @@ flowchart TB
     switch --> serverA
     switch --> serverB
     switch --> serverC
-    switch --> pi
-
-    pi -->|mTLS| cloud
 ```
 
 The above diagram documents the high level architecture for the physical infrastructure of my home lab.
@@ -73,19 +68,51 @@ flowchart TB
     pi["Raspberry Pi"]
     homelab["Homelab VLAN"]
     admin["Admin VLAN"]
-    router["Router"]
 
     pi --> homelab
 
     serverC --> homelab
 
     serverA --> homelab
-    serverA -->|iLO| admin
+    serverA -->|IPMI| admin
 
     serverB --> homelab
-    serverB -->|iLO| admin
+    serverB -->|IPMI| admin
+```
 
-    homelab --> router
+The above topology represents how the machines are separated via VLANs from the rest of my home network for increased security.
 
-    admin --> router
+## Startup Procedure
+
+All servers are [network booted](https://en.wikipedia.org/wiki/Network_booting) via [iPXE chainloading](https://ipxe.org/howto/chainloading).
+Below is a sequence diagram showcasing the boot sequence for each server.
+
+```mermaid
+sequenceDiagram
+    server -->> server: Power On
+
+    create participant router as Router
+    server ->> router: DHCP
+    destroy router
+    router ->> server: FTP URL
+
+    create participant pi as Raspberry Pi
+    server ->> pi: FTP
+
+    create participant cloudflare as Cloudflare
+    pi ->> cloudflare: HTTPS with mTLS
+
+    create participant cloud as Public Cloud
+    cloudflare ->> cloud: Proxy HTTP request over mTLS
+    cloud ->> cloudflare: Return iPXE chainload image
+
+    cloudflare ->> pi: Return iPXE chainload image
+
+    destroy pi
+    pi ->> server: Return iPXE chainload image
+
+    server ->> cloudflare: HTTPS with mTLS
+    cloudflare ->> cloud: Proxy HTTP request over mTLS
+    cloud ->> cloudflare: Return iPXE script for specific machine
+    cloudflare ->> server: Return iPXE script for specific machine
 ```
