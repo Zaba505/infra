@@ -32,7 +32,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/swaggest/jsonschema-go v0.3.72 // indirect
-	github.com/swaggest/openapi-go v0.2.53 // indirect
+	github.com/swaggest/openapi-go v0.2.54 // indirect
 	github.com/swaggest/refl v1.3.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0 // indirect
