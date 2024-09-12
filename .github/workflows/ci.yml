@@ -80,7 +80,7 @@ jobs:
 
       - name: Build and publish images
         run: |
-          tarballTargets=$(bazel query "kind(oci_tarball, //...)")
+          tarballTargets=$(bazel query "kind(filegroup, //...)" | grep ".tar$")
           while IFS=';' read -ra tarballs; do
             for tarball in "${tarballs[@]}"; do
               bazel build $tarball
