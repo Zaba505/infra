@@ -1,6 +1,6 @@
 load("@aspect_bazel_lib//lib:transitions.bzl", "platform_transition_filegroup")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
-load("@rules_oci//oci:defs.bzl", "oci_image", "oci_tarball")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_load")
 load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 go_library(
@@ -25,6 +25,7 @@ go_binary(
 pkg_tar(
     name = "tar",
     srcs = [":boot-image-proxy"],
+    extension = "tar.gz",
 )
 
 # TODO: add labels
@@ -45,14 +46,21 @@ platform_transition_filegroup(
     }),
 )
 
-# $ bazel build //services/boot-image-proxy:tarball
-# $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/boot-image-proxy:tarball)
-# $ podman run --rm -ePROXY_TARGET_HOST=machine.zaba505.dev -p8080:8080 -eCOMMAND_PORT=8080 -ePASSIVE_START_PORT=7000 -ePASSIVE_END_PORT=8000 -p7000-8000:7000-8000 ghcr.io/zaba505/infra/boot-image-proxy:latest
-oci_tarball(
+oci_load(
     name = "tarball",
     image = ":image",
     repo_tags = [
         "ghcr.io/zaba505/infra/boot-image-proxy:latest",
     ],
+    tags = ["manual"],
+)
+
+# $ bazel build //services/boot-image-proxy:tarball.tar
+# $ podman load --input $(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files //services/boot-image-proxy:tarball.tar)
+# $ podman run --rm -ePROXY_TARGET_HOST=machine.zaba505.dev -p8080:8080 -eCOMMAND_PORT=8080 -ePASSIVE_START_PORT=7000 -ePASSIVE_END_PORT=8000 -p7000-8000:7000-8000 ghcr.io/zaba505/infra/boot-image-proxy:latest
+filegroup(
+    name = "tarball.tar",
+    srcs = [":tarball"],
+    output_group = "tarball",
     tags = ["manual"],
 )
