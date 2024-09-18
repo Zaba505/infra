@@ -1,5 +1,6 @@
 ---
 title: Home Lab
+type: docs
 ---
 
 ## Overview
