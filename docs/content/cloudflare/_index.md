@@ -1,5 +1,6 @@
 ---
 title: Cloudflare
+type: docs
 ---
 
 ## Overview
@@ -47,7 +48,7 @@ sequenceDiagram
 ### machine
 
 `machine.example.com` is used for pointing to all the network boot related services hosted
-on a [Public Cloud]({{% ref "/docs/public_cloud/" %}}).
+on a [Public Cloud]({{% ref "/public_cloud/" %}}).
 
 | Properties | |
 | ---------- | ---- |

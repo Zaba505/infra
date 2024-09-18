@@ -1,5 +1,6 @@
 ---
 title: Public Cloud
+type: docs
 ---
 
 ## Overview
@@ -133,7 +134,7 @@ flowchart TB
 ```
 
 Vault is deployed within Google Cloud to help store secret values such as the mTLS related
-certificates used by [Cloudflare]({{% ref "/docs/cloudflare/" %}}) and the [HTTP(s) Load Balancer](#https-load-balancer).
+certificates used by [Cloudflare]({{% ref "/cloudflare/" %}}) and the [HTTP(s) Load Balancer](#https-load-balancer).
 The biggest priority with introducing Vault into the architecture is to allow for the decoupling
 of secret management from any singular provider. It also allows for direct integration with Terraform,
 which reduces the footprint of what is interacting with secrets e.g. Github Actions secrets can only
