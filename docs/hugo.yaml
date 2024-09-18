@@ -44,7 +44,7 @@ params:
   github_repo: https://github.com/Zaba505/infra
   github_project_repo: https://github.com/Zaba505/infra
 
-  offlineSearch: false
+  offlineSearch: true
   prism_syntax_highlighting: false
 
   copyright:
@@ -57,4 +57,11 @@ params:
     navbar_logo: false
     navbar_translucent_over_cover_disable: false
     sidebar_menu_compact: false
-    sidebar_search_disable: false
+    sidebar_search_disable: true
+
+  links:
+    developer:
+      - name: GitHub
+        url: https://github.com/Zaba505/infra
+        icon: fab fa-github
+        desc: Development takes place here!
