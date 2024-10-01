@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"io"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 
@@ -154,9 +155,14 @@ func build[T any](f func(context.Context, T) ([]Endpoint, error)) bedrock.AppBui
 			return nil, err
 		}
 
+		ls, err := net.Listen("tcp", ":80")
+		if err != nil {
+			return nil, err
+		}
+
 		opts := &options{
 			restOpts: []rest.Option{
-				rest.ListenOn(80),
+				rest.Listener(ls),
 				rest.Endpoint(
 					http.MethodGet,
 					"/health/startup",
