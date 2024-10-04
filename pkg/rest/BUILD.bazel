@@ -12,6 +12,7 @@ go_library(
         "@com_github_z5labs_bedrock//pkg/config",
         "@com_github_z5labs_bedrock//rest",
         "@com_github_z5labs_bedrock//rest/endpoint",
+        "@com_github_z5labs_bedrock//rest/mux",
         "@io_opentelemetry_go_otel//propagation",
         "@io_opentelemetry_go_otel_log//:log",
         "@io_opentelemetry_go_otel_metric//:metric",

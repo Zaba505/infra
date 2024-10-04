@@ -15,6 +15,7 @@ import (
 	"github.com/z5labs/bedrock/pkg/config"
 	"github.com/z5labs/bedrock/rest"
 	"github.com/z5labs/bedrock/rest/endpoint"
+	"github.com/z5labs/bedrock/rest/mux"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/propagation"
@@ -176,7 +177,7 @@ func build[T any](f func(context.Context, T) ([]Endpoint, error)) bedrock.AppBui
 			},
 		}
 		for _, endpoint := range endpoints {
-			opts.restOpts = append(opts.restOpts, rest.Endpoint(endpoint.method, endpoint.pattern, endpoint.op))
+			opts.restOpts = append(opts.restOpts, rest.Endpoint(mux.Method(endpoint.method), endpoint.pattern, endpoint.op))
 		}
 
 		var base bedrock.App = rest.NewApp(opts.restOpts...)
