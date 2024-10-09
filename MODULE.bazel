@@ -29,6 +29,7 @@ use_repo(
     "com_github_fclairamb_ftpserverlib",
     "com_github_googleapis_gax_go_v2",
     "com_github_spf13_afero",
+    "com_github_swaggest_openapi_go",
     "com_github_z5labs_bedrock",
     "com_google_cloud_go_storage",
     "io_opentelemetry_go_otel",

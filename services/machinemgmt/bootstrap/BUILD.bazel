@@ -8,6 +8,7 @@ go_library(
     deps = [
         "//pkg/rest",
         "//services/machinemgmt/backend",
+        "@com_github_swaggest_openapi_go//openapi3",
         "@com_github_z5labs_bedrock//rest/endpoint",
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",

@@ -10,6 +10,7 @@ import (
 
 	"github.com/Zaba505/infra/pkg/rest"
 	"github.com/Zaba505/infra/services/machinemgmt/backend"
+	"github.com/swaggest/openapi-go/openapi3"
 
 	"github.com/z5labs/bedrock/rest/endpoint"
 	"go.opentelemetry.io/otel"
@@ -50,8 +51,6 @@ func Endpoint(opts ...Option) rest.Endpoint {
 	)
 }
 
-type Request struct{}
-
 type Response struct {
 	src io.ReadCloser
 }
@@ -60,12 +59,16 @@ func (Response) ContentType() string {
 	return "application/octet"
 }
 
-func (resp *Response) WriterTo(w io.Writer) (int64, error) {
+func (Response) OpenApiV3Schema() (*openapi3.Schema, error) {
+	return &openapi3.Schema{}, nil
+}
+
+func (resp *Response) WriteTo(w io.Writer) (int64, error) {
 	defer resp.src.Close()
 	return io.Copy(w, resp.src)
 }
 
-func (h *handler) Handle(ctx context.Context, _ *Request) (*Response, error) {
+func (h *handler) Handle(ctx context.Context, _ *rest.Empty) (*Response, error) {
 	spanCtx, span := otel.Tracer("service").Start(ctx, "runtime.bootstrapImageHandler")
 	defer span.End()
 
