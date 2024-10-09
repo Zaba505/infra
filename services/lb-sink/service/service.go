@@ -22,9 +22,6 @@ func Init(ctx context.Context, cfg Config) ([]rest.Endpoint, error) {
 
 type unavailableHandler struct{}
 
-type Empty struct{}
-
-func (*unavailableHandler) Handle(_ context.Context, _ *Empty) (*Empty, error) {
-	// TODO: repond with 503
-	return &Empty{}, nil
+func (*unavailableHandler) Handle(_ context.Context, _ *rest.Empty) (*rest.Empty, error) {
+	return &rest.Empty{}, nil
 }

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/z5labs/bedrock"
 	"github.com/z5labs/bedrock/pkg/app"
 	"github.com/z5labs/bedrock/pkg/config"
@@ -82,7 +83,7 @@ type Endpoint struct {
 	op      rest.Operation
 }
 
-func Get[Req, Resp any](pattern string, h endpoint.Handler[Req, Resp], opts ...EndpointOption) Endpoint {
+func Get[I, O any, Req endpoint.Request[I], Resp endpoint.Response[O]](pattern string, h endpoint.Handler[I, O], opts ...EndpointOption) Endpoint {
 	eo := &endpointOptions{}
 	for _, opt := range opts {
 		opt(eo)
@@ -91,7 +92,7 @@ func Get[Req, Resp any](pattern string, h endpoint.Handler[Req, Resp], opts ...E
 	return Endpoint{
 		method:  http.MethodGet,
 		pattern: pattern,
-		op:      endpoint.NewOperation(h, eo.endOpts...),
+		op:      endpoint.NewOperation[I, O, Req, Resp](h, eo.endOpts...),
 	}
 }
 
@@ -147,6 +148,26 @@ type Empty struct{}
 
 func (noopHandler) Handle(_ context.Context, _ *Empty) (*Empty, error) {
 	return &Empty{}, nil
+}
+
+func (Empty) ContentType() string {
+	return ""
+}
+
+func (Empty) Validate() error {
+	return nil
+}
+
+func (Empty) OpenApiV3Schema() (*openapi3.Schema, error) {
+	return &openapi3.Schema{}, nil
+}
+
+func (Empty) ReadRequest(r *http.Request) error {
+	return nil
+}
+
+func (Empty) WriteTo(w io.Writer) (int64, error) {
+	return 0, nil
 }
 
 func build[T any](f func(context.Context, T) ([]Endpoint, error)) bedrock.AppBuilderFunc[T] {
