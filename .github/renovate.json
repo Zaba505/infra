@@ -1,39 +1,9 @@
 {
-    "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+    "extends": [
+        "config:best-practices"
+    ],
     "osvVulnerabilityAlerts": true,
     "schedule": ["before 4am"],
     "baseBranches": ["main"],
-    "enabledManagers": [
-        "bazel-module",
-        "bazelisk",
-        "github-actions",
-        "gomod",
-        "terraform"
-    ],
-    "labels": ["dependencies"],
-    "packageRules": [
-        {
-            "matchManagers": ["bazel-module", "bazelisk"],
-            "addLabels": ["bazel"],
-            "enabled": true
-        },
-        {
-            "matchManagers": ["github-actions"],
-            "addLabels": ["github-actions"],
-            "enabled": true
-        },
-        {
-            "matchManagers": ["gomod"],
-            "addLabels": ["go"],
-            "enabled": true
-        },
-        {
-            "matchManagers": ["terraform"],
-            "addLabels": ["terraform"],
-            "enabled": true
-        }
-    ],
-    "postUpdateOptions": [
-        "gomodTidy"
-    ]
+    "labels": ["dependencies"]
 }
