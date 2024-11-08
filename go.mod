@@ -13,7 +13,7 @@ require (
 	go.opentelemetry.io/otel/log v0.7.0
 	go.opentelemetry.io/otel/metric v1.31.0
 	go.opentelemetry.io/otel/trace v1.31.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.9.0
 )
 
 require (
