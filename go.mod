@@ -9,10 +9,10 @@ require (
 	github.com/spf13/afero v1.11.0
 	github.com/swaggest/openapi-go v0.2.54
 	github.com/z5labs/bedrock v0.12.2
-	go.opentelemetry.io/otel v1.31.0
-	go.opentelemetry.io/otel/log v0.7.0
-	go.opentelemetry.io/otel/metric v1.31.0
-	go.opentelemetry.io/otel/trace v1.31.0
+	go.opentelemetry.io/otel v1.32.0
+	go.opentelemetry.io/otel/log v0.8.0
+	go.opentelemetry.io/otel/metric v1.32.0
+	go.opentelemetry.io/otel/trace v1.32.0
 	golang.org/x/sync v0.8.0
 )
 
