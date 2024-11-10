@@ -2,6 +2,12 @@ variable "name" {
   type = string
 }
 
+variable "ip_addresses" {
+  type = list(object({
+    name = string
+  }))
+}
+
 variable "ipv6_address_name" {
   type = string
 }
