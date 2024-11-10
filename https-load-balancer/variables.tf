@@ -8,10 +8,6 @@ variable "ip_addresses" {
   }))
 }
 
-variable "ipv6_address_name" {
-  type = string
-}
-
 variable "trust_anchor_secrets" {
   type = list(object({
     secret = string
