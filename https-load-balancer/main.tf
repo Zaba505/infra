@@ -194,7 +194,7 @@ resource "google_compute_ssl_certificate" "lb_https" {
 resource "google_compute_target_https_proxy" "lb_https" {
   name              = var.name
   url_map           = google_compute_url_map.https.id
-  ssl_certificates  = google_compute_ssl_certificate.lb_https[*].id
+  ssl_certificates  = [for cert in google_compute_ssl_certificate.lb_https: cert.id]
   server_tls_policy = google_network_security_server_tls_policy.lb_https.id
 }
 
