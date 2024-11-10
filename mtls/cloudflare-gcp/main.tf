@@ -34,7 +34,7 @@ resource "tls_cert_request" "origin" {
     for_each = var.hostnames
 
     content {
-      common_name = each.value
+      common_name = subject.value
     }
   }
 }
