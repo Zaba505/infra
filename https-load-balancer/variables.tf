@@ -10,16 +10,16 @@ variable "ip_addresses" {
 
 variable "trust_anchor_secrets" {
   type = list(object({
-    secret = string
+    secret  = string
     version = string
   }))
 }
 
 variable "server_certificate_secrets" {
   type = list(object({
-    certificate_secret = string
+    certificate_secret  = string
     certificate_version = string
-    private_key_secret = string
+    private_key_secret  = string
     private_key_version = string
   }))
 }

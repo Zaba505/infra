@@ -129,7 +129,7 @@ locals {
 data "google_secret_manager_secret_version_access" "trust_anchor" {
   for_each = local.trust_anchor_secrets
 
-  secret = each.value.secret
+  secret  = each.value.secret
   version = each.value.version
 }
 
@@ -169,14 +169,14 @@ locals {
 data "google_secret_manager_secret_version_access" "server_certificate" {
   for_each = local.server_certificate_secrets
 
-  secret = each.value.certificate_secret
+  secret  = each.value.certificate_secret
   version = each.value.certificate_version
 }
 
 data "google_secret_manager_secret_version_access" "server_private_key" {
   for_each = local.server_certificate_secrets
 
-  secret = each.value.private_key_secret
+  secret  = each.value.private_key_secret
   version = each.value.private_key_version
 }
 
