@@ -113,9 +113,9 @@ resource "google_compute_url_map" "https" {
         for_each = path_matcher.value
 
         content {
-          service = google_compute_backend_service.cloud_run[path_rule.key].id
+          service = google_compute_backend_service.cloud_run[path_rule.value].id
 
-          paths = var.cloud_run[path_rule.key].paths
+          paths = var.cloud_run[path_rule.value].paths
         }
       }
     }
@@ -210,7 +210,7 @@ resource "google_compute_target_https_proxy" "lb_https" {
 }
 
 locals {
-  ip_addresses = [for addr in var.ip_addresses : addr.name]
+  ip_addresses = toset([for addr in var.ip_addresses : addr.name])
 }
 
 data "google_compute_global_address" "ip" {
