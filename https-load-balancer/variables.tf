@@ -16,7 +16,7 @@ variable "trust_anchor_secrets" {
 }
 
 variable "server_certificate_secrets" {
-  type = list(object({
+  type = map(object({
     certificate_secret  = string
     certificate_version = string
     private_key_secret  = string

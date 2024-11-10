@@ -123,7 +123,9 @@ resource "google_compute_url_map" "https" {
 }
 
 locals {
-  trust_anchor_secrets = toset(var.trust_anchor_secrets)
+  trust_anchor_secrets = {
+    for anchor in var.trust_anchor_secrets: anchor.secret => anchor
+  }
 }
 
 data "google_secret_manager_secret_version_access" "trust_anchor" {
@@ -162,19 +164,15 @@ resource "google_network_security_server_tls_policy" "lb_https" {
   }
 }
 
-locals {
-  server_certificate_secrets = toset(var.server_certificate_secrets)
-}
-
 data "google_secret_manager_secret_version_access" "server_certificate" {
-  for_each = local.server_certificate_secrets
+  for_each = var.server_certificate_secrets
 
   secret  = each.value.certificate_secret
   version = each.value.certificate_version
 }
 
 data "google_secret_manager_secret_version_access" "server_private_key" {
-  for_each = local.server_certificate_secrets
+  for_each = var.server_certificate_secrets
 
   secret  = each.value.private_key_secret
   version = each.value.private_key_version
@@ -190,7 +188,7 @@ data "google_secret_manager_secret_version_access" "server_private_key" {
 // Either omit the Instance Template name attribute, specify a partial
 // name with name_prefix, or use random_id resource. Example:
 resource "google_compute_ssl_certificate" "lb_https" {
-  for_each = local.server_certificate_secrets
+  for_each = var.server_certificate_secrets
 
   name_prefix = "${each.value.certificate_secret}-"
 
@@ -212,13 +210,13 @@ resource "google_compute_target_https_proxy" "lb_https" {
 }
 
 locals {
-  ip_addresses = toset(var.ip_addresses)
+  ip_addresses = [for addr in var.ip_addresses: addr.name]
 }
 
 data "google_compute_global_address" "ip" {
   for_each = local.ip_addresses
 
-  name = each.value.name
+  name = each.value
 }
 
 resource "google_compute_global_forwarding_rule" "lb_https_ipv6" {
