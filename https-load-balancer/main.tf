@@ -124,7 +124,7 @@ resource "google_compute_url_map" "https" {
 
 locals {
   trust_anchor_secrets = {
-    for anchor in var.trust_anchor_secrets: anchor.secret => anchor
+    for anchor in var.trust_anchor_secrets : anchor.secret => anchor
   }
 }
 
@@ -210,7 +210,7 @@ resource "google_compute_target_https_proxy" "lb_https" {
 }
 
 locals {
-  ip_addresses = [for addr in var.ip_addresses: addr.name]
+  ip_addresses = [for addr in var.ip_addresses : addr.name]
 }
 
 data "google_compute_global_address" "ip" {
