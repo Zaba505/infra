@@ -4,5 +4,5 @@ variable "hostnames" {
 
 variable "days_valid_for" {
   type    = number
-  default = 180
+  default = 365
 }
