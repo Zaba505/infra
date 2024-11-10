@@ -23,8 +23,8 @@ terraform {
 }
 
 resource "tls_private_key" "origin" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
+  algorithm = var.private_key.algorithm
+  rsa_bits  = var.private_key.rsa_bits
 }
 
 resource "tls_cert_request" "origin" {
@@ -42,7 +42,7 @@ resource "tls_cert_request" "origin" {
 resource "cloudflare_origin_ca_certificate" "origin" {
   csr                = tls_cert_request.origin.cert_request_pem
   hostnames          = var.hostnames
-  request_type       = "origin-rsa"
+  request_type       = var.private_key.algorithm == "RSA" ? "origin-rsa" : "origin-ecc"
   requested_validity = var.days_valid_for
 }
 
