@@ -4,11 +4,6 @@ terraform {
       source  = "hashicorp/google"
       version = "6.10.0"
     }
-
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "6.10.0"
-    }
   }
 }
 
@@ -136,8 +131,6 @@ data "google_secret_manager_secret_version_access" "trust_anchor" {
 }
 
 resource "google_certificate_manager_trust_config" "lb_https" {
-  provider = google-beta
-
   name     = "${var.name}-trust-config"
   location = "global"
 
@@ -153,8 +146,6 @@ resource "google_certificate_manager_trust_config" "lb_https" {
 }
 
 resource "google_network_security_server_tls_policy" "lb_https" {
-  provider = google-beta
-
   name       = "${var.name}-tls-policy"
   location   = "global"
   allow_open = false
@@ -201,8 +192,6 @@ resource "google_compute_ssl_certificate" "lb_https" {
 }
 
 resource "google_compute_target_https_proxy" "lb_https" {
-  provider = google-beta
-
   name              = var.name
   url_map           = google_compute_url_map.https.id
   ssl_certificates  = google_compute_ssl_certificate.lb_https[*].id
