@@ -54,7 +54,15 @@ resource "google_secret_manager_secret" "origin_private_key" {
   }
 }
 
+resource "google_secret_manager_secret_iam_member" "origin_private_key" {
+  secret_id = google_secret_manager_secret.origin_private_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.service_account_email}"
+}
+
 resource "google_secret_manager_secret_version" "origin_private_key" {
+  depends_on = [google_secret_manager_secret_iam_member.origin_private_key]
+
   secret = google_secret_manager_secret.origin_private_key.id
 
   secret_data = tls_private_key.origin.private_key_pem
@@ -68,7 +76,15 @@ resource "google_secret_manager_secret" "origin_certificate" {
   }
 }
 
+resource "google_secret_manager_secret_iam_member" "origin_certificate" {
+  secret_id = google_secret_manager_secret.origin_certificate.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.service_account_email}"
+}
+
 resource "google_secret_manager_secret_version" "origin_certificate" {
+  depends_on = [google_secret_manager_secret_iam_member.origin_certificate]
+
   secret = google_secret_manager_secret.origin_certificate.id
 
   secret_data = cloudflare_origin_ca_certificate.origin.certificate
@@ -86,7 +102,15 @@ data "http" "authenticated_origin_pulls_ca_trust_anchor" {
   url = "https://developers.cloudflare.com/ssl/static/authenticated_origin_pull_ca.pem"
 }
 
+resource "google_secret_manager_secret_iam_member" "authenticated_origin_pull_ca" {
+  secret_id = google_secret_manager_secret.authenticated_origin_pull_ca.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.service_account_email}"
+}
+
 resource "google_secret_manager_secret_version" "authenticated_origin_pull_ca" {
+  depends_on = [google_secret_manager_secret_iam_member.authenticated_origin_pull_ca]
+
   secret = google_secret_manager_secret.authenticated_origin_pull_ca.id
 
   secret_data = data.http.authenticated_origin_pulls_ca_trust_anchor.response_body
