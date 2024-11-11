@@ -143,10 +143,6 @@ resource "google_certificate_manager_trust_config" "lb_https" {
       }
     }
   }
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "google_network_security_server_tls_policy" "lb_https" {
@@ -156,10 +152,6 @@ resource "google_network_security_server_tls_policy" "lb_https" {
   mtls_policy {
     client_validation_mode         = "REJECT_INVALID"
     client_validation_trust_config = google_certificate_manager_trust_config.lb_https.id
-  }
-
-  lifecycle {
-    create_before_destroy = true
   }
 }
 
