@@ -4,19 +4,14 @@ variable "domain_name" {
 
 variable "records" {
   type = map(object({
-    enable_mtls = bool
+    authenticated_origin_pulls_enabled = bool
 
-    ipv4 = optional(object({
+    ipv4 = optional(list(object({
       address = string
-    }))
+    })))
 
-    ipv6 = optional(object({
+    ipv6 = optional(list(object({
       address = string
-    }))
-
-    certificate = optional(object({
-      pem         = string
-      private_key = string
-    }))
+    })))
   }))
 }
