@@ -16,7 +16,7 @@ locals {
       }
     }
     if record.ipv4 != null
-  ])
+  ]...)
 
   aaaa_records = merge([
     for name, record in var.records : {
@@ -26,7 +26,7 @@ locals {
       }
     }
     if record.ipv6 != null
-  ])
+  ]...)
 }
 
 data "cloudflare_zone" "default" {
