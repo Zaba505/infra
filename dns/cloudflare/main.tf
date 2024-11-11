@@ -10,9 +10,9 @@ terraform {
 locals {
   a_records = merge([
     for name, record in var.records : {
-      for address in record.ipv4.address : "${name}-${address}" => {
+      for ipv4 in record.ipv4 : "${name}-${ipv4.address}" => {
         name    = name
-        address = address
+        address = ipv4.address
       }
     }
     if record.ipv4 != null
@@ -20,9 +20,9 @@ locals {
 
   aaaa_records = merge([
     for name, record in var.records : {
-      for address in record.ipv6.address : "${name}-${address}" => {
+      for ipv6 in record.ipv6 : "${name}-${ipv6.address}" => {
         name    = name
-        address = address
+        address = ipv6.address
       }
     }
     if record.ipv6 != null
