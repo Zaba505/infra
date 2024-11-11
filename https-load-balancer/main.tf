@@ -92,7 +92,7 @@ resource "google_compute_url_map" "https" {
 
     content {
       hosts        = [host_rule.key]
-      path_matcher = host_rule.key
+      path_matcher = replace(host_rule.key, ".", "-")
     }
   }
 
@@ -100,7 +100,7 @@ resource "google_compute_url_map" "https" {
     for_each = local.hosts_to_cloud_run_services
 
     content {
-      name = path_matcher.key
+      name = replace(host_rule.key, ".", "-")
 
       default_service = google_compute_backend_service.default_service.id
 
