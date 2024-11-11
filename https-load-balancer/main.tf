@@ -145,13 +145,15 @@ resource "google_certificate_manager_trust_config" "lb_https" {
   }
 }
 
+data "google_project" "this" {}
+
 resource "google_network_security_server_tls_policy" "lb_https" {
   name       = "${var.name}-tls-policy"
   location   = "global"
   allow_open = false
   mtls_policy {
     client_validation_mode         = "REJECT_INVALID"
-    client_validation_trust_config = google_certificate_manager_trust_config.lb_https.id
+    client_validation_trust_config = "projects/${data.google_project.this.number}/locations/global/trustConfigs/${google_certificate_manager_trust_config.lb_https.name}"
   }
 }
 
