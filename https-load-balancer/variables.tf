@@ -2,8 +2,26 @@ variable "name" {
   type = string
 }
 
-variable "ca_certificate_pems" {
-  type = list(string)
+variable "ip_addresses" {
+  type = list(object({
+    name = string
+  }))
+}
+
+variable "trust_anchor_secrets" {
+  type = list(object({
+    secret  = string
+    version = string
+  }))
+}
+
+variable "server_certificate_secrets" {
+  type = map(object({
+    certificate_secret  = string
+    certificate_version = string
+    private_key_secret  = string
+    private_key_version = string
+  }))
 }
 
 variable "default_service" {

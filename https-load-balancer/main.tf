@@ -1,23 +1,8 @@
 terraform {
   required_providers {
-    cloudflare = {
-      source  = "cloudflare/cloudflare"
-      version = "4.45.0"
-    }
-
     google = {
       source  = "hashicorp/google"
       version = "6.10.0"
-    }
-
-    google-beta = {
-      source  = "hashicorp/google-beta"
-      version = "6.10.0"
-    }
-
-    tls = {
-      source  = "hashicorp/tls"
-      version = "4.0.6"
     }
   }
 }
@@ -123,35 +108,44 @@ resource "google_compute_url_map" "https" {
         for_each = path_matcher.value
 
         content {
-          service = google_compute_backend_service.cloud_run[path_rule.key].id
+          service = google_compute_backend_service.cloud_run[path_rule.value].id
 
-          paths = var.cloud_run[path_rule.key].paths
+          paths = var.cloud_run[path_rule.value].paths
         }
       }
     }
   }
 }
 
-resource "google_certificate_manager_trust_config" "lb_https" {
-  provider = google-beta
+locals {
+  trust_anchor_secrets = {
+    for anchor in var.trust_anchor_secrets : anchor.secret => anchor
+  }
+}
 
+data "google_secret_manager_secret_version_access" "trust_anchor" {
+  for_each = local.trust_anchor_secrets
+
+  secret  = each.value.secret
+  version = each.value.version
+}
+
+resource "google_certificate_manager_trust_config" "lb_https" {
   name     = "${var.name}-trust-config"
   location = "global"
 
   trust_stores {
     dynamic "trust_anchors" {
-      for_each = toset(var.ca_certificate_pems)
+      for_each = local.trust_anchor_secrets
 
       content {
-        pem_certificate = trust_anchors.value
+        pem_certificate = data.google_secret_manager_secret_version_access.trust_anchor[trust_anchors.key].secret_data
       }
     }
   }
 }
 
 resource "google_network_security_server_tls_policy" "lb_https" {
-  provider = google-beta
-
   name       = "${var.name}-tls-policy"
   location   = "global"
   allow_open = false
@@ -161,26 +155,18 @@ resource "google_network_security_server_tls_policy" "lb_https" {
   }
 }
 
-resource "tls_private_key" "instance" {
-  algorithm = "RSA"
+data "google_secret_manager_secret_version_access" "server_certificate" {
+  for_each = var.server_certificate_secrets
+
+  secret  = each.value.certificate_secret
+  version = each.value.certificate_version
 }
 
-resource "tls_cert_request" "instance" {
-  private_key_pem = tls_private_key.instance.private_key_pem
+data "google_secret_manager_secret_version_access" "server_private_key" {
+  for_each = var.server_certificate_secrets
 
-  subject {
-    # TODO: figure out to properly handle multiple host names
-    common_name = local.hosts_to_cloud_run_services[0]
-  }
-}
-
-resource "cloudflare_origin_ca_certificate" "lb_https" {
-  # TODO: figure out to properly handle multiple host names and multiple CSRs
-  csr                  = tls_cert_request.instance.cert_request_pem
-  hostnames            = keys(local.hosts_to_cloud_run_services)
-  request_type         = "origin-rsa"
-  requested_validity   = 365
-  min_days_for_renewal = 30
+  secret  = each.value.private_key_secret
+  version = each.value.private_key_version
 }
 
 // Using with Target HTTPS Proxies
@@ -193,10 +179,12 @@ resource "cloudflare_origin_ca_certificate" "lb_https" {
 // Either omit the Instance Template name attribute, specify a partial
 // name with name_prefix, or use random_id resource. Example:
 resource "google_compute_ssl_certificate" "lb_https" {
-  name_prefix = "${var.name}-ssl-cert-"
+  for_each = var.server_certificate_secrets
 
-  certificate = cloudflare_origin_ca_certificate.lb_https.certificate
-  private_key = tls_private_key.instance.private_key_pem
+  name_prefix = "${each.value.certificate_secret}-"
+
+  certificate = data.google_secret_manager_secret_version_access.server_certificate[each.key].secret_data
+  private_key = data.google_secret_manager_secret_version_access.server_private_key[each.key].secret_data
 
   lifecycle {
     create_before_destroy = true
@@ -204,23 +192,27 @@ resource "google_compute_ssl_certificate" "lb_https" {
 }
 
 resource "google_compute_target_https_proxy" "lb_https" {
-  provider = google-beta
-
   name              = var.name
   url_map           = google_compute_url_map.https.id
-  ssl_certificates  = [google_compute_ssl_certificate.lb_https.id]
+  ssl_certificates  = [for cert in google_compute_ssl_certificate.lb_https : cert.id]
   server_tls_policy = google_network_security_server_tls_policy.lb_https.id
 }
 
-resource "google_compute_global_address" "ipv6" {
-  name         = "${var.name}-ipv6-addr"
-  ip_version   = "IPV6"
-  address_type = "EXTERNAL"
+locals {
+  ip_addresses = toset([for addr in var.ip_addresses : addr.name])
+}
+
+data "google_compute_global_address" "ip" {
+  for_each = local.ip_addresses
+
+  name = each.value
 }
 
 resource "google_compute_global_forwarding_rule" "lb_https_ipv6" {
+  for_each = local.ip_addresses
+
   name                  = var.name
-  ip_address            = google_compute_global_address.ipv6.address
+  ip_address            = data.google_compute_global_address.ip[each.key].address
   port_range            = "443"
   target                = google_compute_target_https_proxy.lb_https.id
   load_balancing_scheme = "EXTERNAL_MANAGED"
