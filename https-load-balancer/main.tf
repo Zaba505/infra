@@ -92,7 +92,7 @@ resource "google_compute_url_map" "https" {
 
     content {
       hosts        = [host_rule.key]
-      path_matcher = host_rule.key
+      path_matcher = replace(host_rule.key, ".", "-")
     }
   }
 
@@ -100,7 +100,7 @@ resource "google_compute_url_map" "https" {
     for_each = local.hosts_to_cloud_run_services
 
     content {
-      name = path_matcher.key
+      name = replace(path_matcher.key, ".", "-")
 
       default_service = google_compute_backend_service.default_service.id
 
@@ -145,13 +145,15 @@ resource "google_certificate_manager_trust_config" "lb_https" {
   }
 }
 
+data "google_project" "this" {}
+
 resource "google_network_security_server_tls_policy" "lb_https" {
   name       = "${var.name}-tls-policy"
   location   = "global"
   allow_open = false
   mtls_policy {
     client_validation_mode         = "REJECT_INVALID"
-    client_validation_trust_config = google_certificate_manager_trust_config.lb_https.id
+    client_validation_trust_config = "projects/${data.google_project.this.number}/locations/global/trustConfigs/${google_certificate_manager_trust_config.lb_https.name}"
   }
 }
 
