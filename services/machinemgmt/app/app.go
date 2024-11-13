@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"log/slog"
-	"os"
 
 	"github.com/Zaba505/infra/pkg/rest"
 	"github.com/Zaba505/infra/services/machinemgmt/backend"
@@ -22,10 +21,7 @@ type Config struct {
 }
 
 func Init(ctx context.Context, cfg Config) ([]rest.Endpoint, error) {
-	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
-		Level:     cfg.Logging.Level,
-	}))
+	log := rest.Logger("machinemgmt")
 
 	gs, err := storage.NewClient(context.Background())
 	if err != nil {
