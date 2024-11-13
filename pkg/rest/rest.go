@@ -185,20 +185,26 @@ func build[T any](f func(context.Context, T) ([]Endpoint, error)) bedrock.AppBui
 		opts := &options{
 			restOpts: []rest.Option{
 				rest.Listener(ls),
-				rest.Endpoint(
-					http.MethodGet,
-					"/health/startup",
-					endpoint.NewOperation(noopHandler{}),
-				),
-				rest.Endpoint(
-					http.MethodGet,
-					"/health/liveness",
-					endpoint.NewOperation(noopHandler{}),
-				),
+				rest.Register(rest.Endpoint{
+					Method:    http.MethodGet,
+					Pattern:   "/health/startup",
+					Operation: endpoint.NewOperation(noopHandler{}),
+				}),
+				rest.Register(rest.Endpoint{
+					Method:    http.MethodGet,
+					Pattern:   "/health/liveness",
+					Operation: endpoint.NewOperation(noopHandler{}),
+				}),
 			},
 		}
 		for _, endpoint := range endpoints {
-			opts.restOpts = append(opts.restOpts, rest.Endpoint(mux.Method(endpoint.method), endpoint.pattern, endpoint.op))
+			opts.restOpts = append(
+				opts.restOpts,
+				rest.Register(rest.Endpoint{
+					Method:    mux.Method(endpoint.method),
+					Pattern:   endpoint.pattern,
+					Operation: endpoint.op,
+				}))
 		}
 
 		var base bedrock.App = rest.NewApp(opts.restOpts...)
