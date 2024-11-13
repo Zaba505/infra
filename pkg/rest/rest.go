@@ -18,9 +18,12 @@ import (
 	"github.com/z5labs/bedrock/rest/endpoint"
 	"github.com/z5labs/bedrock/rest/mux"
 	"go.opentelemetry.io/otel/log"
+	lognoop "go.opentelemetry.io/otel/log/noop"
 	"go.opentelemetry.io/otel/metric"
+	metricnoop "go.opentelemetry.io/otel/metric/noop"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	tracenoop "go.opentelemetry.io/otel/trace/noop"
 )
 
 type Config struct {
@@ -139,7 +142,9 @@ func Run[T any](r io.Reader, f func(context.Context, T) ([]Endpoint, error)) {
 	if err == nil {
 		return
 	}
-	// TODO
+
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{}))
+	log.Error("failed to run rest application", slog.String("error", err.Error()))
 }
 
 type noopHandler struct{}
@@ -211,16 +216,17 @@ func build[T any](f func(context.Context, T) ([]Endpoint, error)) bedrock.AppBui
 		base = app.WithOTel(
 			base,
 			app.OTelLoggerProvider(func(ctx context.Context) (log.LoggerProvider, error) {
-				return nil, nil
+				return lognoop.NewLoggerProvider(), nil
 			}),
 			app.OTelTextMapPropogator(func(ctx context.Context) (propagation.TextMapPropagator, error) {
-				return nil, nil
+				tmp := propagation.NewCompositeTextMapPropagator(propagation.Baggage{}, propagation.TraceContext{})
+				return tmp, nil
 			}),
 			app.OTelMeterProvider(func(ctx context.Context) (metric.MeterProvider, error) {
-				return nil, nil
+				return metricnoop.NewMeterProvider(), nil
 			}),
 			app.OTelTracerProvider(func(ctx context.Context) (trace.TracerProvider, error) {
-				return nil, nil
+				return tracenoop.NewTracerProvider(), nil
 			}),
 		)
 		base = app.WithSignalNotifications(base, os.Interrupt, os.Kill)
