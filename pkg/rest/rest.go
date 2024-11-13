@@ -13,6 +13,8 @@ import (
 	"os"
 	"time"
 
+	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"github.com/swaggest/openapi-go/openapi3"
 	"github.com/z5labs/bedrock"
 	"github.com/z5labs/bedrock/pkg/app"
@@ -21,9 +23,9 @@ import (
 	"github.com/z5labs/bedrock/rest"
 	"github.com/z5labs/bedrock/rest/endpoint"
 	"github.com/z5labs/bedrock/rest/mux"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
 	"go.opentelemetry.io/otel/log"
 	"go.opentelemetry.io/otel/metric"
@@ -33,7 +35,7 @@ import (
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.27.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 	tracenoop "go.opentelemetry.io/otel/trace/noop"
 )
@@ -49,33 +51,31 @@ type Config struct {
 }
 
 type OTelConfig struct {
-	GCP struct {
-		ProjectID string `config:"project_id"`
-	} `config:"gcp"`
-
 	ServiceName    string `config:"service_name"`
 	ServiceVersion string `config:"service_version"`
 
 	Trace struct {
+		Enabled      bool          `config:"enabled"`
 		Sampling     float64       `config:"sampling"`
 		BatchTimeout time.Duration `config:"batch_timeout"`
 	} `config:"trace"`
 
 	Metric struct {
+		Enabled      bool          `config:"enabled"`
 		ExportPeriod time.Duration `config:"export_period"`
 	} `config:"metric"`
 
 	Log struct {
 		BatchTimeout time.Duration `config:"batch_timeout"`
 	} `config:"log"`
-
-	OTLP struct {
-		Target string `config:"target"`
-	} `config:"otlp"`
 }
 
 type HttpConfig struct {
 	Port uint `config:"port"`
+}
+
+func Logger(name string) *slog.Logger {
+	return otelslog.NewLogger(name)
 }
 
 type endpointOptions struct {
@@ -167,18 +167,10 @@ func Run[T any](r io.Reader, f func(context.Context, T) ([]Endpoint, error)) {
 		srcs:           srcs,
 		detectResource: detectResource,
 		newTraceExporter: func(ctx context.Context, oc OTelConfig) (sdktrace.SpanExporter, error) {
-			return otlptracegrpc.New(
-				ctx,
-				otlptracegrpc.WithEndpoint(oc.OTLP.Target),
-				otlptracegrpc.WithCompressor("gzip"),
-			)
+			return texporter.New()
 		},
 		newMetricExporter: func(ctx context.Context, oc OTelConfig) (sdkmetric.Exporter, error) {
-			return otlpmetricgrpc.New(
-				ctx,
-				otlpmetricgrpc.WithEndpoint(oc.OTLP.Target),
-				otlpmetricgrpc.WithCompressor("gzip"),
-			)
+			return mexporter.New()
 		},
 		newLogExporter: func(ctx context.Context, oc OTelConfig) (sdklog.Exporter, error) {
 			return stdoutlog.New(stdoutlog.WithWriter(os.Stdout))
@@ -343,7 +335,7 @@ func initTextMapPropogator(_ OTelConfig) func(context.Context) (propagation.Text
 
 func (r runner) initTracerProvider(cfg OTelConfig, postRun *postRun) func(context.Context) (trace.TracerProvider, error) {
 	return func(ctx context.Context) (trace.TracerProvider, error) {
-		if cfg.OTLP.Target == "" {
+		if !cfg.Trace.Enabled {
 			return tracenoop.NewTracerProvider(), nil
 		}
 
@@ -376,7 +368,7 @@ func (r runner) initTracerProvider(cfg OTelConfig, postRun *postRun) func(contex
 
 func (r runner) initMeterProvider(cfg OTelConfig, postRun *postRun) func(context.Context) (metric.MeterProvider, error) {
 	return func(ctx context.Context) (metric.MeterProvider, error) {
-		if cfg.OTLP.Target == "" {
+		if !cfg.Metric.Enabled {
 			return metricnoop.NewMeterProvider(), nil
 		}
 
@@ -448,6 +440,7 @@ func detectResource(ctx context.Context, cfg OTelConfig) (*resource.Resource, er
 		resource.StringDetector(semconv.SchemaURL, semconv.ServiceVersionKey, func() (string, error) {
 			return cfg.ServiceVersion, nil
 		}),
+		gcp.NewDetector(),
 	)
 }
 
