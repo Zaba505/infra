@@ -28,7 +28,7 @@ resource "google_project_iam_member" "cloud_trace" {
   member  = "serviceAccount:${google_service_account.this.email}"
 }
 
-resource "google_project_iam_member" "cloud_trace" {
+resource "google_project_iam_member" "cloud_metrics" {
   count = var.cloud_metrics ? 1 : 0
 
   project = data.google_client_config.default.project
