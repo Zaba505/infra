@@ -128,6 +128,8 @@ github.com/z5labs/bedrock v0.12.2 h1:B7W8RtfsJXul/NhJpftRD29HL3LCIwq8uKy+kRV+Dy4
 github.com/z5labs/bedrock v0.12.2/go.mod h1:zZO69k7KOw8Whms4euhxBbD2N4p2PQ3NVLI0MpqrkLM=
 github.com/z5labs/bedrock v0.12.3 h1:KgMAh8xNO9004rX/6bDBwzpY8+iKX0aoTCpPR/iFlio=
 github.com/z5labs/bedrock v0.12.3/go.mod h1:+2ha6JrppsCyobR33R41EviEiQ9KOUHWWfvEtdI0aUs=
+github.com/z5labs/bedrock v0.13.0 h1:gLWvGo+mQmZjQR0CD2BJ5jH+8UgJ757+cBRhNfsGo7Y=
+github.com/z5labs/bedrock v0.13.0/go.mod h1:+2ha6JrppsCyobR33R41EviEiQ9KOUHWWfvEtdI0aUs=
 go.opencensus.io v0.24.0 h1:y73uSU6J157QMP2kn2r30vwW1A2W2WFwSCGnAVxeaD0=
 go.opencensus.io v0.24.0/go.mod h1:vNK8G9p7aAivkbmorf4v+7Hgx+Zs0yY+0fOtgBfjQKo=
 go.opentelemetry.io/contrib/bridges/otelslog v0.5.0 h1:lU3F57OSLK5mQ1PDBVAfDDaKCPv37MrEbCfTzsF4bz0=
