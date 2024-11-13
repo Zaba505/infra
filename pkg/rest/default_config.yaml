@@ -8,4 +8,4 @@ otel:
     project_id: {{env "GOOGLE_CLOUD_PROJECT"}}
 
 http:
-  port: {{env "HTTP_PORT"}}
+  port: {{env "HTTP_PORT" | default 80}}
