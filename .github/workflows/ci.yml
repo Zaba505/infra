@@ -1,6 +1,14 @@
 name: CI
 
 on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish container images'
+        required: false
+        type: boolean
+        default: false
+
   push:
     branches:
       - main
@@ -37,6 +45,40 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+      - name: Mount Bazel cache
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        with:
+          path: |
+            ~/.cache/bazel
+          key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'MODULE.bazel') }}
+          restore-keys: |
+            ${{ runner.os }}-bazel-
+
+      - name: Fetch dependencies
+        run: bazel fetch //...
+
+      - name: Build
+        run: bazel build //...
+
+      - name: Test
+        run: bazel test //...
+
+      - name: Build Container Images
+        run: |
+          imageTargets=$(bazel query "kind(oci_image, //...)")
+          while IFS=';' read -ra targets; do
+          for target in "${targets[@]}"; do
+              bazel build $target
+          done
+          done <<< "$imageTargets"
+
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'main' || inputs.publish }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
       - name: Generate build version
         id: info
         run: |
@@ -53,23 +95,6 @@ jobs:
           key: ${{ runner.os }}-bazel-${{ hashFiles('.bazelversion', '.bazelrc', 'MODULE.bazel') }}
           restore-keys: |
             ${{ runner.os }}-bazel-
-  
-      - name: Fetch dependencies
-        run: bazel fetch //...
-
-      - name: Build
-        run: bazel build //...
-
-      - name: Test
-        run: bazel test //...
-
-      - name: Tag repo with build version
-        run: |
-          tag=${{ steps.info.outputs.build_version }}
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git tag "${tag}"
-          git push origin --tags
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
@@ -80,17 +105,9 @@ jobs:
 
       - name: Build and publish images
         run: |
-          tarballTargets=$(bazel query "kind(filegroup, //...)" | grep ".tar$")
-          while IFS=';' read -ra tarballs; do
-            for tarball in "${tarballs[@]}"; do
-              bazel build $tarball
-              tarFiles=$(bazel cquery --noshow_progress --ui_event_filters=-info,-stderr --output=files $tarball)
-              img=$(docker load -q --input $tarFiles)
-              imgWithTag=${img#"Loaded image: "}
-              imgAndTag=(${imgWithTag//:/ })
-              img=${imgAndTag[0]}
-              tag=${imgAndTag[1]}
-              docker tag $imgWithTag "$img:${{ steps.info.outputs.build_version }}"
-              docker push -a $img
-            done
-          done <<< "$tarballTargets"
+          pushTargets=$(bazel query "kind(oci_push, //...)")
+          while IFS=';' read -ra targets; do
+          for target in "${targets[@]}"; do
+              bazel run --stamp --embed_label ${{ steps.info.outputs.build_version }} $target
+          done
+          done <<< "$pushTargets"
