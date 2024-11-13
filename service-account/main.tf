@@ -28,6 +28,14 @@ resource "google_project_iam_member" "cloud_trace" {
   member  = "serviceAccount:${google_service_account.this.email}"
 }
 
+resource "google_project_iam_member" "cloud_trace" {
+  count = var.cloud_metrics ? 1 : 0
+
+  project = data.google_client_config.default.project
+  role    = "roles/monitoring.metricWriter"
+  member  = "serviceAccount:${google_service_account.this.email}"
+}
+
 resource "google_project_iam_member" "cloud_storage" {
   count = length(var.cloud_storage.buckets) > 0 ? 1 : 0
 

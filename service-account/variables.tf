@@ -7,6 +7,11 @@ variable "cloud_trace" {
   default = false
 }
 
+variable "cloud_metrics" {
+  type    = bool
+  default = false
+}
+
 variable "cloud_storage" {
   type = object({
     buckets = map(string)
