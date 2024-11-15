@@ -34,6 +34,10 @@ resource "google_compute_region_network_endpoint_group" "default_service" {
   cloud_run {
     service = var.default_service.name
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_backend_service" "default_service" {
@@ -48,6 +52,10 @@ resource "google_compute_backend_service" "default_service" {
       group = google_compute_region_network_endpoint_group.default_service[backend.key].id
     }
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_compute_region_network_endpoint_group" "cloud_run" {
@@ -59,6 +67,10 @@ resource "google_compute_region_network_endpoint_group" "cloud_run" {
 
   cloud_run {
     service = each.value.service_name
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -75,6 +87,10 @@ resource "google_compute_backend_service" "cloud_run" {
     content {
       group = google_compute_region_network_endpoint_group.cloud_run["${each.key}-${backend.value}-neg"].id
     }
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
