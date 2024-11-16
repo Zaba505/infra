@@ -100,6 +100,16 @@ func Header(name string, pattern string, required bool) EndpointOption {
 	}
 }
 
+func PathParam(name string, pattern string, required bool) EndpointOption {
+	return func(eo *endpointOptions) {
+		eo.endOpts = append(eo.endOpts, endpoint.PathParams(endpoint.PathParam{
+			Name:     name,
+			Pattern:  pattern,
+			Required: required,
+		}))
+	}
+}
+
 func QueryParam(name string, pattern string, required bool) EndpointOption {
 	return func(eo *endpointOptions) {
 		eo.endOpts = append(eo.endOpts, endpoint.QueryParams(endpoint.QueryParam{
