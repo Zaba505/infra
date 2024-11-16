@@ -38,6 +38,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 	tracenoop "go.opentelemetry.io/otel/trace/noop"
+	"google.golang.org/api/option"
 )
 
 type Config struct {
@@ -177,7 +178,11 @@ func Run[T any](r io.Reader, f func(context.Context, T) ([]Endpoint, error)) {
 		srcs:           srcs,
 		detectResource: detectResource,
 		newTraceExporter: func(ctx context.Context, oc OTelConfig) (sdktrace.SpanExporter, error) {
-			return texporter.New()
+			return texporter.New(
+				texporter.WithTraceClientOptions([]option.ClientOption{
+					option.WithTelemetryDisabled(),
+				}),
+			)
 		},
 		newMetricExporter: func(ctx context.Context, oc OTelConfig) (sdkmetric.Exporter, error) {
 			return mexporter.New()

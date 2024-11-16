@@ -32,5 +32,6 @@ go_library(
         "@io_opentelemetry_go_otel_sdk_metric//:metric",
         "@io_opentelemetry_go_otel_trace//:trace",
         "@io_opentelemetry_go_otel_trace//noop",
+        "@org_golang_google_api//option",
     ],
 )
