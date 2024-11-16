@@ -48,6 +48,7 @@ func Endpoint(opts ...Option) rest.Endpoint {
 	return rest.Get(
 		"/bootstrap/image/{id}",
 		h,
+		rest.PathParam("id", "", false),
 	)
 }
 
