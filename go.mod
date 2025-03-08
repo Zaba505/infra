@@ -9,7 +9,7 @@ require (
 	github.com/fclairamb/ftpserverlib v0.24.1
 	github.com/googleapis/gax-go/v2 v2.14.0
 	github.com/spf13/afero v1.11.0
-	github.com/swaggest/openapi-go v0.2.54
+	github.com/swaggest/openapi-go v0.2.57
 	github.com/z5labs/bedrock v0.13.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.7.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.32.0
@@ -45,8 +45,8 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	github.com/swaggest/jsonschema-go v0.3.72 // indirect
-	github.com/swaggest/refl v1.3.0 // indirect
+	github.com/swaggest/jsonschema-go v0.3.73 // indirect
+	github.com/swaggest/refl v1.3.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.56.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.57.0 // indirect
