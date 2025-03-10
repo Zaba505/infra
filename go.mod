@@ -1,6 +1,8 @@
 module github.com/Zaba505/infra
 
-go 1.22.2
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/storage v1.43.0
@@ -21,7 +23,7 @@ require (
 	go.opentelemetry.io/otel/sdk/log v0.11.0
 	go.opentelemetry.io/otel/sdk/metric v1.35.0
 	go.opentelemetry.io/otel/trace v1.35.0
-	golang.org/x/sync v0.10.0
+	golang.org/x/sync v0.12.0
 	google.golang.org/api v0.216.0
 )
 
