@@ -3,7 +3,7 @@ module github.com/Zaba505/infra
 go 1.22.2
 
 require (
-	cloud.google.com/go/storage v1.43.0
+	cloud.google.com/go/storage v1.51.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.51.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.27.0
 	github.com/fclairamb/ftpserverlib v0.25.0
