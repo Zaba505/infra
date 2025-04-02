@@ -10,7 +10,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.1
 	github.com/spf13/afero v1.11.0
 	github.com/swaggest/openapi-go v0.2.57
-	github.com/z5labs/bedrock v0.13.0
+	github.com/z5labs/bedrock v0.19.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.10.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.35.0
 	go.opentelemetry.io/otel v1.35.0
