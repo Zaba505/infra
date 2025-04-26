@@ -1,0 +1,20 @@
+{
+    "extends": [
+        "config:best-practices"
+    ],
+    "osvVulnerabilityAlerts": true,
+    "schedule": ["before 4am"],
+    "baseBranches": ["main"],
+    "labels": ["dependencies"],
+    "packageRules": [
+        {
+            "matchManagers": ["gomod"],
+            "matchDepTypes": ["indirect"],
+            "enabled": true
+        }
+    ],
+    "postUpdateOptions": [
+        "gomodTidy",
+        "gomodUpdateImportPaths"
+    ]
+}
