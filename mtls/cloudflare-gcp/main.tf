@@ -7,7 +7,7 @@ terraform {
 
     google = {
       source  = "hashicorp/google"
-      version = "6.24.0"
+      version = "6.32.0"
     }
 
     tls = {
