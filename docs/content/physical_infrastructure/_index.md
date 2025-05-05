@@ -8,11 +8,11 @@ weight: 10
 
 ### Router
 
-Ubiquiti Dream Machine Pro
+[Ubiquiti Dream Machine Pro](https://store.ui.com/us/en/products/udm-pro)
 
 ### Switch
 
-Ubiquiti 48 port PoE
+[Ubiquiti 48 port PoE](https://store.ui.com/us/en/category/all-switching/products/usw-48-poe)
 
 ### Servers
 
