@@ -9,7 +9,7 @@ require (
 	github.com/fclairamb/ftpserverlib v0.25.0
 	github.com/googleapis/gax-go/v2 v2.14.1
 	github.com/spf13/afero v1.14.0
-	github.com/swaggest/openapi-go v0.2.57
+	github.com/swaggest/openapi-go v0.2.58
 	github.com/z5labs/bedrock v0.13.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.10.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.35.0
@@ -51,7 +51,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
-	github.com/swaggest/jsonschema-go v0.3.73 // indirect
+	github.com/swaggest/jsonschema-go v0.3.74 // indirect
 	github.com/swaggest/refl v1.3.1 // indirect
 	github.com/zeebo/errs v1.4.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
