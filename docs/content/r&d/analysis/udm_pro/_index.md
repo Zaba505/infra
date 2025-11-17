@@ -1,7 +1,6 @@
 ---
-type: docs
 title: "Ubiquiti Dream Machine Pro Analysis"
-linkTitle: "UDM Pro"
+type: docs
 description: >
   Comprehensive analysis of the Ubiquiti Dream Machine Pro capabilities, focusing on network boot (PXE) support and infrastructure integration.
 ---

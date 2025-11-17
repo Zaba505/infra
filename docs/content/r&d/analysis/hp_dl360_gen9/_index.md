@@ -1,7 +1,6 @@
 ---
-type: docs
 title: "HP ProLiant DL360 Gen9 Analysis"
-linkTitle: "HP DL360 Gen9"
+type: docs
 description: >
   Technical analysis of HP ProLiant DL360 Gen9 server capabilities with focus on network boot support
 ---
