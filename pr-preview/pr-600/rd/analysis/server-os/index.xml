@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Server Operating System Analysis on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/</link><description>Recent content in Server Operating System Analysis on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/index.xml" rel="self" type="application/rss+xml"/><item><title>Ubuntu Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/ubuntu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/ubuntu/</guid><description>&lt;h1 id="ubuntu-server-for-kubernetes"&gt;Ubuntu Server for Kubernetes&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Server Operating System Analysis on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/</link><description>Recent content in Server Operating System Analysis on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/index.xml" rel="self" type="application/rss+xml"/><item><title>Ubuntu Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/ubuntu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/ubuntu/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Ubuntu Server is a popular general-purpose Linux distribution developed by Canonical. It provides Long Term Support (LTS) releases with 5 years of standard support and optional Extended Security Maintenance (ESM).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -10,8 +9,7 @@
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Fedora Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/fedora/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/fedora/</guid><description>&lt;h1 id="fedora-server-for-kubernetes"&gt;Fedora Server for Kubernetes&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Fedora Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/fedora/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/fedora/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Fedora Server is a cutting-edge Linux distribution sponsored by Red Hat, serving as the upstream for Red Hat Enterprise Linux (RHEL). It emphasizes innovation with the latest software packages and kernel versions.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -22,8 +20,7 @@
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/talos-linux/</guid><description>&lt;h1 id="talos-linux-for-kubernetes"&gt;Talos Linux for Kubernetes&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Talos Linux is a modern operating system designed specifically for running Kubernetes. It is API-driven, immutable, and minimal, with no SSH access, shell, or package manager. All configuration is done via a declarative API.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -34,8 +31,7 @@
 &lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: talosctl CLI + Kubernetes API&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Talos Linux has &lt;strong&gt;built-in Kubernetes&lt;/strong&gt; - there is only one installation method.&lt;/p&gt;</description></item><item><title>Harvester Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/harvester/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/harvester/</guid><description>&lt;h1 id="harvester-hci-for-kubernetes"&gt;Harvester HCI for Kubernetes&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Talos Linux has &lt;strong&gt;built-in Kubernetes&lt;/strong&gt; - there is only one installation method.&lt;/p&gt;</description></item><item><title>Harvester Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/harvester/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-600/rd/analysis/server-os/harvester/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Harvester is a Hyperconverged Infrastructure (HCI) platform built on Kubernetes, designed to provide VM and container management on a unified platform. It combines compute, storage, and networking with built-in K3s for orchestration.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
