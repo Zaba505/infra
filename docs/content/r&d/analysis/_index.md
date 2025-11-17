@@ -28,6 +28,15 @@ This section contains detailed research and analysis of various technologies eva
   - WireGuard VPN deployment and integration
   - Cost analysis and performance considerations
 
+## Operating Systems
+
+- [**Server Operating Systems**](./server-os/) - OS evaluation for Kubernetes homelab infrastructure
+  - Ubuntu Server analysis (kubeadm, k3s, MicroK8s)
+  - Fedora Server analysis (kubeadm with CRI-O)
+  - Talos Linux analysis (purpose-built Kubernetes OS)
+  - Harvester HCI analysis (hyperconverged platform)
+  - Comparison of setup complexity, maintenance, security, and resource overhead
+
 ## Hardware
 
 - [**HP DL360 Gen9**](./hp_dl360_gen9/) - Enterprise server hardware analysis
