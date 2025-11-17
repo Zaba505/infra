@@ -1,4 +1,5 @@
 ---
+type: docs
 title: "Ubiquiti Dream Machine Pro Analysis"
 linkTitle: "UDM Pro"
 weight: 1
