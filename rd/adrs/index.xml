@@ -19,4 +19,11 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>[0004] Server Operating System Selection</title><link>https://zaba505.github.io/infra/rd/adrs/0004-server-operating-system/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0004-server-operating-system/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;The homelab infrastructure requires a server operating system to run Kubernetes clusters for container workloads. The choice of operating system significantly impacts ease of cluster initialization, ongoing maintenance burden, security posture, and operational complexity.&lt;/p&gt;</description></item></channel></rss>
