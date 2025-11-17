@@ -110,6 +110,9 @@ Build a custom network boot server in Go, leveraging the existing `z5labs/humus`
 architecture-beta
     group gcp(cloud)[GCP VPC]
     
+    service wg_nlb(internet)[Network LB] in gcp
+    service wireguard(server)[WireGuard Gateway] in gcp
+    service https_lb(internet)[HTTPS LB] in gcp
     service compute(server)[Compute Engine] in gcp
     service storage(database)[Cloud Storage] in gcp
     service secrets(disk)[Secret Manager] in gcp
@@ -120,7 +123,10 @@ architecture-beta
     service servers(server)[Bare Metal Servers] in homelab
     
     servers:L -- R:udm
-    udm:R -- L:compute
+    udm:R -- L:wg_nlb
+    wg_nlb:R -- L:wireguard
+    wireguard:R -- L:https_lb
+    https_lb:R -- L:compute
     compute:B --> T:storage
     compute:R --> L:secrets
     compute:T --> B:monitoring
@@ -267,6 +273,9 @@ Deploy [Matchbox](https://matchbox.psdn.io/), an open-source network boot server
 architecture-beta
     group gcp(cloud)[GCP VPC]
     
+    service wg_nlb(internet)[Network LB] in gcp
+    service wireguard(server)[WireGuard Gateway] in gcp
+    service https_lb(internet)[HTTPS LB] in gcp
     service compute(server)[Compute Engine] in gcp
     service storage(database)[Cloud Storage] in gcp
     service secrets(disk)[Secret Manager] in gcp
@@ -277,7 +286,10 @@ architecture-beta
     service servers(server)[Bare Metal Servers] in homelab
     
     servers:L -- R:udm
-    udm:R -- L:compute
+    udm:R -- L:wg_nlb
+    wg_nlb:R -- L:wireguard
+    wireguard:R -- L:https_lb
+    https_lb:R -- L:compute
     compute:B --> T:storage
     compute:R --> L:secrets
     compute:T --> B:monitoring
