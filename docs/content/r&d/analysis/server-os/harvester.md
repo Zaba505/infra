@@ -5,8 +5,6 @@ weight: 4
 description: "Analysis of Harvester HCI for Kubernetes homelab infrastructure"
 ---
 
-# Harvester HCI for Kubernetes
-
 ## Overview
 
 Harvester is a Hyperconverged Infrastructure (HCI) platform built on Kubernetes, designed to provide VM and container management on a unified platform. It combines compute, storage, and networking with built-in K3s for orchestration.

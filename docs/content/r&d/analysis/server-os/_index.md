@@ -5,8 +5,6 @@ weight: 60
 description: "Evaluation of operating systems for homelab Kubernetes infrastructure"
 ---
 
-# Server Operating System Analysis
-
 This section provides detailed analysis of operating systems evaluated for the homelab server infrastructure, with a focus on Kubernetes cluster setup and maintenance.
 
 ## Overview

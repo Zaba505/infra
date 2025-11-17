@@ -5,8 +5,6 @@ weight: 2
 description: "Analysis of Fedora Server for Kubernetes homelab infrastructure"
 ---
 
-# Fedora Server for Kubernetes
-
 ## Overview
 
 Fedora Server is a cutting-edge Linux distribution sponsored by Red Hat, serving as the upstream for Red Hat Enterprise Linux (RHEL). It emphasizes innovation with the latest software packages and kernel versions.

@@ -5,8 +5,6 @@ weight: 1
 description: "Analysis of Ubuntu for Kubernetes homelab infrastructure"
 ---
 
-# Ubuntu Server for Kubernetes
-
 ## Overview
 
 Ubuntu Server is a popular general-purpose Linux distribution developed by Canonical. It provides Long Term Support (LTS) releases with 5 years of standard support and optional Extended Security Maintenance (ESM).

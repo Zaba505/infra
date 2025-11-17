@@ -5,8 +5,6 @@ weight: 3
 description: "Analysis of Talos Linux for Kubernetes homelab infrastructure"
 ---
 
-# Talos Linux for Kubernetes
-
 ## Overview
 
 Talos Linux is a modern operating system designed specifically for running Kubernetes. It is API-driven, immutable, and minimal, with no SSH access, shell, or package manager. All configuration is done via a declarative API.
