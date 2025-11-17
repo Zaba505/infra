@@ -12,7 +12,38 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;When setting up a home lab infrastructure, servers need to be provisioned and booted over the network using PXE (Preboot Execution Environment). This requires a TFTP/HTTP server to serve boot files to requesting machines. The question is: where should this boot server be hosted to balance security, reliability, cost, and operational complexity?&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
+&lt;p&gt;When setting up a home lab infrastructure, servers need to be provisioned and booted over the network using PXE (Preboot Execution Environment). This requires a TFTP/HTTP server to serve boot files to requesting machines. The question is: where should this boot server be hosted to balance security, reliability, cost, and operational complexity?&lt;/p&gt;</description></item><item><title>[0003] Cloud Provider Selection for Network Boot Infrastructure</title><link>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
+&lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
+&lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;Not natively supported by Elastic Load Balancing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;AWS&amp;rsquo;s Elastic Load Balancing services do &lt;strong&gt;not&lt;/strong&gt; support TFTP protocol natively:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Application Load Balancer (ALB)&lt;/strong&gt;: HTTP/HTTPS only (Layer 7)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Network Load Balancer (NLB)&lt;/strong&gt;: TCP/UDP support, but &lt;strong&gt;not TFTP-aware&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Classic Load Balancer&lt;/strong&gt;: Deprecated, similar limitations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TFTP operates on UDP port 69 with unique protocol semantics (variable block sizes, retransmissions, port negotiation) that standard load balancers cannot parse.&lt;/p&gt;</description></item><item><title>AWS WireGuard VPN Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/wireguard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/wireguard/</guid><description>&lt;h1 id="wireguard-vpn-support-on-amazon-web-services"&gt;WireGuard VPN Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes options for deploying WireGuard VPN on AWS to establish secure site-to-site connectivity between the home lab and cloud-hosted network boot infrastructure.&lt;/p&gt;
+&lt;h2 id="wireguard-overview"&gt;WireGuard Overview&lt;/h2&gt;
+&lt;p&gt;WireGuard is a modern VPN protocol that provides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Simplicity&lt;/strong&gt;: Minimal codebase (~4,000 lines vs 100,000+ for IPsec)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt;: High throughput with low overhead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Modern cryptography (Curve25519, ChaCha20, Poly1305, BLAKE2s)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Configuration&lt;/strong&gt;: Simple key-based configuration&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Integration&lt;/strong&gt;: Mainline Linux kernel support since 5.6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="aws-native-vpn-support"&gt;AWS Native VPN Support&lt;/h2&gt;
+&lt;h3 id="site-to-site-vpn-ipsec"&gt;Site-to-Site VPN (IPsec)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
 &lt;h3 id="hardware-assembly"&gt;Hardware Assembly&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;
@@ -93,7 +124,25 @@ ADR Categories:
  ┌──────────────┐
  │ PXE Clients │
  └──────────────┘
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Use case:&lt;/strong&gt; Lab, development, small deployments (&amp;lt;50 machines)&lt;/p&gt;</description></item><item><title>Hardware Specifications</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/specifications/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/specifications/</guid><description>&lt;h2 id="system-overview"&gt;System Overview&lt;/h2&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Use case:&lt;/strong&gt; Lab, development, small deployments (&amp;lt;50 machines)&lt;/p&gt;</description></item><item><title>GCP Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/google-cloud/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/google-cloud/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-google-cloud-platform"&gt;Network Boot Protocol Support on Google Cloud Platform&lt;/h1&gt;
+&lt;p&gt;This document analyzes GCP&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
+&lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
+&lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;Not natively supported by Cloud Load Balancing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;GCP&amp;rsquo;s Cloud Load Balancing services (Application Load Balancer, Network Load Balancer) do &lt;strong&gt;not&lt;/strong&gt; support TFTP protocol natively. TFTP operates on UDP port 69 and has unique protocol requirements that are not compatible with GCP&amp;rsquo;s load balancing services.&lt;/p&gt;</description></item><item><title>GCP WireGuard VPN Support</title><link>https://zaba505.github.io/infra/rd/analysis/google-cloud/wireguard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/google-cloud/wireguard/</guid><description>&lt;h1 id="wireguard-vpn-support-on-google-cloud-platform"&gt;WireGuard VPN Support on Google Cloud Platform&lt;/h1&gt;
+&lt;p&gt;This document analyzes options for deploying WireGuard VPN on GCP to establish secure site-to-site connectivity between the home lab and cloud-hosted network boot infrastructure.&lt;/p&gt;
+&lt;h2 id="wireguard-overview"&gt;WireGuard Overview&lt;/h2&gt;
+&lt;p&gt;WireGuard is a modern VPN protocol that provides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Simplicity&lt;/strong&gt;: Minimal codebase (~4,000 lines vs 100,000+ for IPsec)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt;: High throughput with low overhead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Modern cryptography (Curve25519, ChaCha20, Poly1305, BLAKE2s)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Configuration&lt;/strong&gt;: Simple key-based configuration&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Integration&lt;/strong&gt;: Mainline Linux kernel support since 5.6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="gcp-native-vpn-support"&gt;GCP Native VPN Support&lt;/h2&gt;
+&lt;h3 id="cloud-vpn-ipsec"&gt;Cloud VPN (IPsec)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Hardware Specifications</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/specifications/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/specifications/</guid><description>&lt;h2 id="system-overview"&gt;System Overview&lt;/h2&gt;
 &lt;p&gt;The HP ProLiant DL360 Gen9 is a dual-socket 1U rack server designed for data center and enterprise deployments, also popular in home lab environments due to its performance and manageability.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Generation&lt;/strong&gt;: Gen9 (2014-2017 product cycle)&lt;br&gt;
 &lt;strong&gt;Form Factor&lt;/strong&gt;: 1U rack-mountable (19-inch standard rack)&lt;br&gt;
