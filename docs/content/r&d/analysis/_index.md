@@ -17,6 +17,17 @@ This section contains detailed research and analysis of various technologies eva
   - Deployment patterns and operational considerations
   - Use case evaluation and comparison with alternatives
 
+## Cloud Providers
+
+- [**Google Cloud Platform**](./google-cloud/) - GCP capabilities for network boot infrastructure
+  - Network boot protocol support (TFTP, HTTP, HTTPS)
+  - WireGuard VPN deployment and integration
+  - Cost analysis and performance considerations
+- [**Amazon Web Services**](./aws/) - AWS capabilities for network boot infrastructure
+  - Network boot protocol support (TFTP, HTTP, HTTPS)
+  - WireGuard VPN deployment and integration
+  - Cost analysis and performance considerations
+
 ## Hardware
 
 - [**HP DL360 Gen9**](./hp_dl360_gen9/) - Enterprise server hardware analysis
