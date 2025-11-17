@@ -28,7 +28,24 @@ ADR Categories:
 &lt;strong&gt;Dimensions&lt;/strong&gt;: 43.46 x 67.31 x 4.29 cm (17.1 x 26.5 x 1.69 in)&lt;/p&gt;
 &lt;h2 id="processor-support"&gt;Processor Support&lt;/h2&gt;
 &lt;h3 id="supported-cpu-families"&gt;Supported CPU Families&lt;/h3&gt;
-&lt;p&gt;The DL360 Gen9 supports Intel Xeon E5-2600 v3 and v4 series processors:&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
+&lt;p&gt;The DL360 Gen9 supports Intel Xeon E5-2600 v3 and v4 series processors:&lt;/p&gt;</description></item><item><title>Network Boot Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/network-boot/</guid><description>&lt;h1 id="network-boot-support-in-matchbox"&gt;Network Boot Support in Matchbox&lt;/h1&gt;
+&lt;p&gt;Matchbox provides comprehensive network boot support for bare-metal provisioning, supporting multiple boot firmware types and protocols.&lt;/p&gt;
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Matchbox serves as an HTTP entrypoint for network-booted machines but &lt;strong&gt;does not implement DHCP, TFTP, or DNS services itself&lt;/strong&gt;. Instead, it integrates with existing network infrastructure (or companion services like dnsmasq) to provide a complete PXE boot solution.&lt;/p&gt;
+&lt;h2 id="boot-protocol-support"&gt;Boot Protocol Support&lt;/h2&gt;
+&lt;h3 id="1-pxe-preboot-execution-environment"&gt;1. PXE (Preboot Execution Environment)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Legacy BIOS support via chainloading to iPXE:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>UDM Pro VLAN Configuration &amp; Capabilities</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/udm_pro/vlans/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/udm_pro/vlans/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The &lt;strong&gt;Ubiquiti Dream Machine Pro (UDM Pro)&lt;/strong&gt; provides robust VLAN support through native 802.1Q tagging, enabling network segmentation for security, performance, and organizational purposes. This document covers VLAN configuration capabilities, port assignments, and VPN integration.&lt;/p&gt;
+&lt;h2 id="vlan-fundamentals-on-udm-pro"&gt;VLAN Fundamentals on UDM Pro&lt;/h2&gt;
+&lt;h3 id="supported-standards"&gt;Supported Standards&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;802.1Q VLAN Tagging&lt;/strong&gt;: Full support for standard VLAN tagging&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VLAN Range&lt;/strong&gt;: IDs 1-4094 (standard IEEE 802.1Q range)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Maximum VLANs&lt;/strong&gt;: Up to 32 networks/VLANs per device&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Native VLAN&lt;/strong&gt;: Configurable per port (default: VLAN 1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="vlan-types"&gt;VLAN Types&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Corporate Network&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
 &lt;h3 id="hardware-assembly"&gt;Hardware Assembly&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;
@@ -57,34 +74,70 @@ ADR Categories:
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;&lt;strong&gt;Install Network Cards&lt;/strong&gt;:&lt;/p&gt;</description></item><item><title>Network Boot</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/physical_infrastructure/network_boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/physical_infrastructure/network_boot/</guid><description>&lt;div class="alert alert-info" role="alert"&gt;
-&lt;h4 class="alert-heading"&gt;Note&lt;/h4&gt;
-
- &lt;p&gt;Network booting only applies to following machines in the homelab:&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Install Network Cards&lt;/strong&gt;:&lt;/p&gt;</description></item><item><title>Configuration Model</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/configuration/</guid><description>&lt;h1 id="matchbox-configuration-model"&gt;Matchbox Configuration Model&lt;/h1&gt;
+&lt;p&gt;Matchbox uses a flexible configuration model based on &lt;strong&gt;Profiles&lt;/strong&gt; (what to provision) and &lt;strong&gt;Groups&lt;/strong&gt; (which machines get which profile), with support for templating and metadata.&lt;/p&gt;
+&lt;h2 id="architecture-overview"&gt;Architecture Overview&lt;/h2&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;┌─────────────────────────────────────────────────────────────┐
+│ Matchbox Store │
+│ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+│ │ Profiles │ │ Groups │ │ Assets │ │
+│ └────────────┘ └────────────┘ └────────────┘ │
+│ │ │ │
+│ │ │ │
+│ ▼ ▼ │
+│ ┌─────────────────────────────────────┐ │
+│ │ Matcher Engine │ │
+│ │ (Label-based group selection) │ │
+│ └─────────────────────────────────────┘ │
+│ │ │
+│ ▼ │
+│ ┌─────────────────────────────────────┐ │
+│ │ Template Renderer │ │
+│ │ (Go templates + metadata) │ │
+│ └─────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+ │
+ ▼
+ Rendered Config (iPXE, Ignition, etc.)
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id="data-directory-structure"&gt;Data Directory Structure&lt;/h2&gt;
+&lt;p&gt;Matchbox uses a FileStore (default) that reads from &lt;code&gt;-data-path&lt;/code&gt; (default: &lt;code&gt;/var/lib/matchbox&lt;/code&gt;):&lt;/p&gt;</description></item><item><title>Deployment Patterns</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/deployment/</guid><description>&lt;h1 id="matchbox-deployment-patterns"&gt;Matchbox Deployment Patterns&lt;/h1&gt;
+&lt;p&gt;Analysis of deployment architectures, installation methods, and operational considerations for running Matchbox in production.&lt;/p&gt;
+&lt;h2 id="deployment-architectures"&gt;Deployment Architectures&lt;/h2&gt;
+&lt;h3 id="single-host-deployment"&gt;Single-Host Deployment&lt;/h3&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;┌─────────────────────────────────────────────────────┐
+│ Provisioning Host │
+│ ┌─────────────┐ ┌─────────────┐ │
+│ │ Matchbox │ │ dnsmasq │ │
+│ │ :8080 HTTP │ │ DHCP/TFTP │ │
+│ │ :8081 gRPC │ │ :67,:69 │ │
+│ └─────────────┘ └─────────────┘ │
+│ │ │ │
+│ └──────────┬───────────┘ │
+│ │ │
+│ /var/lib/matchbox/ │
+│ ├── groups/ │
+│ ├── profiles/ │
+│ ├── ignition/ │
+│ └── assets/ │
+└─────────────────────────────────────────────────────┘
+ │
+ │ Network
+ ▼
+ ┌──────────────┐
+ │ PXE Clients │
+ └──────────────┘
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Use case:&lt;/strong&gt; Lab, development, small deployments (&amp;lt;50 machines)&lt;/p&gt;</description></item><item><title>Use Case Evaluation</title><link>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/evaluation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-592/rd/analysis/matchbox/evaluation/</guid><description>&lt;h1 id="matchbox-use-case-evaluation"&gt;Matchbox Use Case Evaluation&lt;/h1&gt;
+&lt;p&gt;Analysis of Matchbox&amp;rsquo;s suitability for various use cases, strengths, limitations, and comparison with alternative provisioning solutions.&lt;/p&gt;
+&lt;h2 id="use-case-fit-analysis"&gt;Use Case Fit Analysis&lt;/h2&gt;
+&lt;h3 id="-ideal-use-cases"&gt;✅ Ideal Use Cases&lt;/h3&gt;
+&lt;h4 id="1-bare-metal-kubernetes-clusters"&gt;1. Bare-Metal Kubernetes Clusters&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;Scenario:&lt;/strong&gt; Provisioning 10-1000 physical servers for Kubernetes nodes&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why Matchbox Excels:&lt;/strong&gt;&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;a href="https://zaba505.github.io/infra/pr-preview/pr-592/physical_infrastructure/#servers"&gt;hp-dl360&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Ignition-native (perfect for Fedora CoreOS/Flatcar)&lt;/li&gt;
+&lt;li&gt;Declarative machine provisioning via Terraform&lt;/li&gt;
+&lt;li&gt;Label-based matching (region, role, hardware type)&lt;/li&gt;
+&lt;li&gt;Integration with Typhoon Kubernetes distribution&lt;/li&gt;
+&lt;li&gt;Minimal OS surface (immutable, container-optimized)&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;/div&gt;
-
-&lt;h2 id="architecture"&gt;Architecture&lt;/h2&gt;
-&lt;pre class="mermaid"&gt;flowchart LR
- subgraph homelab [Homelab]
- server@{ label: &amp;#34;Server&amp;#34;, shape: rect }
- switch@{ label: &amp;#34;Switch&amp;#34;, shape: circle }
- router@{ label: &amp;#34;Router&amp;#34;, shape: circle }
- end
-
- subgraph cloud [Public Cloud]
- wiregaurd@{ label: &amp;#34;Wiregaurd&amp;#34;, shape: rect }
- matchbox@{ label: &amp;#34;Matchbox&amp;#34;, shape: rect }
- end
-
- server --- switch
- switch --- router
- router --- wiregaurd
- wiregaurd --- matchbox&lt;/pre&gt;
-&lt;h2 id="homelab"&gt;Homelab&lt;/h2&gt;
-&lt;h3 id="setting-up-network-boot-vlan"&gt;Setting up Network Boot VLAN&lt;/h3&gt;
-&lt;p&gt;We begin by creating a VLAN on the router and assign by &lt;a href="https://en.wikipedia.org/wiki/MAC_address"&gt;MAC address&lt;/a&gt;
-the first port of each server to it.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;&lt;strong&gt;Example workflow:&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
