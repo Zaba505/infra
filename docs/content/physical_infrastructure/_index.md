@@ -102,9 +102,7 @@ VLAN firewall rules.
 
 ### Network Boot VLAN
 
-This an exclusive VLAN for configuring the servers to network boot. This VLAN
-is covered in more depth on the specific
-[Network Boot]({{% ref "/physical_infrastructure/network_boot.md" %}}) documentation.
+This an exclusive VLAN for configuring the servers to network boot.
 
 ### Homelab VLAN
 
