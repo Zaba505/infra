@@ -9,7 +9,7 @@ require (
 	github.com/fclairamb/ftpserverlib v0.25.0
 	github.com/googleapis/gax-go/v2 v2.14.1
 	github.com/spf13/afero v1.14.0
-	github.com/swaggest/openapi-go v0.2.58
+	github.com/swaggest/openapi-go v0.2.60
 	github.com/z5labs/bedrock v0.13.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.38.0
