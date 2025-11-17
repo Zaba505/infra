@@ -12,9 +12,14 @@ Create a new Markdown Architectural Decision Record (MADR) following the MADR 4.
    - **Strategic** - High-level architectural decisions affecting the entire system (frameworks, authentication strategies, cross-cutting patterns). Use for foundational technology choices.
    - **User Journey Solution** - Decisions solving specific user journey problems. More tactical than strategic, but still architectural. Use when evaluating approaches to implement user-facing features.
    - **API Design** - API endpoint implementation decisions (pagination, filtering, bulk operations). Use for significant API design trade-offs that warrant documentation.
-5. Determine the next sequential number by checking existing ADRs in `docs/content/r&d/adrs/`
-6. Fill in today's date in YYYY-MM-DD format
-7. Set initial status to "proposed"
+5. Ask the user for the considered options/alternatives they want to evaluate (if not provided, use template placeholders)
+6. Determine the next sequential number by checking existing ADRs in `docs/content/r&d/adrs/`
+7. Fill in today's date in YYYY-MM-DD format
+8. Set initial status to "proposed"
+9. When populating the template with user-provided options:
+   - Replace the "Considered Options" bullet list with the actual option names
+   - Generate a "Pros and Cons" subsection for each provided option
+   - Reference the first option in "Decision Outcome" as the placeholder choice
 
 **MADR Template to use:**
 
