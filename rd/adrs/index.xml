@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Architecture Decision Records on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/rd/adrs/</link><description>Recent content in Architecture Decision Records on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/rd/adrs/index.xml" rel="self" type="application/rss+xml"/><item><title>[0001] Use MADR for Architecture Decision Records</title><link>https://zaba505.github.io/infra/rd/adrs/0001-use-madr-for-architecture-decision-records/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0001-use-madr-for-architecture-decision-records/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;As the project grows, architectural decisions are made that have long-term impacts on the system&amp;rsquo;s design, maintainability, and scalability. Without a structured way to document these decisions, we risk losing the context and rationale behind important choices, making it difficult for current and future team members to understand why certain approaches were taken.&lt;/p&gt;</description></item></channel></rss>
