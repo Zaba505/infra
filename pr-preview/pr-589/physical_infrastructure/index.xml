@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Physical Infrastructure on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-589/physical_infrastructure/</link><description>Recent content in Physical Infrastructure on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-589/physical_infrastructure/index.xml" rel="self" type="application/rss+xml"/><item><title>Network Boot</title><link>https://zaba505.github.io/infra/pr-preview/pr-589/physical_infrastructure/network_boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-589/physical_infrastructure/network_boot/</guid><description>&lt;div class="alert alert-info" role="alert"&gt;
+&lt;h4 class="alert-heading"&gt;Note&lt;/h4&gt;
+
+ &lt;p&gt;Network booting only applies to following machines in the homelab:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://zaba505.github.io/infra/pr-preview/pr-589/physical_infrastructure/#servers"&gt;hp-dl360&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;/div&gt;
+
+&lt;h2 id="architecture"&gt;Architecture&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;flowchart LR
+ subgraph homelab [Homelab]
+ server@{ label: &amp;#34;Server&amp;#34;, shape: rect }
+ switch@{ label: &amp;#34;Switch&amp;#34;, shape: circle }
+ router@{ label: &amp;#34;Router&amp;#34;, shape: circle }
+ end
+
+ subgraph cloud [Public Cloud]
+ wiregaurd@{ label: &amp;#34;Wiregaurd&amp;#34;, shape: rect }
+ matchbox@{ label: &amp;#34;Matchbox&amp;#34;, shape: rect }
+ end
+
+ server --- switch
+ switch --- router
+ router --- wiregaurd
+ wiregaurd --- matchbox&lt;/pre&gt;
+&lt;h2 id="homelab"&gt;Homelab&lt;/h2&gt;
+&lt;h3 id="setting-up-network-boot-vlan"&gt;Setting up Network Boot VLAN&lt;/h3&gt;
+&lt;p&gt;We begin by creating a VLAN on the router and assign by &lt;a href="https://en.wikipedia.org/wiki/MAC_address"&gt;MAC address&lt;/a&gt;
+the first port of each server to it.&lt;/p&gt;</description></item></channel></rss>
