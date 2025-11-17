@@ -2,7 +2,6 @@
 type: docs
 title: "UDM Pro VLAN Configuration & Capabilities"
 linkTitle: "VLANs"
-weight: 2
 description: >
   Detailed analysis of VLAN support on the Ubiquiti Dream Machine Pro, including port-based VLAN assignment and VPN integration.
 ---

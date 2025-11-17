@@ -1,7 +1,6 @@
 ---
 type: docs
 title: "Configuration Guide"
-weight: 3
 description: >
   Setup, optimization, and configuration recommendations for HP ProLiant DL360 Gen9 in home lab environments
 ---

@@ -1,7 +1,6 @@
 ---
 title: "Deployment Patterns"
 type: docs
-weight: 4
 description: "Matchbox deployment options and operational considerations"
 ---
 

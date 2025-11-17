@@ -1,7 +1,6 @@
 ---
 type: docs
 title: "Hardware Specifications"
-weight: 2
 description: >
   Detailed hardware specifications and configuration options for HP ProLiant DL360 Gen9
 ---

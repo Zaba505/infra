@@ -1,7 +1,6 @@
 ---
 title: "Network Boot Support"
 type: docs
-weight: 2
 description: "Detailed analysis of Matchbox's network boot capabilities"
 ---
 

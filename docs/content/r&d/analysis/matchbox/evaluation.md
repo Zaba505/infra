@@ -1,7 +1,6 @@
 ---
 title: "Use Case Evaluation"
 type: docs
-weight: 5
 description: "Evaluation of Matchbox for specific use cases and comparison with alternatives"
 ---
 

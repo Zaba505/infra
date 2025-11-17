@@ -1,7 +1,7 @@
 ---
 title: Technology Analysis
 type: docs
-weight: 2
+weight: 10
 description: "In-depth analysis of technologies and tools evaluated for home lab infrastructure"
 ---
 

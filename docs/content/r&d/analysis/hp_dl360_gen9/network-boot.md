@@ -1,7 +1,6 @@
 ---
 type: docs
 title: "Network Boot Capabilities"
-weight: 1
 description: >
   Comprehensive analysis of network boot support on HP ProLiant DL360 Gen9
 ---

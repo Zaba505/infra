@@ -1,7 +1,6 @@
 ---
 title: "Matchbox Analysis"
 type: docs
-weight: 1
 description: "Analysis of Matchbox network boot service capabilities and architecture"
 ---
 

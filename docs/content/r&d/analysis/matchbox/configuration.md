@@ -1,7 +1,6 @@
 ---
 title: "Configuration Model"
 type: docs
-weight: 3
 description: "Analysis of Matchbox's profile, group, and templating system"
 ---
 
