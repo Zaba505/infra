@@ -1,3 +1,0 @@
-common --enable_bzlmod
-
-build --show_timestamps

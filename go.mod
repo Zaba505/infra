@@ -8,7 +8,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.27.0
 	github.com/fclairamb/ftpserverlib v0.25.0
 	github.com/googleapis/gax-go/v2 v2.14.1
-	github.com/spf13/afero v1.14.0
 	github.com/swaggest/openapi-go v0.2.58
 	github.com/z5labs/bedrock v0.13.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.13.0
@@ -50,6 +49,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20250313105119-ba97887b0a25 // indirect
+	github.com/spf13/afero v1.14.0 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/swaggest/jsonschema-go v0.3.79 // indirect
 	github.com/swaggest/refl v1.4.0 // indirect
