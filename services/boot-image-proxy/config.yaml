@@ -1,2 +1,0 @@
-proxy:
-  target: {{env "PROXY_TARGET_HOST"}}
