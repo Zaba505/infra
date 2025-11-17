@@ -5,7 +5,7 @@ description: >
 type: docs
 weight: 0002
 category: "strategic"
-status: "proposed"
+status: "accepted"
 date: 2025-11-16
 deciders: []
 consulted: []
@@ -39,12 +39,24 @@ When setting up a home lab infrastructure, servers need to be provisioned and bo
 
 ## Decision Outcome
 
-Chosen option: "TBD", because evaluation is in progress. This ADR documents the analysis to inform the final decision.
+Chosen option: "Option 3: TFTP/HTTP server on public cloud (with VPN)", because:
+
+1. **No local machine management**: Unlike Option 1, this avoids the need to maintain dedicated local hardware for the boot server, reducing operational overhead
+2. **Secure protocol support**: The VPN tunnel encrypts all traffic, allowing unsecured protocols like TFTP to be used without risk of data exposure over public internet routes (unlike Option 2)
+3. **Cost-effective VPN**: The UDM Pro natively supports WireGuard, enabling a self-managed VPN solution that avoids expensive managed VPN services (~$180-300/year vs ~$540-900/year)
 
 ### Consequences
 
-* Good, because [to be determined after option selection]
-* Bad, because [to be determined after option selection]
+* Good, because all traffic is encrypted through WireGuard VPN tunnel
+* Good, because boot server is not exposed to public internet (no public attack surface)
+* Good, because trust model is simple - subnet validation similar to local option
+* Good, because centralized cloud management reduces local maintenance burden
+* Good, because boot server remains available even if home lab storage fails
+* Good, because UDM Pro's native WireGuard support keeps costs at ~$180-300/year
+* Bad, because boot process depends on both internet connectivity and VPN availability
+* Bad, because VPN adds latency to boot file transfers
+* Bad, because VPN gateway becomes an additional failure point
+* Bad, because higher ongoing cost compared to local-only option (~$180-300/year vs ~$10/year)
 
 ### Confirmation
 
