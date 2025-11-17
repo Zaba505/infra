@@ -1,0 +1,3 @@
+openapi:
+  title: "Load Balancer Sink"
+  version: "v0.1.0"

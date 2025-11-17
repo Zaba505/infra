@@ -4,13 +4,14 @@ import (
 	"bytes"
 	_ "embed"
 
-	"github.com/Zaba505/infra/pkg/rest"
-	"github.com/Zaba505/infra/services/lb-sink/service"
+	"github.com/Zaba505/infra/services/lb-sink/app"
+
+	"github.com/z5labs/humus/rest"
 )
 
 //go:embed config.yaml
-var cfgSrc []byte
+var configBytes []byte
 
 func main() {
-	rest.Run(bytes.NewReader(cfgSrc), service.Init)
+	rest.Run(bytes.NewReader(configBytes), app.Init)
 }

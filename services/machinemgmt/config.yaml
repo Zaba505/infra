@@ -1,2 +1,0 @@
-storage:
-  bucket: {{env "IMAGE_BUCKET_NAME"}}
