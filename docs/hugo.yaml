@@ -1,18 +1,22 @@
 title: Zaba505's Home Lab
-language: en-us
+languageCode: en-us
 
 module:
   hugoVersion:
     extended: true
-    min: "0.73.0"
+    min: "0.147.0"
   imports:
-    - path: "github.com/google/docsy"
+    - path: github.com/google/docsy
+      disable: false
+    - path: github.com/google/docsy/dependencies
+      disable: false
 
 enableRobotsTXT: true
 
 # Will give values to .Lastmod etc.
 enableGitInfo: true
 
+# Image processing configuration
 imaging:
   resampleFilter: CatmullRom
   quality: 75
@@ -21,12 +25,10 @@ imaging:
 # Highlighting config
 pygmentsCodeFences: true
 pygmentsUseClasses: false
-# Use the new Chroma Go highlighter in Hugo.
 pygmentsUseClassic: false
-# pygmentsOptions: "linenos=table"
-# See https://help.farbox.com/pygments.html
 pygmentsStyle: tango
 
+# Markup settings
 markup:
   goldmark:
     parser:
@@ -40,10 +42,13 @@ markup:
 outputs:
   section: [HTML, print, RSS]
 
+# Site params
 params:
+  # Repository
   github_repo: https://github.com/Zaba505/infra
   github_project_repo: https://github.com/Zaba505/infra
 
+  # Enable Lunr.js offline search
   offlineSearch: true
   prism_syntax_highlighting: false
 
@@ -51,14 +56,16 @@ params:
     authors: Zaba505 | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0) |
     from_year: 2024
 
+  # UI
   ui:
     showLightDarkModeMenu: true
     breadcrumb_disable: false
     navbar_logo: false
     navbar_translucent_over_cover_disable: false
-    sidebar_menu_compact: false
+    sidebar_menu_compact: true
     sidebar_search_disable: true
 
+  # Links
   links:
     developer:
       - name: GitHub
