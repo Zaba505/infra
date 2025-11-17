@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/</link><description>Recent content on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-602/index.xml" rel="self" type="application/rss+xml"/><item><title>[0001] Use MADR for Architecture Decision Records</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0001-use-madr-for-architecture-decision-records/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0001-use-madr-for-architecture-decision-records/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;As the project grows, architectural decisions are made that have long-term impacts on the system&amp;rsquo;s design, maintainability, and scalability. Without a structured way to document these decisions, we risk losing the context and rationale behind important choices, making it difficult for current and future team members to understand why certain approaches were taken.&lt;/p&gt;</description></item><item><title>Ubuntu Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/ubuntu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/ubuntu/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Ubuntu Server is a popular general-purpose Linux distribution developed by Canonical. It provides Long Term Support (LTS) releases with 5 years of standard support and optional Extended Security Maintenance (ESM).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Latest LTS&lt;/strong&gt;: Ubuntu 24.04 LTS (Noble Numbat)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Support Period&lt;/strong&gt;: 5 years standard, 10 years with Ubuntu Pro (free for personal use)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel&lt;/strong&gt;: Linux 6.8+ (LTS), regular HWE updates&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Package Manager&lt;/strong&gt;: APT/DPKG, Snap&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
+&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>[0002] Network Boot Architecture for Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0002-network-boot-architecture/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0002-network-boot-architecture/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;When setting up a home lab infrastructure, servers need to be provisioned and booted over the network using PXE (Preboot Execution Environment). This requires a TFTP/HTTP server to serve boot files to requesting machines. The question is: where should this boot server be hosted to balance security, reliability, cost, and operational complexity?&lt;/p&gt;</description></item><item><title>Fedora Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/fedora/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/fedora/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Fedora Server is a cutting-edge Linux distribution sponsored by Red Hat, serving as the upstream for Red Hat Enterprise Linux (RHEL). It emphasizes innovation with the latest software packages and kernel versions.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Latest Version&lt;/strong&gt;: Fedora 41 (October 2024)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Support Period&lt;/strong&gt;: ~13 months per release (shorter than Ubuntu LTS)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel&lt;/strong&gt;: Linux 6.11+ (latest stable)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Package Manager&lt;/strong&gt;: DNF/RPM, Flatpak&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
+&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>[0003] Cloud Provider Selection for Network Boot Infrastructure</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0003-cloud-provider-selection/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0003-cloud-provider-selection/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Talos Linux is a modern operating system designed specifically for running Kubernetes. It is API-driven, immutable, and minimal, with no SSH access, shell, or package manager. All configuration is done via a declarative API.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Latest Version&lt;/strong&gt;: Talos 1.9 (supports Kubernetes 1.31)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Support&lt;/strong&gt;: Community-driven, commercial support available from Sidero Labs&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel&lt;/strong&gt;: Linux 6.6+ LTS&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Architecture&lt;/strong&gt;: Immutable, API-driven, no shell access&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: talosctl CLI + Kubernetes API&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
+&lt;p&gt;Talos Linux has &lt;strong&gt;built-in Kubernetes&lt;/strong&gt; - there is only one installation method.&lt;/p&gt;</description></item><item><title>[0004] Server Operating System Selection</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0004-server-operating-system/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0004-server-operating-system/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;The homelab infrastructure requires a server operating system to run Kubernetes clusters for container workloads. The choice of operating system significantly impacts ease of cluster initialization, ongoing maintenance burden, security posture, and operational complexity.&lt;/p&gt;</description></item><item><title>Harvester Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/harvester/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/server-os/harvester/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Harvester is a Hyperconverged Infrastructure (HCI) platform built on Kubernetes, designed to provide VM and container management on a unified platform. It combines compute, storage, and networking with built-in K3s for orchestration.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Latest Version&lt;/strong&gt;: Harvester 1.4 (based on K3s 1.30+)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Foundation&lt;/strong&gt;: Built on RancherOS 2.0, K3s, and KubeVirt&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Support&lt;/strong&gt;: Supported by SUSE (acquired Rancher)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Architecture&lt;/strong&gt;: HCI platform with VM + container workloads&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: Web UI + kubectl + Rancher integration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
+&lt;p&gt;Harvester &lt;strong&gt;includes K3s as its foundation&lt;/strong&gt; - Kubernetes is built-in.&lt;/p&gt;</description></item><item><title>[0005] Network Boot Infrastructure Implementation on Google Cloud</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0005-network-boot-infrastructure-gcp/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/adrs/0005-network-boot-infrastructure-gcp/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
+&lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
+&lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;Not natively supported by Elastic Load Balancing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;AWS&amp;rsquo;s Elastic Load Balancing services do &lt;strong&gt;not&lt;/strong&gt; support TFTP protocol natively:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Application Load Balancer (ALB)&lt;/strong&gt;: HTTP/HTTPS only (Layer 7)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Network Load Balancer (NLB)&lt;/strong&gt;: TCP/UDP support, but &lt;strong&gt;not TFTP-aware&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Classic Load Balancer&lt;/strong&gt;: Deprecated, similar limitations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TFTP operates on UDP port 69 with unique protocol semantics (variable block sizes, retransmissions, port negotiation) that standard load balancers cannot parse.&lt;/p&gt;</description></item><item><title>AWS WireGuard VPN Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/wireguard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/wireguard/</guid><description>&lt;h1 id="wireguard-vpn-support-on-amazon-web-services"&gt;WireGuard VPN Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes options for deploying WireGuard VPN on AWS to establish secure site-to-site connectivity between the home lab and cloud-hosted network boot infrastructure.&lt;/p&gt;
+&lt;h2 id="wireguard-overview"&gt;WireGuard Overview&lt;/h2&gt;
+&lt;p&gt;WireGuard is a modern VPN protocol that provides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Simplicity&lt;/strong&gt;: Minimal codebase (~4,000 lines vs 100,000+ for IPsec)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt;: High throughput with low overhead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Modern cryptography (Curve25519, ChaCha20, Poly1305, BLAKE2s)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Configuration&lt;/strong&gt;: Simple key-based configuration&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Integration&lt;/strong&gt;: Mainline Linux kernel support since 5.6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="aws-native-vpn-support"&gt;AWS Native VPN Support&lt;/h2&gt;
+&lt;h3 id="site-to-site-vpn-ipsec"&gt;Site-to-Site VPN (IPsec)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
+&lt;h3 id="hardware-assembly"&gt;Hardware Assembly&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install Processors&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Use thermal paste (HPE thermal grease recommended)&lt;/li&gt;
+&lt;li&gt;Align CPU carefully with socket (LGA 2011-3)&lt;/li&gt;
+&lt;li&gt;Secure heatsink with proper torque (hand-tighten screws in cross pattern)&lt;/li&gt;
+&lt;li&gt;Install both CPUs for dual-socket configuration&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install Memory&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Populate channels evenly (see Memory Configuration below)&lt;/li&gt;
+&lt;li&gt;Seat DIMMs firmly until retention clips engage&lt;/li&gt;
+&lt;li&gt;Verify all DIMMs recognized in POST&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install Storage&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Insert drives into hot-swap caddies&lt;/li&gt;
+&lt;li&gt;Label drives clearly for identification&lt;/li&gt;
+&lt;li&gt;Configure RAID controller (see Storage Configuration below)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Install Network Cards&lt;/strong&gt;:&lt;/p&gt;</description></item><item><title>Configuration Model</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/configuration/</guid><description>&lt;h1 id="matchbox-configuration-model"&gt;Matchbox Configuration Model&lt;/h1&gt;
+&lt;p&gt;Matchbox uses a flexible configuration model based on &lt;strong&gt;Profiles&lt;/strong&gt; (what to provision) and &lt;strong&gt;Groups&lt;/strong&gt; (which machines get which profile), with support for templating and metadata.&lt;/p&gt;
+&lt;h2 id="architecture-overview"&gt;Architecture Overview&lt;/h2&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;┌─────────────────────────────────────────────────────────────┐
+│ Matchbox Store │
+│ ┌────────────┐ ┌────────────┐ ┌────────────┐ │
+│ │ Profiles │ │ Groups │ │ Assets │ │
+│ └────────────┘ └────────────┘ └────────────┘ │
+│ │ │ │
+│ │ │ │
+│ ▼ ▼ │
+│ ┌─────────────────────────────────────┐ │
+│ │ Matcher Engine │ │
+│ │ (Label-based group selection) │ │
+│ └─────────────────────────────────────┘ │
+│ │ │
+│ ▼ │
+│ ┌─────────────────────────────────────┐ │
+│ │ Template Renderer │ │
+│ │ (Go templates + metadata) │ │
+│ └─────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+ │
+ ▼
+ Rendered Config (iPXE, Ignition, etc.)
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id="data-directory-structure"&gt;Data Directory Structure&lt;/h2&gt;
+&lt;p&gt;Matchbox uses a FileStore (default) that reads from &lt;code&gt;-data-path&lt;/code&gt; (default: &lt;code&gt;/var/lib/matchbox&lt;/code&gt;):&lt;/p&gt;</description></item><item><title>Deployment Patterns</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/deployment/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/deployment/</guid><description>&lt;h1 id="matchbox-deployment-patterns"&gt;Matchbox Deployment Patterns&lt;/h1&gt;
+&lt;p&gt;Analysis of deployment architectures, installation methods, and operational considerations for running Matchbox in production.&lt;/p&gt;
+&lt;h2 id="deployment-architectures"&gt;Deployment Architectures&lt;/h2&gt;
+&lt;h3 id="single-host-deployment"&gt;Single-Host Deployment&lt;/h3&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;┌─────────────────────────────────────────────────────┐
+│ Provisioning Host │
+│ ┌─────────────┐ ┌─────────────┐ │
+│ │ Matchbox │ │ dnsmasq │ │
+│ │ :8080 HTTP │ │ DHCP/TFTP │ │
+│ │ :8081 gRPC │ │ :67,:69 │ │
+│ └─────────────┘ └─────────────┘ │
+│ │ │ │
+│ └──────────┬───────────┘ │
+│ │ │
+│ /var/lib/matchbox/ │
+│ ├── groups/ │
+│ ├── profiles/ │
+│ ├── ignition/ │
+│ └── assets/ │
+└─────────────────────────────────────────────────────┘
+ │
+ │ Network
+ ▼
+ ┌──────────────┐
+ │ PXE Clients │
+ └──────────────┘
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Use case:&lt;/strong&gt; Lab, development, small deployments (&amp;lt;50 machines)&lt;/p&gt;</description></item><item><title>GCP Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/google-cloud/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/google-cloud/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-google-cloud-platform"&gt;Network Boot Protocol Support on Google Cloud Platform&lt;/h1&gt;
+&lt;p&gt;This document analyzes GCP&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
+&lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
+&lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;Not natively supported by Cloud Load Balancing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;GCP&amp;rsquo;s Cloud Load Balancing services (Application Load Balancer, Network Load Balancer) do &lt;strong&gt;not&lt;/strong&gt; support TFTP protocol natively. TFTP operates on UDP port 69 and has unique protocol requirements that are not compatible with GCP&amp;rsquo;s load balancing services.&lt;/p&gt;</description></item><item><title>GCP WireGuard VPN Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/google-cloud/wireguard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/google-cloud/wireguard/</guid><description>&lt;h1 id="wireguard-vpn-support-on-google-cloud-platform"&gt;WireGuard VPN Support on Google Cloud Platform&lt;/h1&gt;
+&lt;p&gt;This document analyzes options for deploying WireGuard VPN on GCP to establish secure site-to-site connectivity between the home lab and cloud-hosted network boot infrastructure.&lt;/p&gt;
+&lt;h2 id="wireguard-overview"&gt;WireGuard Overview&lt;/h2&gt;
+&lt;p&gt;WireGuard is a modern VPN protocol that provides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Simplicity&lt;/strong&gt;: Minimal codebase (~4,000 lines vs 100,000+ for IPsec)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt;: High throughput with low overhead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Modern cryptography (Curve25519, ChaCha20, Poly1305, BLAKE2s)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Configuration&lt;/strong&gt;: Simple key-based configuration&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Integration&lt;/strong&gt;: Mainline Linux kernel support since 5.6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="gcp-native-vpn-support"&gt;GCP Native VPN Support&lt;/h2&gt;
+&lt;h3 id="cloud-vpn-ipsec"&gt;Cloud VPN (IPsec)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Hardware Specifications</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/specifications/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/specifications/</guid><description>&lt;h2 id="system-overview"&gt;System Overview&lt;/h2&gt;
+&lt;p&gt;The HP ProLiant DL360 Gen9 is a dual-socket 1U rack server designed for data center and enterprise deployments, also popular in home lab environments due to its performance and manageability.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Generation&lt;/strong&gt;: Gen9 (2014-2017 product cycle)&lt;br&gt;
+&lt;strong&gt;Form Factor&lt;/strong&gt;: 1U rack-mountable (19-inch standard rack)&lt;br&gt;
+&lt;strong&gt;Dimensions&lt;/strong&gt;: 43.46 x 67.31 x 4.29 cm (17.1 x 26.5 x 1.69 in)&lt;/p&gt;
+&lt;h2 id="processor-support"&gt;Processor Support&lt;/h2&gt;
+&lt;h3 id="supported-cpu-families"&gt;Supported CPU Families&lt;/h3&gt;
+&lt;p&gt;The DL360 Gen9 supports Intel Xeon E5-2600 v3 and v4 series processors:&lt;/p&gt;</description></item><item><title>Network Boot Capabilities</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/hp_dl360_gen9/network-boot/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The HP ProLiant DL360 Gen9 provides robust network boot capabilities through multiple protocols and firmware interfaces. This makes it particularly well-suited for diskless deployments, automated provisioning, and infrastructure-as-code workflows.&lt;/p&gt;
+&lt;h2 id="supported-network-boot-protocols"&gt;Supported Network Boot Protocols&lt;/h2&gt;
+&lt;h3 id="pxe-preboot-execution-environment"&gt;PXE (Preboot Execution Environment)&lt;/h3&gt;
+&lt;p&gt;The DL360 Gen9 fully supports PXE boot via both legacy BIOS and UEFI firmware modes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Legacy BIOS PXE&lt;/strong&gt;: Traditional PXE implementation using TFTP&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Protocol: PXEv2 (PXE 2.1)&lt;/li&gt;
+&lt;li&gt;Network Stack: IPv4 only in legacy mode&lt;/li&gt;
+&lt;li&gt;Boot files: &lt;code&gt;pxelinux.0&lt;/code&gt;, &lt;code&gt;undionly.kpxe&lt;/code&gt;, or custom NBP&lt;/li&gt;
+&lt;li&gt;DHCP options: Standard options 66 (TFTP server) and 67 (boot filename)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;UEFI PXE&lt;/strong&gt;: Modern UEFI network boot implementation&lt;/p&gt;</description></item><item><title>Network Boot Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/network-boot/</guid><description>&lt;h1 id="network-boot-support-in-matchbox"&gt;Network Boot Support in Matchbox&lt;/h1&gt;
+&lt;p&gt;Matchbox provides comprehensive network boot support for bare-metal provisioning, supporting multiple boot firmware types and protocols.&lt;/p&gt;
+&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Matchbox serves as an HTTP entrypoint for network-booted machines but &lt;strong&gt;does not implement DHCP, TFTP, or DNS services itself&lt;/strong&gt;. Instead, it integrates with existing network infrastructure (or companion services like dnsmasq) to provide a complete PXE boot solution.&lt;/p&gt;
+&lt;h2 id="boot-protocol-support"&gt;Boot Protocol Support&lt;/h2&gt;
+&lt;h3 id="1-pxe-preboot-execution-environment"&gt;1. PXE (Preboot Execution Environment)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Legacy BIOS support via chainloading to iPXE:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Use Case Evaluation</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/evaluation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/matchbox/evaluation/</guid><description>&lt;h1 id="matchbox-use-case-evaluation"&gt;Matchbox Use Case Evaluation&lt;/h1&gt;
+&lt;p&gt;Analysis of Matchbox&amp;rsquo;s suitability for various use cases, strengths, limitations, and comparison with alternative provisioning solutions.&lt;/p&gt;
+&lt;h2 id="use-case-fit-analysis"&gt;Use Case Fit Analysis&lt;/h2&gt;
+&lt;h3 id="-ideal-use-cases"&gt;✅ Ideal Use Cases&lt;/h3&gt;
+&lt;h4 id="1-bare-metal-kubernetes-clusters"&gt;1. Bare-Metal Kubernetes Clusters&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;Scenario:&lt;/strong&gt; Provisioning 10-1000 physical servers for Kubernetes nodes&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why Matchbox Excels:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Ignition-native (perfect for Fedora CoreOS/Flatcar)&lt;/li&gt;
+&lt;li&gt;Declarative machine provisioning via Terraform&lt;/li&gt;
+&lt;li&gt;Label-based matching (region, role, hardware type)&lt;/li&gt;
+&lt;li&gt;Integration with Typhoon Kubernetes distribution&lt;/li&gt;
+&lt;li&gt;Minimal OS surface (immutable, container-optimized)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Example workflow:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>UDM Pro VLAN Configuration &amp; Capabilities</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/udm_pro/vlans/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/udm_pro/vlans/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The &lt;strong&gt;Ubiquiti Dream Machine Pro (UDM Pro)&lt;/strong&gt; provides robust VLAN support through native 802.1Q tagging, enabling network segmentation for security, performance, and organizational purposes. This document covers VLAN configuration capabilities, port assignments, and VPN integration.&lt;/p&gt;
+&lt;h2 id="vlan-fundamentals-on-udm-pro"&gt;VLAN Fundamentals on UDM Pro&lt;/h2&gt;
+&lt;h3 id="supported-standards"&gt;Supported Standards&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;802.1Q VLAN Tagging&lt;/strong&gt;: Full support for standard VLAN tagging&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VLAN Range&lt;/strong&gt;: IDs 1-4094 (standard IEEE 802.1Q range)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Maximum VLANs&lt;/strong&gt;: Up to 32 networks/VLANs per device&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Native VLAN&lt;/strong&gt;: Configurable per port (default: VLAN 1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="vlan-types"&gt;VLAN Types&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Corporate Network&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>

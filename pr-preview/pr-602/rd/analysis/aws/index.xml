@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Amazon Web Services Analysis on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/</link><description>Recent content in Amazon Web Services Analysis on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/index.xml" rel="self" type="application/rss+xml"/><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
+&lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
+&lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;Not natively supported by Elastic Load Balancing&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;AWS&amp;rsquo;s Elastic Load Balancing services do &lt;strong&gt;not&lt;/strong&gt; support TFTP protocol natively:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Application Load Balancer (ALB)&lt;/strong&gt;: HTTP/HTTPS only (Layer 7)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Network Load Balancer (NLB)&lt;/strong&gt;: TCP/UDP support, but &lt;strong&gt;not TFTP-aware&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Classic Load Balancer&lt;/strong&gt;: Deprecated, similar limitations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;TFTP operates on UDP port 69 with unique protocol semantics (variable block sizes, retransmissions, port negotiation) that standard load balancers cannot parse.&lt;/p&gt;</description></item><item><title>AWS WireGuard VPN Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/wireguard/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-602/rd/analysis/aws/wireguard/</guid><description>&lt;h1 id="wireguard-vpn-support-on-amazon-web-services"&gt;WireGuard VPN Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;This document analyzes options for deploying WireGuard VPN on AWS to establish secure site-to-site connectivity between the home lab and cloud-hosted network boot infrastructure.&lt;/p&gt;
+&lt;h2 id="wireguard-overview"&gt;WireGuard Overview&lt;/h2&gt;
+&lt;p&gt;WireGuard is a modern VPN protocol that provides:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Simplicity&lt;/strong&gt;: Minimal codebase (~4,000 lines vs 100,000+ for IPsec)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Performance&lt;/strong&gt;: High throughput with low overhead&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Security&lt;/strong&gt;: Modern cryptography (Curve25519, ChaCha20, Poly1305, BLAKE2s)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Configuration&lt;/strong&gt;: Simple key-based configuration&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Kernel Integration&lt;/strong&gt;: Mainline Linux kernel support since 5.6&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="aws-native-vpn-support"&gt;AWS Native VPN Support&lt;/h2&gt;
+&lt;h3 id="site-to-site-vpn-ipsec"&gt;Site-to-Site VPN (IPsec)&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
