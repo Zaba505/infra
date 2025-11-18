@@ -15,7 +15,7 @@ output "internal_ip_address" {
 
 output "url_map_id" {
   description = "The ID of the URL map"
-  value       = google_compute_url_map.default.id
+  value       = google_compute_region_url_map.default.id
 }
 
 output "backend_service_ids" {

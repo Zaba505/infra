@@ -126,8 +126,9 @@ locals {
   hosts_to_cloud_run_services = transpose({ for name, cr in var.cloud_run : name => cr.hosts })
 }
 
-resource "google_compute_url_map" "default" {
-  name = var.name
+resource "google_compute_region_url_map" "default" {
+  name   = var.name
+  region = var.region
 
   default_service = google_compute_backend_service.default_service.id
 
@@ -167,7 +168,7 @@ resource "google_compute_region_target_http_proxy" "default" {
 
   name    = var.name
   region  = var.region
-  url_map = google_compute_url_map.default.id
+  url_map = google_compute_region_url_map.default.id
 }
 
 resource "google_compute_region_target_https_proxy" "default" {
@@ -175,7 +176,7 @@ resource "google_compute_region_target_https_proxy" "default" {
 
   name             = var.name
   region           = var.region
-  url_map          = google_compute_url_map.default.id
+  url_map          = google_compute_region_url_map.default.id
   ssl_certificates = var.ssl_certificates
 }
 
