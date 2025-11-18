@@ -9,9 +9,14 @@ variable "region" {
 }
 
 variable "protocols" {
-  description = "List of protocols to support (TCP, UDP, or both). WireGuard requires both TCP and UDP."
+  description = "List of protocols to support (TCP, UDP, or both). WireGuard uses UDP only."
   type        = list(string)
-  default     = ["TCP", "UDP"]
+  default     = ["UDP"]
+
+  validation {
+    condition     = length(var.protocols) > 0
+    error_message = "At least one protocol (TCP or UDP) must be specified."
+  }
 
   validation {
     condition     = alltrue([for p in var.protocols : contains(["TCP", "UDP"], p)])
@@ -38,9 +43,8 @@ variable "port_range" {
 }
 
 variable "external_ip_address" {
-  description = "Name of an existing external IP address to use. If null, a new ephemeral IP will be created."
+  description = "Name of an existing external IP address to use. Required to prevent IP changes that break DNS records."
   type        = string
-  default     = null
 }
 
 variable "network_tier" {
@@ -77,7 +81,7 @@ variable "backend_timeout_sec" {
 }
 
 variable "instance_groups" {
-  description = "List of instance group backends for the load balancer"
+  description = "List of instance group backends for the load balancer with their health check configurations"
   type = list(object({
     instance_group               = string
     balancing_mode               = string
@@ -87,72 +91,33 @@ variable "instance_groups" {
     max_rate                     = optional(number)
     max_rate_per_instance        = optional(number)
     max_utilization              = optional(number)
+    health_check = object({
+      protocol            = string
+      port                = number
+      request_path        = optional(string)
+      check_interval_sec  = optional(number, 10)
+      timeout_sec         = optional(number, 5)
+      healthy_threshold   = optional(number, 2)
+      unhealthy_threshold = optional(number, 3)
+    })
   }))
   default = []
-}
 
-variable "health_check" {
-  description = "Health check configuration for backend instances"
-  type = object({
-    protocol            = string
-    port                = number
-    request_path        = optional(string)
-    check_interval_sec  = optional(number)
-    timeout_sec         = optional(number)
-    healthy_threshold   = optional(number)
-    unhealthy_threshold = optional(number)
-  })
-  default = {
-    protocol            = "TCP"
-    port                = 51820
-    check_interval_sec  = 10
-    timeout_sec         = 5
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
+  validation {
+    condition = alltrue([
+      for ig in var.instance_groups :
+      contains(["TCP", "HTTP", "HTTPS"], ig.health_check.protocol)
+    ])
+    error_message = "Health check protocol must be 'TCP', 'HTTP', or 'HTTPS' for all instance groups."
   }
 
   validation {
-    condition     = contains(["TCP", "HTTP", "HTTPS"], var.health_check.protocol)
-    error_message = "Health check protocol must be 'TCP', 'HTTP', or 'HTTPS'."
-  }
-
-  validation {
-    condition = (
-      var.health_check.protocol == "TCP" ||
-      (var.health_check.request_path != null && var.health_check.request_path != "")
-    )
+    condition = alltrue([
+      for ig in var.instance_groups :
+      ig.health_check.protocol == "TCP" ||
+      (ig.health_check.request_path != null && ig.health_check.request_path != "")
+    ])
     error_message = "Health check request_path is required for HTTP and HTTPS protocols."
   }
-
-  validation {
-    condition = (
-      var.health_check.check_interval_sec == null ||
-      (var.health_check.check_interval_sec >= 1 && var.health_check.check_interval_sec <= 2147483647)
-    )
-    error_message = "Health check interval must be between 1 and 2147483647 seconds."
-  }
-
-  validation {
-    condition = (
-      var.health_check.timeout_sec == null ||
-      (var.health_check.timeout_sec >= 1 && var.health_check.timeout_sec <= 2147483647)
-    )
-    error_message = "Health check timeout must be between 1 and 2147483647 seconds."
-  }
-
-  validation {
-    condition = (
-      var.health_check.healthy_threshold == null ||
-      (var.health_check.healthy_threshold >= 1 && var.health_check.healthy_threshold <= 10)
-    )
-    error_message = "Healthy threshold must be between 1 and 10."
-  }
-
-  validation {
-    condition = (
-      var.health_check.unhealthy_threshold == null ||
-      (var.health_check.unhealthy_threshold >= 1 && var.health_check.unhealthy_threshold <= 10)
-    )
-    error_message = "Unhealthy threshold must be between 1 and 10."
-  }
 }
+
