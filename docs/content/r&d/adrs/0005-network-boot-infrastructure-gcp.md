@@ -5,7 +5,7 @@ description: >
 type: docs
 weight: 5
 category: "strategic"
-status: "proposed"
+status: "accepted"
 date: 2025-11-17
 deciders: []
 consulted: []
@@ -68,33 +68,15 @@ The target bare metal servers (HP DL360 Gen 9) have the following network boot c
 
 ## Decision Outcome
 
-**Status**: Proposed (requires implementation proof-of-concept for final decision)
-
-**Preliminary Recommendation**: "**Option 1: Custom implementation**", because:
+**Chosen option**: "**Option 1: Custom implementation**", because:
 
 1. **UEFI HTTP Boot Simplification**: Elimination of TFTP/PXE dramatically reduces implementation complexity
 2. **Cloud Run Deployment**: HTTP-only boot enables serverless deployment (~$5/month vs $8-17/month)
-3. **Development Time Reduced**: UEFI HTTP boot reduces custom development from 3-4 weeks to 2-3 weeks
-4. **TCO Competitive**: Year 1 TCO gap narrowed significantly (see cost analysis below)
-5. **Full Control**: Custom implementation maintains flexibility for future home lab requirements
-6. **GCP Native Integration**: Direct Cloud Storage, Firestore, Secret Manager, and IAM integration
-7. **Existing Framework**: Leverages `z5labs/humus` patterns already in use across services
-
-**Note**: The decision is much closer than originally assessed. Without TFTP complexity:
-- Custom implementation effort reduced by ~30% (1-2 weeks saved)
-- Both options can use Cloud Run (cost parity improved)
-- Testing complexity significantly reduced (HTTP-only vs TFTP + HTTP)
-
-The recommendation could reasonably go either way. Final decision should be based on POC results measuring:
-- Actual development time for custom HTTP-only implementation
-- Cloud Run cold start latency for boot requests
-- Operational complexity of Matchbox configuration vs custom API
-
-However, a proof-of-concept should validate:
-- Cloud Run cold start latency (< 100ms for boot requests)
-- GCP Cloud Storage integration for boot assets
-- WireGuard VPN compatibility from UDM Pro
-- HTTP boot workflow simplicity vs Matchbox configuration overhead
+3. **Development Time Manageable**: UEFI HTTP boot reduces custom development to 2-3 weeks
+4. **Full Control**: Custom implementation maintains flexibility for future home lab requirements
+5. **GCP Native Integration**: Direct Cloud Storage, Firestore, Secret Manager, and IAM integration
+6. **Existing Framework**: Leverages `z5labs/humus` patterns already in use across services
+7. **HTTP REST API**: Native HTTP REST admin API via `z5labs/humus` framework provides better integration with existing tooling
 
 ### Consequences
 
@@ -105,25 +87,25 @@ However, a proof-of-concept should validate:
 * Good, because full control over implementation enables future customization
 * Good, because simplified testing (HTTP-only, no TFTP/PXE edge cases)
 * Good, because OpenTelemetry observability built-in from existing patterns
-* Neutral, because requires 2-3 weeks development time vs 1 week for Matchbox
+* Neutral, because requires 2-3 weeks development time vs 1 week for Matchbox setup
 * Neutral, because ongoing maintenance responsibility (no upstream project support)
 * Bad, because custom implementation may miss edge cases that Matchbox handles
 * Bad, because reinvents machine matching and boot configuration patterns
-* Bad, because POC may reveal Cloud Run cold start latency issues
+* Bad, because Cloud Run cold start latency needs monitoring (mitigated with min instances = 1)
 
 ### Confirmation
 
-The implementation will be confirmed by:
-- Deploying proof-of-concept custom boot server on GCP Cloud Run
+The implementation success will be validated by:
+- Successfully deploying custom boot server on GCP Cloud Run
 - Successfully network booting HP DL360 Gen 9 via UEFI HTTP boot through WireGuard VPN
 - Confirming iLO 4 firmware v2.40+ compatibility with HTTP boot workflow
-- Validating boot image upload and versioning workflows
+- Validating boot image upload and versioning workflows via HTTP REST API
 - Measuring Cloud Run cold start latency for boot requests (target: < 100ms)
 - Measuring boot file request latency for kernel/initrd downloads (target: < 100ms)
 - Confirming Cloud Storage integration for boot asset storage
-- Testing machine-to-image mapping based on MAC address
+- Testing machine-to-image mapping based on MAC address using Firestore
 - Validating WireGuard VPN security for boot traffic (compensating for lack of client cert support)
-- Comparing development time estimate (2-3 weeks) against actual implementation
+- Verifying OpenTelemetry observability integration with Cloud Monitoring
 
 ## Pros and Cons of the Options
 
@@ -136,25 +118,27 @@ Build a custom network boot server in Go, leveraging the existing `z5labs/humus`
 ```mermaid
 architecture-beta
     group gcp(cloud)[GCP VPC]
-    
+
     service wg_nlb(internet)[Network LB] in gcp
     service wireguard(server)[WireGuard Gateway] in gcp
     service https_lb(internet)[HTTPS LB] in gcp
     service compute(server)[Compute Engine] in gcp
     service storage(database)[Cloud Storage] in gcp
+    service firestore(database)[Firestore] in gcp
     service secrets(disk)[Secret Manager] in gcp
     service monitoring(internet)[Cloud Monitoring] in gcp
-    
+
     group homelab(cloud)[Home Lab]
     service udm(server)[UDM Pro] in homelab
     service servers(server)[Bare Metal Servers] in homelab
-    
+
     servers:L -- R:udm
     udm:R -- L:wg_nlb
     wg_nlb:R -- L:wireguard
     wireguard:R -- L:https_lb
     https_lb:R -- L:compute
     compute:B --> T:storage
+    compute:B --> T:firestore
     compute:R --> L:secrets
     compute:T --> B:monitoring
 ```
@@ -163,7 +147,7 @@ architecture-beta
 - **Boot Server**: Go service deployed to Cloud Run (or Compute Engine VM as fallback)
   - HTTP/HTTPS server (using `z5labs/humus` framework with OpenAPI)
   - UEFI HTTP boot endpoint serving boot scripts and assets
-  - gRPC admin API for boot configuration management
+  - HTTP REST admin API for boot configuration management
 - **Cloud Storage**: Buckets for boot images, boot scripts, kernels, initrd files
 - **Firestore/Datastore**: Machine-to-image mapping database (MAC → boot profile)
 - **Secret Manager**: WireGuard keys, TLS certificates (optional for HTTPS boot)
@@ -713,7 +697,7 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 | **Rollback Capability** | ⚠️ Requires implementation | ✅ Update group to previous profile |
 | **OpenTelemetry Observability** | ✅ Built-in | ⚠️ Logs only (requires parsing) |
 | **GCP Cloud Storage Integration** | ✅ Native SDK | ⚠️ Requires sync scripts |
-| **gRPC Admin API** | ⚠️ Requires implementation | ✅ Built-in |
+| **HTTP REST Admin API** | ✅ Native (z5labs/humus) | ⚠️ gRPC only |
 | **Multi-Environment Support** | ⚠️ Requires implementation | ✅ Groups + metadata |
 
 ### Development Effort Comparison
@@ -727,7 +711,7 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 | **Boot Script Templates** | 2-3 days (boot script templating) | ✅ Included |
 | **Cloud-Init Support** | 3-5 days (parsing, injection) | ✅ Included |
 | **Asset Management** | 2-3 days (upload, storage) | ✅ Included |
-| **gRPC Admin API** | 3-5 days (proto definitions, server) | ✅ Included |
+| **HTTP REST Admin API** | 2-3 days (OpenAPI endpoints) | ✅ Included (gRPC) |
 | **Cloud Run Deployment** | 1 day (Cloud Run config) | 1 day (Cloud Run config) |
 | **Testing** | 3-5 days (unit, integration, E2E - simplified) | 2-3 days (integration only) |
 | **Documentation** | 2-3 days | 1 day (reference existing docs) |
@@ -777,31 +761,54 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 | **Scalability Limits** | Low (Cloud Run autoscaling) | Low (handles thousands of nodes) | Both: Monitor boot request latency |
 | **Dependency Abandonment** | N/A (no external deps) | Low (Red Hat backing) | Matchbox: Can fork if necessary |
 
-## Proof-of-Concept Plan
+## Implementation Plan
 
-Before final decision, implement a basic proof-of-concept for both options:
+### Phase 1: Core Boot Server (Week 1)
+1. **Project Setup** (1-2 days)
+   - Create Go project with `z5labs/humus` framework
+   - Set up OpenAPI specification for HTTP REST admin API
+   - Configure Cloud Storage and Firestore clients
+   - Implement basic health check endpoints
 
-### Custom Implementation POC (3-5 days)
-1. HTTP endpoint serving boot script with static kernel/initrd URLs (1 day)
-2. Simple MAC-based machine matching (Firestore or JSON) (1 day)
-3. Deploy to Cloud Run, test via WireGuard VPN (1 day)
-4. Measure: Cloud Run cold start latency, boot workflow, development complexity
-5. Test UEFI HTTP boot from HP DL360 Gen 9 (iLO 4 v2.40+) (1 day)
+2. **UEFI HTTP Boot Endpoints** (2-3 days)
+   - HTTP endpoint serving boot scripts (iPXE format)
+   - Kernel and initrd streaming from Cloud Storage
+   - MAC-based machine matching using Firestore
+   - Boot script templating with machine-specific parameters
 
-### Matchbox POC (2-3 days)
-1. Deploy Matchbox container to Cloud Run (1 day)
-2. Configure profile and group YAML for Ubuntu/Talos boot (1 day)
-3. Test UEFI HTTP boot via WireGuard VPN, validate Cloud Storage sync (1 day)
-4. Measure: Cloud Run cold start latency, configuration complexity, operational overhead
+3. **Testing & Deployment** (2-3 days)
+   - Deploy to Cloud Run with min instances = 1
+   - Configure WireGuard VPN connectivity
+   - Test UEFI HTTP boot from HP DL360 Gen 9 (iLO 4 v2.40+)
+   - Validate boot latency and Cloud Run cold start metrics
 
-### POC Success Criteria
-- ✅ Successfully boot test server via UEFI HTTP boot (HP DL360 Gen 9, iLO 4 v2.40+)
+### Phase 2: Admin API & Management (Week 2)
+1. **HTTP REST Admin API** (2-3 days)
+   - Boot image upload endpoints (kernel, initrd, metadata)
+   - Machine-to-image mapping management
+   - Boot profile CRUD operations
+   - Asset versioning and integrity validation
+
+2. **Cloud-Init Integration** (2-3 days)
+   - Cloud-init configuration templating
+   - Metadata injection for machine-specific settings
+   - Integration with boot workflow
+
+3. **Observability & Documentation** (2-3 days)
+   - OpenTelemetry metrics integration
+   - Cloud Monitoring dashboards
+   - API documentation
+   - Operational runbooks
+
+### Success Criteria
+- ✅ Successfully boot HP DL360 Gen 9 via UEFI HTTP boot through WireGuard VPN
 - ✅ Boot latency < 100ms for HTTP requests (kernel/initrd downloads)
 - ✅ Cloud Run cold start latency < 100ms (with min instances = 1)
 - ✅ Machine-to-image mapping works correctly based on MAC address
 - ✅ Cloud Storage integration functional (upload, retrieve boot assets)
-- ✅ WireGuard VPN secures boot traffic (no client cert issues)
-- ✅ Logs available in Cloud Monitoring for troubleshooting
+- ✅ HTTP REST API fully functional for boot configuration management
+- ✅ Firestore stores machine mappings and boot profiles correctly
+- ✅ OpenTelemetry metrics available in Cloud Monitoring
 - ✅ Configuration update workflow clear and documented
 - ✅ Firmware compatibility confirmed (no TFTP fallback needed)
 
@@ -824,9 +831,10 @@ Before final decision, implement a basic proof-of-concept for both options:
 ### Future Considerations
 
 1. **High Availability**: If boot server uptime becomes critical, evaluate multi-region deployment or failover strategies
-2. **Multi-Cloud**: If multi-cloud strategy emerges, custom implementation may provide better portability
-3. **Enterprise Features**: If advanced provisioning workflows required (bare metal Kubernetes, etc.), Matchbox provides stronger foundation
-4. **Integration with Existing Services**: Custom implementation could leverage existing `z5labs/humus` patterns and shared infrastructure (monitoring, secrets, etc.)
+2. **Multi-Cloud**: If multi-cloud strategy emerges, custom implementation provides better portability
+3. **Enterprise Features**: If advanced provisioning workflows required (bare metal Kubernetes, Ignition support, etc.), evaluate adding features to custom implementation
+4. **Asset Versioning**: Implement comprehensive boot image versioning and rollback capabilities beyond basic Cloud Storage versioning
+5. **Multi-Environment Support**: Add support for multiple environments (dev, staging, prod) with environment-specific boot profiles
 
 ### Related Issues
 
