@@ -41,7 +41,14 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>Cloud Storage FUSE (gcsfuse)</title><link>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Cloud Storage FUSE (gcsfuse) is a FUSE-based filesystem adapter that allows Google Cloud Storage (GCS) buckets to be mounted and accessed as local filesystems on Linux systems. This enables applications to interact with object storage using standard filesystem operations (open, read, write, etc.) rather than requiring GCS-specific APIs.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Project&lt;/strong&gt;: &lt;a href="https://github.com/GoogleCloudPlatform/gcsfuse"&gt;GoogleCloudPlatform/gcsfuse&lt;/a&gt;
+&lt;strong&gt;License&lt;/strong&gt;: Apache 2.0
+&lt;strong&gt;Status&lt;/strong&gt;: Generally Available (GA)
+&lt;strong&gt;Latest Version&lt;/strong&gt;: v2.x (as of 2024)&lt;/p&gt;
+&lt;h2 id="how-gcsfuse-works"&gt;How gcsfuse Works&lt;/h2&gt;
+&lt;p&gt;gcsfuse translates filesystem operations into GCS API calls:&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Talos Linux is a modern operating system designed specifically for running Kubernetes. It is API-driven, immutable, and minimal, with no SSH access, shell, or package manager. All configuration is done via a declarative API.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -70,7 +77,14 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: Web UI + kubectl + Rancher integration&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Harvester &lt;strong&gt;includes K3s as its foundation&lt;/strong&gt; - Kubernetes is built-in.&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;Harvester &lt;strong&gt;includes K3s as its foundation&lt;/strong&gt; - Kubernetes is built-in.&lt;/p&gt;</description></item><item><title>[0005] Network Boot Infrastructure Implementation on Google Cloud</title><link>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
 &lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
 &lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
 &lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;

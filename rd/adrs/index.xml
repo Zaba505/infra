@@ -26,4 +26,11 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;The homelab infrastructure requires a server operating system to run Kubernetes clusters for container workloads. The choice of operating system significantly impacts ease of cluster initialization, ongoing maintenance burden, security posture, and operational complexity.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;The homelab infrastructure requires a server operating system to run Kubernetes clusters for container workloads. The choice of operating system significantly impacts ease of cluster initialization, ongoing maintenance burden, security posture, and operational complexity.&lt;/p&gt;</description></item><item><title>[0005] Network Boot Infrastructure Implementation on Google Cloud</title><link>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item></channel></rss>
