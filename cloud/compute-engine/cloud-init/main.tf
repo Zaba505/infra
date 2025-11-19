@@ -9,6 +9,21 @@ terraform {
 
 data "google_project" "default" {}
 
+# Create service account for instances
+resource "google_service_account" "this" {
+  account_id   = var.name
+  display_name = var.name
+}
+
+# Grant IAM roles to the service account
+resource "google_project_iam_member" "this" {
+  for_each = toset(var.service_account_roles)
+
+  project = data.google_project.default.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.this.email}"
+}
+
 # Fetch cloud-init configuration from Secret Manager if provided
 data "google_secret_manager_secret_version_access" "cloud_init" {
   count = var.cloud_init_secret != null ? 1 : 0
@@ -54,7 +69,7 @@ resource "google_compute_instance_template" "default" {
 
   # Service account configuration
   service_account {
-    email  = var.service_account_email
+    email  = google_service_account.this.email
     scopes = var.service_account_scopes
   }
 
@@ -116,9 +131,11 @@ resource "google_compute_health_check" "autohealing" {
 
 # Managed instance group for auto-healing and restart policies
 resource "google_compute_instance_group_manager" "default" {
-  name               = var.name
+  for_each = toset(var.zones)
+
+  name               = "${var.name}-${each.value}"
   base_instance_name = var.name
-  zone               = var.zone
+  zone               = each.value
 
   version {
     instance_template = google_compute_instance_template.default.id

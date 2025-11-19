@@ -9,9 +9,9 @@ variable "description" {
   default     = "Compute Engine instance with cloud-init support"
 }
 
-variable "zone" {
-  type        = string
-  description = "GCP zone for the instance group (e.g., us-central1-a)"
+variable "zones" {
+  type        = list(string)
+  description = "GCP zones for the instance groups (e.g., [\"us-central1-a\", \"us-central1-b\"])"
 }
 
 variable "machine_type" {
@@ -49,17 +49,18 @@ variable "network" {
   description = "Network configuration including VPC, subnet, and external IP settings"
 }
 
-variable "service_account_email" {
-  type        = string
-  description = "Service account email for the instance"
-}
-
 variable "service_account_scopes" {
   type        = list(string)
   description = "Service account scopes for the instance"
   default = [
     "https://www.googleapis.com/auth/cloud-platform",
   ]
+}
+
+variable "service_account_roles" {
+  type        = list(string)
+  description = "IAM roles to grant to the service account"
+  default     = []
 }
 
 variable "network_tags" {
