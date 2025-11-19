@@ -56,6 +56,7 @@ variable "ssl_certificates" {
 
 variable "health_check" {
   type = object({
+    port                = number
     check_interval_sec  = number
     timeout_sec         = number
     healthy_threshold   = number
@@ -64,6 +65,7 @@ variable "health_check" {
   })
   description = "Health check configuration for backend services"
   default = {
+    port                = 8080
     check_interval_sec  = 10
     timeout_sec         = 5
     healthy_threshold   = 2
