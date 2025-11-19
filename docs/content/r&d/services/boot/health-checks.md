@@ -5,8 +5,6 @@ description: "Standard Cloud Run health check endpoints for startup and liveness
 weight: 30
 ---
 
-# Health Check Endpoints
-
 The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.
 
 ## Startup Probe

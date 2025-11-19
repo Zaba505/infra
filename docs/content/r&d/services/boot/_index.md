@@ -5,8 +5,6 @@ description: "Network boot server HTTP API specification for UEFI HTTP boot infr
 weight: 10
 ---
 
-# Boot Server API Documentation
-
 The Boot Server is a custom Go microservice that provides network boot capabilities for bare metal servers in the home lab. It implements UEFI HTTP boot endpoints for serving boot scripts and assets, plus an HTTP REST admin API for managing boot images, machine mappings, and boot profiles.
 
 ## Architecture Overview

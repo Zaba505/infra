@@ -5,8 +5,6 @@ description: "Management API for boot images, machines, and profiles"
 weight: 20
 ---
 
-# HTTP REST Admin API
-
 The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. All endpoints require GCP IAM authentication.
 
 ## Authentication

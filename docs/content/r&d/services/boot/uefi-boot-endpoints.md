@@ -5,8 +5,6 @@ description: "Boot endpoints accessed by bare metal servers during network boot"
 weight: 10
 ---
 
-# UEFI HTTP Boot Endpoints
-
 These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.
 
 ## Boot Script Endpoint

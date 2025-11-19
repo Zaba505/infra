@@ -5,8 +5,6 @@ description: "Documentation for GCP Cloud Run microservices"
 weight: 30
 ---
 
-# Services
-
 This section contains documentation for the Go microservices deployed to GCP Cloud Run as part of the home lab infrastructure.
 
 ## Service Architecture
