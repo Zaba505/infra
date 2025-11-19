@@ -7,7 +7,7 @@ terraform {
   }
 }
 
-data "google_project" "default" {}
+data "google_client_config" "default" {}
 
 # Create service account for instances
 resource "google_service_account" "this" {
@@ -19,7 +19,7 @@ resource "google_service_account" "this" {
 resource "google_project_iam_member" "this" {
   for_each = toset(var.service_account_roles)
 
-  project = data.google_project.default.project_id
+  project = data.google_client_config.default.project
   role    = each.value
   member  = "serviceAccount:${google_service_account.this.email}"
 }

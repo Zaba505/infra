@@ -22,7 +22,7 @@ variable "machine_type" {
 
 variable "instance_count" {
   type        = number
-  description = "Number of instances to create in the managed instance group"
+  description = "Number of instances to create per zone in each managed instance group"
   default     = 1
 }
 
@@ -51,7 +51,7 @@ variable "network" {
 
 variable "service_account_scopes" {
   type        = list(string)
-  description = "Service account scopes for the instance"
+  description = "Service account scopes for the instance. Default grants broad access; actual permissions are restricted by IAM roles assigned via service_account_roles. Consider using more specific scopes for production deployments."
   default = [
     "https://www.googleapis.com/auth/cloud-platform",
   ]
@@ -100,7 +100,7 @@ variable "health_check" {
   type = object({
     type                = string
     port                = number
-    request_path        = string
+    request_path        = optional(string, "/")
     check_interval_sec  = number
     timeout_sec         = number
     healthy_threshold   = number
@@ -108,6 +108,12 @@ variable "health_check" {
     initial_delay_sec   = number
   })
   description = "Health check configuration for auto-healing. Type can be 'http', 'https', or 'tcp'."
+
+  validation {
+    condition     = contains(["http", "https", "tcp"], var.health_check.type)
+    error_message = "Health check type must be one of: http, https, tcp."
+  }
+
   default = {
     type                = "tcp"
     port                = 22
