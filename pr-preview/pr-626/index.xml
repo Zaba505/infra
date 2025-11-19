@@ -84,8 +84,7 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>UEFI HTTP Boot Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</guid><description>&lt;h1 id="uefi-http-boot-endpoints"&gt;UEFI HTTP Boot Endpoints&lt;/h1&gt;
-&lt;p&gt;These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.&lt;/p&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>UEFI HTTP Boot Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</guid><description>&lt;p&gt;These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.&lt;/p&gt;
 &lt;h2 id="boot-script-endpoint"&gt;Boot Script Endpoint&lt;/h2&gt;
 &lt;h3 id="get-bootipxe"&gt;&lt;code&gt;GET /boot.ipxe&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address.&lt;/p&gt;
@@ -108,8 +107,7 @@ ADR Categories:
  &lt;/tr&gt;
  &lt;/tbody&gt;
 &lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>HTTP REST Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;h1 id="http-rest-admin-api"&gt;HTTP REST Admin API&lt;/h1&gt;
-&lt;p&gt;The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. All endpoints require GCP IAM authentication.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>HTTP REST Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;p&gt;The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. All endpoints require GCP IAM authentication.&lt;/p&gt;
 &lt;h2 id="authentication"&gt;Authentication&lt;/h2&gt;
 &lt;p&gt;All admin API endpoints require authentication using one of the following methods:&lt;/p&gt;
 &lt;ul&gt;
@@ -134,8 +132,7 @@ ADR Categories:
 &lt;hr&gt;
 &lt;h2 id="boot-image-management"&gt;Boot Image Management&lt;/h2&gt;
 &lt;h3 id="post-apiv1images"&gt;&lt;code&gt;POST /api/v1/images&lt;/code&gt;&lt;/h3&gt;
-&lt;p&gt;Upload a new boot image (kernel, initrd, and metadata).&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;h1 id="health-check-endpoints"&gt;Health Check Endpoints&lt;/h1&gt;
-&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
+&lt;p&gt;Upload a new boot image (kernel, initrd, and metadata).&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
 &lt;h2 id="startup-probe"&gt;Startup Probe&lt;/h2&gt;
 &lt;h3 id="get-healthstartup"&gt;&lt;code&gt;GET /health/startup&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
