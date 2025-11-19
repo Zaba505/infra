@@ -9,17 +9,6 @@ variable "description" {
   default     = ""
 }
 
-variable "routing_mode" {
-  description = "Network-wide routing mode. Must be REGIONAL"
-  type        = string
-  default     = "REGIONAL"
-
-  validation {
-    condition     = var.routing_mode == "REGIONAL"
-    error_message = "routing_mode must be REGIONAL"
-  }
-}
-
 variable "subnets" {
   description = <<-EOT
     Map of subnets to create. Each subnet requires:
@@ -115,6 +104,37 @@ variable "firewall_rules" {
     ])
     error_message = "firewall_rules direction must be either INGRESS or EGRESS"
   }
+
+  validation {
+    condition = alltrue([
+      for rule in var.firewall_rules :
+      (rule.allow != null && rule.deny == null) || (rule.allow == null && rule.deny != null)
+    ])
+    error_message = "Each firewall rule must have exactly one of 'allow' or 'deny' specified, not both"
+  }
+
+  validation {
+    condition     = length(var.firewall_rules) == length(distinct([for r in var.firewall_rules : r.name]))
+    error_message = "All firewall rule names must be unique"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.firewall_rules :
+      rule.direction != "INGRESS" ||
+      length(coalesce(rule.source_ranges, [])) > 0 ||
+      length(coalesce(rule.source_tags, [])) > 0
+    ])
+    error_message = "INGRESS firewall rules must specify at least one of: source_ranges, source_tags"
+  }
+
+  validation {
+    condition = alltrue([
+      for rule in var.firewall_rules :
+      rule.log_config == null || contains(["EXCLUDE_ALL_METADATA", "INCLUDE_ALL_METADATA"], rule.log_config.metadata)
+    ])
+    error_message = "log_config.metadata must be either EXCLUDE_ALL_METADATA or INCLUDE_ALL_METADATA"
+  }
 }
 
 variable "enable_cloud_nat" {
@@ -163,4 +183,31 @@ variable "cloud_nat_configs" {
     min_ports_per_vm                   = optional(number)
   }))
   default = {}
+
+  validation {
+    condition = alltrue([
+      for k, v in var.cloud_nat_configs :
+      (
+        (
+          !contains(keys(v), "nat_ip_allocate_option") ||
+          contains(["AUTO_ONLY", "MANUAL_ONLY"], v.nat_ip_allocate_option)
+        )
+        &&
+        (
+          !contains(keys(v), "source_subnetwork_ip_ranges_to_nat") ||
+          contains([
+            "ALL_SUBNETWORKS_ALL_IP_RANGES",
+            "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES",
+            "LIST_OF_SUBNETWORKS"
+          ], v.source_subnetwork_ip_ranges_to_nat)
+        )
+        &&
+        (
+          !contains(keys(v), "log_filter") ||
+          contains(["ERRORS_ONLY", "TRANSLATIONS_ONLY", "ALL"], v.log_filter)
+        )
+      )
+    ])
+    error_message = "Each cloud_nat_configs entry must use allowed values for nat_ip_allocate_option (AUTO_ONLY, MANUAL_ONLY), source_subnetwork_ip_ranges_to_nat (ALL_SUBNETWORKS_ALL_IP_RANGES, ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, LIST_OF_SUBNETWORKS), and log_filter (ERRORS_ONLY, TRANSLATIONS_ONLY, ALL)."
+  }
 }

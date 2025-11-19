@@ -11,7 +11,7 @@ terraform {
 resource "google_compute_network" "vpc" {
   name                    = var.name
   auto_create_subnetworks = false
-  routing_mode            = var.routing_mode
+  routing_mode            = "REGIONAL"
   description             = var.description
 
   lifecycle {
@@ -173,9 +173,12 @@ resource "google_compute_router_nat" "nat" {
   nat_ips = lookup(each.value, "nat_ips", [])
 
   # Logging configuration
-  log_config {
-    enable = lookup(each.value, "enable_logging", false)
-    filter = lookup(each.value, "log_filter", "ERRORS_ONLY")
+  dynamic "log_config" {
+    for_each = lookup(each.value, "enable_logging", false) ? [1] : []
+    content {
+      enable = true
+      filter = lookup(each.value, "log_filter", "ERRORS_ONLY")
+    }
   }
 
   # Min ports per VM
