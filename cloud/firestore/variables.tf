@@ -11,7 +11,7 @@ variable "location" {
 variable "database_type" {
   type        = string
   description = "The type of the database. Possible values: FIRESTORE_NATIVE, DATASTORE_MODE"
-  default     = "DATASTORE_MODE"
+  default     = "FIRESTORE_NATIVE"
 
   validation {
     condition     = contains(["FIRESTORE_NATIVE", "DATASTORE_MODE"], var.database_type)
