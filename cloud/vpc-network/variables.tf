@@ -10,13 +10,13 @@ variable "description" {
 }
 
 variable "routing_mode" {
-  description = "Network-wide routing mode. Valid values: REGIONAL, GLOBAL"
+  description = "Network-wide routing mode. Must be REGIONAL"
   type        = string
   default     = "REGIONAL"
 
   validation {
-    condition     = contains(["REGIONAL", "GLOBAL"], var.routing_mode)
-    error_message = "routing_mode must be either REGIONAL or GLOBAL"
+    condition     = var.routing_mode == "REGIONAL"
+    error_message = "routing_mode must be REGIONAL"
   }
 }
 
