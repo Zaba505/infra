@@ -310,13 +310,30 @@ Empty response body.
 
 Register a new machine and map it to a boot profile.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: POST /api/v1/machines
+    API->>API: Validate MAC address format
+    API->>DB: Check if profile_id exists
+    DB-->>API: Profile found
+    API->>DB: Store machine mapping
+    DB-->>API: Machine registered
+    API-->>Client: 201 Created (machine config)
+```
+
 **Request Body:**
 
 ```json
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "ubuntu-server-base",
+  "profile_id": "urn:boot:profile:ubuntu-server-base",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -337,7 +354,7 @@ Register a new machine and map it to a boot profile.
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "ubuntu-server-base",
+  "profile_id": "urn:boot:profile:ubuntu-server-base",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -368,6 +385,20 @@ Register a new machine and map it to a boot profile.
 
 List all registered machines.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/machines?profile_id=...
+    API->>DB: Query machines with filters
+    DB-->>API: Machine list
+    API-->>Client: 200 OK (machines list)
+```
+
 **Query Parameters:**
 
 | Parameter | Type | Required | Description | Default |
@@ -385,7 +416,7 @@ List all registered machines.
     {
       "mac_address": "52:54:00:12:34:56",
       "hostname": "node-01",
-      "profile_id": "ubuntu-server-base",
+      "profile_id": "urn:boot:profile:ubuntu-server-base",
       "metadata": {
         "datacenter": "homelab",
         "rack": "A1",
@@ -416,6 +447,20 @@ List all registered machines.
 
 Retrieve a specific machine configuration by MAC address.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/machines/{mac}
+    API->>DB: Query machine by MAC
+    DB-->>API: Machine config
+    API-->>Client: 200 OK (machine config)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
@@ -438,6 +483,22 @@ Same as POST response.
 
 Update a machine's configuration.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: PUT /api/v1/machines/{mac}
+    API->>DB: Check if profile_id exists (if updated)
+    DB-->>API: Profile found
+    API->>DB: Update machine config
+    DB-->>API: Machine updated
+    API-->>Client: 200 OK (updated config)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
@@ -448,7 +509,7 @@ Update a machine's configuration.
 
 ```json
 {
-  "profile_id": "ubuntu-server-v2",
+  "profile_id": "urn:boot:profile:ubuntu-server-v2",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -474,6 +535,20 @@ Full machine configuration with updated fields.
 
 Delete a machine registration.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: DELETE /api/v1/machines/{mac}
+    API->>DB: Delete machine by MAC
+    DB-->>API: Machine deleted
+    API-->>Client: 204 No Content
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
@@ -498,19 +573,35 @@ Empty response body.
 
 Create a new boot profile.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: POST /api/v1/profiles
+    API->>API: Validate URN format
+    API->>DB: Check if image_id exists
+    DB-->>API: Image found
+    API->>DB: Store profile
+    DB-->>API: Profile created
+    API-->>Client: 201 Created (profile config)
+```
+
 **Request Body:**
 
 ```json
 {
-  "id": "ubuntu-server-base",
+  "id": "urn:boot:profile:ubuntu-server-base",
   "name": "Ubuntu Server Base Profile",
-  "image_id": "ubuntu-2204",
+  "image_id": "urn:boot:image:ubuntu-2204",
   "kernel_args": [
     "console=tty0",
     "console=ttyS0",
     "ip=dhcp"
   ],
-  "cloud_init_template": "ubuntu-base.yaml",
   "metadata": {
     "description": "Base Ubuntu server configuration with minimal packages",
     "tags": ["base", "minimal"]
@@ -522,15 +613,14 @@ Create a new boot profile.
 
 ```json
 {
-  "id": "ubuntu-server-base",
+  "id": "urn:boot:profile:ubuntu-server-base",
   "name": "Ubuntu Server Base Profile",
-  "image_id": "ubuntu-2204",
+  "image_id": "urn:boot:image:ubuntu-2204",
   "kernel_args": [
     "console=tty0",
     "console=ttyS0",
     "ip=dhcp"
   ],
-  "cloud_init_template": "ubuntu-base.yaml",
   "metadata": {
     "description": "Base Ubuntu server configuration with minimal packages",
     "tags": ["base", "minimal"]
@@ -553,13 +643,27 @@ Create a new boot profile.
 
 List all boot profiles.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/profiles?image_id=...
+    API->>DB: Query profiles with filters
+    DB-->>API: Profile list
+    API-->>Client: 200 OK (profiles list)
+```
+
 **Query Parameters:**
 
 | Parameter | Type | Required | Description | Default |
 |-----------|------|----------|-------------|---------|
 | `page` | integer | No | Page number (1-indexed) | 1 |
 | `per_page` | integer | No | Results per page (1-100) | 20 |
-| `image_id` | string | No | Filter by boot image | - |
+| `image_id` | string (URN) | No | Filter by boot image | - |
 
 **Response (200 OK):**
 
@@ -567,15 +671,14 @@ List all boot profiles.
 {
   "profiles": [
     {
-      "id": "ubuntu-server-base",
+      "id": "urn:boot:profile:ubuntu-server-base",
       "name": "Ubuntu Server Base Profile",
-      "image_id": "ubuntu-2204",
+      "image_id": "urn:boot:image:ubuntu-2204",
       "kernel_args": [
         "console=tty0",
         "console=ttyS0",
         "ip=dhcp"
       ],
-      "cloud_init_template": "ubuntu-base.yaml",
       "metadata": {
         "description": "Base Ubuntu server configuration with minimal packages",
         "tags": ["base", "minimal"]
@@ -599,11 +702,25 @@ List all boot profiles.
 
 Retrieve a specific boot profile.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/profiles/{urn}
+    API->>DB: Query profile by URN
+    DB-->>API: Profile config
+    API-->>Client: 200 OK (profile config)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier |
+| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
 
 **Response (200 OK):**
 
@@ -621,11 +738,27 @@ Same as POST response.
 
 Update a boot profile.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: PUT /api/v1/profiles/{urn}
+    API->>DB: Check if image_id exists (if updated)
+    DB-->>API: Image found
+    API->>DB: Update profile
+    DB-->>API: Profile updated
+    API-->>Client: 200 OK (updated config)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier |
+| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
 
 **Request Body:**
 
@@ -661,11 +794,27 @@ Full profile configuration with updated fields.
 
 Delete a boot profile.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: DELETE /api/v1/profiles/{urn}
+    API->>DB: Check if profile is in use
+    DB-->>API: Not in use
+    API->>DB: Delete profile
+    DB-->>API: Profile deleted
+    API-->>Client: 204 No Content
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier |
+| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
 
 **Response (204 No Content):**
 
@@ -685,6 +834,23 @@ Empty response body.
 ### `POST /api/v1/machines/{mac}/rollback`
 
 Rollback a machine to its previous boot profile.
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: POST /api/v1/machines/{mac}/rollback
+    API->>DB: Get machine history
+    DB-->>API: Previous profile_id
+    API->>DB: Update machine to previous profile
+    DB-->>API: Machine rolled back
+    API->>DB: Record rollback event
+    API-->>Client: 200 OK (rollback details)
+```
 
 **Path Parameters:**
 
@@ -706,11 +872,10 @@ Rollback a machine to its previous boot profile.
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "ubuntu-server-base",
-  "previous_profile_id": "ubuntu-server-v2",
+  "profile_id": "urn:boot:profile:ubuntu-server-base",
+  "previous_profile_id": "urn:boot:profile:ubuntu-server-v2",
   "rollback_reason": "Failed upgrade to new kernel version",
-  "rollback_at": "2025-11-19T06:30:00Z",
-  "rollback_by": "admin@example.com"
+  "rollback_at": "2025-11-19T06:30:00Z"
 }
 ```
 
