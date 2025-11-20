@@ -2,51 +2,42 @@
 &lt;h2 id="boot-script-endpoint"&gt;Boot Script Endpoint&lt;/h2&gt;
 &lt;h3 id="get-bootipxe"&gt;&lt;code&gt;GET /boot.ipxe&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th&gt;Parameter&lt;/th&gt;
- &lt;th&gt;Type&lt;/th&gt;
- &lt;th&gt;Required&lt;/th&gt;
- &lt;th&gt;Description&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td&gt;&lt;code&gt;mac&lt;/code&gt;&lt;/td&gt;
- &lt;td&gt;string&lt;/td&gt;
- &lt;td&gt;Yes&lt;/td&gt;
- &lt;td&gt;MAC address of the requesting machine (format: &lt;code&gt;aa:bb:cc:dd:ee:ff&lt;/code&gt;)&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>HTTP REST Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;p&gt;The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. All endpoints require GCP IAM authentication.&lt;/p&gt;
-&lt;h2 id="authentication"&gt;Authentication&lt;/h2&gt;
-&lt;p&gt;All admin API endpoints require authentication using one of the following methods:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Service Account Token&lt;/strong&gt;: &lt;code&gt;Authorization: Bearer &amp;lt;service-account-token&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;User OAuth Token&lt;/strong&gt;: &lt;code&gt;Authorization: Bearer &amp;lt;user-oauth-token&amp;gt;&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;IAM Authentication&lt;/strong&gt;: Validated against GCP IAM policies&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Required IAM Permissions:&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;bootserver.images.create&lt;/code&gt; - Upload boot images&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.images.read&lt;/code&gt; - List and retrieve boot images&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.images.delete&lt;/code&gt; - Delete boot images&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.machines.create&lt;/code&gt; - Register machines&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.machines.read&lt;/code&gt; - List and retrieve machine configurations&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.machines.update&lt;/code&gt; - Update machine mappings&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.machines.delete&lt;/code&gt; - Delete machine registrations&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.profiles.create&lt;/code&gt; - Create boot profiles&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.profiles.read&lt;/code&gt; - List and retrieve profiles&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.profiles.update&lt;/code&gt; - Update boot profiles&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bootserver.profiles.delete&lt;/code&gt; - Delete boot profiles&lt;/li&gt;
-&lt;/ul&gt;
-&lt;hr&gt;
+&lt;h4 id="sequence-diagram"&gt;Sequence Diagram&lt;/h4&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Bare Metal Server
+ participant Boot as Boot Server
+ participant DB as Firestore
+ 
+ Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
+ Boot-&amp;gt;&amp;gt;Boot: Validate MAC address format
+ Boot-&amp;gt;&amp;gt;DB: Query machine by MAC
+ DB--&amp;gt;&amp;gt;Boot: Machine config (profile_id, kernel args)
+ Boot-&amp;gt;&amp;gt;DB: Get profile by ID
+ DB--&amp;gt;&amp;gt;Boot: Profile config (image_id, kernel args)
+ Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>HTTP REST Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;p&gt;The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. Since this is for a home lab environment, no authentication is required.&lt;/p&gt;
 &lt;h2 id="boot-image-management"&gt;Boot Image Management&lt;/h2&gt;
 &lt;h3 id="post-apiv1images"&gt;&lt;code&gt;POST /api/v1/images&lt;/code&gt;&lt;/h3&gt;
-&lt;p&gt;Upload a new boot image (kernel, initrd, and metadata).&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
+&lt;p&gt;Upload a new boot image (kernel, initrd, and metadata).&lt;/p&gt;
+&lt;h4 id="sequence-diagram"&gt;Sequence Diagram&lt;/h4&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Boot Server API
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+ 
+ Client-&amp;gt;&amp;gt;API: POST /api/v1/images (multipart/form-data)
+ API-&amp;gt;&amp;gt;API: Validate URN format
+ API-&amp;gt;&amp;gt;API: Compute SHA-256 checksums
+ API-&amp;gt;&amp;gt;Storage: Upload kernel file
+ Storage--&amp;gt;&amp;gt;API: Upload complete
+ API-&amp;gt;&amp;gt;Storage: Upload initrd file
+ Storage--&amp;gt;&amp;gt;API: Upload complete
+ API-&amp;gt;&amp;gt;DB: Store metadata (URN, checksums, sizes)
+ DB--&amp;gt;&amp;gt;API: Metadata stored
+ API--&amp;gt;&amp;gt;Client: 201 Created (image metadata)&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Request Body (multipart/form-data):&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
 &lt;h2 id="startup-probe"&gt;Startup Probe&lt;/h2&gt;
 &lt;h3 id="get-healthstartup"&gt;&lt;code&gt;GET /health/startup&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
@@ -54,26 +45,6 @@
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000"&gt;GET&lt;/span&gt; &lt;span style="color:#000"&gt;/health/startup&lt;/span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;HTTP&lt;/span&gt;&lt;span style="color:#ce5c00;font-weight:bold"&gt;/&lt;/span&gt;&lt;span style="color:#0000cf;font-weight:bold"&gt;1.1&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000"&gt;Host&lt;/span&gt;&lt;span style="color:#ce5c00;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#000"&gt;boot.example.com&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000;font-weight:bold"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;status&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;ok&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;timestamp&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;2025-11-19T06:00:00Z&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;checks&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#000;font-weight:bold"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;firestore&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;connected&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;cloud_storage&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;connected&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;secret_manager&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;connected&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#000;font-weight:bold"&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000;font-weight:bold"&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000;font-weight:bold"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;status&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;unavailable&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;timestamp&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;2025-11-19T06:00:00Z&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;checks&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#000;font-weight:bold"&gt;{&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;firestore&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;connected&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;cloud_storage&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;error&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;,&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;secret_manager&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;connected&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#000;font-weight:bold"&gt;},&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;&amp;#34;errors&amp;#34;&lt;/span&gt;&lt;span style="color:#000;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#000;font-weight:bold"&gt;[&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#4e9a06"&gt;&amp;#34;Cloud Storage connection failed: permission denied&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt; &lt;span style="color:#000;font-weight:bold"&gt;]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000;font-weight:bold"&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Response Headers:&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;</description></item></channel></rss>
