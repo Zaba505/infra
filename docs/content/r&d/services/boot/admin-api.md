@@ -5,31 +5,7 @@ description: "Management API for boot images, machines, and profiles"
 weight: 20
 ---
 
-The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. All endpoints require GCP IAM authentication.
-
-## Authentication
-
-All admin API endpoints require authentication using one of the following methods:
-
-- **Service Account Token**: `Authorization: Bearer <service-account-token>`
-- **User OAuth Token**: `Authorization: Bearer <user-oauth-token>`
-- **IAM Authentication**: Validated against GCP IAM policies
-
-**Required IAM Permissions:**
-
-- `bootserver.images.create` - Upload boot images
-- `bootserver.images.read` - List and retrieve boot images
-- `bootserver.images.delete` - Delete boot images
-- `bootserver.machines.create` - Register machines
-- `bootserver.machines.read` - List and retrieve machine configurations
-- `bootserver.machines.update` - Update machine mappings
-- `bootserver.machines.delete` - Delete machine registrations
-- `bootserver.profiles.create` - Create boot profiles
-- `bootserver.profiles.read` - List and retrieve profiles
-- `bootserver.profiles.update` - Update boot profiles
-- `bootserver.profiles.delete` - Delete boot profiles
-
----
+The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. Since this is for a home lab environment, no authentication is required.
 
 ## Boot Image Management
 
@@ -37,50 +13,91 @@ All admin API endpoints require authentication using one of the following method
 
 Upload a new boot image (kernel, initrd, and metadata).
 
-**Request Body:**
+#### Sequence Diagram
 
-```json
-{
-  "id": "ubuntu-2204",
-  "name": "Ubuntu 22.04 LTS Server",
-  "version": "22.04.3",
-  "kernel": {
-    "url": "gs://boot-images/kernels/ubuntu-22.04.3-kernel.img",
-    "sha256": "a1b2c3d4e5f6..."
-  },
-  "initrd": {
-    "url": "gs://boot-images/initrd/ubuntu-22.04.3-initrd.img",
-    "sha256": "f6e5d4c3b2a1..."
-  },
-  "metadata": {
-    "os": "ubuntu",
-    "os_version": "22.04.3",
-    "architecture": "x86_64",
-    "tags": ["lts", "server"]
-  }
-}
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    
+    Client->>API: POST /api/v1/images (multipart/form-data)
+    API->>API: Validate URN format
+    API->>API: Compute SHA-256 checksums
+    API->>Storage: Upload kernel file
+    Storage-->>API: Upload complete
+    API->>Storage: Upload initrd file
+    Storage-->>API: Upload complete
+    API->>DB: Store metadata (URN, checksums, sizes)
+    DB-->>API: Metadata stored
+    API-->>Client: 201 Created (image metadata)
+```
+
+**Request Body (multipart/form-data):**
+
+Form fields:
+- `id` (text): Boot image URN (format: `urn:boot:image:{name}`)
+- `name` (text): Human-readable name
+- `version` (text): Semantic version
+- `kernel` (file): Kernel image file
+- `initrd` (file): Initrd image file
+- `metadata` (JSON text): Metadata object
+
+**Example Request:**
+
+```http
+POST /api/v1/images HTTP/1.1
+Host: boot.example.com
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="id"
+
+urn:boot:image:ubuntu-2204
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+
+Ubuntu 22.04 LTS Server
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="version"
+
+22.04.3
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="kernel"; filename="vmlinuz"
+Content-Type: application/octet-stream
+
+<kernel binary data>
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="initrd"; filename="initrd.img"
+Content-Type: application/octet-stream
+
+<initrd binary data>
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="metadata"
+Content-Type: application/json
+
+{"os":"ubuntu","os_version":"22.04.3","architecture":"x86_64","tags":["lts","server"]}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ```
 
 **Request Headers:**
 
-- `Content-Type: application/json`
-- `Authorization: Bearer <token>`
+- `Content-Type: multipart/form-data`
 
 **Response (201 Created):**
 
 ```json
 {
-  "id": "ubuntu-2204",
+  "id": "urn:boot:image:ubuntu-2204",
   "name": "Ubuntu 22.04 LTS Server",
   "version": "22.04.3",
   "kernel": {
-    "url": "gs://boot-images/kernels/ubuntu-22.04.3-kernel.img",
-    "sha256": "a1b2c3d4e5f6...",
+    "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
-    "url": "gs://boot-images/initrd/ubuntu-22.04.3-initrd.img",
-    "sha256": "f6e5d4c3b2a1...",
+    "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
   "metadata": {
@@ -89,8 +106,7 @@ Upload a new boot image (kernel, initrd, and metadata).
     "architecture": "x86_64",
     "tags": ["lts", "server"]
   },
-  "created_at": "2025-11-19T06:00:00Z",
-  "created_by": "admin@example.com"
+  "created_at": "2025-11-19T06:00:00Z"
 }
 ```
 
@@ -99,16 +115,28 @@ Upload a new boot image (kernel, initrd, and metadata).
 | Status Code | Description |
 |-------------|-------------|
 | 400 Bad Request | Invalid request body or missing required fields |
-| 401 Unauthorized | Missing or invalid authentication |
-| 403 Forbidden | Insufficient permissions |
 | 409 Conflict | Image with the same ID already exists |
-| 422 Unprocessable Entity | Validation error (invalid SHA256, unreachable URL) |
+| 422 Unprocessable Entity | Validation error (invalid URN format, file too large) |
 
 ---
 
 ### `GET /api/v1/images`
 
 List all boot images.
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/images?os=ubuntu
+    API->>DB: Query images with filters
+    DB-->>API: Image metadata list
+    API-->>Client: 200 OK (images list)
+```
 
 **Query Parameters:**
 
@@ -125,7 +153,6 @@ List all boot images.
 ```http
 GET /api/v1/images?os=ubuntu&architecture=x86_64&page=1&per_page=20 HTTP/1.1
 Host: boot.example.com
-Authorization: Bearer <token>
 ```
 
 **Response (200 OK):**
@@ -134,17 +161,15 @@ Authorization: Bearer <token>
 {
   "images": [
     {
-      "id": "ubuntu-2204",
+      "id": "urn:boot:image:ubuntu-2204",
       "name": "Ubuntu 22.04 LTS Server",
       "version": "22.04.3",
       "kernel": {
-        "url": "gs://boot-images/kernels/ubuntu-22.04.3-kernel.img",
-        "sha256": "a1b2c3d4e5f6...",
+        "sha256": "a1b2c3d4e5f6789...",
         "size_bytes": 8388608
       },
       "initrd": {
-        "url": "gs://boot-images/initrd/ubuntu-22.04.3-initrd.img",
-        "sha256": "f6e5d4c3b2a1...",
+        "sha256": "f6e5d4c3b2a19876...",
         "size_bytes": 52428800
       },
       "metadata": {
@@ -153,8 +178,7 @@ Authorization: Bearer <token>
         "architecture": "x86_64",
         "tags": ["lts", "server"]
       },
-      "created_at": "2025-11-19T06:00:00Z",
-      "created_by": "admin@example.com"
+      "created_at": "2025-11-19T06:00:00Z"
     }
   ],
   "pagination": {
@@ -172,35 +196,46 @@ Authorization: Bearer <token>
 
 Retrieve a specific boot image by ID.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/images/{urn}
+    API->>DB: Query image by URN
+    DB-->>API: Image metadata
+    API-->>Client: 200 OK (image metadata)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier |
+| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
 
 **Request Example:**
 
 ```http
-GET /api/v1/images/ubuntu-2204 HTTP/1.1
+GET /api/v1/images/urn:boot:image:ubuntu-2204 HTTP/1.1
 Host: boot.example.com
-Authorization: Bearer <token>
 ```
 
 **Response (200 OK):**
 
 ```json
 {
-  "id": "ubuntu-2204",
+  "id": "urn:boot:image:ubuntu-2204",
   "name": "Ubuntu 22.04 LTS Server",
   "version": "22.04.3",
   "kernel": {
-    "url": "gs://boot-images/kernels/ubuntu-22.04.3-kernel.img",
-    "sha256": "a1b2c3d4e5f6...",
+    "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
-    "url": "gs://boot-images/initrd/ubuntu-22.04.3-initrd.img",
-    "sha256": "f6e5d4c3b2a1...",
+    "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
   "metadata": {
@@ -209,8 +244,7 @@ Authorization: Bearer <token>
     "architecture": "x86_64",
     "tags": ["lts", "server"]
   },
-  "created_at": "2025-11-19T06:00:00Z",
-  "created_by": "admin@example.com"
+  "created_at": "2025-11-19T06:00:00Z"
 }
 ```
 
@@ -226,18 +260,35 @@ Authorization: Bearer <token>
 
 Delete a boot image.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    
+    Client->>API: DELETE /api/v1/images/{urn}
+    API->>DB: Check if image is in use
+    DB-->>API: Not in use
+    API->>Storage: Delete kernel file
+    API->>Storage: Delete initrd file
+    API->>DB: Delete metadata
+    API-->>Client: 204 No Content
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier |
+| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
 
 **Request Example:**
 
 ```http
-DELETE /api/v1/images/ubuntu-2204 HTTP/1.1
+DELETE /api/v1/images/urn:boot:image:ubuntu-2204 HTTP/1.1
 Host: boot.example.com
-Authorization: Bearer <token>
 ```
 
 **Response (204 No Content):**
