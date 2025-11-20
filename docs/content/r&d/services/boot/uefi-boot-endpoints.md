@@ -13,6 +13,24 @@ These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the U
 
 Serves iPXE boot scripts customized for the requesting machine based on its MAC address.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Bare Metal Server
+    participant Boot as Boot Server
+    participant DB as Firestore
+    
+    Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
+    Boot->>Boot: Validate MAC address format
+    Boot->>DB: Query machine by MAC
+    DB-->>Boot: Machine config (profile_id, kernel args)
+    Boot->>DB: Get profile by ID
+    DB-->>Boot: Profile config (image_id, kernel args)
+    Boot->>Boot: Generate iPXE script
+    Boot-->>Client: 200 OK (iPXE script)
+```
+
 **Query Parameters:**
 
 | Parameter | Type | Required | Description |
@@ -32,11 +50,11 @@ Host: boot.internal
 #!ipxe
 
 # Boot configuration for node-01 (52:54:00:12:34:56)
-# Profile: ubuntu-22.04-server
+# Profile: urn:boot:profile:ubuntu-22.04-server
 # Generated: 2025-11-19T06:00:00Z
 
-kernel /assets/ubuntu-2204/kernel console=tty0 console=ttyS0 ip=dhcp
-initrd /assets/ubuntu-2204/initrd
+kernel /assets/urn:boot:image:ubuntu-2204/kernel console=tty0 console=ttyS0 ip=dhcp
+initrd /assets/urn:boot:image:ubuntu-2204/initrd
 boot
 ```
 
@@ -58,8 +76,7 @@ boot
 The iPXE script may include the following dynamic values:
 
 - Machine-specific kernel parameters
-- Cloud-init data source URLs
-- Asset download URLs
+- Asset download URLs (using URN format)
 - Network configuration parameters
 
 ---
@@ -70,16 +87,32 @@ The iPXE script may include the following dynamic values:
 
 Streams kernel images from Cloud Storage for the boot process.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Bare Metal Server
+    participant Boot as Boot Server
+    participant Storage as Cloud Storage
+    
+    Client->>Boot: GET /assets/urn:boot:image:ubuntu-2204/kernel
+    Boot->>Boot: Validate URN format
+    Boot->>Boot: Parse image ID from URN
+    Boot->>Storage: Stream kernel file
+    Storage-->>Boot: Kernel data stream
+    Boot-->>Client: 200 OK (kernel stream)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier (e.g., `ubuntu-2204`, `talos-v1.8`) |
+| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
 
 **Request Example:**
 
 ```http
-GET /assets/ubuntu-2204/kernel HTTP/1.1
+GET /assets/urn:boot:image:ubuntu-2204/kernel HTTP/1.1
 Host: boot.internal
 ```
 
@@ -115,16 +148,32 @@ Binary kernel image streamed from Cloud Storage.
 
 Streams initial ramdisk (initrd) images from Cloud Storage for the boot process.
 
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Bare Metal Server
+    participant Boot as Boot Server
+    participant Storage as Cloud Storage
+    
+    Client->>Boot: GET /assets/urn:boot:image:ubuntu-2204/initrd
+    Boot->>Boot: Validate URN format
+    Boot->>Boot: Parse image ID from URN
+    Boot->>Storage: Stream initrd file
+    Storage-->>Boot: Initrd data stream
+    Boot-->>Client: 200 OK (initrd stream)
+```
+
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier (e.g., `ubuntu-2204`, `talos-v1.8`) |
+| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
 
 **Request Example:**
 
 ```http
-GET /assets/ubuntu-2204/initrd HTTP/1.1
+GET /assets/urn:boot:image:ubuntu-2204/initrd HTTP/1.1
 Host: boot.internal
 ```
 
@@ -154,89 +203,6 @@ Binary initrd image streamed from Cloud Storage.
 
 ---
 
-## Cloud-Init Configuration Endpoint
-
-### `GET /cloud-init/{machine_id}`
-
-Serves cloud-init configuration files customized for specific machines.
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (hostname, UUID, or MAC address) |
-
-**Request Example:**
-
-```http
-GET /cloud-init/node-01 HTTP/1.1
-Host: boot.internal
-```
-
-**Response Example (200 OK):**
-
-```yaml
-#cloud-config
-
-hostname: node-01
-fqdn: node-01.homelab.local
-
-users:
-  - name: admin
-    groups: sudo
-    shell: /bin/bash
-    sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIExample...
-
-packages:
-  - qemu-guest-agent
-  - curl
-
-runcmd:
-  - systemctl enable qemu-guest-agent
-  - systemctl start qemu-guest-agent
-
-final_message: "Cloud-init complete for node-01 after $UPTIME seconds"
-```
-
-**Response Headers:**
-
-- `Content-Type: text/cloud-config; charset=utf-8`
-- `Cache-Control: no-cache, no-store, must-revalidate`
-
-**Error Responses:**
-
-| Status Code | Description | Example |
-|-------------|-------------|---------|
-| 404 Not Found | Machine configuration not found | `{"error": {"code": "MACHINE_NOT_FOUND", "message": "Cloud-init configuration for 'node-01' not found"}}` |
-| 500 Internal Server Error | Template or storage error | `{"error": {"code": "INTERNAL_ERROR", "message": "Failed to generate cloud-init configuration"}}` |
-
-**Cloud-Init Features:**
-
-The cloud-init configuration supports:
-
-- Hostname and FQDN configuration
-- User account creation with SSH keys
-- Package installation
-- Custom commands (runcmd)
-- Network configuration
-- Disk partitioning and filesystem setup
-- Service management
-
-**Template Variables:**
-
-Cloud-init templates can use machine-specific variables:
-
-- `{{.Hostname}}` - Machine hostname
-- `{{.FQDN}}` - Fully qualified domain name
-- `{{.MACAddress}}` - Primary MAC address
-- `{{.IPAddress}}` - Assigned IP address (if static)
-- `{{.SSHKeys}}` - Authorized SSH public keys
-- `{{.Metadata}}` - Custom machine metadata
-
----
-
 ## Security Considerations
 
 ### VPN Source IP Validation
@@ -253,7 +219,6 @@ To prevent abuse, boot endpoints are rate-limited:
 
 - **Boot Script**: 10 requests/minute per MAC address
 - **Asset Downloads**: 5 concurrent downloads per MAC address
-- **Cloud-Init**: 10 requests/minute per machine_id
 
 ### Asset Integrity
 
@@ -265,16 +230,13 @@ Boot assets are validated for integrity:
 
 ## Observability
 
-All boot endpoint requests are instrumented with OpenTelemetry:
+All boot endpoint requests are instrumented with OpenTelemetry following HTTP semantic conventions:
 
-- **Metrics**: Request count, latency, error rate, bytes transferred
+- **Metrics**: OpenTelemetry HTTP server metrics (request count, duration, size)
+  - `http.server.request.duration` - Request duration histogram
+  - `http.server.request.body.size` - Request body size
+  - `http.server.response.body.size` - Response body size (tracks bytes transferred)
 - **Traces**: End-to-end tracing from request to Cloud Storage retrieval
+  - HTTP server span captures request details (method, route, status code)
+  - Child spans for database queries and Cloud Storage operations
 - **Logs**: Structured logs with MAC address, image ID, response status
-
-**Key Metrics:**
-
-- `boot_script_requests_total` - Total boot script requests
-- `boot_script_latency_ms` - Boot script generation latency
-- `asset_download_bytes_total` - Total bytes transferred for boot assets
-- `asset_download_duration_ms` - Asset download duration
-- `cloud_init_requests_total` - Cloud-init configuration requests
