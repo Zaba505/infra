@@ -16,7 +16,3 @@ All services follow a consistent architecture pattern:
 - **Observability**: OpenTelemetry metrics, traces, and logs
 - **Health Checks**: Standard `/health/startup` and `/health/liveness` endpoints
 - **Configuration**: Embedded `config.yaml` with OpenAPI specifications
-
-## Available Services
-
-- [Boot Server](./boot/) - Network boot server for UEFI HTTP boot infrastructure

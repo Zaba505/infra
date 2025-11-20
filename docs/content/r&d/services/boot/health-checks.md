@@ -22,50 +22,25 @@ Host: boot.example.com
 
 **Response (200 OK):**
 
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-11-19T06:00:00Z",
-  "checks": {
-    "firestore": "connected",
-    "cloud_storage": "connected",
-    "secret_manager": "connected"
-  }
-}
-```
+Empty response body with HTTP 200 status code.
 
 **Response (503 Service Unavailable):**
 
-```json
-{
-  "status": "unavailable",
-  "timestamp": "2025-11-19T06:00:00Z",
-  "checks": {
-    "firestore": "connected",
-    "cloud_storage": "error",
-    "secret_manager": "connected"
-  },
-  "errors": [
-    "Cloud Storage connection failed: permission denied"
-  ]
-}
-```
+Empty response body with HTTP 503 status code.
 
 **Response Headers:**
 
-- `Content-Type: application/json`
 - `Cache-Control: no-cache, no-store, must-revalidate`
 
 **Startup Check Components:**
 
 1. **Firestore Connection** - Verifies database connectivity
 2. **Cloud Storage Access** - Validates access to boot image buckets
-3. **Secret Manager** - Confirms access to configuration secrets (if applicable)
 
 **Cloud Run Configuration:**
 
 ```yaml
-livenessProbe:
+startupProbe:
   httpGet:
     path: /health/startup
     port: 8080
@@ -98,39 +73,20 @@ Host: boot.example.com
 
 **Response (200 OK):**
 
-```json
-{
-  "status": "ok",
-  "timestamp": "2025-11-19T06:00:00Z",
-  "uptime_seconds": 3600
-}
-```
+Empty response body with HTTP 200 status code.
 
 **Response (503 Service Unavailable):**
 
-```json
-{
-  "status": "unhealthy",
-  "timestamp": "2025-11-19T06:00:00Z",
-  "uptime_seconds": 3650,
-  "errors": [
-    "Firestore connection pool exhausted",
-    "High error rate in last 60 seconds: 45%"
-  ]
-}
-```
+Empty response body with HTTP 503 status code.
 
 **Response Headers:**
 
-- `Content-Type: application/json`
 - `Cache-Control: no-cache, no-store, must-revalidate`
 
 **Liveness Check Components:**
 
 1. **HTTP Server Health** - Verifies the HTTP server is responsive
-2. **Database Connection Pool** - Ensures database connections are available
-3. **Error Rate** - Checks if error rate is within acceptable thresholds
-4. **Memory Pressure** - Monitors memory usage (optional)
+2. **Basic health validation** - Ensures the application can handle requests
 
 **Cloud Run Configuration:**
 
@@ -139,7 +95,7 @@ livenessProbe:
   httpGet:
     path: /health/liveness
     port: 8080
-  initialDelaySeconds: 30
+  initialDelaySeconds: 0
   timeoutSeconds: 30
   periodSeconds: 10
   failureThreshold: 3
@@ -183,22 +139,16 @@ graph TD
     
     C --> E[Firestore Connection]
     C --> F[Cloud Storage Access]
-    C --> G[Secret Manager Access]
     
     E --> H{All OK?}
     F --> H
-    G --> H
     
     H -->|Yes| I[200 OK]
     H -->|No| J[503 Service Unavailable]
     
     D --> K[Server Responsive]
-    D --> L[Connection Pool]
-    D --> M[Error Rate]
     
-    K --> N{All OK?}
-    L --> N
-    M --> N
+    K --> N{OK?}
     
     N -->|Yes| O[200 OK]
     N -->|No| P[503 Service Unavailable]
@@ -228,11 +178,7 @@ Health check results are logged and monitored:
   "message": "Health check completed",
   "probe": "liveness",
   "status": "ok",
-  "duration_ms": 15,
-  "checks": {
-    "firestore": "connected",
-    "cloud_storage": "connected"
-  }
+  "duration_ms": 15
 }
 ```
 
@@ -269,13 +215,6 @@ func TestHealthStartup(t *testing.T) {
     defer resp.Body.Close()
     
     assert.Equal(t, http.StatusOK, resp.StatusCode)
-    
-    var health HealthResponse
-    err = json.NewDecoder(resp.Body).Decode(&health)
-    require.NoError(t, err)
-    
-    assert.Equal(t, "ok", health.Status)
-    assert.NotEmpty(t, health.Timestamp)
 }
 ```
 
@@ -339,8 +278,9 @@ gcloud monitoring time-series list \
   --filter='metric.type="custom.googleapis.com/health_check_total" AND metric.labels.status="error"' \
   --interval-start-time="5 minutes ago"
 
-# Check for resource exhaustion
-kubectl top pods -l app=boot-server
+# Check for resource exhaustion (Cloud Run)
+gcloud run services describe boot-server --region=<region> --format=json | jq '.status'
+# For detailed resource metrics, check Cloud Monitoring dashboards
 ```
 
 **Common Causes:**
@@ -357,30 +297,21 @@ kubectl top pods -l app=boot-server
 
 Health check endpoints are **intentionally unauthenticated** to allow Cloud Run infrastructure to probe without credentials. This is safe because:
 
-1. Endpoints expose minimal information (status only)
+1. Endpoints return only HTTP status codes (no response body)
 2. No sensitive data is returned
 3. Rate limiting prevents abuse
 4. Endpoints are read-only
 
 ### Information Disclosure
 
-Health checks should avoid disclosing:
+Health checks return only HTTP status codes with no response body, ensuring:
 
-- Internal IP addresses
-- Detailed error messages with stack traces
-- Database connection strings
-- API keys or secrets
+- No internal IP addresses disclosed
+- No error messages or stack traces exposed
+- No database connection strings revealed
+- No API keys or secrets leaked
 
-Return generic error messages in production:
-
-```json
-{
-  "status": "unhealthy",
-  "errors": ["Internal service error"]
-}
-```
-
-Detailed diagnostics should be logged (not returned in response):
+Detailed diagnostics are logged internally (not returned in response):
 
 ```json
 {
