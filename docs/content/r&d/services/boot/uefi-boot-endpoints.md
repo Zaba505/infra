@@ -21,13 +21,14 @@ sequenceDiagram
     participant Boot as Boot Server
     participant DB as Firestore
     
-    Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
+    Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56&machine_id=urn:boot:machine:node-01
     Boot->>Boot: Validate MAC address format
-    Boot->>DB: Query machine by MAC
+    Boot->>Boot: Validate machine_id URN format
+    Boot->>DB: Query machine by MAC and machine_id
     DB-->>Boot: Machine config (profile_id, kernel args)
     Boot->>DB: Get profile by ID
     DB-->>Boot: Profile config (image_id, kernel args)
-    Boot->>Boot: Generate iPXE script
+    Boot->>Boot: Generate iPXE script with machine_id
     Boot-->>Client: 200 OK (iPXE script)
 ```
 
@@ -36,11 +37,12 @@ sequenceDiagram
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `mac` | string | Yes | MAC address of the requesting machine (format: `aa:bb:cc:dd:ee:ff`) |
+| `machine_id` | string | Yes | Machine identifier assigned by the boot service |
 
 **Request Example:**
 
 ```http
-GET /boot.ipxe?mac=52:54:00:12:34:56 HTTP/1.1
+GET /boot.ipxe?mac=52:54:00:12:34:56&machine_id=urn:boot:machine:node-01 HTTP/1.1
 Host: boot.internal
 ```
 
@@ -50,11 +52,12 @@ Host: boot.internal
 #!ipxe
 
 # Boot configuration for node-01 (52:54:00:12:34:56)
+# Machine ID: urn:boot:machine:node-01
 # Profile: urn:boot:profile:ubuntu-22.04-server
 # Generated: 2025-11-19T06:00:00Z
 
-kernel /assets/urn:boot:image:ubuntu-2204/kernel console=tty0 console=ttyS0 ip=dhcp
-initrd /assets/urn:boot:image:ubuntu-2204/initrd
+kernel /assets/urn:boot:machine:node-01/kernel console=tty0 console=ttyS0 ip=dhcp
+initrd /assets/urn:boot:machine:node-01/initrd
 boot
 ```
 
@@ -93,12 +96,14 @@ Streams kernel images from Cloud Storage for the boot process.
 sequenceDiagram
     participant Client as Bare Metal Server
     participant Boot as Boot Server
+    participant DB as Firestore
     participant Storage as Cloud Storage
     
-    Client->>Boot: GET /assets/urn:boot:image:ubuntu-2204/kernel
+    Client->>Boot: GET /assets/urn:boot:machine:node-01/kernel
     Boot->>Boot: Validate URN format
-    Boot->>Boot: Parse image ID from URN
-    Boot->>Storage: Stream kernel file
+    Boot->>DB: Query machine to get image_id
+    DB-->>Boot: Machine config (image_id)
+    Boot->>Storage: Stream kernel file for image
     Storage-->>Boot: Kernel data stream
     Boot-->>Client: 200 OK (kernel stream)
 ```
@@ -107,12 +112,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
+| `id` | string (URN) | Yes | Machine identifier assigned by the boot service (URN format: `urn:boot:machine:{name}`) |
 
 **Request Example:**
 
 ```http
-GET /assets/urn:boot:image:ubuntu-2204/kernel HTTP/1.1
+GET /assets/urn:boot:machine:node-01/kernel HTTP/1.1
 Host: boot.internal
 ```
 
@@ -154,12 +159,14 @@ Streams initial ramdisk (initrd) images from Cloud Storage for the boot process.
 sequenceDiagram
     participant Client as Bare Metal Server
     participant Boot as Boot Server
+    participant DB as Firestore
     participant Storage as Cloud Storage
     
-    Client->>Boot: GET /assets/urn:boot:image:ubuntu-2204/initrd
+    Client->>Boot: GET /assets/urn:boot:machine:node-01/initrd
     Boot->>Boot: Validate URN format
-    Boot->>Boot: Parse image ID from URN
-    Boot->>Storage: Stream initrd file
+    Boot->>DB: Query machine to get image_id
+    DB-->>Boot: Machine config (image_id)
+    Boot->>Storage: Stream initrd file for image
     Storage-->>Boot: Initrd data stream
     Boot-->>Client: 200 OK (initrd stream)
 ```
@@ -168,12 +175,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
+| `id` | string (URN) | Yes | Machine identifier assigned by the boot service (URN format: `urn:boot:machine:{name}`) |
 
 **Request Example:**
 
 ```http
-GET /assets/urn:boot:image:ubuntu-2204/initrd HTTP/1.1
+GET /assets/urn:boot:machine:node-01/initrd HTTP/1.1
 Host: boot.internal
 ```
 
