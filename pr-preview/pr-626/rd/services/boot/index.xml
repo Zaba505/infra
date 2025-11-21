@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Boot Server on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/</link><description>Recent content in Boot Server on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/index.xml" rel="self" type="application/rss+xml"/><item><title>UEFI HTTP Boot Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</guid><description>&lt;p&gt;These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.&lt;/p&gt;
+&lt;h2 id="boot-script-endpoint"&gt;Boot Script Endpoint&lt;/h2&gt;
+&lt;h3 id="get-bootipxe"&gt;&lt;code&gt;GET /boot.ipxe&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address.&lt;/p&gt;
+&lt;h4 id="sequence-diagram"&gt;Sequence Diagram&lt;/h4&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Bare Metal Server
+ participant Boot as Boot Server
+ participant DB as Firestore
+ 
+ Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56&amp;amp;machine_id=urn:boot:machine:node-01
+ Boot-&amp;gt;&amp;gt;Boot: Validate MAC address format
+ Boot-&amp;gt;&amp;gt;Boot: Validate machine_id URN format
+ Boot-&amp;gt;&amp;gt;DB: Query machine by MAC and machine_id
+ DB--&amp;gt;&amp;gt;Boot: Machine config (profile_id, kernel args)
+ Boot-&amp;gt;&amp;gt;DB: Get profile by ID
+ DB--&amp;gt;&amp;gt;Boot: Profile config (image_id, kernel args)
+ Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with machine_id
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>HTTP REST Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;p&gt;The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. Since this is for a home lab environment, no authentication is required.&lt;/p&gt;
+&lt;h2 id="boot-image-management"&gt;Boot Image Management&lt;/h2&gt;
+&lt;h3 id="post-apiv1images"&gt;&lt;code&gt;POST /api/v1/images&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;Upload a new boot image (kernel, initrd, and metadata).&lt;/p&gt;
+&lt;h4 id="sequence-diagram"&gt;Sequence Diagram&lt;/h4&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Boot Server API
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+ 
+ Client-&amp;gt;&amp;gt;API: POST /api/v1/images (multipart/form-data)
+ API-&amp;gt;&amp;gt;API: Validate URN format
+ API-&amp;gt;&amp;gt;API: Compute SHA-256 checksums
+ API-&amp;gt;&amp;gt;Storage: Upload kernel file
+ Storage--&amp;gt;&amp;gt;API: Upload complete
+ API-&amp;gt;&amp;gt;Storage: Upload initrd file
+ Storage--&amp;gt;&amp;gt;API: Upload complete
+ API-&amp;gt;&amp;gt;DB: Store metadata (URN, checksums, sizes)
+ DB--&amp;gt;&amp;gt;API: Metadata stored
+ API--&amp;gt;&amp;gt;Client: 201 Created (image metadata)&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Request Body (multipart/form-data):&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
+&lt;h2 id="startup-probe"&gt;Startup Probe&lt;/h2&gt;
+&lt;h3 id="get-healthstartup"&gt;&lt;code&gt;GET /health/startup&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" style="background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000"&gt;GET&lt;/span&gt; &lt;span style="color:#000"&gt;/health/startup&lt;/span&gt; &lt;span style="color:#204a87;font-weight:bold"&gt;HTTP&lt;/span&gt;&lt;span style="color:#ce5c00;font-weight:bold"&gt;/&lt;/span&gt;&lt;span style="color:#0000cf;font-weight:bold"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style="display:flex;"&gt;&lt;span&gt;&lt;span style="color:#000"&gt;Host&lt;/span&gt;&lt;span style="color:#ce5c00;font-weight:bold"&gt;:&lt;/span&gt; &lt;span style="color:#000"&gt;boot.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;</description></item></channel></rss>
