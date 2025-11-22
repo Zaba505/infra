@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Ubiquiti Dream Machine Pro Analysis on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-629/rd/analysis/udm_pro/</link><description>Recent content in Ubiquiti Dream Machine Pro Analysis on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-629/rd/analysis/udm_pro/index.xml" rel="self" type="application/rss+xml"/><item><title>UDM Pro VLAN Configuration &amp; Capabilities</title><link>https://zaba505.github.io/infra/pr-preview/pr-629/rd/analysis/udm_pro/vlans/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-629/rd/analysis/udm_pro/vlans/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;The &lt;strong&gt;Ubiquiti Dream Machine Pro (UDM Pro)&lt;/strong&gt; provides robust VLAN support through native 802.1Q tagging, enabling network segmentation for security, performance, and organizational purposes. This document covers VLAN configuration capabilities, port assignments, and VPN integration.&lt;/p&gt;
+&lt;h2 id="vlan-fundamentals-on-udm-pro"&gt;VLAN Fundamentals on UDM Pro&lt;/h2&gt;
+&lt;h3 id="supported-standards"&gt;Supported Standards&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;802.1Q VLAN Tagging&lt;/strong&gt;: Full support for standard VLAN tagging&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;VLAN Range&lt;/strong&gt;: IDs 1-4094 (standard IEEE 802.1Q range)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Maximum VLANs&lt;/strong&gt;: Up to 32 networks/VLANs per device&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Native VLAN&lt;/strong&gt;: Configurable per port (default: VLAN 1)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="vlan-types"&gt;VLAN Types&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;Corporate Network&lt;/strong&gt;&lt;/p&gt;</description></item></channel></rss>
