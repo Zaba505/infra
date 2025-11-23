@@ -50,12 +50,12 @@ Host: boot.internal
 #!ipxe
 
 # Boot configuration for node-01 (52:54:00:12:34:56)
-# Machine ID: urn:boot:machine:node-01
-# Profile: urn:boot:profile:ubuntu-22.04-server
+# Machine ID: 018c7dbd-9265-7000-8000-123456789abc
+# Profile: 018c7dbd-a1b2-7000-8000-987654321def
 # Generated: 2025-11-19T06:00:00Z
 
-kernel /assets/urn:boot:machine:node-01/kernel console=tty0 console=ttyS0 ip=dhcp
-initrd /assets/urn:boot:machine:node-01/initrd
+kernel /assets/018c7dbd-9265-7000-8000-123456789abc/kernel console=tty0 console=ttyS0 ip=dhcp
+initrd /assets/018c7dbd-9265-7000-8000-123456789abc/initrd
 boot
 ```
 
@@ -97,8 +97,8 @@ sequenceDiagram
     participant DB as Firestore
     participant Storage as Cloud Storage
     
-    Client->>Boot: GET /assets/urn:boot:machine:node-01/kernel
-    Boot->>Boot: Validate URN format
+    Client->>Boot: GET /assets/018c7dbd-9265-7000-8000-123456789abc/kernel
+    Boot->>Boot: Validate UUIDv7 format
     Boot->>DB: Query machine to get image_id
     DB-->>Boot: Machine config (image_id)
     Boot->>Storage: Stream kernel file for image
@@ -110,12 +110,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Machine identifier assigned by the boot service (URN format: `urn:boot:machine:{name}`) |
+| `id` | string (UUIDv7) | Yes | Machine identifier assigned by the boot service (UUIDv7 format: `018c7dbd-9265-7000-8000-123456789abc`) |
 
 **Request Example:**
 
 ```http
-GET /assets/urn:boot:machine:node-01/kernel HTTP/1.1
+GET /assets/018c7dbd-9265-7000-8000-123456789abc/kernel HTTP/1.1
 Host: boot.internal
 ```
 
@@ -160,8 +160,8 @@ sequenceDiagram
     participant DB as Firestore
     participant Storage as Cloud Storage
     
-    Client->>Boot: GET /assets/urn:boot:machine:node-01/initrd
-    Boot->>Boot: Validate URN format
+    Client->>Boot: GET /assets/018c7dbd-9265-7000-8000-123456789abc/initrd
+    Boot->>Boot: Validate UUIDv7 format
     Boot->>DB: Query machine to get image_id
     DB-->>Boot: Machine config (image_id)
     Boot->>Storage: Stream initrd file for image
@@ -173,12 +173,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Machine identifier assigned by the boot service (URN format: `urn:boot:machine:{name}`) |
+| `id` | string (UUIDv7) | Yes | Machine identifier assigned by the boot service (UUIDv7 format: `018c7dbd-9265-7000-8000-123456789abc`) |
 
 **Request Example:**
 
 ```http
-GET /assets/urn:boot:machine:node-01/initrd HTTP/1.1
+GET /assets/018c7dbd-9265-7000-8000-123456789abc/initrd HTTP/1.1
 Host: boot.internal
 ```
 
