@@ -1,6 +1,6 @@
 ---
 title: "Resource Identifiers Analysis"
-docs: type
+type: docs
 weight: 50
 ---
 

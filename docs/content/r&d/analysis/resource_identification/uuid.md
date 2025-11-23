@@ -1,6 +1,6 @@
 ---
 title: "UUID Analysis"
-docs: type
+type: docs
 weight: 1
 ---
 

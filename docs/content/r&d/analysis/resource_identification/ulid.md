@@ -1,6 +1,6 @@
 ---
 title: "ULID Analysis"
-docs: type
+type: docs
 weight: 2
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Snowflake ID Analysis"
-docs: type
+type: docs
 weight: 3
 ---
 
