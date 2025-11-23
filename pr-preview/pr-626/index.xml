@@ -16,8 +16,7 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>UUID Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/uuid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/uuid/</guid><description>&lt;h1 id="uuid-universally-unique-identifier"&gt;UUID (Universally Unique Identifier)&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Universally Unique Identifier (UUID) Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/uuid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/uuid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;UUIDs are 128-bit identifiers standardized in RFC 9562 (May 2024), which obsoletes the previous RFC 4122. The latest specification introduces three new versions (v6, v7, v8) while maintaining backward compatibility with existing versions.&lt;/p&gt;
 &lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
 &lt;h3 id="-fully-uri-safe"&gt;✅ Fully URI-Safe&lt;/h3&gt;
@@ -49,8 +48,7 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>ULID Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/ulid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/ulid/</guid><description>&lt;h1 id="ulid-universally-unique-lexicographically-sortable-identifier"&gt;ULID (Universally Unique Lexicographically Sortable Identifier)&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Universally Unique Lexicographically Sortable Identifier (ULID) Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/ulid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/ulid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;ULID is a community-driven specification for unique identifiers that combine the decentralized generation of UUIDs with the performance benefits of time-ordered sequential IDs. Created as an alternative to UUID v4&amp;rsquo;s poor database performance, ULID predates UUID v7 but shares similar design goals.&lt;/p&gt;
 &lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
 &lt;h3 id="-completely-uri-safe"&gt;✅ Completely URI-Safe&lt;/h3&gt;
@@ -76,8 +74,7 @@ ADR Categories:
 &lt;strong&gt;Status&lt;/strong&gt;: Generally Available (GA)
 &lt;strong&gt;Latest Version&lt;/strong&gt;: v2.x (as of 2024)&lt;/p&gt;
 &lt;h2 id="how-gcsfuse-works"&gt;How gcsfuse Works&lt;/h2&gt;
-&lt;p&gt;gcsfuse translates filesystem operations into GCS API calls:&lt;/p&gt;</description></item><item><title>Snowflake ID Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/snowflake/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/snowflake/</guid><description>&lt;h1 id="snowflake-id"&gt;Snowflake ID&lt;/h1&gt;
-&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;gcsfuse translates filesystem operations into GCS API calls:&lt;/p&gt;</description></item><item><title>Snowflake ID Analysis</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/snowflake/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/analysis/resource_identification/snowflake/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Snowflake IDs are 64-bit unique identifiers originally developed by Twitter (now X) in 2010 to replace auto-incrementing integer IDs that became problematic as they scaled across multiple database shards. The format has been widely adopted by other distributed systems including Discord, Instagram, and many platforms requiring globally unique, time-ordered identifiers.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key differentiator:&lt;/strong&gt; Half the size of UUIDs/ULIDs while maintaining distributed generation and time-ordering properties.&lt;/p&gt;
 &lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
