@@ -6,22 +6,37 @@
 &lt;pre class="mermaid"&gt;sequenceDiagram
  participant Client as Bare Metal Server
  participant Boot as Boot Service
- participant MgmtAPI as Machine Management Service
+ participant MachineAPI as Machine Service
  participant DB as Firestore
  
  Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
  Boot-&amp;gt;&amp;gt;Boot: Validate MAC address format
- Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
- MgmtAPI-&amp;gt;&amp;gt;DB: Query machine by NIC MAC
- DB--&amp;gt;&amp;gt;MgmtAPI: Machine profile (machine_id)
- MgmtAPI--&amp;gt;&amp;gt;Boot: Machine profile
- Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/machines/{machine_id}/profile
- MgmtAPI-&amp;gt;&amp;gt;DB: Get active boot profile for machine
- DB--&amp;gt;&amp;gt;MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
- MgmtAPI--&amp;gt;&amp;gt;Boot: Boot profile metadata
+ Boot-&amp;gt;&amp;gt;MachineAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
+ MachineAPI-&amp;gt;&amp;gt;DB: Query machine by NIC MAC
+ DB--&amp;gt;&amp;gt;MachineAPI: Machine profile (machine_id)
+ MachineAPI--&amp;gt;&amp;gt;Boot: Machine profile
+ Boot-&amp;gt;&amp;gt;DB: Query boot profile by machine_id
+ DB--&amp;gt;&amp;gt;Boot: Boot profile (profile_id, kernel_id, initrd_id, kernel args)
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id
  Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
-&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Boot Service Admin API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/admin-api/</guid><description>&lt;p&gt;The Boot Service provides admin HTTP REST endpoints for managing boot profiles. Boot profiles bundle kernel, initrd, and kernel arguments together. Each machine has exactly one active boot profile at any given time.&lt;/p&gt;
+&lt;h2 id="boot-profile-management"&gt;Boot Profile Management&lt;/h2&gt;
+&lt;h3 id="cloud-storage-structure"&gt;Cloud Storage Structure&lt;/h3&gt;
+&lt;p&gt;Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;gs://{bucket}/blobs/{kernel_id}
+gs://{bucket}/blobs/{initrd_id}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;For example:&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;gs://boot-server-blobs/blobs/018c7dbd-b100-7000-8000-123456789abc
+gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The UUIDv7 identifiers are generated server-side during upload, ensuring:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Globally unique object keys&lt;/li&gt;
+&lt;li&gt;Time-ordered storage (UUIDv7 timestamp prefix)&lt;/li&gt;
+&lt;li&gt;No namespace collisions between profiles&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id="post-apiv1profiles"&gt;&lt;code&gt;POST /api/v1/profiles&lt;/code&gt;&lt;/h3&gt;
+&lt;p&gt;Create a new boot profile for a machine. If the machine already has a boot profile, this operation will fail - use PUT to update instead.&lt;/p&gt;</description></item><item><title>Health Check Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/health-checks/</guid><description>&lt;p&gt;The Boot Server exposes standard health check endpoints used by GCP Cloud Run for startup and liveness probes. These endpoints are unauthenticated and accessible without VPN access.&lt;/p&gt;
 &lt;h2 id="startup-probe"&gt;Startup Probe&lt;/h2&gt;
 &lt;h3 id="get-healthstartup"&gt;&lt;code&gt;GET /health/startup&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
