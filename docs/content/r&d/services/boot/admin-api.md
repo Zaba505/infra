@@ -449,20 +449,8 @@ sequenceDiagram
 
 ```json
 {
-  "mac_address": "52:54:00:12:34:56",
-  "hostname": "node-01",
   "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "metadata": {
-    "datacenter": "homelab",
-    "rack": "A1",
-    "role": "compute"
-  },
-  "network": {
-    "ip_address": "10.0.1.10",
-    "netmask": "255.255.255.0",
-    "gateway": "10.0.1.1",
-    "dns_servers": ["10.0.1.1", "8.8.8.8"]
-  }
+  "mac_address": "52:54:00:12:34:56"
 }
 ```
 
@@ -470,22 +458,11 @@ sequenceDiagram
 
 ```json
 {
-  "mac_address": "52:54:00:12:34:56",
-  "hostname": "node-01",
+  "id": "018c7dbd-c000-7000-8000-fedcba987654",
   "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "metadata": {
-    "datacenter": "homelab",
-    "rack": "A1",
-    "role": "compute"
-  },
-  "network": {
-    "ip_address": "10.0.1.10",
-    "netmask": "255.255.255.0",
-    "gateway": "10.0.1.1",
-    "dns_servers": ["10.0.1.1", "8.8.8.8"]
-  },
-  "created_at": "2025-11-23T19:00:00Z",
-  "updated_at": "2025-11-23T19:00:00Z"
+  "mac_address": "52:54:00:12:34:56",
+  "created_at": 1700000000000,
+  "updated_at": 1700000000000
 }
 ```
 
@@ -496,6 +473,12 @@ sequenceDiagram
 | 400 Bad Request | Invalid MAC address format or missing required fields |
 | 409 Conflict | Machine with the same MAC address already exists |
 | 422 Unprocessable Entity | Referenced profile_id does not exist |
+
+**Notes:**
+
+- The machine ID is generated server-side (UUIDv7)
+- MAC address must be unique across all machines
+- Timestamps are Unix milliseconds since epoch
 
 ---
 
@@ -523,8 +506,8 @@ sequenceDiagram
 |-----------|------|----------|-------------|---------|
 | `page` | integer | No | Page number (1-indexed) | 1 |
 | `per_page` | integer | No | Results per page (1-100) | 20 |
-| `profile_id` | string | No | Filter by boot profile | - |
-| `role` | string | No | Filter by machine role | - |
+| `profile_id` | string | No | Filter by boot profile (UUIDv7) | - |
+| `mac_address` | string | No | Filter by MAC address | - |
 
 **Response (200 OK):**
 
@@ -532,22 +515,11 @@ sequenceDiagram
 {
   "machines": [
     {
-      "mac_address": "52:54:00:12:34:56",
-      "hostname": "node-01",
+      "id": "018c7dbd-c000-7000-8000-fedcba987654",
       "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-      "metadata": {
-        "datacenter": "homelab",
-        "rack": "A1",
-        "role": "compute"
-      },
-      "network": {
-        "ip_address": "10.0.1.10",
-        "netmask": "255.255.255.0",
-        "gateway": "10.0.1.1",
-        "dns_servers": ["10.0.1.1", "8.8.8.8"]
-      },
-      "created_at": "2025-11-23T19:00:00Z",
-      "updated_at": "2025-11-23T19:00:00Z"
+      "mac_address": "52:54:00:12:34:56",
+      "created_at": 1700000000000,
+      "updated_at": 1700000000000
     }
   ],
   "pagination": {
@@ -628,12 +600,7 @@ sequenceDiagram
 
 ```json
 {
-  "profile_id": "018c7dbd-a000-7000-8000-000000000002",
-  "metadata": {
-    "datacenter": "homelab",
-    "rack": "A1",
-    "role": "storage"
-  }
+  "profile_id": "018c7dbd-a000-7000-8000-000000000002"
 }
 ```
 
@@ -727,12 +694,12 @@ sequenceDiagram
 
 ```json
 {
-  "mac_address": "52:54:00:12:34:56",
-  "hostname": "node-01",
+  "id": "018c7dbd-c000-7000-8000-fedcba987654",
   "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
+  "mac_address": "52:54:00:12:34:56",
   "previous_profile_id": "018c7dbd-a000-7000-8000-000000000002",
   "rollback_reason": "Failed upgrade to new kernel version",
-  "rollback_at": "2025-11-23T19:30:00Z"
+  "rollback_at": 1700000000000
 }
 ```
 
@@ -755,56 +722,41 @@ The system maintains a history of profile changes to enable rollback:
 
 ## Data Models
 
+All data models are defined as Protocol Buffer (protobuf) messages and stored in Firestore.
+
 ### Boot Profile
 
-```typescript
-interface BootProfile {
-  id: string;              // UUIDv7 identifier
-  name: string;            // Human-readable name
-  kernel: {
-    id: string;            // UUIDv7 blob identifier
-    sha256: string;        // SHA-256 checksum
-    size_bytes: number;    // File size in bytes
-  };
-  initrd: {
-    id: string;            // UUIDv7 blob identifier
-    sha256: string;        // SHA-256 checksum
-    size_bytes: number;    // File size in bytes
-  };
-  kernel_args: string[];   // Kernel command-line arguments
-  metadata: {
-    os?: string;           // Operating system (ubuntu, fedora, talos)
-    os_version?: string;   // OS version
-    architecture?: string; // CPU architecture (x86_64, arm64)
-    tags?: string[];       // Custom tags
-    description?: string;  // Human-readable description
-    [key: string]: any;    // Additional custom metadata
-  };
-  created_at: string;      // ISO 8601 timestamp (immutable)
+```protobuf
+syntax = "proto3";
+
+message BootProfile {
+  string id = 1;              // UUIDv7 identifier
+  string name = 2;            // Human-readable name
+  Blob kernel = 3;            // Kernel blob reference
+  Blob initrd = 4;            // Initrd blob reference
+  repeated string kernel_args = 5;  // Kernel command-line arguments
+  map<string, string> metadata = 6; // Custom metadata (os, version, architecture, tags, etc.)
+  int64 created_at = 7;       // Unix timestamp in milliseconds (immutable)
+}
+
+message Blob {
+  string id = 1;              // UUIDv7 blob identifier
+  string sha256 = 2;          // SHA-256 checksum (hex encoded)
+  int64 size_bytes = 3;       // File size in bytes
 }
 ```
 
 ### Machine
 
-```typescript
-interface Machine {
-  mac_address: string;     // MAC address (primary key)
-  hostname: string;        // Machine hostname
-  profile_id: string;      // Reference to boot profile (UUIDv7)
-  metadata: {
-    datacenter?: string;
-    rack?: string;
-    role?: string;
-    [key: string]: any;    // Custom metadata
-  };
-  network: {
-    ip_address?: string;   // Static IP (optional)
-    netmask?: string;
-    gateway?: string;
-    dns_servers?: string[];
-  };
-  created_at: string;      // ISO 8601 timestamp
-  updated_at: string;      // ISO 8601 timestamp
+```protobuf
+syntax = "proto3";
+
+message Machine {
+  string id = 1;              // UUIDv7 machine identifier
+  string profile_id = 2;      // Reference to boot profile (UUIDv7)
+  string mac_address = 3;     // MAC address (format: aa:bb:cc:dd:ee:ff)
+  int64 created_at = 4;       // Unix timestamp in milliseconds
+  int64 updated_at = 5;       // Unix timestamp in milliseconds
 }
 ```
 
