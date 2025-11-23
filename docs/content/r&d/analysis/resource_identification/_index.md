@@ -4,8 +4,6 @@ type: docs
 weight: 50
 ---
 
-# Resource Identifiers: UUID, ULID, and Snowflake ID
-
 This analysis compares three popular distributed identifier strategies for use in modern systems: UUID (particularly v4 and v7), ULID, and Snowflake ID. The comparison focuses on three critical aspects:
 
 1. **URI Safety**: Can they be used directly in URLs without encoding?

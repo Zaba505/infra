@@ -1,10 +1,8 @@
 ---
-title: "ULID Analysis"
+title: "Universally Unique Lexicographically Sortable Identifier (ULID) Analysis"
 type: docs
 weight: 2
 ---
-
-# ULID (Universally Unique Lexicographically Sortable Identifier)
 
 ## Overview
 

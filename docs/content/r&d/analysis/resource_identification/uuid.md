@@ -1,10 +1,8 @@
 ---
-title: "UUID Analysis"
+title: "Universally Unique Identifier (UUID) Analysis"
 type: docs
 weight: 1
 ---
-
-# UUID (Universally Unique Identifier)
 
 ## Overview
 

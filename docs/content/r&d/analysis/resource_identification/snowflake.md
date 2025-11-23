@@ -4,8 +4,6 @@ type: docs
 weight: 3
 ---
 
-# Snowflake ID
-
 ## Overview
 
 Snowflake IDs are 64-bit unique identifiers originally developed by Twitter (now X) in 2010 to replace auto-incrementing integer IDs that became problematic as they scaled across multiple database shards. The format has been widely adopted by other distributed systems including Discord, Instagram, and many platforms requiring globally unique, time-ordered identifiers.
