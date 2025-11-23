@@ -1,29 +1,32 @@
 ---
 title: "Boot Service"
 type: docs
-description: "UEFI HTTP boot endpoints for bare metal server boot operations"
+description: "UEFI HTTP boot endpoints and boot profile management"
 weight: 10
 ---
 
-The Boot Service is a custom Go microservice that provides UEFI HTTP boot endpoints for bare metal servers in the home lab. It serves boot scripts and streams kernel/initrd assets by calling the Machine Management Service API to resolve machine mappings and profiles.
+The Boot Service is a custom Go microservice that provides UEFI HTTP boot endpoints for bare metal servers and manages boot profiles. It serves boot scripts, streams kernel/initrd assets, and handles boot profile administration (kernel/initrd upload, storage, and lifecycle management).
 
 ## Architecture Overview
 
 The Boot Service is deployed on GCP Cloud Run and accessed through a WireGuard VPN tunnel from bare metal servers. It integrates with:
 
-- **Machine Management Service**: Retrieves machine-to-profile mappings and boot profile metadata
+- **Machine Service**: Retrieves machine hardware profiles by MAC address
+- **Cloud Storage**: Stores and retrieves kernel/initrd blobs
+- **Firestore**: Stores boot profile metadata
 - **Cloud Monitoring**: OpenTelemetry observability with distributed tracing
 
 ## Related Documentation
 
-- [Machine Management Service](../machine-mgmt/) - Backend service for profile and machine management
+- [Machine Service](../machine-mgmt/) - Machine hardware profile management
 - [ADR-0005: Network Boot Infrastructure Implementation on Google Cloud](../../adrs/0005-network-boot-infrastructure-gcp/) - Architecture decision and design rationale
 - [ADR-0002: Network Boot Architecture](../../adrs/0002-network-boot-architecture/) - Overall network boot strategy
 
 ## API Categories
 
 1. **[UEFI HTTP Boot Endpoints](./uefi-boot-endpoints/)** - Accessed by bare metal servers during boot process (via WireGuard VPN)
-2. **[Health Check Endpoints](./health-checks/)** - Standard Cloud Run health endpoints
+2. **[Admin API](./admin-api/)** - Boot profile management endpoints for administrators
+3. **[Health Check Endpoints](./health-checks/)** - Standard Cloud Run health endpoints
 
 ## Security Model
 

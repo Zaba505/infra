@@ -1,369 +1,15 @@
 ---
-title: "Machine Management Service API"
+title: "Machine Service API"
 type: docs
-description: "REST API endpoints for machine profiles and boot profiles"
-weight: 10
+description: "REST API endpoints for managing machine hardware profiles"
+weight: 20
 ---
 
-The Machine Management Service provides HTTP REST endpoints for managing machine hardware profiles and boot profiles. This service is called by the Boot Service during boot operations and by administrators for configuration management. Since this is for a home lab environment, no authentication is required.
+The Machine Service provides HTTP REST endpoints for managing machine hardware profiles. This service stores machine specifications (CPUs, memory, NICs, drives, accelerators) in Firestore and is queried by the Boot Service during boot operations and by administrators for configuration management.
 
-## Boot Profile Management
+## Machine Hardware Profiles
 
-Boot profiles bundle kernel, initrd, and kernel arguments together. Each machine has exactly one active boot profile at any given time. When a profile is updated, it replaces the previous active profile for that machine.
-
-## Cloud Storage Structure
-
-Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:
-
-```
-gs://{bucket}/blobs/{kernel_id}
-gs://{bucket}/blobs/{initrd_id}
-```
-
-For example:
-```
-gs://boot-server-blobs/blobs/018c7dbd-b100-7000-8000-123456789abc
-gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
-```
-
-The UUIDv7 identifiers are generated server-side during upload, ensuring:
-- Globally unique object keys
-- Time-ordered storage (UUIDv7 timestamp prefix)
-- No namespace collisions between profiles
-
-### `POST /api/v1/profiles`
-
-Create a new boot profile for a machine. If the machine already has a boot profile, this operation will fail - use PUT to update instead.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>API: POST /api/v1/profiles (multipart/form-data)
-    API->>DB: Check if machine already has a boot profile
-    DB-->>API: No existing profile
-    API->>DB: Fetch machine profile by id
-    DB-->>API: Machine profile
-    API->>API: Generate UUIDv7 for profile
-    API->>API: Generate UUIDv7 for kernel blob
-    API->>API: Generate UUIDv7 for initrd blob
-    API->>Storage: PUT gs://bucket/blobs/{kernel_id}
-    Storage-->>API: Kernel stored
-    API->>Storage: PUT gs://bucket/blobs/{initrd_id}
-    Storage-->>API: Initrd stored
-    API->>DB: Store profile metadata (profile_id, kernel_id, initrd_id, machine_id)
-    DB-->>API: Profile created
-    API-->>Client: 201 Created (profile metadata with IDs)
-```
-
-**Request Body (multipart/form-data):**
-
-Form fields:
-- `machine_id` (text): Machine identifier (UUIDv7)
-- `kernel` (file): Kernel image file
-- `initrd` (file): Initrd image file
-- `kernel_args` (JSON array): Kernel command-line arguments
-
-**Example Request:**
-
-```http
-POST /api/v1/profiles HTTP/1.1
-Host: boot.example.com
-Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="machine_id"
-
-018c7dbd-c000-7000-8000-fedcba987654
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="kernel"; filename="vmlinuz"
-Content-Type: application/octet-stream
-
-<kernel binary data>
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="initrd"; filename="initrd.img"
-Content-Type: application/octet-stream
-
-<initrd binary data>
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="kernel_args"
-Content-Type: application/json
-
-["console=tty0", "console=ttyS0", "ip=dhcp"]
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
-```
-
-**Request Headers:**
-
-- `Content-Type: multipart/form-data`
-
-**Response (201 Created):**
-
-```json
-{
-  "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "kernel": {
-    "id": "018c7dbd-b100-7000-8000-123456789abc",
-    "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
-  },
-  "initrd": {
-    "id": "018c7dbd-b200-7000-8000-987654321fed"
-  }
-}
-```
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 400 Bad Request | Invalid request body or missing required fields |
-| 409 Conflict | Machine already has a boot profile (use PUT to update) |
-| 422 Unprocessable Entity | Validation error (file too large, invalid JSON, machine_id not found) |
-
----
-
-### `GET /api/v1/machines/{machine_id}/profile`
-
-Retrieve the active boot profile for a specific machine.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant DB as Firestore
-    
-    Client->>API: GET /api/v1/machines/{machine_id}/profile
-    API->>DB: Query active boot profile for machine
-    DB-->>API: Boot profile
-    API-->>Client: 200 OK (boot profile)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (200 OK):**
-
-```json
-{
-  "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654",
-  "kernel": {
-    "id": "018c7dbd-b100-7000-8000-123456789abc",
-    "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
-  },
-  "initrd": {
-    "id": "018c7dbd-b200-7000-8000-987654321fed"
-  }
-}
-```
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
-
-### `GET /api/v1/machines/{machine_id}/profile/kernel`
-
-Download the kernel binary for a machine's active boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>API: GET /api/v1/machines/{machine_id}/profile/kernel
-    API->>DB: Query active boot profile for machine
-    DB-->>API: Profile metadata (kernel_id)
-    API->>Storage: GET gs://bucket/blobs/{kernel_id}
-    Storage-->>API: Kernel binary
-    API-->>Client: 200 OK (application/octet-stream)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (200 OK):**
-
-- **Content-Type**: `application/octet-stream`
-- **Body**: Binary kernel data
-
-**Response Headers:**
-
-```
-Content-Type: application/octet-stream
-Content-Disposition: attachment; filename="vmlinuz"
-```
-
-**Storage Path:**
-
-The kernel is fetched from `gs://{bucket}/blobs/{kernel_id}` where `kernel_id` is the UUIDv7 identifier from the profile.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
-
-### `GET /api/v1/machines/{machine_id}/profile/initrd`
-
-Download the initrd binary for a machine's active boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>API: GET /api/v1/machines/{machine_id}/profile/initrd
-    API->>DB: Query active boot profile for machine
-    DB-->>API: Profile metadata (initrd_id)
-    API->>Storage: GET gs://bucket/blobs/{initrd_id}
-    Storage-->>API: Initrd binary
-    API-->>Client: 200 OK (application/octet-stream)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (200 OK):**
-
-- **Content-Type**: `application/octet-stream`
-- **Body**: Binary initrd data
-
-**Response Headers:**
-
-```
-Content-Type: application/octet-stream
-Content-Disposition: attachment; filename="initrd.img"
-```
-
-**Storage Path:**
-
-The initrd is fetched from `gs://{bucket}/blobs/{initrd_id}` where `initrd_id` is the UUIDv7 identifier from the profile.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
-
-### `PUT /api/v1/machines/{machine_id}/profile`
-
-Update the boot profile for a machine (replaces the existing profile).
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>API: PUT /api/v1/machines/{machine_id}/profile
-    API->>DB: Get current active profile
-    DB-->>API: Current profile (old kernel_id, old initrd_id)
-    API->>API: Generate UUIDs for new kernel/initrd
-    API->>Storage: PUT new kernel/initrd blobs
-    Storage-->>API: Blobs stored
-    API->>DB: Update boot profile (replace kernel_id, initrd_id, args)
-    DB-->>API: Profile updated
-    API->>Storage: DELETE old kernel/initrd blobs
-    API-->>Client: 200 OK (updated profile)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Request Body (multipart/form-data):**
-
-Same as POST request (kernel, initrd, kernel_args).
-
-**Response (200 OK):**
-
-Updated profile metadata.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-| 422 Unprocessable Entity | Validation error |
-
----
-
-### `DELETE /api/v1/machines/{machine_id}/profile`
-
-Delete a machine's boot profile and its associated blobs.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Machine Management Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>API: DELETE /api/v1/machines/{machine_id}/profile
-    API->>DB: Get kernel_id and initrd_id
-    DB-->>API: Blob IDs
-    API->>Storage: DELETE gs://bucket/blobs/{kernel_id}
-    API->>Storage: DELETE gs://bucket/blobs/{initrd_id}
-    API->>DB: Delete boot profile
-    API-->>Client: 204 No Content
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (204 No Content):**
-
-Empty response body.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
+Machine profiles define the physical hardware specifications of bare metal servers. Each machine is uniquely identified by its NICs' MAC addresses.
 
 ## Machine Management
 
@@ -376,7 +22,7 @@ Register a new machine with hardware specifications.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Machine Management Service
+    participant API as Machine Service
     participant DB as Firestore
     
     Client->>API: POST /api/v1/machines
@@ -479,7 +125,7 @@ List all registered machines.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Machine Management Service
+    participant API as Machine Service
     participant DB as Firestore
     
     Client->>API: GET /api/v1/machines?mac=...
@@ -548,7 +194,7 @@ Retrieve a specific machine by ID.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Machine Management Service
+    participant API as Machine Service
     participant DB as Firestore
     
     Client->>API: GET /api/v1/machines/{id}
@@ -584,7 +230,7 @@ Update a machine's hardware profile.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Machine Management Service
+    participant API as Machine Service
     participant DB as Firestore
     
     Client->>API: PUT /api/v1/machines/{id}
@@ -625,7 +271,7 @@ Delete a machine registration.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Machine Management Service
+    participant API as Machine Service
     participant DB as Firestore
     
     Client->>API: DELETE /api/v1/machines/{id}
@@ -652,33 +298,9 @@ Empty response body.
 
 ---
 
-## Boot Profile Management
+## Data Models
 
-All data models are defined as Protocol Buffer (protobuf) messages and stored in Firestore.
-
-### Boot Profile
-
-```protobuf
-syntax = "proto3";
-
-message Kernel {
-  string id = 1;              // UUIDv7 blob identifier
-  repeated string args = 2;   // Kernel command-line arguments
-}
-
-message Initrd {
-  string id = 1;              // UUIDv7 blob identifier
-}
-
-message BootProfile {
-  string id = 1;              // UUIDv7 identifier
-  string machine_id = 2;      // Reference to machine (UUIDv7) - unique constraint
-  Kernel kernel = 3;          // Kernel configuration
-  Initrd initrd = 4;          // Initrd configuration
-}
-```
-
-**Note**: The `machine_id` field has a unique constraint in Firestore, ensuring each machine has exactly one active boot profile.
+The Machine Service only manages machine hardware profiles. All data models are defined as Protocol Buffer (protobuf) messages and stored in Firestore.
 
 ### Machine
 

@@ -19,19 +19,17 @@ Serves iPXE boot scripts customized for the requesting machine based on its MAC 
 sequenceDiagram
     participant Client as Bare Metal Server
     participant Boot as Boot Service
-    participant MgmtAPI as Machine Management Service
+    participant MachineAPI as Machine Service
     participant DB as Firestore
     
     Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
     Boot->>Boot: Validate MAC address format
-    Boot->>MgmtAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
-    MgmtAPI->>DB: Query machine by NIC MAC
-    DB-->>MgmtAPI: Machine profile (machine_id)
-    MgmtAPI-->>Boot: Machine profile
-    Boot->>MgmtAPI: GET /api/v1/machines/{machine_id}/profile
-    MgmtAPI->>DB: Get active boot profile for machine
-    DB-->>MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
-    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>MachineAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
+    MachineAPI->>DB: Query machine by NIC MAC
+    DB-->>MachineAPI: Machine profile (machine_id)
+    MachineAPI-->>Boot: Machine profile
+    Boot->>DB: Query boot profile by machine_id
+    DB-->>Boot: Boot profile (profile_id, kernel_id, initrd_id, kernel args)
     Boot->>Boot: Generate iPXE script with profile_id
     Boot-->>Client: 200 OK (iPXE script)
 ```
@@ -98,16 +96,13 @@ Streams kernel images from Cloud Storage for the boot process.
 sequenceDiagram
     participant Client as Bare Metal Server
     participant Boot as Boot Service
-    participant MgmtAPI as Machine Management Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
     Client->>Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/kernel
     Boot->>Boot: Validate UUIDv7 format
-    Boot->>MgmtAPI: GET /api/v1/profiles/{boot_profile_id}
-    MgmtAPI->>DB: Query boot profile by ID
-    DB-->>MgmtAPI: Boot profile (kernel_id)
-    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>DB: Query boot profile by ID
+    DB-->>Boot: Boot profile (kernel_id)
     Boot->>Storage: GET gs://bucket/blobs/{kernel_id}
     Storage-->>Boot: Kernel data stream
     Boot-->>Client: 200 OK (kernel stream)
@@ -164,16 +159,13 @@ Streams initial ramdisk (initrd) images from Cloud Storage for the boot process.
 sequenceDiagram
     participant Client as Bare Metal Server
     participant Boot as Boot Service
-    participant MgmtAPI as Machine Management Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
     Client->>Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/initrd
     Boot->>Boot: Validate UUIDv7 format
-    Boot->>MgmtAPI: GET /api/v1/profiles/{boot_profile_id}
-    MgmtAPI->>DB: Query boot profile by ID
-    DB-->>MgmtAPI: Boot profile (initrd_id)
-    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>DB: Query boot profile by ID
+    DB-->>Boot: Boot profile (initrd_id)
     Boot->>Storage: GET gs://bucket/blobs/{initrd_id}
     Storage-->>Boot: Initrd data stream
     Boot-->>Client: 200 OK (initrd stream)
