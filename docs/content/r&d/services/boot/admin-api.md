@@ -1,17 +1,19 @@
 ---
 title: "HTTP REST Admin API"
 type: docs
-description: "Management API for boot images, machines, and profiles"
+description: "Management API for boot profiles and machine mappings"
 weight: 20
 ---
 
-The Admin API provides HTTP REST endpoints for managing boot images, machine mappings, and boot profiles. Since this is for a home lab environment, no authentication is required.
+The Admin API provides HTTP REST endpoints for managing immutable boot profiles and machine mappings. Since this is for a home lab environment, no authentication is required.
 
-## Boot Image Management
+## Boot Profile Management
 
-### `POST /api/v1/images`
+Boot profiles are immutable resources that bundle kernel, initrd, kernel arguments, and metadata together. Once created, profiles cannot be modified - you must create a new profile for any changes.
 
-Upload a new boot image (kernel, initrd, and metadata).
+### `POST /api/v1/profiles`
+
+Create a new immutable boot profile by uploading kernel, initrd, and configuration in a single request.
 
 #### Sequence Diagram
 
@@ -22,47 +24,38 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant DB as Firestore
     
-    Client->>API: POST /api/v1/images (multipart/form-data)
-    API->>API: Validate URN format
+    Client->>API: POST /api/v1/profiles (multipart/form-data)
+    API->>API: Generate UUIDv7 for profile
     API->>API: Compute SHA-256 checksums
     API->>Storage: Upload kernel file
-    Storage-->>API: Upload complete
+    Storage-->>API: Upload complete (kernel ID)
     API->>Storage: Upload initrd file
-    Storage-->>API: Upload complete
-    API->>DB: Store metadata (URN, checksums, sizes)
-    DB-->>API: Metadata stored
-    API-->>Client: 201 Created (image metadata)
+    Storage-->>API: Upload complete (initrd ID)
+    API->>DB: Store profile metadata
+    DB-->>API: Profile created
+    API-->>Client: 201 Created (profile metadata with ID)
 ```
 
 **Request Body (multipart/form-data):**
 
 Form fields:
-- `id` (text): Boot image identifier (UUIDv7 format)
 - `name` (text): Human-readable name
-- `version` (text): Semantic version
 - `kernel` (file): Kernel image file
 - `initrd` (file): Initrd image file
-- `metadata` (JSON text): Metadata object
+- `kernel_args` (JSON array): Kernel command-line arguments
+- `metadata` (JSON object): Additional metadata (os, version, architecture, tags, etc.)
 
 **Example Request:**
 
 ```http
-POST /api/v1/images HTTP/1.1
+POST /api/v1/profiles HTTP/1.1
 Host: boot.example.com
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="id"
-
-018c7dbd-9265-7000-8000-123456789abc
-------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="name"
 
-Ubuntu 22.04 LTS Server
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="version"
-
-22.04.3
+Ubuntu 22.04 LTS Server Base
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="kernel"; filename="vmlinuz"
 Content-Type: application/octet-stream
@@ -74,10 +67,15 @@ Content-Type: application/octet-stream
 
 <initrd binary data>
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="kernel_args"
+Content-Type: application/json
+
+["console=tty0", "console=ttyS0", "ip=dhcp"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="metadata"
 Content-Type: application/json
 
-{"os":"ubuntu","os_version":"22.04.3","architecture":"x86_64","tags":["lts","server"]}
+{"os":"ubuntu","os_version":"22.04.3","architecture":"x86_64","tags":["lts","server"],"description":"Base Ubuntu server configuration"}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ```
 
@@ -89,24 +87,27 @@ Content-Type: application/json
 
 ```json
 {
-  "id": "urn:boot:image:ubuntu-2204",
-  "name": "Ubuntu 22.04 LTS Server",
-  "version": "22.04.3",
+  "id": "018c7dbd-a000-7000-8000-abcdef123456",
+  "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
+    "id": "018c7dbd-a000-7000-8000-kernel123456",
     "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
+    "id": "018c7dbd-a000-7000-8000-initrd123456",
     "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
+  "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
   "metadata": {
     "os": "ubuntu",
     "os_version": "22.04.3",
     "architecture": "x86_64",
-    "tags": ["lts", "server"]
+    "tags": ["lts", "server"],
+    "description": "Base Ubuntu server configuration"
   },
-  "created_at": "2025-11-19T06:00:00Z"
+  "created_at": "2025-11-23T19:00:00Z"
 }
 ```
 
@@ -115,14 +116,13 @@ Content-Type: application/json
 | Status Code | Description |
 |-------------|-------------|
 | 400 Bad Request | Invalid request body or missing required fields |
-| 409 Conflict | Image with the same ID already exists |
-| 422 Unprocessable Entity | Validation error (invalid URN format, file too large) |
+| 422 Unprocessable Entity | Validation error (file too large, invalid JSON) |
 
 ---
 
-### `GET /api/v1/images`
+### `GET /api/v1/profiles`
 
-List all boot images.
+List all boot profiles with metadata only (not binary content).
 
 #### Sequence Diagram
 
@@ -132,10 +132,10 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/images?os=ubuntu
-    API->>DB: Query images with filters
-    DB-->>API: Image metadata list
-    API-->>Client: 200 OK (images list)
+    Client->>API: GET /api/v1/profiles?os=ubuntu
+    API->>DB: Query profiles with filters
+    DB-->>API: Profile metadata list
+    API-->>Client: 200 OK (profiles list)
 ```
 
 **Query Parameters:**
@@ -148,37 +148,33 @@ sequenceDiagram
 | `architecture` | string | No | Filter by architecture | - |
 | `tags` | string | No | Filter by tags (comma-separated) | - |
 
-**Request Example:**
-
-```http
-GET /api/v1/images?os=ubuntu&architecture=x86_64&page=1&per_page=20 HTTP/1.1
-Host: boot.example.com
-```
-
 **Response (200 OK):**
 
 ```json
 {
-  "images": [
+  "profiles": [
     {
-      "id": "018c7dbd-9265-7000-8000-123456789abc",
-      "name": "Ubuntu 22.04 LTS Server",
-      "version": "22.04.3",
+      "id": "018c7dbd-a000-7000-8000-abcdef123456",
+      "name": "Ubuntu 22.04 LTS Server Base",
       "kernel": {
+        "id": "018c7dbd-a000-7000-8000-kernel123456",
         "sha256": "a1b2c3d4e5f6789...",
         "size_bytes": 8388608
       },
       "initrd": {
+        "id": "018c7dbd-a000-7000-8000-initrd123456",
         "sha256": "f6e5d4c3b2a19876...",
         "size_bytes": 52428800
       },
+      "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
       "metadata": {
         "os": "ubuntu",
         "os_version": "22.04.3",
         "architecture": "x86_64",
-        "tags": ["lts", "server"]
+        "tags": ["lts", "server"],
+        "description": "Base Ubuntu server configuration"
       },
-      "created_at": "2025-11-19T06:00:00Z"
+      "created_at": "2025-11-23T19:00:00Z"
     }
   ],
   "pagination": {
@@ -192,9 +188,9 @@ Host: boot.example.com
 
 ---
 
-### `GET /api/v1/images/{id}`
+### `GET /api/v1/profiles/{id}`
 
-Retrieve a specific boot image by ID.
+Retrieve metadata for a specific boot profile by ID (does not include binary content).
 
 #### Sequence Diagram
 
@@ -204,47 +200,43 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/images/{id}
-    API->>DB: Query image by ID
-    DB-->>API: Image metadata
-    API-->>Client: 200 OK (image metadata)
+    Client->>API: GET /api/v1/profiles/{id}
+    API->>DB: Query profile by ID
+    DB-->>API: Profile metadata
+    API-->>Client: 200 OK (profile metadata)
 ```
 
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier (UUIDv7 format) |
-
-**Request Example:**
-
-```http
-GET /api/v1/images/018c7dbd-9265-7000-8000-123456789abc HTTP/1.1
-Host: boot.example.com
-```
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
 
 **Response (200 OK):**
 
 ```json
 {
-  "id": "018c7dbd-9265-7000-8000-123456789abc",
-  "name": "Ubuntu 22.04 LTS Server",
-  "version": "22.04.3",
+  "id": "018c7dbd-a000-7000-8000-abcdef123456",
+  "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
+    "id": "018c7dbd-a000-7000-8000-kernel123456",
     "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
+    "id": "018c7dbd-a000-7000-8000-initrd123456",
     "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
+  "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
   "metadata": {
     "os": "ubuntu",
     "os_version": "22.04.3",
     "architecture": "x86_64",
-    "tags": ["lts", "server"]
+    "tags": ["lts", "server"],
+    "description": "Base Ubuntu server configuration"
   },
-  "created_at": "2025-11-19T06:00:00Z"
+  "created_at": "2025-11-23T19:00:00Z"
 }
 ```
 
@@ -252,13 +244,13 @@ Host: boot.example.com
 
 | Status Code | Description |
 |-------------|-------------|
-| 404 Not Found | Image with specified ID not found |
+| 404 Not Found | Profile with specified ID not found |
 
 ---
 
-### `DELETE /api/v1/images/{id}`
+### `GET /api/v1/profiles/{id}/kernel`
 
-Delete a boot image.
+Download the kernel binary for a specific profile.
 
 #### Sequence Diagram
 
@@ -269,12 +261,110 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant DB as Firestore
     
-    Client->>API: DELETE /api/v1/images/{id}
-    API->>DB: Check if image is in use
+    Client->>API: GET /api/v1/profiles/{id}/kernel
+    API->>DB: Lookup profile kernel storage path
+    DB-->>API: Storage path
+    API->>Storage: Fetch kernel file
+    Storage-->>API: Kernel binary
+    API-->>Client: 200 OK (application/octet-stream)
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
+
+**Response (200 OK):**
+
+- **Content-Type**: `application/octet-stream`
+- **Body**: Binary kernel data
+
+**Response Headers:**
+
+```
+Content-Type: application/octet-stream
+Content-Length: 8388608
+Content-Disposition: attachment; filename="vmlinuz"
+X-Content-SHA256: a1b2c3d4e5f6789...
+```
+
+**Error Responses:**
+
+| Status Code | Description |
+|-------------|-------------|
+| 404 Not Found | Profile with specified ID not found |
+
+---
+
+### `GET /api/v1/profiles/{id}/initrd`
+
+Download the initrd binary for a specific profile.
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    
+    Client->>API: GET /api/v1/profiles/{id}/initrd
+    API->>DB: Lookup profile initrd storage path
+    DB-->>API: Storage path
+    API->>Storage: Fetch initrd file
+    Storage-->>API: Initrd binary
+    API-->>Client: 200 OK (application/octet-stream)
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
+
+**Response (200 OK):**
+
+- **Content-Type**: `application/octet-stream`
+- **Body**: Binary initrd data
+
+**Response Headers:**
+
+```
+Content-Type: application/octet-stream
+Content-Length: 52428800
+Content-Disposition: attachment; filename="initrd.img"
+X-Content-SHA256: f6e5d4c3b2a19876...
+```
+
+**Error Responses:**
+
+| Status Code | Description |
+|-------------|-------------|
+| 404 Not Found | Profile with specified ID not found |
+
+---
+
+### `DELETE /api/v1/profiles/{id}`
+
+Delete an immutable boot profile. Only allowed if no machines are currently using it.
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Boot Server API
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    
+    Client->>API: DELETE /api/v1/profiles/{id}
+    API->>DB: Check if profile is in use
     DB-->>API: Not in use
     API->>Storage: Delete kernel file
     API->>Storage: Delete initrd file
-    API->>DB: Delete metadata
+    API->>DB: Delete profile metadata
     API-->>Client: 204 No Content
 ```
 
@@ -282,14 +372,7 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string | Yes | Boot image identifier (UUIDv7 format) |
-
-**Request Example:**
-
-```http
-DELETE /api/v1/images/018c7dbd-9265-7000-8000-123456789abc HTTP/1.1
-Host: boot.example.com
-```
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
 
 **Response (204 No Content):**
 
@@ -299,8 +382,8 @@ Empty response body.
 
 | Status Code | Description |
 |-------------|-------------|
-| 404 Not Found | Image with specified ID not found |
-| 409 Conflict | Image is currently in use by one or more machines |
+| 404 Not Found | Profile with specified ID not found |
+| 409 Conflict | Profile is currently assigned to one or more machines |
 
 ---
 
@@ -366,8 +449,8 @@ sequenceDiagram
     "gateway": "10.0.1.1",
     "dns_servers": ["10.0.1.1", "8.8.8.8"]
   },
-  "created_at": "2025-11-19T06:00:00Z",
-  "updated_at": "2025-11-19T06:00:00Z"
+  "created_at": "2025-11-23T19:00:00Z",
+  "updated_at": "2025-11-23T19:00:00Z"
 }
 ```
 
@@ -428,8 +511,8 @@ sequenceDiagram
         "gateway": "10.0.1.1",
         "dns_servers": ["10.0.1.1", "8.8.8.8"]
       },
-      "created_at": "2025-11-19T06:00:00Z",
-      "updated_at": "2025-11-19T06:00:00Z"
+      "created_at": "2025-11-23T19:00:00Z",
+      "updated_at": "2025-11-23T19:00:00Z"
     }
   ],
   "pagination": {
@@ -481,7 +564,7 @@ Same as POST response.
 
 ### `PUT /api/v1/machines/{mac}`
 
-Update a machine's configuration.
+Update a machine's configuration (primarily to change the assigned boot profile).
 
 #### Sequence Diagram
 
@@ -496,6 +579,7 @@ sequenceDiagram
     DB-->>API: Profile found
     API->>DB: Update machine config
     DB-->>API: Machine updated
+    API->>DB: Record profile change in history
     API-->>Client: 200 OK (updated config)
 ```
 
@@ -567,268 +651,6 @@ Empty response body.
 
 ---
 
-## Boot Profile Management
-
-### `POST /api/v1/profiles`
-
-Create a new boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: POST /api/v1/profiles
-    API->>API: Validate identifier format
-    API->>DB: Check if image_id exists
-    DB-->>API: Image found
-    API->>DB: Store profile
-    DB-->>API: Profile created
-    API-->>Client: 201 Created (profile config)
-```
-
-**Request Body:**
-
-```json
-{
-  "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "name": "Ubuntu Server Base Profile",
-  "image_id": "018c7dbd-9265-7000-8000-123456789abc",
-  "kernel_args": [
-    "console=tty0",
-    "console=ttyS0",
-    "ip=dhcp"
-  ],
-  "metadata": {
-    "description": "Base Ubuntu server configuration with minimal packages",
-    "tags": ["base", "minimal"]
-  }
-}
-```
-
-**Response (201 Created):**
-
-```json
-{
-  "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "name": "Ubuntu Server Base Profile",
-  "image_id": "018c7dbd-9265-7000-8000-123456789abc",
-  "kernel_args": [
-    "console=tty0",
-    "console=ttyS0",
-    "ip=dhcp"
-  ],
-  "metadata": {
-    "description": "Base Ubuntu server configuration with minimal packages",
-    "tags": ["base", "minimal"]
-  },
-  "created_at": "2025-11-19T06:00:00Z",
-  "updated_at": "2025-11-19T06:00:00Z"
-}
-```
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 409 Conflict | Profile with the same ID already exists |
-| 422 Unprocessable Entity | Referenced image_id does not exist |
-
----
-
-### `GET /api/v1/profiles`
-
-List all boot profiles.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: GET /api/v1/profiles?image_id=...
-    API->>DB: Query profiles with filters
-    DB-->>API: Profile list
-    API-->>Client: 200 OK (profiles list)
-```
-
-**Query Parameters:**
-
-| Parameter | Type | Required | Description | Default |
-|-----------|------|----------|-------------|---------|
-| `page` | integer | No | Page number (1-indexed) | 1 |
-| `per_page` | integer | No | Results per page (1-100) | 20 |
-| `image_id` | string | No | Filter by boot image (UUIDv7) | - |
-
-**Response (200 OK):**
-
-```json
-{
-  "profiles": [
-    {
-      "id": "018c7dbd-a000-7000-8000-abcdef123456",
-      "name": "Ubuntu Server Base Profile",
-      "image_id": "018c7dbd-9265-7000-8000-123456789abc",
-      "kernel_args": [
-        "console=tty0",
-        "console=ttyS0",
-        "ip=dhcp"
-      ],
-      "metadata": {
-        "description": "Base Ubuntu server configuration with minimal packages",
-        "tags": ["base", "minimal"]
-      },
-      "created_at": "2025-11-19T06:00:00Z",
-      "updated_at": "2025-11-19T06:00:00Z"
-    }
-  ],
-  "pagination": {
-    "total": 1,
-    "page": 1,
-    "per_page": 20,
-    "total_pages": 1
-  }
-}
-```
-
----
-
-### `GET /api/v1/profiles/{id}`
-
-Retrieve a specific boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: GET /api/v1/profiles/{id}
-    API->>DB: Query profile by ID
-    DB-->>API: Profile config
-    API-->>Client: 200 OK (profile config)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
-
-**Response (200 OK):**
-
-Same as POST response.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Profile with specified ID not found |
-
----
-
-### `PUT /api/v1/profiles/{id}`
-
-Update a boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: PUT /api/v1/profiles/{id}
-    API->>DB: Check if image_id exists (if updated)
-    DB-->>API: Image found
-    API->>DB: Update profile
-    DB-->>API: Profile updated
-    API-->>Client: 200 OK (updated config)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
-
-**Request Body:**
-
-```json
-{
-  "kernel_args": [
-    "console=tty0",
-    "console=ttyS0",
-    "ip=dhcp",
-    "net.ifnames=0"
-  ],
-  "metadata": {
-    "description": "Updated Ubuntu server configuration",
-    "tags": ["base", "minimal", "updated"]
-  }
-}
-```
-
-**Response (200 OK):**
-
-Full profile configuration with updated fields.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Profile with specified ID not found |
-| 422 Unprocessable Entity | Referenced image_id does not exist (if updated) |
-
----
-
-### `DELETE /api/v1/profiles/{id}`
-
-Delete a boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: DELETE /api/v1/profiles/{id}
-    API->>DB: Check if profile is in use
-    DB-->>API: Not in use
-    API->>DB: Delete profile
-    DB-->>API: Profile deleted
-    API-->>Client: 204 No Content
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
-
-**Response (204 No Content):**
-
-Empty response body.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Profile with specified ID not found |
-| 409 Conflict | Profile is currently assigned to one or more machines |
-
----
-
 ## Machine Rollback
 
 ### `POST /api/v1/machines/{mac}/rollback`
@@ -875,7 +697,7 @@ sequenceDiagram
   "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
   "previous_profile_id": "018c7dbd-a000-7000-8000-000000000002",
   "rollback_reason": "Failed upgrade to new kernel version",
-  "rollback_at": "2025-11-19T06:30:00Z"
+  "rollback_at": "2025-11-23T19:30:00Z"
 }
 ```
 
@@ -898,31 +720,32 @@ The system maintains a history of profile changes to enable rollback:
 
 ## Data Models
 
-### Boot Image
+### Boot Profile
 
 ```typescript
-interface BootImage {
-  id: string;              // UUIDv7 identifier (e.g., "018c7dbd-9265-7000-8000-123456789abc")
+interface BootProfile {
+  id: string;              // UUIDv7 identifier
   name: string;            // Human-readable name
-  version: string;         // Semantic version
   kernel: {
-    url: string;           // Cloud Storage URL
+    id: string;            // UUIDv7 identifier for kernel blob
     sha256: string;        // SHA-256 checksum
     size_bytes: number;    // File size in bytes
   };
   initrd: {
-    url: string;           // Cloud Storage URL
+    id: string;            // UUIDv7 identifier for initrd blob
     sha256: string;        // SHA-256 checksum
     size_bytes: number;    // File size in bytes
   };
+  kernel_args: string[];   // Kernel command-line arguments
   metadata: {
-    os: string;            // Operating system (ubuntu, fedora, talos)
-    os_version: string;    // OS version
-    architecture: string;  // CPU architecture (x86_64, arm64)
-    tags: string[];        // Custom tags
+    os?: string;           // Operating system (ubuntu, fedora, talos)
+    os_version?: string;   // OS version
+    architecture?: string; // CPU architecture (x86_64, arm64)
+    tags?: string[];       // Custom tags
+    description?: string;  // Human-readable description
+    [key: string]: any;    // Additional custom metadata
   };
-  created_at: string;      // ISO 8601 timestamp
-  created_by: string;      // User or service account email
+  created_at: string;      // ISO 8601 timestamp (immutable)
 }
 ```
 
@@ -944,25 +767,6 @@ interface Machine {
     netmask?: string;
     gateway?: string;
     dns_servers?: string[];
-  };
-  created_at: string;      // ISO 8601 timestamp
-  updated_at: string;      // ISO 8601 timestamp
-}
-```
-
-### Boot Profile
-
-```typescript
-interface BootProfile {
-  id: string;              // UUIDv7 identifier
-  name: string;            // Human-readable name
-  image_id: string;        // Reference to boot image (UUIDv7)
-  kernel_args: string[];   // Kernel command-line arguments
-  cloud_init_template: string; // Cloud-init template filename
-  metadata: {
-    description?: string;
-    tags?: string[];
-    [key: string]: any;    // Custom metadata
   };
   created_at: string;      // ISO 8601 timestamp
   updated_at: string;      // ISO 8601 timestamp
