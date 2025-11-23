@@ -94,11 +94,10 @@ ADR Categories:
  participant Boot as Boot Server
  participant DB as Firestore
  
- Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56&amp;amp;machine_id=urn:boot:machine:node-01
+ Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
  Boot-&amp;gt;&amp;gt;Boot: Validate MAC address format
- Boot-&amp;gt;&amp;gt;Boot: Validate machine_id URN format
- Boot-&amp;gt;&amp;gt;DB: Query machine by MAC and machine_id
- DB--&amp;gt;&amp;gt;Boot: Machine config (profile_id, kernel args)
+ Boot-&amp;gt;&amp;gt;DB: Query machine by MAC
+ DB--&amp;gt;&amp;gt;Boot: Machine config (machine_id, profile_id, kernel args)
  Boot-&amp;gt;&amp;gt;DB: Get profile by ID
  DB--&amp;gt;&amp;gt;Boot: Profile config (image_id, kernel args)
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with machine_id
