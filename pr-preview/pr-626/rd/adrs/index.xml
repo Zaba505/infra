@@ -33,4 +33,11 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>[0006] Universal Resource Identifier Standard</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/adrs/0006-resource-identifier-standard/</link><pubDate>Sun, 23 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/adrs/0006-resource-identifier-standard/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item></channel></rss>
