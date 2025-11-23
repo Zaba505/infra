@@ -1,17 +1,17 @@
 ---
-title: "HTTP REST Admin API"
+title: "Machine Management Service API"
 type: docs
-description: "Management API for boot profiles and machine mappings"
-weight: 20
+description: "REST API endpoints for machine profiles and boot profiles"
+weight: 10
 ---
 
-The Admin API provides HTTP REST endpoints for managing immutable boot profiles and machine mappings. Since this is for a home lab environment, no authentication is required.
+The Machine Management Service provides HTTP REST endpoints for managing machine hardware profiles and boot profiles. This service is called by the Boot Service during boot operations and by administrators for configuration management. Since this is for a home lab environment, no authentication is required.
 
 ## Boot Profile Management
 
-Boot profiles are immutable resources that bundle kernel, initrd, kernel arguments, and metadata together. Once created, profiles cannot be modified - you must create a new profile for any changes.
+Boot profiles bundle kernel, initrd, and kernel arguments together. Each profile is associated with a specific machine and its version. Profiles can be updated, creating new versions while maintaining the association with the machine.
 
-### Cloud Storage Structure
+## Cloud Storage Structure
 
 Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:
 
@@ -29,27 +29,28 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 The UUIDv7 identifiers are generated server-side during upload, ensuring:
 - Globally unique object keys
 - Time-ordered storage (UUIDv7 timestamp prefix)
-- Content-addressable storage pattern
 - No namespace collisions between profiles
 
 ### `POST /api/v1/profiles`
 
-Create a new immutable boot profile by uploading kernel, initrd, and configuration in a single request.
+Create a new boot profile by uploading kernel, initrd, and configuration. The profile is associated with a specific machine ID and version.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
+    participant MachineDB as Machine Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
     Client->>API: POST /api/v1/profiles (multipart/form-data)
+    API->>MachineDB: Fetch machine profile by id
+    MachineDB-->>API: Machine profile
     API->>API: Generate UUIDv7 for profile
     API->>API: Generate UUIDv7 for kernel blob
     API->>API: Generate UUIDv7 for initrd blob
-    API->>API: Compute SHA-256 checksums
     API->>Storage: PUT gs://bucket/blobs/{kernel_id}
     Storage-->>API: Kernel stored
     API->>Storage: PUT gs://bucket/blobs/{initrd_id}
@@ -62,11 +63,10 @@ sequenceDiagram
 **Request Body (multipart/form-data):**
 
 Form fields:
-- `name` (text): Human-readable name
+- `machine_id` (text): Machine identifier (UUIDv7)
 - `kernel` (file): Kernel image file
 - `initrd` (file): Initrd image file
 - `kernel_args` (JSON array): Kernel command-line arguments
-- `metadata` (JSON object): Additional metadata (os, version, architecture, tags, etc.)
 
 **Example Request:**
 
@@ -76,9 +76,9 @@ Host: boot.example.com
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="name"
+Content-Disposition: form-data; name="machine_id"
 
-Ubuntu 22.04 LTS Server Base
+018c7dbd-c000-7000-8000-fedcba987654
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="kernel"; filename="vmlinuz"
 Content-Type: application/octet-stream
@@ -94,11 +94,6 @@ Content-Disposition: form-data; name="kernel_args"
 Content-Type: application/json
 
 ["console=tty0", "console=ttyS0", "ip=dhcp"]
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="metadata"
-Content-Type: application/json
-
-{"os":"ubuntu","os_version":"22.04.3","architecture":"x86_64","tags":["lts","server"],"description":"Base Ubuntu server configuration"}
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ```
 
@@ -111,26 +106,13 @@ Content-Type: application/json
 ```json
 {
   "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
     "id": "018c7dbd-b100-7000-8000-123456789abc",
-    "sha256": "a1b2c3d4e5f6789...",
-    "size_bytes": 8388608
+    "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
   },
   "initrd": {
-    "id": "018c7dbd-b200-7000-8000-987654321fed",
-    "sha256": "f6e5d4c3b2a19876...",
-    "size_bytes": 52428800
-  },
-  "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
-  "metadata": {
-    "os": "ubuntu",
-    "os_version": "22.04.3",
-    "architecture": "x86_64",
-    "tags": ["lts", "server"],
-    "description": "Base Ubuntu server configuration"
-  },
-  "created_at": "2025-11-23T19:00:00Z"
+    "id": "018c7dbd-b200-7000-8000-987654321fed"
+  }
 }
 ```
 
@@ -139,25 +121,25 @@ Content-Type: application/json
 | Status Code | Description |
 |-------------|-------------|
 | 400 Bad Request | Invalid request body or missing required fields |
-| 422 Unprocessable Entity | Validation error (file too large, invalid JSON) |
+| 422 Unprocessable Entity | Validation error (file too large, invalid JSON, machine_id not found) |
 
 ---
 
 ### `GET /api/v1/profiles`
 
-List all boot profiles with metadata only (not binary content).
+List all boot profiles.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/profiles?os=ubuntu
+    Client->>API: GET /api/v1/profiles?machine_id=...
     API->>DB: Query profiles with filters
-    DB-->>API: Profile metadata list
+    DB-->>API: Profile list
     API-->>Client: 200 OK (profiles list)
 ```
 
@@ -167,9 +149,7 @@ sequenceDiagram
 |-----------|------|----------|-------------|---------|
 | `page` | integer | No | Page number (1-indexed) | 1 |
 | `per_page` | integer | No | Results per page (1-100) | 20 |
-| `os` | string | No | Filter by operating system | - |
-| `architecture` | string | No | Filter by architecture | - |
-| `tags` | string | No | Filter by tags (comma-separated) | - |
+| `machine_id` | string | No | Filter by machine ID (UUIDv7) | - |
 
 **Response (200 OK):**
 
@@ -178,26 +158,13 @@ sequenceDiagram
   "profiles": [
     {
       "id": "018c7dbd-a000-7000-8000-abcdef123456",
-      "name": "Ubuntu 22.04 LTS Server Base",
       "kernel": {
         "id": "018c7dbd-b100-7000-8000-123456789abc",
-        "sha256": "a1b2c3d4e5f6789...",
-        "size_bytes": 8388608
+        "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
       },
       "initrd": {
-        "id": "018c7dbd-b200-7000-8000-987654321fed",
-        "sha256": "f6e5d4c3b2a19876...",
-        "size_bytes": 52428800
-      },
-      "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
-      "metadata": {
-        "os": "ubuntu",
-        "os_version": "22.04.3",
-        "architecture": "x86_64",
-        "tags": ["lts", "server"],
-        "description": "Base Ubuntu server configuration"
-      },
-      "created_at": "2025-11-23T19:00:00Z"
+        "id": "018c7dbd-b200-7000-8000-987654321fed"
+      }
     }
   ],
   "pagination": {
@@ -213,14 +180,14 @@ sequenceDiagram
 
 ### `GET /api/v1/profiles/{id}`
 
-Retrieve metadata for a specific boot profile by ID (does not include binary content).
+Retrieve metadata for a specific boot profile by ID.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
     Client->>API: GET /api/v1/profiles/{id}
@@ -240,26 +207,13 @@ sequenceDiagram
 ```json
 {
   "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
     "id": "018c7dbd-b100-7000-8000-123456789abc",
-    "sha256": "a1b2c3d4e5f6789...",
-    "size_bytes": 8388608
+    "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
   },
   "initrd": {
-    "id": "018c7dbd-b200-7000-8000-987654321fed",
-    "sha256": "f6e5d4c3b2a19876...",
-    "size_bytes": 52428800
-  },
-  "kernel_args": ["console=tty0", "console=ttyS0", "ip=dhcp"],
-  "metadata": {
-    "os": "ubuntu",
-    "os_version": "22.04.3",
-    "architecture": "x86_64",
-    "tags": ["lts", "server"],
-    "description": "Base Ubuntu server configuration"
-  },
-  "created_at": "2025-11-23T19:00:00Z"
+    "id": "018c7dbd-b200-7000-8000-987654321fed"
+  }
 }
 ```
 
@@ -280,7 +234,7 @@ Download the kernel binary for a specific profile.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
@@ -307,15 +261,12 @@ sequenceDiagram
 
 ```
 Content-Type: application/octet-stream
-Content-Length: 8388608
 Content-Disposition: attachment; filename="vmlinuz"
-X-Content-SHA256: a1b2c3d4e5f6789...
-X-Blob-ID: 018c7dbd-b100-7000-8000-123456789abc
 ```
 
 **Storage Path:**
 
-The kernel is fetched from `gs://{bucket}/blobs/{kernel_id}` where `kernel_id` is the UUIDv7 identifier returned in the profile metadata.
+The kernel is fetched from `gs://{bucket}/blobs/{kernel_id}` where `kernel_id` is the UUIDv7 identifier from the profile.
 
 **Error Responses:**
 
@@ -334,7 +285,7 @@ Download the initrd binary for a specific profile.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
@@ -361,15 +312,12 @@ sequenceDiagram
 
 ```
 Content-Type: application/octet-stream
-Content-Length: 52428800
 Content-Disposition: attachment; filename="initrd.img"
-X-Content-SHA256: f6e5d4c3b2a19876...
-X-Blob-ID: 018c7dbd-b200-7000-8000-987654321fed
 ```
 
 **Storage Path:**
 
-The initrd is fetched from `gs://{bucket}/blobs/{initrd_id}` where `initrd_id` is the UUIDv7 identifier returned in the profile metadata.
+The initrd is fetched from `gs://{bucket}/blobs/{initrd_id}` where `initrd_id` is the UUIDv7 identifier from the profile.
 
 **Error Responses:**
 
@@ -379,22 +327,67 @@ The initrd is fetched from `gs://{bucket}/blobs/{initrd_id}` where `initrd_id` i
 
 ---
 
-### `DELETE /api/v1/profiles/{id}`
+### `PUT /api/v1/profiles/{id}`
 
-Delete an immutable boot profile. Only allowed if no machines are currently using it.
+Update a boot profile (creates a new version associated with the machine).
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    
+    Client->>API: PUT /api/v1/profiles/{id}
+    API->>DB: Get current profile
+    DB-->>API: Current profile
+    API->>API: Generate UUIDs for new kernel/initrd
+    API->>Storage: PUT new kernel/initrd blobs
+    Storage-->>API: Blobs stored
+    API->>DB: Update boot profile info
+    DB-->>API: Profile updated
+    API-->>Client: 200 OK (updated profile)
+```
+
+**Path Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
+
+**Request Body (multipart/form-data):**
+
+Same as POST request (machine_id, kernel, initrd, kernel_args).
+
+**Response (200 OK):**
+
+Updated profile metadata.
+
+**Error Responses:**
+
+| Status Code | Description |
+|-------------|-------------|
+| 404 Not Found | Profile with specified ID not found |
+| 422 Unprocessable Entity | Validation error |
+
+---
+
+### `DELETE /api/v1/profiles/{id}`
+
+Delete a boot profile and its associated blobs.
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client as Admin Client
+    participant API as Machine Management Service
     participant Storage as Cloud Storage
     participant DB as Firestore
     
     Client->>API: DELETE /api/v1/profiles/{id}
-    API->>DB: Check if profile is in use
-    DB-->>API: Not in use
     API->>DB: Get kernel_id and initrd_id
     DB-->>API: Blob IDs
     API->>Storage: DELETE gs://bucket/blobs/{kernel_id}
@@ -418,39 +411,61 @@ Empty response body.
 | Status Code | Description |
 |-------------|-------------|
 | 404 Not Found | Profile with specified ID not found |
-| 409 Conflict | Profile is currently assigned to one or more machines |
 
 ---
 
-## Machine Mapping Management
+## Machine Management
 
 ### `POST /api/v1/machines`
 
-Register a new machine and map it to a boot profile.
+Register a new machine with hardware specifications.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
     Client->>API: POST /api/v1/machines
-    API->>API: Validate MAC address format
-    API->>DB: Check if profile_id exists
-    DB-->>API: Profile found
-    API->>DB: Store machine mapping
-    DB-->>API: Machine registered
-    API-->>Client: 201 Created (machine config)
+    API->>API: Generate machine id (UUIDv7)
+    API->>API: Validate machine profile
+    API->>DB: Insert machine profile
+    DB-->>API: Machine created
+    API-->>Client: 201 Created (machine id)
 ```
 
 **Request Body:**
 
 ```json
 {
-  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "mac_address": "52:54:00:12:34:56"
+  "cpus": [
+    {
+      "manufacturer": "Intel",
+      "clock_frequency": 2400000000,
+      "cores": 8
+    }
+  ],
+  "memory_modules": [
+    {
+      "size": 17179869184
+    },
+    {
+      "size": 17179869184
+    }
+  ],
+  "accelerators": [],
+  "nics": [
+    {
+      "mac": "52:54:00:12:34:56"
+    }
+  ],
+  "drives": [
+    {
+      "capacity": 500107862016
+    }
+  ]
 }
 ```
 
@@ -459,10 +474,32 @@ sequenceDiagram
 ```json
 {
   "id": "018c7dbd-c000-7000-8000-fedcba987654",
-  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "mac_address": "52:54:00:12:34:56",
-  "created_at": 1700000000000,
-  "updated_at": 1700000000000
+  "cpus": [
+    {
+      "manufacturer": "Intel",
+      "clock_frequency": 2400000000,
+      "cores": 8
+    }
+  ],
+  "memory_modules": [
+    {
+      "size": 17179869184
+    },
+    {
+      "size": 17179869184
+    }
+  ],
+  "accelerators": [],
+  "nics": [
+    {
+      "mac": "52:54:00:12:34:56"
+    }
+  ],
+  "drives": [
+    {
+      "capacity": 500107862016
+    }
+  ]
 }
 ```
 
@@ -470,15 +507,15 @@ sequenceDiagram
 
 | Status Code | Description |
 |-------------|-------------|
-| 400 Bad Request | Invalid MAC address format or missing required fields |
-| 409 Conflict | Machine with the same MAC address already exists |
-| 422 Unprocessable Entity | Referenced profile_id does not exist |
+| 400 Bad Request | Invalid request body or missing required fields |
+| 409 Conflict | Machine with the same NIC MAC address already exists |
 
 **Notes:**
 
 - The machine ID is generated server-side (UUIDv7)
-- MAC address must be unique across all machines
-- Timestamps are Unix milliseconds since epoch
+- MAC addresses must be unique across all machines
+- All size/capacity values are in bytes
+- Clock frequency is in hertz
 
 ---
 
@@ -491,10 +528,10 @@ List all registered machines.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/machines?profile_id=...
+    Client->>API: GET /api/v1/machines?mac=...
     API->>DB: Query machines with filters
     DB-->>API: Machine list
     API-->>Client: 200 OK (machines list)
@@ -506,8 +543,7 @@ sequenceDiagram
 |-----------|------|----------|-------------|---------|
 | `page` | integer | No | Page number (1-indexed) | 1 |
 | `per_page` | integer | No | Results per page (1-100) | 20 |
-| `profile_id` | string | No | Filter by boot profile (UUIDv7) | - |
-| `mac_address` | string | No | Filter by MAC address | - |
+| `mac` | string | No | Filter by NIC MAC address | - |
 
 **Response (200 OK):**
 
@@ -516,10 +552,29 @@ sequenceDiagram
   "machines": [
     {
       "id": "018c7dbd-c000-7000-8000-fedcba987654",
-      "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-      "mac_address": "52:54:00:12:34:56",
-      "created_at": 1700000000000,
-      "updated_at": 1700000000000
+      "cpus": [
+        {
+          "manufacturer": "Intel",
+          "clock_frequency": 2400000000,
+          "cores": 8
+        }
+      ],
+      "memory_modules": [
+        {
+          "size": 17179869184
+        }
+      ],
+      "accelerators": [],
+      "nics": [
+        {
+          "mac": "52:54:00:12:34:56"
+        }
+      ],
+      "drives": [
+        {
+          "capacity": 500107862016
+        }
+      ]
     }
   ],
   "pagination": {
@@ -533,29 +588,29 @@ sequenceDiagram
 
 ---
 
-### `GET /api/v1/machines/{mac}`
+### `GET /api/v1/machines/{id}`
 
-Retrieve a specific machine configuration by MAC address.
+Retrieve a specific machine by ID.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/machines/{mac}
-    API->>DB: Query machine by MAC
-    DB-->>API: Machine config
-    API-->>Client: 200 OK (machine config)
+    Client->>API: GET /api/v1/machines/{id}
+    API->>DB: Query machine by ID
+    DB-->>API: Machine profile
+    API-->>Client: 200 OK (machine profile)
 ```
 
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `mac` | string | Yes | MAC address (format: `aa:bb:cc:dd:ee:ff`) |
+| `id` | string | Yes | Machine identifier (UUIDv7 format) |
 
 **Response (200 OK):**
 
@@ -565,59 +620,52 @@ Same as POST response.
 
 | Status Code | Description |
 |-------------|-------------|
-| 404 Not Found | Machine with specified MAC address not found |
+| 404 Not Found | Machine with specified ID not found |
 
 ---
 
-### `PUT /api/v1/machines/{mac}`
+### `PUT /api/v1/machines/{id}`
 
-Update a machine's configuration (primarily to change the assigned boot profile).
+Update a machine's hardware profile.
 
 #### Sequence Diagram
 
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
-    Client->>API: PUT /api/v1/machines/{mac}
-    API->>DB: Check if profile_id exists (if updated)
-    DB-->>API: Profile found
-    API->>DB: Update machine config
+    Client->>API: PUT /api/v1/machines/{id}
+    API->>DB: Update machine profile
     DB-->>API: Machine updated
-    API->>DB: Record profile change in history
-    API-->>Client: 200 OK (updated config)
+    API-->>Client: 200 OK (updated profile)
 ```
 
 **Path Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `mac` | string | Yes | MAC address (format: `aa:bb:cc:dd:ee:ff`) |
+| `id` | string | Yes | Machine identifier (UUIDv7 format) |
 
 **Request Body:**
 
-```json
-{
-  "profile_id": "018c7dbd-a000-7000-8000-000000000002"
-}
-```
+Full machine profile (same as POST request).
 
 **Response (200 OK):**
 
-Full machine configuration with updated fields.
+Full machine profile with updated fields.
 
 **Error Responses:**
 
 | Status Code | Description |
 |-------------|-------------|
-| 404 Not Found | Machine with specified MAC address not found |
-| 422 Unprocessable Entity | Referenced profile_id does not exist |
+| 404 Not Found | Machine with specified ID not found |
+| 400 Bad Request | Invalid request body |
 
 ---
 
-### `DELETE /api/v1/machines/{mac}`
+### `DELETE /api/v1/machines/{id}`
 
 Delete a machine registration.
 
@@ -626,11 +674,11 @@ Delete a machine registration.
 ```mermaid
 sequenceDiagram
     participant Client as Admin Client
-    participant API as Boot Server API
+    participant API as Machine Management Service
     participant DB as Firestore
     
-    Client->>API: DELETE /api/v1/machines/{mac}
-    API->>DB: Delete machine by MAC
+    Client->>API: DELETE /api/v1/machines/{id}
+    API->>DB: Delete machine by ID
     DB-->>API: Machine deleted
     API-->>Client: 204 No Content
 ```
@@ -639,7 +687,7 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `mac` | string | Yes | MAC address (format: `aa:bb:cc:dd:ee:ff`) |
+| `id` | string | Yes | Machine identifier (UUIDv7 format) |
 
 **Response (204 No Content):**
 
@@ -649,78 +697,11 @@ Empty response body.
 
 | Status Code | Description |
 |-------------|-------------|
-| 404 Not Found | Machine with specified MAC address not found |
+| 404 Not Found | Machine with specified ID not found |
 
 ---
 
-## Machine Rollback
-
-### `POST /api/v1/machines/{mac}/rollback`
-
-Rollback a machine to its previous boot profile.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant API as Boot Server API
-    participant DB as Firestore
-    
-    Client->>API: POST /api/v1/machines/{mac}/rollback
-    API->>DB: Get machine history
-    DB-->>API: Previous profile_id
-    API->>DB: Update machine to previous profile
-    DB-->>API: Machine rolled back
-    API->>DB: Record rollback event
-    API-->>Client: 200 OK (rollback details)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `mac` | string | Yes | MAC address (format: `aa:bb:cc:dd:ee:ff`) |
-
-**Request Body:**
-
-```json
-{
-  "reason": "Failed upgrade to new kernel version"
-}
-```
-
-**Response (200 OK):**
-
-```json
-{
-  "id": "018c7dbd-c000-7000-8000-fedcba987654",
-  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "mac_address": "52:54:00:12:34:56",
-  "previous_profile_id": "018c7dbd-a000-7000-8000-000000000002",
-  "rollback_reason": "Failed upgrade to new kernel version",
-  "rollback_at": 1700000000000
-}
-```
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine with specified MAC address not found |
-| 409 Conflict | No previous profile available for rollback |
-
-**Rollback History:**
-
-The system maintains a history of profile changes to enable rollback:
-
-- Up to 10 previous profile assignments per machine
-- Rollback can be performed multiple times (limited by history depth)
-- History includes timestamp, user, and reason for each change
-
----
-
-## Data Models
+## Boot Profile Management
 
 All data models are defined as Protocol Buffer (protobuf) messages and stored in Firestore.
 
@@ -729,20 +710,19 @@ All data models are defined as Protocol Buffer (protobuf) messages and stored in
 ```protobuf
 syntax = "proto3";
 
-message BootProfile {
-  string id = 1;              // UUIDv7 identifier
-  string name = 2;            // Human-readable name
-  Blob kernel = 3;            // Kernel blob reference
-  Blob initrd = 4;            // Initrd blob reference
-  repeated string kernel_args = 5;  // Kernel command-line arguments
-  map<string, string> metadata = 6; // Custom metadata (os, version, architecture, tags, etc.)
-  int64 created_at = 7;       // Unix timestamp in milliseconds (immutable)
+message Kernel {
+  string id = 1;              // UUIDv7 blob identifier
+  repeated string args = 2;   // Kernel command-line arguments
 }
 
-message Blob {
+message Initrd {
   string id = 1;              // UUIDv7 blob identifier
-  string sha256 = 2;          // SHA-256 checksum (hex encoded)
-  int64 size_bytes = 3;       // File size in bytes
+}
+
+message BootProfile {
+  string id = 1;              // UUIDv7 identifier
+  Kernel kernel = 2;          // Kernel configuration
+  Initrd initrd = 3;          // Initrd configuration
 }
 ```
 
@@ -751,12 +731,35 @@ message Blob {
 ```protobuf
 syntax = "proto3";
 
+message CPU {
+  string manufacturer = 1;
+  int64 clock_frequency = 2;  // measured in hertz
+  int64 cores = 3;            // number of cores
+}
+
+message MemoryModule {
+  int64 size = 1;             // measured in bytes
+}
+
+message Accelerator {
+  string manufacturer = 1;
+}
+
+message NIC {
+  string mac = 1;             // mac address
+}
+
+message Drive {
+  int64 capacity = 1;         // capacity in bytes
+}
+
 message Machine {
   string id = 1;              // UUIDv7 machine identifier
-  string profile_id = 2;      // Reference to boot profile (UUIDv7)
-  string mac_address = 3;     // MAC address (format: aa:bb:cc:dd:ee:ff)
-  int64 created_at = 4;       // Unix timestamp in milliseconds
-  int64 updated_at = 5;       // Unix timestamp in milliseconds
+  repeated CPU cpus = 2;
+  repeated MemoryModule memory_modules = 3;
+  repeated Accelerator accelerators = 4;
+  repeated NIC nics = 5;
+  repeated Drive drives = 6;
 }
 ```
 

@@ -77,6 +77,22 @@ The target bare metal servers (HP DL360 Gen 9) have the following network boot c
 5. **GCP Native Integration**: Direct Cloud Storage, Firestore, Secret Manager, and IAM integration
 6. **Existing Framework**: Leverages `z5labs/humus` patterns already in use across services
 7. **HTTP REST API**: Native HTTP REST admin API via `z5labs/humus` framework provides better integration with existing tooling
+8. **Microservices Architecture**: Separation into Boot Service and Machine Management Service provides better separation of concerns
+
+### Architecture
+
+The implementation consists of two services:
+
+1. **Boot Service**: Serves UEFI HTTP boot endpoints (`/boot.ipxe`, `/assets/{id}/kernel`, `/assets/{id}/initrd`)
+   - Accessed by bare metal servers during boot
+   - Calls Machine Management Service API to resolve machine mappings and profiles
+   - Streams kernel/initrd data from Machine Management Service
+
+2. **Machine Management Service**: Provides REST API for managing profiles and machine mappings
+   - Stores boot profiles and machine mappings in Firestore
+   - Manages kernel/initrd blobs in Cloud Storage
+   - Provides admin API for creating/updating profiles and machines
+   - Streams kernel/initrd binaries to Boot Service and admin clients
 
 ### Consequences
 
@@ -85,13 +101,17 @@ The target bare metal servers (HP DL360 Gen 9) have the following network boot c
 * Good, because leverages existing `z5labs/humus` framework and Go expertise
 * Good, because GCP native integration (Cloud Storage, Firestore, Secret Manager, IAM)
 * Good, because full control over implementation enables future customization
+* Good, because microservices architecture separates boot operations from management operations
+* Good, because Boot Service can scale independently from Machine Management Service
 * Good, because simplified testing (HTTP-only, no TFTP/PXE edge cases)
 * Good, because OpenTelemetry observability built-in from existing patterns
 * Neutral, because requires 2-3 weeks development time vs 1 week for Matchbox setup
 * Neutral, because ongoing maintenance responsibility (no upstream project support)
+* Neutral, because two services require coordination but provide clearer boundaries
 * Bad, because custom implementation may miss edge cases that Matchbox handles
 * Bad, because reinvents machine matching and boot configuration patterns
 * Bad, because Cloud Run cold start latency needs monitoring (mitigated with min instances = 1)
+* Bad, because service-to-service communication adds latency (mitigated by GCP regional networking)
 
 ### Confirmation
 
@@ -763,52 +783,61 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 
 ## Implementation Plan
 
-### Phase 1: Core Boot Server (Week 1)
+### Phase 1: Machine Management Service (Week 1)
 1. **Project Setup** (1-2 days)
    - Create Go project with `z5labs/humus` framework
    - Set up OpenAPI specification for HTTP REST admin API
    - Configure Cloud Storage and Firestore clients
    - Implement basic health check endpoints
 
-2. **UEFI HTTP Boot Endpoints** (2-3 days)
+2. **Profile Management API** (2-3 days)
+   - Boot profile upload endpoint (kernel, initrd, metadata)
+   - Profile listing and retrieval endpoints
+   - Kernel/initrd streaming endpoints (`GET /api/v1/profiles/{id}/kernel`, `GET /api/v1/profiles/{id}/initrd`)
+   - Cloud Storage integration for blob management
+
+3. **Machine Management API** (2-3 days)
+   - Machine registration endpoints
+   - MAC address to profile mapping
+   - Machine listing and updates
+   - Firestore integration for machine mappings
+
+### Phase 2: Boot Service (Week 2)
+1. **UEFI HTTP Boot Endpoints** (2-3 days)
    - HTTP endpoint serving boot scripts (iPXE format)
-   - Kernel and initrd streaming from Cloud Storage
-   - MAC-based machine matching using Firestore
+   - Kernel and initrd streaming endpoints (proxy to Machine Management Service)
+   - MAC-based machine matching via Machine Management Service API
    - Boot script templating with machine-specific parameters
 
-3. **Testing & Deployment** (2-3 days)
-   - Deploy to Cloud Run with min instances = 1
+2. **Testing & Deployment** (2-3 days)
+   - Deploy both services to Cloud Run with min instances = 1
    - Configure WireGuard VPN connectivity
    - Test UEFI HTTP boot from HP DL360 Gen 9 (iLO 4 v2.40+)
-   - Validate boot latency and Cloud Run cold start metrics
+   - Validate boot latency and service-to-service communication
 
-### Phase 2: Admin API & Management (Week 2)
-1. **HTTP REST Admin API** (2-3 days)
-   - Boot image upload endpoints (kernel, initrd, metadata)
-   - Machine-to-image mapping management
-   - Boot profile CRUD operations
-   - Asset versioning and integrity validation
+### Phase 3: Integration & Observability (Week 2-3)
+1. **Service Integration** (1-2 days)
+   - Configure service-to-service authentication (if needed)
+   - Optimize streaming performance between services
+   - Handle error scenarios and fallbacks
 
-2. **Cloud-Init Integration** (2-3 days)
-   - Cloud-init configuration templating
-   - Metadata injection for machine-specific settings
-   - Integration with boot workflow
-
-3. **Observability & Documentation** (2-3 days)
-   - OpenTelemetry metrics integration
+2. **Observability & Documentation** (2-3 days)
+   - OpenTelemetry metrics integration (both services)
+   - Distributed tracing across services
    - Cloud Monitoring dashboards
    - API documentation
    - Operational runbooks
 
 ### Success Criteria
 - ✅ Successfully boot HP DL360 Gen 9 via UEFI HTTP boot through WireGuard VPN
-- ✅ Boot latency < 100ms for HTTP requests (kernel/initrd downloads)
-- ✅ Cloud Run cold start latency < 100ms (with min instances = 1)
-- ✅ Machine-to-image mapping works correctly based on MAC address
+- ✅ Boot latency < 100ms for HTTP requests to Boot Service
+- ✅ Service-to-service latency < 50ms (Boot Service → Machine Management Service)
+- ✅ Cloud Run cold start latency < 100ms (with min instances = 1 for both services)
+- ✅ Machine-to-profile mapping works correctly based on MAC address
 - ✅ Cloud Storage integration functional (upload, retrieve boot assets)
 - ✅ HTTP REST API fully functional for boot configuration management
 - ✅ Firestore stores machine mappings and boot profiles correctly
-- ✅ OpenTelemetry metrics available in Cloud Monitoring
+- ✅ OpenTelemetry distributed tracing works across both services
 - ✅ Configuration update workflow clear and documented
 - ✅ Firmware compatibility confirmed (no TFTP fallback needed)
 

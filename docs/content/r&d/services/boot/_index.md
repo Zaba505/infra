@@ -1,33 +1,29 @@
 ---
-title: "Boot Server"
+title: "Boot Service"
 type: docs
-description: "Network boot server HTTP API specification for UEFI HTTP boot infrastructure"
+description: "UEFI HTTP boot endpoints for bare metal server boot operations"
 weight: 10
 ---
 
-The Boot Server is a custom Go microservice that provides network boot capabilities for bare metal servers in the home lab. It implements UEFI HTTP boot endpoints for serving boot scripts and assets, plus an HTTP REST admin API for managing boot images, machine mappings, and boot profiles.
+The Boot Service is a custom Go microservice that provides UEFI HTTP boot endpoints for bare metal servers in the home lab. It serves boot scripts and streams kernel/initrd assets by calling the Machine Management Service API to resolve machine mappings and profiles.
 
 ## Architecture Overview
 
-The Boot Server is deployed on GCP Cloud Run and accessed through a WireGuard VPN tunnel from bare metal servers. It integrates with:
+The Boot Service is deployed on GCP Cloud Run and accessed through a WireGuard VPN tunnel from bare metal servers. It integrates with:
 
-- **Cloud Storage**: Boot images (kernels, initrd files, cloud-init configs)
-- **Firestore**: Machine-to-image mappings and boot profile metadata
-- **Secret Manager**: Sensitive configuration data
-- **Cloud Monitoring**: OpenTelemetry observability
+- **Machine Management Service**: Retrieves machine-to-profile mappings and boot profile metadata
+- **Cloud Monitoring**: OpenTelemetry observability with distributed tracing
 
 ## Related Documentation
 
+- [Machine Management Service](../machine-mgmt/) - Backend service for profile and machine management
 - [ADR-0005: Network Boot Infrastructure Implementation on Google Cloud](../../adrs/0005-network-boot-infrastructure-gcp/) - Architecture decision and design rationale
 - [ADR-0002: Network Boot Architecture](../../adrs/0002-network-boot-architecture/) - Overall network boot strategy
 
 ## API Categories
 
-The Boot Server exposes two distinct API categories:
-
 1. **[UEFI HTTP Boot Endpoints](./uefi-boot-endpoints/)** - Accessed by bare metal servers during boot process (via WireGuard VPN)
-2. **[HTTP REST Admin API](./admin-api/)** - Management API for boot configuration (authenticated)
-3. **[Health Check Endpoints](./health-checks/)** - Standard Cloud Run health endpoints
+2. **[Health Check Endpoints](./health-checks/)** - Standard Cloud Run health endpoints
 
 ## Security Model
 
@@ -36,13 +32,11 @@ The Boot Server exposes two distinct API categories:
 Since HP DL360 Gen 9 servers do not support client-side TLS certificates for UEFI HTTP boot, all boot traffic is secured via WireGuard VPN:
 
 - **Boot Endpoints**: Only accessible through WireGuard tunnel (source IP validation)
-- **Admin API**: Authenticated using IAM-based authentication
 - **Transport Security**: WireGuard provides mutual authentication and encryption
 
 ### Authentication Methods
 
 - **UEFI Boot Endpoints**: VPN source IP validation (bare metal servers)
-- **Admin API**: GCP IAM authentication (service accounts, user accounts)
 - **Health Checks**: Unauthenticated (used by Cloud Run for liveness/startup probes)
 
 ## Common Patterns

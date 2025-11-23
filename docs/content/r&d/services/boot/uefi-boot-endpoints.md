@@ -18,16 +18,21 @@ Serves iPXE boot scripts customized for the requesting machine based on its MAC 
 ```mermaid
 sequenceDiagram
     participant Client as Bare Metal Server
-    participant Boot as Boot Server
+    participant Boot as Boot Service
+    participant MgmtAPI as Machine Management Service
     participant DB as Firestore
     
     Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
     Boot->>Boot: Validate MAC address format
-    Boot->>DB: Query machine by MAC
-    DB-->>Boot: Machine config (machine_id, profile_id, kernel args)
-    Boot->>DB: Get profile by ID
-    DB-->>Boot: Profile config (image_id, kernel args)
-    Boot->>Boot: Generate iPXE script with machine_id
+    Boot->>MgmtAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
+    MgmtAPI->>DB: Query machine by NIC MAC
+    DB-->>MgmtAPI: Machine profile (machine_id)
+    MgmtAPI-->>Boot: Machine profile
+    Boot->>MgmtAPI: GET /api/v1/profiles?machine_id={id}
+    MgmtAPI->>DB: Get boot profile by machine ID
+    DB-->>MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
+    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>Boot: Generate iPXE script with profile_id
     Boot-->>Client: 200 OK (iPXE script)
 ```
 
@@ -50,12 +55,11 @@ Host: boot.internal
 #!ipxe
 
 # Boot configuration for node-01 (52:54:00:12:34:56)
-# Machine ID: 018c7dbd-9265-7000-8000-123456789abc
-# Profile: 018c7dbd-a1b2-7000-8000-987654321def
+# Boot Profile ID: 018c7dbd-a1b2-7000-8000-987654321def
 # Generated: 2025-11-19T06:00:00Z
 
-kernel /assets/018c7dbd-9265-7000-8000-123456789abc/kernel console=tty0 console=ttyS0 ip=dhcp
-initrd /assets/018c7dbd-9265-7000-8000-123456789abc/initrd
+kernel /asset/018c7dbd-a1b2-7000-8000-987654321def/kernel console=tty0 console=ttyS0 ip=dhcp
+initrd /asset/018c7dbd-a1b2-7000-8000-987654321def/initrd
 boot
 ```
 
@@ -84,7 +88,7 @@ The iPXE script may include the following dynamic values:
 
 ## Kernel Image Endpoint
 
-### `GET /assets/{id}/kernel`
+### `GET /asset/{boot_profile_id}/kernel`
 
 Streams kernel images from Cloud Storage for the boot process.
 
@@ -93,15 +97,18 @@ Streams kernel images from Cloud Storage for the boot process.
 ```mermaid
 sequenceDiagram
     participant Client as Bare Metal Server
-    participant Boot as Boot Server
-    participant DB as Firestore
+    participant Boot as Boot Service
+    participant MgmtAPI as Machine Management Service
     participant Storage as Cloud Storage
+    participant DB as Firestore
     
-    Client->>Boot: GET /assets/018c7dbd-9265-7000-8000-123456789abc/kernel
+    Client->>Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/kernel
     Boot->>Boot: Validate UUIDv7 format
-    Boot->>DB: Query machine to get image_id
-    DB-->>Boot: Machine config (image_id)
-    Boot->>Storage: Stream kernel file for image
+    Boot->>MgmtAPI: GET /api/v1/profiles/{boot_profile_id}
+    MgmtAPI->>DB: Query boot profile by ID
+    DB-->>MgmtAPI: Boot profile (kernel_id)
+    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>Storage: GET gs://bucket/blobs/{kernel_id}
     Storage-->>Boot: Kernel data stream
     Boot-->>Client: 200 OK (kernel stream)
 ```
@@ -110,12 +117,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (UUIDv7) | Yes | Machine identifier assigned by the boot service (UUIDv7 format: `018c7dbd-9265-7000-8000-123456789abc`) |
+| `boot_profile_id` | string (UUIDv7) | Yes | Boot profile identifier (UUIDv7 format: `018c7dbd-a1b2-7000-8000-987654321def`) |
 
 **Request Example:**
 
 ```http
-GET /assets/018c7dbd-9265-7000-8000-123456789abc/kernel HTTP/1.1
+GET /asset/018c7dbd-a1b2-7000-8000-987654321def/kernel HTTP/1.1
 Host: boot.internal
 ```
 
@@ -147,7 +154,7 @@ Binary kernel image streamed from Cloud Storage.
 
 ## Initrd Image Endpoint
 
-### `GET /assets/{id}/initrd`
+### `GET /asset/{boot_profile_id}/initrd`
 
 Streams initial ramdisk (initrd) images from Cloud Storage for the boot process.
 
@@ -156,15 +163,18 @@ Streams initial ramdisk (initrd) images from Cloud Storage for the boot process.
 ```mermaid
 sequenceDiagram
     participant Client as Bare Metal Server
-    participant Boot as Boot Server
-    participant DB as Firestore
+    participant Boot as Boot Service
+    participant MgmtAPI as Machine Management Service
     participant Storage as Cloud Storage
+    participant DB as Firestore
     
-    Client->>Boot: GET /assets/018c7dbd-9265-7000-8000-123456789abc/initrd
+    Client->>Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/initrd
     Boot->>Boot: Validate UUIDv7 format
-    Boot->>DB: Query machine to get image_id
-    DB-->>Boot: Machine config (image_id)
-    Boot->>Storage: Stream initrd file for image
+    Boot->>MgmtAPI: GET /api/v1/profiles/{boot_profile_id}
+    MgmtAPI->>DB: Query boot profile by ID
+    DB-->>MgmtAPI: Boot profile (initrd_id)
+    MgmtAPI-->>Boot: Boot profile metadata
+    Boot->>Storage: GET gs://bucket/blobs/{initrd_id}
     Storage-->>Boot: Initrd data stream
     Boot-->>Client: 200 OK (initrd stream)
 ```
@@ -173,12 +183,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (UUIDv7) | Yes | Machine identifier assigned by the boot service (UUIDv7 format: `018c7dbd-9265-7000-8000-123456789abc`) |
+| `boot_profile_id` | string (UUIDv7) | Yes | Boot profile identifier (UUIDv7 format: `018c7dbd-a1b2-7000-8000-987654321def`) |
 
 **Request Example:**
 
 ```http
-GET /assets/018c7dbd-9265-7000-8000-123456789abc/initrd HTTP/1.1
+GET /asset/018c7dbd-a1b2-7000-8000-987654321def/initrd HTTP/1.1
 Host: boot.internal
 ```
 
