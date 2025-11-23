@@ -37,7 +37,7 @@ sequenceDiagram
 **Request Body (multipart/form-data):**
 
 Form fields:
-- `id` (text): Boot image URN (format: `urn:boot:image:{name}`)
+- `id` (text): Boot image identifier (UUIDv7 format)
 - `name` (text): Human-readable name
 - `version` (text): Semantic version
 - `kernel` (file): Kernel image file
@@ -54,7 +54,7 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="id"
 
-urn:boot:image:ubuntu-2204
+018c7dbd-9265-7000-8000-123456789abc
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="name"
 
@@ -161,7 +161,7 @@ Host: boot.example.com
 {
   "images": [
     {
-      "id": "urn:boot:image:ubuntu-2204",
+      "id": "018c7dbd-9265-7000-8000-123456789abc",
       "name": "Ubuntu 22.04 LTS Server",
       "version": "22.04.3",
       "kernel": {
@@ -204,8 +204,8 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/images/{urn}
-    API->>DB: Query image by URN
+    Client->>API: GET /api/v1/images/{id}
+    API->>DB: Query image by ID
     DB-->>API: Image metadata
     API-->>Client: 200 OK (image metadata)
 ```
@@ -214,12 +214,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
+| `id` | string | Yes | Boot image identifier (UUIDv7 format) |
 
 **Request Example:**
 
 ```http
-GET /api/v1/images/urn:boot:image:ubuntu-2204 HTTP/1.1
+GET /api/v1/images/018c7dbd-9265-7000-8000-123456789abc HTTP/1.1
 Host: boot.example.com
 ```
 
@@ -227,7 +227,7 @@ Host: boot.example.com
 
 ```json
 {
-  "id": "urn:boot:image:ubuntu-2204",
+  "id": "018c7dbd-9265-7000-8000-123456789abc",
   "name": "Ubuntu 22.04 LTS Server",
   "version": "22.04.3",
   "kernel": {
@@ -269,7 +269,7 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant DB as Firestore
     
-    Client->>API: DELETE /api/v1/images/{urn}
+    Client->>API: DELETE /api/v1/images/{id}
     API->>DB: Check if image is in use
     DB-->>API: Not in use
     API->>Storage: Delete kernel file
@@ -282,12 +282,12 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot image identifier (URN format: `urn:boot:image:{name}`) |
+| `id` | string | Yes | Boot image identifier (UUIDv7 format) |
 
 **Request Example:**
 
 ```http
-DELETE /api/v1/images/urn:boot:image:ubuntu-2204 HTTP/1.1
+DELETE /api/v1/images/018c7dbd-9265-7000-8000-123456789abc HTTP/1.1
 Host: boot.example.com
 ```
 
@@ -333,7 +333,7 @@ sequenceDiagram
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "urn:boot:profile:ubuntu-server-base",
+  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -354,7 +354,7 @@ sequenceDiagram
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "urn:boot:profile:ubuntu-server-base",
+  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -416,7 +416,7 @@ sequenceDiagram
     {
       "mac_address": "52:54:00:12:34:56",
       "hostname": "node-01",
-      "profile_id": "urn:boot:profile:ubuntu-server-base",
+      "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
       "metadata": {
         "datacenter": "homelab",
         "rack": "A1",
@@ -509,7 +509,7 @@ sequenceDiagram
 
 ```json
 {
-  "profile_id": "urn:boot:profile:ubuntu-server-v2",
+  "profile_id": "018c7dbd-a000-7000-8000-000000000002",
   "metadata": {
     "datacenter": "homelab",
     "rack": "A1",
@@ -582,7 +582,7 @@ sequenceDiagram
     participant DB as Firestore
     
     Client->>API: POST /api/v1/profiles
-    API->>API: Validate URN format
+    API->>API: Validate identifier format
     API->>DB: Check if image_id exists
     DB-->>API: Image found
     API->>DB: Store profile
@@ -594,9 +594,9 @@ sequenceDiagram
 
 ```json
 {
-  "id": "urn:boot:profile:ubuntu-server-base",
+  "id": "018c7dbd-a000-7000-8000-abcdef123456",
   "name": "Ubuntu Server Base Profile",
-  "image_id": "urn:boot:image:ubuntu-2204",
+  "image_id": "018c7dbd-9265-7000-8000-123456789abc",
   "kernel_args": [
     "console=tty0",
     "console=ttyS0",
@@ -613,9 +613,9 @@ sequenceDiagram
 
 ```json
 {
-  "id": "urn:boot:profile:ubuntu-server-base",
+  "id": "018c7dbd-a000-7000-8000-abcdef123456",
   "name": "Ubuntu Server Base Profile",
-  "image_id": "urn:boot:image:ubuntu-2204",
+  "image_id": "018c7dbd-9265-7000-8000-123456789abc",
   "kernel_args": [
     "console=tty0",
     "console=ttyS0",
@@ -663,7 +663,7 @@ sequenceDiagram
 |-----------|------|----------|-------------|---------|
 | `page` | integer | No | Page number (1-indexed) | 1 |
 | `per_page` | integer | No | Results per page (1-100) | 20 |
-| `image_id` | string (URN) | No | Filter by boot image | - |
+| `image_id` | string | No | Filter by boot image (UUIDv7) | - |
 
 **Response (200 OK):**
 
@@ -671,9 +671,9 @@ sequenceDiagram
 {
   "profiles": [
     {
-      "id": "urn:boot:profile:ubuntu-server-base",
+      "id": "018c7dbd-a000-7000-8000-abcdef123456",
       "name": "Ubuntu Server Base Profile",
-      "image_id": "urn:boot:image:ubuntu-2204",
+      "image_id": "018c7dbd-9265-7000-8000-123456789abc",
       "kernel_args": [
         "console=tty0",
         "console=ttyS0",
@@ -710,8 +710,8 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: GET /api/v1/profiles/{urn}
-    API->>DB: Query profile by URN
+    Client->>API: GET /api/v1/profiles/{id}
+    API->>DB: Query profile by ID
     DB-->>API: Profile config
     API-->>Client: 200 OK (profile config)
 ```
@@ -720,7 +720,7 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
 
 **Response (200 OK):**
 
@@ -746,7 +746,7 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: PUT /api/v1/profiles/{urn}
+    Client->>API: PUT /api/v1/profiles/{id}
     API->>DB: Check if image_id exists (if updated)
     DB-->>API: Image found
     API->>DB: Update profile
@@ -758,7 +758,7 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
 
 **Request Body:**
 
@@ -802,7 +802,7 @@ sequenceDiagram
     participant API as Boot Server API
     participant DB as Firestore
     
-    Client->>API: DELETE /api/v1/profiles/{urn}
+    Client->>API: DELETE /api/v1/profiles/{id}
     API->>DB: Check if profile is in use
     DB-->>API: Not in use
     API->>DB: Delete profile
@@ -814,7 +814,7 @@ sequenceDiagram
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `id` | string (URN) | Yes | Boot profile identifier (URN format: `urn:boot:profile:{name}`) |
+| `id` | string | Yes | Boot profile identifier (UUIDv7 format) |
 
 **Response (204 No Content):**
 
@@ -872,8 +872,8 @@ sequenceDiagram
 {
   "mac_address": "52:54:00:12:34:56",
   "hostname": "node-01",
-  "profile_id": "urn:boot:profile:ubuntu-server-base",
-  "previous_profile_id": "urn:boot:profile:ubuntu-server-v2",
+  "profile_id": "018c7dbd-a000-7000-8000-abcdef123456",
+  "previous_profile_id": "018c7dbd-a000-7000-8000-000000000002",
   "rollback_reason": "Failed upgrade to new kernel version",
   "rollback_at": "2025-11-19T06:30:00Z"
 }
@@ -902,7 +902,7 @@ The system maintains a history of profile changes to enable rollback:
 
 ```typescript
 interface BootImage {
-  id: string;              // Unique identifier (e.g., "ubuntu-2204")
+  id: string;              // UUIDv7 identifier (e.g., "018c7dbd-9265-7000-8000-123456789abc")
   name: string;            // Human-readable name
   version: string;         // Semantic version
   kernel: {
@@ -932,7 +932,7 @@ interface BootImage {
 interface Machine {
   mac_address: string;     // MAC address (primary key)
   hostname: string;        // Machine hostname
-  profile_id: string;      // Reference to boot profile
+  profile_id: string;      // Reference to boot profile (UUIDv7)
   metadata: {
     datacenter?: string;
     rack?: string;
@@ -954,9 +954,9 @@ interface Machine {
 
 ```typescript
 interface BootProfile {
-  id: string;              // Unique identifier
+  id: string;              // UUIDv7 identifier
   name: string;            // Human-readable name
-  image_id: string;        // Reference to boot image
+  image_id: string;        // Reference to boot image (UUIDv7)
   kernel_args: string[];   // Kernel command-line arguments
   cloud_init_template: string; // Cloud-init template filename
   metadata: {
