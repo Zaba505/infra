@@ -469,6 +469,38 @@ Snowflake IDs reveal more information than UUIDs:
 - Sharded database architecture
 - Combines Snowflake with PostgreSQL sequences
 
+## Go Library Support
+
+### ✅ bwmarrin/snowflake Library
+
+The most popular Go library for Snowflake IDs is [`github.com/bwmarrin/snowflake`](https://github.com/bwmarrin/snowflake), which provides a production-ready implementation with configurable epoch and node ID.
+
+**Installation:**
+```bash
+go get github.com/bwmarrin/snowflake
+```
+
+**Usage example:**
+
+```go
+import "github.com/bwmarrin/snowflake"
+
+// Create a new node with worker ID (must be unique per instance)
+node, err := snowflake.NewNode(1) // Worker ID: 1 (range: 0-1023)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Generate a Snowflake ID
+id := node.Generate()
+fmt.Println(id.Int64())   // e.g., 175928847299117063
+fmt.Println(id.String())  // e.g., "175928847299117063"
+```
+
+**Alternative: sony/sonyflake**
+
+[`github.com/sony/sonyflake`](https://github.com/sony/sonyflake) is another option that uses a different bit layout (39-bit time, 8-bit sequence, 16-bit machine ID), providing finer-grained machine ID space at the cost of time precision.
+
 ## Migration Strategies
 
 ### From Auto-Increment

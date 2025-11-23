@@ -310,6 +310,37 @@ uuid2 := uuid.NewV7() // 0191e1a6-8b2c-7890-xyz1-987654321def
 └─────────────────────────────────────────────────────┘
 ```
 
+## Go Library Support
+
+### ✅ Official Google UUID Library
+
+The most widely-used Go library for UUIDs is [`github.com/google/uuid`](https://github.com/google/uuid), which provides full support for UUID versions 1, 3, 4, 5, 6, and 7.
+
+**Installation:**
+```bash
+go get github.com/google/uuid
+```
+
+**Usage examples:**
+
+```go
+import "github.com/google/uuid"
+
+// Generate UUID v4 (random)
+id := uuid.New()
+fmt.Println(id.String()) // e.g., 550e8400-e29b-41d4-a716-446655440000
+
+// Generate UUID v7 (time-ordered, recommended for databases)
+id := uuid.Must(uuid.NewV7())
+fmt.Println(id.String()) // e.g., 0191e1a6-8b2c-7890-abcd-123456789abc
+
+// Parse existing UUID
+parsed, err := uuid.Parse("550e8400-e29b-41d4-a716-446655440000")
+if err != nil {
+    log.Fatal(err)
+}
+```
+
 ## Modern Recommendations (2024-2025)
 
 **For new projects:**

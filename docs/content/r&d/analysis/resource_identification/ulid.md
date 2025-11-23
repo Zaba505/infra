@@ -334,6 +334,34 @@ entropy := ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0)
 id := ulid.MustNew(ulid.Timestamp(time.Now()), entropy)
 ```
 
+## Go Library Support
+
+### ✅ oklog/ulid Library
+
+The canonical Go library for ULIDs is [`github.com/oklog/ulid/v2`](https://github.com/oklog/ulid), which provides full ULID specification support with both standard and monotonic generation modes.
+
+**Installation:**
+```bash
+go get github.com/oklog/ulid/v2
+```
+
+**Usage examples:**
+
+```go
+import (
+    "crypto/rand"
+    "github.com/oklog/ulid/v2"
+)
+
+// Simple generation with default entropy
+id := ulid.Make()
+fmt.Println(id.String()) // e.g., 01ARZ3NDEKTSV4RRFFQ69G5FAV
+
+// Monotonic generation for strict ordering
+entropy := ulid.Monotonic(rand.Reader, 0)
+id := ulid.MustNew(ulid.Timestamp(time.Now()), entropy)
+```
+
 ## Summary
 
 ULID represents an excellent choice for modern distributed systems:
