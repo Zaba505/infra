@@ -11,6 +11,27 @@ The Admin API provides HTTP REST endpoints for managing immutable boot profiles 
 
 Boot profiles are immutable resources that bundle kernel, initrd, kernel arguments, and metadata together. Once created, profiles cannot be modified - you must create a new profile for any changes.
 
+### Cloud Storage Structure
+
+Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:
+
+```
+gs://{bucket}/blobs/{kernel_id}
+gs://{bucket}/blobs/{initrd_id}
+```
+
+For example:
+```
+gs://boot-server-blobs/blobs/018c7dbd-b100-7000-8000-123456789abc
+gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
+```
+
+The UUIDv7 identifiers are generated server-side during upload, ensuring:
+- Globally unique object keys
+- Time-ordered storage (UUIDv7 timestamp prefix)
+- Content-addressable storage pattern
+- No namespace collisions between profiles
+
 ### `POST /api/v1/profiles`
 
 Create a new immutable boot profile by uploading kernel, initrd, and configuration in a single request.
@@ -26,14 +47,16 @@ sequenceDiagram
     
     Client->>API: POST /api/v1/profiles (multipart/form-data)
     API->>API: Generate UUIDv7 for profile
+    API->>API: Generate UUIDv7 for kernel blob
+    API->>API: Generate UUIDv7 for initrd blob
     API->>API: Compute SHA-256 checksums
-    API->>Storage: Upload kernel file
-    Storage-->>API: Upload complete (kernel ID)
-    API->>Storage: Upload initrd file
-    Storage-->>API: Upload complete (initrd ID)
-    API->>DB: Store profile metadata
+    API->>Storage: PUT gs://bucket/blobs/{kernel_id}
+    Storage-->>API: Kernel stored
+    API->>Storage: PUT gs://bucket/blobs/{initrd_id}
+    Storage-->>API: Initrd stored
+    API->>DB: Store profile metadata (profile_id, kernel_id, initrd_id)
     DB-->>API: Profile created
-    API-->>Client: 201 Created (profile metadata with ID)
+    API-->>Client: 201 Created (profile metadata with IDs)
 ```
 
 **Request Body (multipart/form-data):**
@@ -90,12 +113,12 @@ Content-Type: application/json
   "id": "018c7dbd-a000-7000-8000-abcdef123456",
   "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
-    "id": "018c7dbd-a000-7000-8000-kernel123456",
+    "id": "018c7dbd-b100-7000-8000-123456789abc",
     "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
-    "id": "018c7dbd-a000-7000-8000-initrd123456",
+    "id": "018c7dbd-b200-7000-8000-987654321fed",
     "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
@@ -157,12 +180,12 @@ sequenceDiagram
       "id": "018c7dbd-a000-7000-8000-abcdef123456",
       "name": "Ubuntu 22.04 LTS Server Base",
       "kernel": {
-        "id": "018c7dbd-a000-7000-8000-kernel123456",
+        "id": "018c7dbd-b100-7000-8000-123456789abc",
         "sha256": "a1b2c3d4e5f6789...",
         "size_bytes": 8388608
       },
       "initrd": {
-        "id": "018c7dbd-a000-7000-8000-initrd123456",
+        "id": "018c7dbd-b200-7000-8000-987654321fed",
         "sha256": "f6e5d4c3b2a19876...",
         "size_bytes": 52428800
       },
@@ -219,12 +242,12 @@ sequenceDiagram
   "id": "018c7dbd-a000-7000-8000-abcdef123456",
   "name": "Ubuntu 22.04 LTS Server Base",
   "kernel": {
-    "id": "018c7dbd-a000-7000-8000-kernel123456",
+    "id": "018c7dbd-b100-7000-8000-123456789abc",
     "sha256": "a1b2c3d4e5f6789...",
     "size_bytes": 8388608
   },
   "initrd": {
-    "id": "018c7dbd-a000-7000-8000-initrd123456",
+    "id": "018c7dbd-b200-7000-8000-987654321fed",
     "sha256": "f6e5d4c3b2a19876...",
     "size_bytes": 52428800
   },
@@ -262,9 +285,9 @@ sequenceDiagram
     participant DB as Firestore
     
     Client->>API: GET /api/v1/profiles/{id}/kernel
-    API->>DB: Lookup profile kernel storage path
-    DB-->>API: Storage path
-    API->>Storage: Fetch kernel file
+    API->>DB: Query profile by ID
+    DB-->>API: Profile metadata (kernel_id)
+    API->>Storage: GET gs://bucket/blobs/{kernel_id}
     Storage-->>API: Kernel binary
     API-->>Client: 200 OK (application/octet-stream)
 ```
@@ -287,7 +310,12 @@ Content-Type: application/octet-stream
 Content-Length: 8388608
 Content-Disposition: attachment; filename="vmlinuz"
 X-Content-SHA256: a1b2c3d4e5f6789...
+X-Blob-ID: 018c7dbd-b100-7000-8000-123456789abc
 ```
+
+**Storage Path:**
+
+The kernel is fetched from `gs://{bucket}/blobs/{kernel_id}` where `kernel_id` is the UUIDv7 identifier returned in the profile metadata.
 
 **Error Responses:**
 
@@ -311,9 +339,9 @@ sequenceDiagram
     participant DB as Firestore
     
     Client->>API: GET /api/v1/profiles/{id}/initrd
-    API->>DB: Lookup profile initrd storage path
-    DB-->>API: Storage path
-    API->>Storage: Fetch initrd file
+    API->>DB: Query profile by ID
+    DB-->>API: Profile metadata (initrd_id)
+    API->>Storage: GET gs://bucket/blobs/{initrd_id}
     Storage-->>API: Initrd binary
     API-->>Client: 200 OK (application/octet-stream)
 ```
@@ -336,7 +364,12 @@ Content-Type: application/octet-stream
 Content-Length: 52428800
 Content-Disposition: attachment; filename="initrd.img"
 X-Content-SHA256: f6e5d4c3b2a19876...
+X-Blob-ID: 018c7dbd-b200-7000-8000-987654321fed
 ```
+
+**Storage Path:**
+
+The initrd is fetched from `gs://{bucket}/blobs/{initrd_id}` where `initrd_id` is the UUIDv7 identifier returned in the profile metadata.
 
 **Error Responses:**
 
@@ -362,8 +395,10 @@ sequenceDiagram
     Client->>API: DELETE /api/v1/profiles/{id}
     API->>DB: Check if profile is in use
     DB-->>API: Not in use
-    API->>Storage: Delete kernel file
-    API->>Storage: Delete initrd file
+    API->>DB: Get kernel_id and initrd_id
+    DB-->>API: Blob IDs
+    API->>Storage: DELETE gs://bucket/blobs/{kernel_id}
+    API->>Storage: DELETE gs://bucket/blobs/{initrd_id}
     API->>DB: Delete profile metadata
     API-->>Client: 204 No Content
 ```
@@ -727,12 +762,12 @@ interface BootProfile {
   id: string;              // UUIDv7 identifier
   name: string;            // Human-readable name
   kernel: {
-    id: string;            // UUIDv7 identifier for kernel blob
+    id: string;            // UUIDv7 blob identifier
     sha256: string;        // SHA-256 checksum
     size_bytes: number;    // File size in bytes
   };
   initrd: {
-    id: string;            // UUIDv7 identifier for initrd blob
+    id: string;            // UUIDv7 blob identifier
     sha256: string;        // SHA-256 checksum
     size_bytes: number;    // File size in bytes
   };
