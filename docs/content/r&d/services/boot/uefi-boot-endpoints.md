@@ -28,8 +28,8 @@ sequenceDiagram
     MgmtAPI->>DB: Query machine by NIC MAC
     DB-->>MgmtAPI: Machine profile (machine_id)
     MgmtAPI-->>Boot: Machine profile
-    Boot->>MgmtAPI: GET /api/v1/profiles?machine_id={id}
-    MgmtAPI->>DB: Get boot profile by machine ID
+    Boot->>MgmtAPI: GET /api/v1/machines/{machine_id}/profile
+    MgmtAPI->>DB: Get active boot profile for machine
     DB-->>MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
     MgmtAPI-->>Boot: Boot profile metadata
     Boot->>Boot: Generate iPXE script with profile_id
