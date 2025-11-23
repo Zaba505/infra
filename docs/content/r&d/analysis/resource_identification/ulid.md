@@ -1,5 +1,6 @@
 ---
 title: "ULID Analysis"
+docs: type
 weight: 2
 ---
 

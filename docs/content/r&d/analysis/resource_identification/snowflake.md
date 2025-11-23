@@ -1,5 +1,6 @@
 ---
 title: "Snowflake ID Analysis"
+docs: type
 weight: 3
 ---
 
