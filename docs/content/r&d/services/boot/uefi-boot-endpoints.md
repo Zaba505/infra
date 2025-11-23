@@ -21,11 +21,10 @@ sequenceDiagram
     participant Boot as Boot Server
     participant DB as Firestore
     
-    Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56&machine_id=urn:boot:machine:node-01
+    Client->>Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
     Boot->>Boot: Validate MAC address format
-    Boot->>Boot: Validate machine_id URN format
-    Boot->>DB: Query machine by MAC and machine_id
-    DB-->>Boot: Machine config (profile_id, kernel args)
+    Boot->>DB: Query machine by MAC
+    DB-->>Boot: Machine config (machine_id, profile_id, kernel args)
     Boot->>DB: Get profile by ID
     DB-->>Boot: Profile config (image_id, kernel args)
     Boot->>Boot: Generate iPXE script with machine_id
@@ -37,12 +36,11 @@ sequenceDiagram
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `mac` | string | Yes | MAC address of the requesting machine (format: `aa:bb:cc:dd:ee:ff`) |
-| `machine_id` | string | Yes | Machine identifier assigned by the boot service |
 
 **Request Example:**
 
 ```http
-GET /boot.ipxe?mac=52:54:00:12:34:56&machine_id=urn:boot:machine:node-01 HTTP/1.1
+GET /boot.ipxe?mac=52:54:00:12:34:56 HTTP/1.1
 Host: boot.internal
 ```
 
