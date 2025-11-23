@@ -15,8 +15,8 @@
  MgmtAPI-&amp;gt;&amp;gt;DB: Query machine by NIC MAC
  DB--&amp;gt;&amp;gt;MgmtAPI: Machine profile (machine_id)
  MgmtAPI--&amp;gt;&amp;gt;Boot: Machine profile
- Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/profiles?machine_id={id}
- MgmtAPI-&amp;gt;&amp;gt;DB: Get boot profile by machine ID
+ Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/machines/{machine_id}/profile
+ MgmtAPI-&amp;gt;&amp;gt;DB: Get active boot profile for machine
  DB--&amp;gt;&amp;gt;MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
  MgmtAPI--&amp;gt;&amp;gt;Boot: Boot profile metadata
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id

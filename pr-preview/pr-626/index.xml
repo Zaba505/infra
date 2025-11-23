@@ -124,7 +124,7 @@ ADR Categories:
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
 &lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item><item><title>Machine Management Service API</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/machine-mgmt/api/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/machine-mgmt/api/</guid><description>&lt;p&gt;The Machine Management Service provides HTTP REST endpoints for managing machine hardware profiles and boot profiles. This service is called by the Boot Service during boot operations and by administrators for configuration management. Since this is for a home lab environment, no authentication is required.&lt;/p&gt;
 &lt;h2 id="boot-profile-management"&gt;Boot Profile Management&lt;/h2&gt;
-&lt;p&gt;Boot profiles bundle kernel, initrd, and kernel arguments together. Each profile is associated with a specific machine and its version. Profiles can be updated, creating new versions while maintaining the association with the machine.&lt;/p&gt;</description></item><item><title>UEFI HTTP Boot Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</guid><description>&lt;p&gt;These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.&lt;/p&gt;
+&lt;p&gt;Boot profiles bundle kernel, initrd, and kernel arguments together. Each machine has exactly one active boot profile at any given time. When a profile is updated, it replaces the previous active profile for that machine.&lt;/p&gt;</description></item><item><title>UEFI HTTP Boot Endpoints</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/services/boot/uefi-boot-endpoints/</guid><description>&lt;p&gt;These endpoints are accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process. All endpoints are accessed through the WireGuard VPN tunnel and use source IP validation for security.&lt;/p&gt;
 &lt;h2 id="boot-script-endpoint"&gt;Boot Script Endpoint&lt;/h2&gt;
 &lt;h3 id="get-bootipxe"&gt;&lt;code&gt;GET /boot.ipxe&lt;/code&gt;&lt;/h3&gt;
 &lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address.&lt;/p&gt;
@@ -141,8 +141,8 @@ ADR Categories:
  MgmtAPI-&amp;gt;&amp;gt;DB: Query machine by NIC MAC
  DB--&amp;gt;&amp;gt;MgmtAPI: Machine profile (machine_id)
  MgmtAPI--&amp;gt;&amp;gt;Boot: Machine profile
- Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/profiles?machine_id={id}
- MgmtAPI-&amp;gt;&amp;gt;DB: Get boot profile by machine ID
+ Boot-&amp;gt;&amp;gt;MgmtAPI: GET /api/v1/machines/{machine_id}/profile
+ MgmtAPI-&amp;gt;&amp;gt;DB: Get active boot profile for machine
  DB--&amp;gt;&amp;gt;MgmtAPI: Boot profile (kernel_id, initrd_id, kernel args)
  MgmtAPI--&amp;gt;&amp;gt;Boot: Boot profile metadata
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id
