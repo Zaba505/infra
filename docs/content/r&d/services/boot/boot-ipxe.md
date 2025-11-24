@@ -66,11 +66,45 @@ boot
 
 **Error Responses:**
 
-| Status Code | Description | Example |
-|-------------|-------------|---------|
-| 400 Bad Request | Missing or invalid MAC address | `{"error": {"code": "INVALID_MAC_ADDRESS", "message": "MAC address must be in format aa:bb:cc:dd:ee:ff"}}` |
-| 404 Not Found | No boot configuration found for MAC | `{"error": {"code": "MACHINE_NOT_CONFIGURED", "message": "No boot configuration found for MAC 52:54:00:12:34:56"}}` |
-| 500 Internal Server Error | Database or template error | `{"error": {"code": "INTERNAL_ERROR", "message": "Failed to generate boot script"}}` |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**400 Bad Request** - Missing or invalid MAC address:
+
+```json
+{
+  "type": "https://api.example.com/errors/invalid-mac-address",
+  "title": "Invalid MAC Address",
+  "status": 400,
+  "detail": "MAC address must be in format aa:bb:cc:dd:ee:ff",
+  "instance": "/boot.ipxe",
+  "mac_address": "invalid-mac"
+}
+```
+
+**404 Not Found** - No boot configuration found for MAC:
+
+```json
+{
+  "type": "https://api.example.com/errors/machine-not-configured",
+  "title": "Machine Not Configured",
+  "status": 404,
+  "detail": "No boot configuration found for MAC address 52:54:00:12:34:56",
+  "instance": "/boot.ipxe?mac=52:54:00:12:34:56",
+  "mac_address": "52:54:00:12:34:56"
+}
+```
+
+**500 Internal Server Error** - Database or template error:
+
+```json
+{
+  "type": "https://api.example.com/errors/internal-error",
+  "title": "Internal Server Error",
+  "status": 500,
+  "detail": "Failed to generate boot script due to an internal error",
+  "instance": "/boot.ipxe?mac=52:54:00:12:34:56"
+}
+```
 
 ## Boot Script Variables
 

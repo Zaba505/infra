@@ -74,6 +74,17 @@ Host: machine.example.com
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine with specified ID not found |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**404 Not Found** - Machine with specified ID not found:
+
+```json
+{
+  "type": "https://api.example.com/errors/machine-not-found",
+  "title": "Machine Not Found",
+  "status": 404,
+  "detail": "Machine with ID 018c7dbd-c000-7000-8000-fedcba987654 not found",
+  "instance": "/api/v1/machines/018c7dbd-c000-7000-8000-fedcba987654",
+  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654"
+}
+```

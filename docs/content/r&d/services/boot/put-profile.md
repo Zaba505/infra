@@ -88,7 +88,32 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-| 422 Unprocessable Entity | Validation error |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**404 Not Found** - Machine not found or has no boot profile:
+
+```json
+{
+  "type": "https://api.example.com/errors/boot-profile-not-found",
+  "title": "Boot Profile Not Found",
+  "status": 404,
+  "detail": "No boot profile found for machine 018c7dbd-c000-7000-8000-fedcba987654",
+  "instance": "/api/v1/boot/018c7dbd-c000-7000-8000-fedcba987654/profile",
+  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654"
+}
+```
+
+**422 Unprocessable Entity** - Validation error:
+
+```json
+{
+  "type": "https://api.example.com/errors/file-too-large",
+  "title": "File Too Large",
+  "status": 422,
+  "detail": "Kernel file exceeds maximum allowed size of 100MB",
+  "instance": "/api/v1/boot/018c7dbd-c000-7000-8000-fedcba987654/profile",
+  "field": "kernel",
+  "file_size": 125829120,
+  "max_size": 104857600
+}
+```

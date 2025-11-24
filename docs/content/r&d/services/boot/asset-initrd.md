@@ -55,10 +55,32 @@ Binary initrd image streamed from Cloud Storage.
 
 **Error Responses:**
 
-| Status Code | Description | Example |
-|-------------|-------------|---------|
-| 404 Not Found | Initrd image not found | `{"error": {"code": "INITRD_NOT_FOUND", "message": "Initrd image not found for boot profile"}}` |
-| 500 Internal Server Error | Cloud Storage error | `{"error": {"code": "STORAGE_ERROR", "message": "Failed to retrieve initrd from storage"}}` |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**404 Not Found** - Initrd image not found:
+
+```json
+{
+  "type": "https://api.example.com/errors/initrd-not-found",
+  "title": "Initrd Not Found",
+  "status": 404,
+  "detail": "Initrd image not found for boot profile 018c7dbd-a1b2-7000-8000-987654321def",
+  "instance": "/asset/018c7dbd-a1b2-7000-8000-987654321def/initrd",
+  "boot_profile_id": "018c7dbd-a1b2-7000-8000-987654321def"
+}
+```
+
+**500 Internal Server Error** - Cloud Storage error:
+
+```json
+{
+  "type": "https://api.example.com/errors/storage-error",
+  "title": "Storage Error",
+  "status": 500,
+  "detail": "Failed to retrieve initrd from storage due to an internal error",
+  "instance": "/asset/018c7dbd-a1b2-7000-8000-987654321def/initrd"
+}
+```
 
 ## Performance Characteristics
 

@@ -56,6 +56,17 @@ Host: boot.example.com
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**404 Not Found** - Machine not found or has no boot profile:
+
+```json
+{
+  "type": "https://api.example.com/errors/boot-profile-not-found",
+  "title": "Boot Profile Not Found",
+  "status": 404,
+  "detail": "No boot profile found for machine 018c7dbd-c000-7000-8000-fedcba987654",
+  "instance": "/api/v1/boot/018c7dbd-c000-7000-8000-fedcba987654/profile",
+  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654"
+}
+```

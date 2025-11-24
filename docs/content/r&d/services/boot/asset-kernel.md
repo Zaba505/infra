@@ -55,10 +55,32 @@ Binary kernel image streamed from Cloud Storage.
 
 **Error Responses:**
 
-| Status Code | Description | Example |
-|-------------|-------------|---------|
-| 404 Not Found | Kernel image not found | `{"error": {"code": "KERNEL_NOT_FOUND", "message": "Kernel image not found for boot profile"}}` |
-| 500 Internal Server Error | Cloud Storage error | `{"error": {"code": "STORAGE_ERROR", "message": "Failed to retrieve kernel from storage"}}` |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**404 Not Found** - Kernel image not found:
+
+```json
+{
+  "type": "https://api.example.com/errors/kernel-not-found",
+  "title": "Kernel Not Found",
+  "status": 404,
+  "detail": "Kernel image not found for boot profile 018c7dbd-a1b2-7000-8000-987654321def",
+  "instance": "/asset/018c7dbd-a1b2-7000-8000-987654321def/kernel",
+  "boot_profile_id": "018c7dbd-a1b2-7000-8000-987654321def"
+}
+```
+
+**500 Internal Server Error** - Cloud Storage error:
+
+```json
+{
+  "type": "https://api.example.com/errors/storage-error",
+  "title": "Storage Error",
+  "status": 500,
+  "detail": "Failed to retrieve kernel from storage due to an internal error",
+  "instance": "/asset/018c7dbd-a1b2-7000-8000-987654321def/kernel"
+}
+```
 
 ## Performance Characteristics
 

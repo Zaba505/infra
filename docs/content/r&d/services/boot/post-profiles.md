@@ -114,11 +114,54 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 400 Bad Request | Invalid request body or missing required fields |
-| 409 Conflict | Machine already has a boot profile (use PUT to update) |
-| 422 Unprocessable Entity | Validation error (file too large, invalid JSON, machine_id not found) |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**400 Bad Request** - Invalid request body or missing required fields:
+
+```json
+{
+  "type": "https://api.example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "The request body failed validation",
+  "instance": "/api/v1/profiles",
+  "invalid_fields": [
+    {
+      "field": "machine_id",
+      "reason": "required field is missing"
+    }
+  ]
+}
+```
+
+**409 Conflict** - Machine already has a boot profile:
+
+```json
+{
+  "type": "https://api.example.com/errors/boot-profile-exists",
+  "title": "Boot Profile Already Exists",
+  "status": 409,
+  "detail": "Machine 018c7dbd-c000-7000-8000-fedcba987654 already has a boot profile",
+  "instance": "/api/v1/profiles",
+  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654",
+  "existing_profile_id": "018c7dbd-a000-7000-8000-abcdef123456"
+}
+```
+
+**422 Unprocessable Entity** - Validation error (file too large, invalid JSON, machine_id not found):
+
+```json
+{
+  "type": "https://api.example.com/errors/file-too-large",
+  "title": "File Too Large",
+  "status": 422,
+  "detail": "Kernel file exceeds maximum allowed size of 100MB",
+  "instance": "/api/v1/profiles",
+  "field": "kernel",
+  "file_size": 125829120,
+  "max_size": 104857600
+}
+```
 
 ## Data Models
 

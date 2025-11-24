@@ -104,7 +104,35 @@ Full machine profile with updated fields:
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine with specified ID not found |
-| 400 Bad Request | Invalid request body |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**400 Bad Request** - Invalid request body:
+
+```json
+{
+  "type": "https://api.example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "The request body failed validation",
+  "instance": "/api/v1/machines/018c7dbd-c000-7000-8000-fedcba987654",
+  "invalid_fields": [
+    {
+      "field": "nics",
+      "reason": "at least one NIC is required"
+    }
+  ]
+}
+```
+
+**404 Not Found** - Machine with specified ID not found:
+
+```json
+{
+  "type": "https://api.example.com/errors/machine-not-found",
+  "title": "Machine Not Found",
+  "status": 404,
+  "detail": "Machine with ID 018c7dbd-c000-7000-8000-fedcba987654 not found",
+  "instance": "/api/v1/machines/018c7dbd-c000-7000-8000-fedcba987654",
+  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654"
+}
+```
