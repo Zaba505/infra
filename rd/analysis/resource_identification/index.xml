@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Resource Identifiers Analysis on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/</link><description>Recent content in Resource Identifiers Analysis on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/rd/analysis/resource_identification/index.xml" rel="self" type="application/rss+xml"/><item><title>Universally Unique Identifier (UUID) Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/uuid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/uuid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;UUIDs are 128-bit identifiers standardized in RFC 9562 (May 2024), which obsoletes the previous RFC 4122. The latest specification introduces three new versions (v6, v7, v8) while maintaining backward compatibility with existing versions.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-fully-uri-safe"&gt;✅ Fully URI-Safe&lt;/h3&gt;
+&lt;p&gt;UUIDs are inherently safe for use in URIs without any encoding required.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Standard format:&lt;/strong&gt;&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;550e8400-e29b-41d4-a716-446655440000
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;36 characters: 32 hexadecimal digits + 4 hyphens&lt;/li&gt;
+&lt;li&gt;Character set: &lt;code&gt;a-f&lt;/code&gt;, &lt;code&gt;0-9&lt;/code&gt;, &lt;code&gt;-&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;All characters are in RFC 3986 §2.3 unreserved set&lt;/li&gt;
+&lt;li&gt;Case-insensitive (lowercase recommended per RFC 9562)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Usage in URIs:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Universally Unique Lexicographically Sortable Identifier (ULID) Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/ulid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/ulid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;ULID is a community-driven specification for unique identifiers that combine the decentralized generation of UUIDs with the performance benefits of time-ordered sequential IDs. Created as an alternative to UUID v4&amp;rsquo;s poor database performance, ULID predates UUID v7 but shares similar design goals.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-completely-uri-safe"&gt;✅ Completely URI-Safe&lt;/h3&gt;
+&lt;p&gt;ULIDs are designed with URI usage as a primary consideration.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Character set:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Uses Crockford&amp;rsquo;s Base32 alphabet&lt;/li&gt;
+&lt;li&gt;Characters: &lt;code&gt;0123456789ABCDEFGHJKMNPQRSTVWXYZ&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Excluded: &lt;code&gt;I&lt;/code&gt;, &lt;code&gt;L&lt;/code&gt;, &lt;code&gt;O&lt;/code&gt;, &lt;code&gt;U&lt;/code&gt; (avoid confusion and potential abuse)&lt;/li&gt;
+&lt;li&gt;32 unique characters&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Format:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Snowflake ID Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/snowflake/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/snowflake/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Snowflake IDs are 64-bit unique identifiers originally developed by Twitter (now X) in 2010 to replace auto-incrementing integer IDs that became problematic as they scaled across multiple database shards. The format has been widely adopted by other distributed systems including Discord, Instagram, and many platforms requiring globally unique, time-ordered identifiers.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key differentiator:&lt;/strong&gt; Half the size of UUIDs/ULIDs while maintaining distributed generation and time-ordering properties.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-completely-uri-safe"&gt;✅ Completely URI-Safe&lt;/h3&gt;
+&lt;p&gt;Snowflake IDs are inherently URI-safe in their native numeric form.&lt;/p&gt;</description></item></channel></rss>

@@ -16,7 +16,21 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>[0002] Network Boot Architecture for Home Lab</title><link>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</guid><description>&lt;!--
+&lt;p&gt;Ubuntu supports multiple Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Universally Unique Identifier (UUID) Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/uuid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/uuid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;UUIDs are 128-bit identifiers standardized in RFC 9562 (May 2024), which obsoletes the previous RFC 4122. The latest specification introduces three new versions (v6, v7, v8) while maintaining backward compatibility with existing versions.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-fully-uri-safe"&gt;✅ Fully URI-Safe&lt;/h3&gt;
+&lt;p&gt;UUIDs are inherently safe for use in URIs without any encoding required.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Standard format:&lt;/strong&gt;&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;550e8400-e29b-41d4-a716-446655440000
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;Characteristics:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;36 characters: 32 hexadecimal digits + 4 hyphens&lt;/li&gt;
+&lt;li&gt;Character set: &lt;code&gt;a-f&lt;/code&gt;, &lt;code&gt;0-9&lt;/code&gt;, &lt;code&gt;-&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;All characters are in RFC 3986 §2.3 unreserved set&lt;/li&gt;
+&lt;li&gt;Case-insensitive (lowercase recommended per RFC 9562)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Usage in URIs:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>[0002] Network Boot Architecture for Home Lab</title><link>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</guid><description>&lt;!--
 ADR Categories:
 - strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
 - user-journey: Solutions for specific user journey problems (feature implementation approaches)
@@ -34,7 +48,19 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Init System&lt;/strong&gt;: systemd&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>[0003] Cloud Provider Selection for Network Boot Infrastructure</title><link>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</guid><description>&lt;!--
+&lt;p&gt;Fedora supports standard Kubernetes installation approaches:&lt;/p&gt;</description></item><item><title>Universally Unique Lexicographically Sortable Identifier (ULID) Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/ulid/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/ulid/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;ULID is a community-driven specification for unique identifiers that combine the decentralized generation of UUIDs with the performance benefits of time-ordered sequential IDs. Created as an alternative to UUID v4&amp;rsquo;s poor database performance, ULID predates UUID v7 but shares similar design goals.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-completely-uri-safe"&gt;✅ Completely URI-Safe&lt;/h3&gt;
+&lt;p&gt;ULIDs are designed with URI usage as a primary consideration.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Character set:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Uses Crockford&amp;rsquo;s Base32 alphabet&lt;/li&gt;
+&lt;li&gt;Characters: &lt;code&gt;0123456789ABCDEFGHJKMNPQRSTVWXYZ&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Excluded: &lt;code&gt;I&lt;/code&gt;, &lt;code&gt;L&lt;/code&gt;, &lt;code&gt;O&lt;/code&gt;, &lt;code&gt;U&lt;/code&gt; (avoid confusion and potential abuse)&lt;/li&gt;
+&lt;li&gt;32 unique characters&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Format:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>[0003] Cloud Provider Selection for Network Boot Infrastructure</title><link>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</guid><description>&lt;!--
 ADR Categories:
 - strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
 - user-journey: Solutions for specific user journey problems (feature implementation approaches)
@@ -48,7 +74,12 @@ ADR Categories:
 &lt;strong&gt;Status&lt;/strong&gt;: Generally Available (GA)
 &lt;strong&gt;Latest Version&lt;/strong&gt;: v2.x (as of 2024)&lt;/p&gt;
 &lt;h2 id="how-gcsfuse-works"&gt;How gcsfuse Works&lt;/h2&gt;
-&lt;p&gt;gcsfuse translates filesystem operations into GCS API calls:&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;gcsfuse translates filesystem operations into GCS API calls:&lt;/p&gt;</description></item><item><title>Snowflake ID Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/resource_identification/snowflake/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/resource_identification/snowflake/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Snowflake IDs are 64-bit unique identifiers originally developed by Twitter (now X) in 2010 to replace auto-incrementing integer IDs that became problematic as they scaled across multiple database shards. The format has been widely adopted by other distributed systems including Discord, Instagram, and many platforms requiring globally unique, time-ordered identifiers.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Key differentiator:&lt;/strong&gt; Half the size of UUIDs/ULIDs while maintaining distributed generation and time-ordering properties.&lt;/p&gt;
+&lt;h2 id="uri-safety"&gt;URI Safety&lt;/h2&gt;
+&lt;h3 id="-completely-uri-safe"&gt;✅ Completely URI-Safe&lt;/h3&gt;
+&lt;p&gt;Snowflake IDs are inherently URI-safe in their native numeric form.&lt;/p&gt;</description></item><item><title>Talos Linux Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/talos-linux/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Talos Linux is a modern operating system designed specifically for running Kubernetes. It is API-driven, immutable, and minimal, with no SSH access, shell, or package manager. All configuration is done via a declarative API.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -84,7 +115,604 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>[0006] Universal Resource Identifier Standard</title><link>https://zaba505.github.io/infra/rd/adrs/0006-resource-identifier-standard/</link><pubDate>Sun, 23 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0006-resource-identifier-standard/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item><item><title>[0007] Standard API Error Response Format</title><link>https://zaba505.github.io/infra/rd/adrs/0007-standard-api-error-response/</link><pubDate>Mon, 24 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0007-standard-api-error-response/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;Currently, there is no standardized error response format across API endpoints in the infrastructure. This inconsistency makes it difficult for clients to handle errors uniformly, complicates debugging, and reduces the overall developer experience. How should we structure error responses to ensure consistency, provide adequate debugging information, and follow industry best practices?&lt;/p&gt;</description></item><item><title>GET /boot.ipxe</title><link>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</guid><description>&lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address. This endpoint is accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Bare Metal Server
+ participant Boot as Boot Service
+ participant MachineAPI as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: GET /boot.ipxe?mac=52:54:00:12:34:56
+ Boot-&amp;gt;&amp;gt;Boot: Validate MAC address format
+ Boot-&amp;gt;&amp;gt;MachineAPI: GET /api/v1/machines?mac=52:54:00:12:34:56
+ MachineAPI-&amp;gt;&amp;gt;DB: Query machine by NIC MAC
+ DB--&amp;gt;&amp;gt;MachineAPI: Machine profile (machine_id)
+ MachineAPI--&amp;gt;&amp;gt;Boot: Machine profile
+ Boot-&amp;gt;&amp;gt;DB: Query boot profile by machine_id
+ DB--&amp;gt;&amp;gt;Boot: Boot profile (profile_id, kernel_id, initrd_id, kernel args)
+ Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/kernel</title><link>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</guid><description>&lt;p&gt;Streams kernel images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Bare Metal Server
+ participant Boot as Boot Service
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/kernel
+ Boot-&amp;gt;&amp;gt;Boot: Validate UUIDv7 format
+ Boot-&amp;gt;&amp;gt;DB: Query boot profile by ID
+ DB--&amp;gt;&amp;gt;Boot: Boot profile (kernel_id)
+ Boot-&amp;gt;&amp;gt;Storage: GET gs://bucket/blobs/{kernel_id}
+ Storage--&amp;gt;&amp;gt;Boot: Kernel data stream
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (kernel stream)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/initrd</title><link>https://zaba505.github.io/infra/rd/services/boot/asset-initrd/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/asset-initrd/</guid><description>&lt;p&gt;Streams initial ramdisk (initrd) images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Bare Metal Server
+ participant Boot as Boot Service
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: GET /asset/018c7dbd-a1b2-7000-8000-987654321def/initrd
+ Boot-&amp;gt;&amp;gt;Boot: Validate UUIDv7 format
+ Boot-&amp;gt;&amp;gt;DB: Query boot profile by ID
+ DB--&amp;gt;&amp;gt;Boot: Boot profile (initrd_id)
+ Boot-&amp;gt;&amp;gt;Storage: GET gs://bucket/blobs/{initrd_id}
+ Storage--&amp;gt;&amp;gt;Boot: Initrd data stream
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (initrd stream)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>POST /api/v1/machines</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/post-machines/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/post-machines/</guid><description>&lt;p&gt;Register a new machine with hardware specifications.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;API: POST /api/v1/machines
+ API-&amp;gt;&amp;gt;API: Generate machine id (UUIDv7)
+ API-&amp;gt;&amp;gt;API: Validate machine profile
+ API-&amp;gt;&amp;gt;DB: Insert machine profile
+ DB--&amp;gt;&amp;gt;API: Machine created
+ API--&amp;gt;&amp;gt;Client: 201 Created (machine id)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Body:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cpus&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;manufacturer&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Intel&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;clock_frequency&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2400000000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cores&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;memory_modules&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;accelerators&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;nics&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;mac&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;52:54:00:12:34:56&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;drives&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;capacity&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;500107862016&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (201 Created):&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>POST /api/v1/profiles</title><link>https://zaba505.github.io/infra/rd/services/boot/post-profiles/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/post-profiles/</guid><description>&lt;p&gt;Create a new boot profile for a machine. If the machine already has a boot profile, this operation will fail - use PUT to update instead.&lt;/p&gt;
+&lt;h2 id="cloud-storage-structure"&gt;Cloud Storage Structure&lt;/h2&gt;
+&lt;p&gt;Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;gs://{bucket}/blobs/{kernel_id}
+gs://{bucket}/blobs/{initrd_id}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;For example:&lt;/p&gt;
+&lt;pre tabindex="0"&gt;&lt;code&gt;gs://boot-server-blobs/blobs/018c7dbd-b100-7000-8000-123456789abc
+gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;The UUIDv7 identifiers are generated server-side during upload, ensuring:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Globally unique object keys&lt;/li&gt;
+&lt;li&gt;Time-ordered storage (UUIDv7 timestamp prefix)&lt;/li&gt;
+&lt;li&gt;No namespace collisions between profiles&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant Boot as Boot Service
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: POST /api/v1/profiles (multipart/form-data)
+ Boot-&amp;gt;&amp;gt;DB: Check if machine already has a boot profile
+ DB--&amp;gt;&amp;gt;Boot: No existing profile
+ Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for profile
+ Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for kernel blob
+ Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for initrd blob
+ Boot-&amp;gt;&amp;gt;Storage: PUT gs://bucket/blobs/{kernel_id}
+ Storage--&amp;gt;&amp;gt;Boot: Kernel stored
+ Boot-&amp;gt;&amp;gt;Storage: PUT gs://bucket/blobs/{initrd_id}
+ Storage--&amp;gt;&amp;gt;Boot: Initrd stored
+ Boot-&amp;gt;&amp;gt;DB: Store profile metadata (profile_id, kernel_id, initrd_id, machine_id)
+ DB--&amp;gt;&amp;gt;Boot: Profile created
+ Boot--&amp;gt;&amp;gt;Client: 201 Created (profile metadata with IDs)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Body (multipart/form-data):&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /api/v1/boot/{machine_id}/profile</title><link>https://zaba505.github.io/infra/rd/services/boot/get-profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/get-profile/</guid><description>&lt;p&gt;Retrieve the active boot profile for a specific machine.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant Boot as Boot Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: GET /api/v1/boot/{machine_id}/profile
+ Boot-&amp;gt;&amp;gt;DB: Query active boot profile for machine
+ DB--&amp;gt;&amp;gt;Boot: Boot profile
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (boot profile)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;machine_id&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;Yes&lt;/td&gt;
+ &lt;td&gt;Machine identifier (UUIDv7 format)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Example Request:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/api/v1/boot/018c7dbd-c000-7000-8000-fedcba987654/profile&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;boot.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;018c7dbd-a000-7000-8000-abcdef123456&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;machine_id&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;018c7dbd-c000-7000-8000-fedcba987654&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;kernel&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;018c7dbd-b100-7000-8000-123456789abc&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;args&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;console=tty0&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;console=ttyS0&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;ip=dhcp&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;initrd&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;018c7dbd-b200-7000-8000-987654321fed&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Error Responses:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /api/v1/machines</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/get-machines/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/get-machines/</guid><description>&lt;p&gt;List all registered machines with optional filtering by MAC address.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;API: GET /api/v1/machines?mac=...
+ API-&amp;gt;&amp;gt;DB: Query machines with filters
+ DB--&amp;gt;&amp;gt;API: Machine list
+ API--&amp;gt;&amp;gt;Client: 200 OK (machines list)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;th&gt;Default&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;page&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;integer&lt;/td&gt;
+ &lt;td&gt;No&lt;/td&gt;
+ &lt;td&gt;Page number (1-indexed)&lt;/td&gt;
+ &lt;td&gt;1&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;per_page&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;integer&lt;/td&gt;
+ &lt;td&gt;No&lt;/td&gt;
+ &lt;td&gt;Results per page (1-100)&lt;/td&gt;
+ &lt;td&gt;20&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;mac&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;No&lt;/td&gt;
+ &lt;td&gt;Filter by NIC MAC address&lt;/td&gt;
+ &lt;td&gt;-&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Example Request:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /api/v1/machines/{id}</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/get-machine/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/get-machine/</guid><description>&lt;p&gt;Retrieve a specific machine by ID.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;API: GET /api/v1/machines/{id}
+ API-&amp;gt;&amp;gt;DB: Query machine by ID
+ DB--&amp;gt;&amp;gt;API: Machine profile
+ API--&amp;gt;&amp;gt;Client: 200 OK (machine profile)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;id&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;Yes&lt;/td&gt;
+ &lt;td&gt;Machine identifier (UUIDv7 format)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Example Request:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/api/v1/machines/018c7dbd-c000-7000-8000-fedcba987654&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;machine.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;id&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;018c7dbd-c000-7000-8000-fedcba987654&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cpus&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;manufacturer&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Intel&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;clock_frequency&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2400000000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cores&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;memory_modules&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;accelerators&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;nics&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;mac&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;52:54:00:12:34:56&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;drives&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;capacity&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;500107862016&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;strong&gt;Error Responses:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>PUT /api/v1/boot/{machine_id}/profile</title><link>https://zaba505.github.io/infra/rd/services/boot/put-profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/put-profile/</guid><description>&lt;p&gt;Update the boot profile for a machine (replaces the existing profile).&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant Boot as Boot Service
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: PUT /api/v1/boot/{machine_id}/profile
+ Boot-&amp;gt;&amp;gt;DB: Get current active profile
+ DB--&amp;gt;&amp;gt;Boot: Current profile (old kernel_id, old initrd_id)
+ Boot-&amp;gt;&amp;gt;Boot: Generate UUIDs for new kernel/initrd
+ Boot-&amp;gt;&amp;gt;Storage: PUT new kernel/initrd blobs
+ Storage--&amp;gt;&amp;gt;Boot: Blobs stored
+ Boot-&amp;gt;&amp;gt;DB: Update boot profile (replace kernel_id, initrd_id, args)
+ DB--&amp;gt;&amp;gt;Boot: Profile updated
+ Boot-&amp;gt;&amp;gt;Storage: DELETE old kernel/initrd blobs
+ Boot--&amp;gt;&amp;gt;Client: 200 OK (updated profile)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>DELETE /api/v1/boot/{machine_id}/profile</title><link>https://zaba505.github.io/infra/rd/services/boot/delete-profile/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/delete-profile/</guid><description>&lt;p&gt;Delete a machine&amp;rsquo;s boot profile and its associated blobs.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant Boot as Boot Service
+ participant Storage as Cloud Storage
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;Boot: DELETE /api/v1/boot/{machine_id}/profile
+ Boot-&amp;gt;&amp;gt;DB: Get kernel_id and initrd_id
+ DB--&amp;gt;&amp;gt;Boot: Blob IDs
+ Boot-&amp;gt;&amp;gt;Storage: DELETE gs://bucket/blobs/{kernel_id}
+ Boot-&amp;gt;&amp;gt;Storage: DELETE gs://bucket/blobs/{initrd_id}
+ Boot-&amp;gt;&amp;gt;DB: Delete boot profile
+ Boot--&amp;gt;&amp;gt;Client: 204 No Content&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;machine_id&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;Yes&lt;/td&gt;
+ &lt;td&gt;Machine identifier (UUIDv7 format)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Example Request:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>PUT /api/v1/machines/{id}</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/put-machine/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/put-machine/</guid><description>&lt;p&gt;Update a machine&amp;rsquo;s hardware profile.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;API: PUT /api/v1/machines/{id}
+ API-&amp;gt;&amp;gt;DB: Update machine profile
+ DB--&amp;gt;&amp;gt;API: Machine updated
+ API--&amp;gt;&amp;gt;Client: 200 OK (updated profile)&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;id&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;Yes&lt;/td&gt;
+ &lt;td&gt;Machine identifier (UUIDv7 format)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Request Body:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Full machine profile (same structure as POST /api/v1/machines):&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-json" data-lang="json"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cpus&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;manufacturer&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;Intel&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;clock_frequency&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;2400000000&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;cores&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;8&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;memory_modules&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;},&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;size&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;17179869184&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;accelerators&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;nics&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;mac&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;&amp;#34;52:54:00:12:34:56&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;],&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;drives&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="nt"&gt;&amp;#34;capacity&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="mi"&gt;500107862016&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="p"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>DELETE /api/v1/machines/{id}</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/delete-machine/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/delete-machine/</guid><description>&lt;p&gt;Delete a machine registration.&lt;/p&gt;
+&lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;sequenceDiagram
+ participant Client as Admin Client
+ participant API as Machine Service
+ participant DB as Firestore
+
+ Client-&amp;gt;&amp;gt;API: DELETE /api/v1/machines/{id}
+ API-&amp;gt;&amp;gt;DB: Delete machine by ID
+ DB--&amp;gt;&amp;gt;API: Machine deleted
+ API--&amp;gt;&amp;gt;Client: 204 No Content&lt;/pre&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Path Parameters:&lt;/strong&gt;&lt;/p&gt;
+&lt;table&gt;
+ &lt;thead&gt;
+ &lt;tr&gt;
+ &lt;th&gt;Parameter&lt;/th&gt;
+ &lt;th&gt;Type&lt;/th&gt;
+ &lt;th&gt;Required&lt;/th&gt;
+ &lt;th&gt;Description&lt;/th&gt;
+ &lt;/tr&gt;
+ &lt;/thead&gt;
+ &lt;tbody&gt;
+ &lt;tr&gt;
+ &lt;td&gt;&lt;code&gt;id&lt;/code&gt;&lt;/td&gt;
+ &lt;td&gt;string&lt;/td&gt;
+ &lt;td&gt;Yes&lt;/td&gt;
+ &lt;td&gt;Machine identifier (UUIDv7 format)&lt;/td&gt;
+ &lt;/tr&gt;
+ &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;&lt;strong&gt;Example Request:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;DELETE&lt;/span&gt; &lt;span class="nn"&gt;/api/v1/machines/018c7dbd-c000-7000-8000-fedcba987654&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;machine.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (204 No Content):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Error Responses:&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;All error responses follow RFC 7807 Problem Details format (see &lt;a href="../../adrs/0007-standard-api-error-response/"&gt;ADR-0007&lt;/a&gt;) with &lt;code&gt;Content-Type: application/problem+json&lt;/code&gt;.&lt;/p&gt;</description></item><item><title>GET /health/startup</title><link>https://zaba505.github.io/infra/rd/services/boot/health-startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/health-startup/</guid><description>&lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/health/startup&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;boot.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response Headers:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Cache-Control: no-cache, no-store, must-revalidate&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="startup-check-components"&gt;Startup Check Components&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Firestore Connection&lt;/strong&gt; - Verifies database connectivity&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Cloud Storage Access&lt;/strong&gt; - Validates access to boot image buckets&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="cloud-run-configuration"&gt;Cloud Run Configuration&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;startupProbe&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;httpGet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;/health/startup&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;8080&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;initialDelaySeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;timeoutSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;30&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;periodSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;failureThreshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="behavior"&gt;Behavior&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Success (200)&lt;/strong&gt;: Application is fully initialized and ready to serve requests&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Failure (503)&lt;/strong&gt;: Application is still starting up or encountered initialization errors&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Timeout&lt;/strong&gt;: After 30 seconds of no response, Cloud Run considers startup failed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="observability"&gt;Observability&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Metrics:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /health/startup</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/health-startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/health-startup/</guid><description>&lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/health/startup&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;machine.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response Headers:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Cache-Control: no-cache, no-store, must-revalidate&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="startup-check-components"&gt;Startup Check Components&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Firestore Connection&lt;/strong&gt; - Verifies database connectivity&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Machine Management Service Readiness&lt;/strong&gt; - Validates service initialization&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="cloud-run-configuration"&gt;Cloud Run Configuration&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;startupProbe&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;httpGet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;/health/startup&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;8080&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;initialDelaySeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;timeoutSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;30&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;periodSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;failureThreshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="behavior"&gt;Behavior&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Success (200)&lt;/strong&gt;: Application is fully initialized and ready to serve requests&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Failure (503)&lt;/strong&gt;: Application is still starting up or encountered initialization errors&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Timeout&lt;/strong&gt;: After 30 seconds of no response, Cloud Run considers startup failed&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="observability"&gt;Observability&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Metrics:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /health/liveness</title><link>https://zaba505.github.io/infra/rd/services/boot/health-liveness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/health-liveness/</guid><description>&lt;p&gt;Indicates whether the application is alive and healthy. Used by Cloud Run to detect and restart unhealthy instances.&lt;/p&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/health/liveness&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;boot.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response Headers:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Cache-Control: no-cache, no-store, must-revalidate&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="liveness-check-components"&gt;Liveness Check Components&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;HTTP Server Health&lt;/strong&gt; - Verifies the HTTP server is responsive&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Basic health validation&lt;/strong&gt; - Ensures the application can handle requests&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="cloud-run-configuration"&gt;Cloud Run Configuration&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;livenessProbe&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;httpGet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;/health/liveness&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;8080&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;initialDelaySeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;timeoutSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;30&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;periodSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;failureThreshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="behavior"&gt;Behavior&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Success (200)&lt;/strong&gt;: Application is healthy and functioning normally&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Failure (503)&lt;/strong&gt;: Application is unhealthy and should be restarted&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consecutive Failures&lt;/strong&gt;: After 3 consecutive failures (30 seconds), Cloud Run restarts the instance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="graceful-degradation"&gt;Graceful Degradation&lt;/h2&gt;
+&lt;p&gt;The health check is designed with graceful degradation in mind:&lt;/p&gt;</description></item><item><title>GET /health/liveness</title><link>https://zaba505.github.io/infra/rd/services/machine-mgmt/health-liveness/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/machine-mgmt/health-liveness/</guid><description>&lt;p&gt;Indicates whether the application is alive and healthy. Used by Cloud Run to detect and restart unhealthy instances.&lt;/p&gt;
+&lt;h2 id="request"&gt;Request&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/health/liveness&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;Host&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="l"&gt;machine.example.com&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="response"&gt;Response&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Response (200 OK):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 200 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response (503 Service Unavailable):&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;Empty response body with HTTP 503 status code.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Response Headers:&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Cache-Control: no-cache, no-store, must-revalidate&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="liveness-check-components"&gt;Liveness Check Components&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;HTTP Server Health&lt;/strong&gt; - Verifies the HTTP server is responsive&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Basic health validation&lt;/strong&gt; - Ensures the application can handle requests&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="cloud-run-configuration"&gt;Cloud Run Configuration&lt;/h2&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;livenessProbe&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;httpGet&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;path&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;/health/liveness&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;port&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;8080&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;initialDelaySeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;0&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;timeoutSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;30&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;periodSeconds&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;10&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="nt"&gt;failureThreshold&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="m"&gt;3&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id="behavior"&gt;Behavior&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Success (200)&lt;/strong&gt;: Application is healthy and functioning normally&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Failure (503)&lt;/strong&gt;: Application is unhealthy and should be restarted&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consecutive Failures&lt;/strong&gt;: After 3 consecutive failures (30 seconds), Cloud Run restarts the instance&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="graceful-degradation"&gt;Graceful Degradation&lt;/h2&gt;
+&lt;p&gt;The health check is designed with graceful degradation in mind:&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
 &lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
 &lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
 &lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
