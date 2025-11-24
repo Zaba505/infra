@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	"github.com/Zaba505/infra/services/machine/models"
 )
 
 func TestProblem_WriteHttpResponse(t *testing.T) {
@@ -54,7 +52,7 @@ func TestProblem_WriteHttpResponse(t *testing.T) {
 }
 
 func TestValidationProblem_WriteHttpResponse(t *testing.T) {
-	fields := []models.InvalidField{
+	fields := []InvalidField{
 		{Field: "nics", Reason: "at least one NIC is required"},
 	}
 	vp := NewValidationError("/api/v1/machines", fields)
@@ -110,7 +108,7 @@ func TestConflictProblem_WriteHttpResponse(t *testing.T) {
 }
 
 func TestNewValidationError(t *testing.T) {
-	fields := []models.InvalidField{
+	fields := []InvalidField{
 		{Field: "test", Reason: "test reason"},
 	}
 	vp := NewValidationError("/test", fields)

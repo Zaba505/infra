@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Zaba505/infra/services/machine/endpoint"
-	"github.com/Zaba505/infra/services/machine/firestore"
+	"github.com/Zaba505/infra/services/machine/service"
 	"github.com/z5labs/humus/rest"
 )
 
@@ -19,7 +19,7 @@ type FirestoreConfig struct {
 }
 
 func Init(ctx context.Context, cfg Config) (*rest.Api, error) {
-	fsClient, err := firestore.NewClient(ctx, cfg.Firestore.ProjectID)
+	fsClient, err := service.NewFirestoreClient(ctx, cfg.Firestore.ProjectID)
 	if err != nil {
 		return nil, err
 	}

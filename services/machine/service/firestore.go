@@ -1,4 +1,4 @@
-package firestore
+package service
 
 import (
 	"context"
@@ -6,23 +6,22 @@ import (
 	"strings"
 
 	"cloud.google.com/go/firestore"
-	"github.com/Zaba505/infra/services/machine/models"
 	"google.golang.org/api/iterator"
 )
 
-type Client struct {
+type FirestoreClient struct {
 	client *firestore.Client
 }
 
-func NewClient(ctx context.Context, projectID string) (*Client, error) {
+func NewFirestoreClient(ctx context.Context, projectID string) (*FirestoreClient, error) {
 	client, err := firestore.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create firestore client: %w", err)
 	}
-	return &Client{client: client}, nil
+	return &FirestoreClient{client: client}, nil
 }
 
-func (c *Client) CreateMachine(ctx context.Context, machineID string, machine *models.MachineRequest) error {
+func (c *FirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *MachineRequest) error {
 	docRef := c.client.Collection("machines").Doc(machineID)
 
 	data := map[string]interface{}{
@@ -42,7 +41,7 @@ func (c *Client) CreateMachine(ctx context.Context, machineID string, machine *m
 	return nil
 }
 
-func (c *Client) FindMachineByMAC(ctx context.Context, mac string) (string, bool, error) {
+func (c *FirestoreClient) FindMachineByMAC(ctx context.Context, mac string) (string, bool, error) {
 	normalizedMAC := strings.ToLower(mac)
 
 	iter := c.client.Collection("machines").
@@ -60,8 +59,8 @@ func (c *Client) FindMachineByMAC(ctx context.Context, mac string) (string, bool
 	}
 
 	var data struct {
-		ID   string       `firestore:"id"`
-		NICs []models.NIC `firestore:"nics"`
+		ID   string `firestore:"id"`
+		NICs []NIC  `firestore:"nics"`
 	}
 	if err := doc.DataTo(&data); err != nil {
 		return "", false, fmt.Errorf("failed to decode machine document: %w", err)
@@ -76,6 +75,6 @@ func (c *Client) FindMachineByMAC(ctx context.Context, mac string) (string, bool
 	return "", false, nil
 }
 
-func (c *Client) Close() error {
+func (c *FirestoreClient) Close() error {
 	return c.client.Close()
 }

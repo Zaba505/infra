@@ -1,25 +1,23 @@
-package firestore
+package service
 
 import (
 	"context"
 	"testing"
-
-	"github.com/Zaba505/infra/services/machine/models"
 )
 
 type mockFirestoreClient struct {
-	machines      map[string]*models.MachineRequest
+	machines      map[string]*MachineRequest
 	createErr     error
 	findByMACErr  error
 	existingMacID string
 }
 
-func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *models.MachineRequest) error {
+func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *MachineRequest) error {
 	if m.createErr != nil {
 		return m.createErr
 	}
 	if m.machines == nil {
-		m.machines = make(map[string]*models.MachineRequest)
+		m.machines = make(map[string]*MachineRequest)
 	}
 	m.machines[machineID] = machine
 	return nil
@@ -44,8 +42,8 @@ func TestMockClient(t *testing.T) {
 
 	t.Run("CreateMachine success", func(t *testing.T) {
 		mock := &mockFirestoreClient{}
-		req := &models.MachineRequest{
-			NICs: []models.NIC{{MAC: "aa:bb:cc:dd:ee:ff"}},
+		req := &MachineRequest{
+			NICs: []NIC{{MAC: "aa:bb:cc:dd:ee:ff"}},
 		}
 
 		err := mock.CreateMachine(ctx, "test-id", req)
