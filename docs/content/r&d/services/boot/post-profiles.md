@@ -1,15 +1,13 @@
 ---
-title: "Boot Service Admin API"
+title: "POST /api/v1/profiles"
 type: docs
-description: "REST API endpoints for managing boot profiles"
+description: "Create a new boot profile for a machine"
 weight: 20
 ---
 
-The Boot Service provides admin HTTP REST endpoints for managing boot profiles. Boot profiles bundle kernel, initrd, and kernel arguments together. Each machine has exactly one active boot profile at any given time.
+Create a new boot profile for a machine. If the machine already has a boot profile, this operation will fail - use PUT to update instead.
 
-## Boot Profile Management
-
-### Cloud Storage Structure
+## Cloud Storage Structure
 
 Kernel and initrd binaries are stored in Google Cloud Storage using their UUIDv7 identifiers as object keys:
 
@@ -29,13 +27,7 @@ The UUIDv7 identifiers are generated server-side during upload, ensuring:
 - Time-ordered storage (UUIDv7 timestamp prefix)
 - No namespace collisions between profiles
 
----
-
-### `POST /api/v1/profiles`
-
-Create a new boot profile for a machine. If the machine already has a boot profile, this operation will fail - use PUT to update instead.
-
-#### Sequence Diagram
+## Sequence Diagram
 
 ```mermaid
 sequenceDiagram
@@ -44,7 +36,7 @@ sequenceDiagram
     participant Machine as Machine Service
     participant Storage as Cloud Storage
     participant DB as Firestore
-    
+
     Client->>Boot: POST /api/v1/profiles (multipart/form-data)
     Boot->>DB: Check if machine already has a boot profile
     DB-->>Boot: No existing profile
@@ -63,6 +55,8 @@ sequenceDiagram
     DB-->>Boot: Profile created
     Boot-->>Client: 201 Created (profile metadata with IDs)
 ```
+
+## Request
 
 **Request Body (multipart/form-data):**
 
@@ -105,6 +99,8 @@ Content-Type: application/json
 
 - `Content-Type: multipart/form-data`
 
+## Response
+
 **Response (201 Created):**
 
 ```json
@@ -128,144 +124,6 @@ Content-Type: application/json
 | 400 Bad Request | Invalid request body or missing required fields |
 | 409 Conflict | Machine already has a boot profile (use PUT to update) |
 | 422 Unprocessable Entity | Validation error (file too large, invalid JSON, machine_id not found) |
-
----
-
-### `GET /api/v1/boot/{machine_id}/profile`
-
-Retrieve the active boot profile for a specific machine.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant Boot as Boot Service
-    participant DB as Firestore
-    
-    Client->>Boot: GET /api/v1/boot/{machine_id}/profile
-    Boot->>DB: Query active boot profile for machine
-    DB-->>Boot: Boot profile
-    Boot-->>Client: 200 OK (boot profile)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (200 OK):**
-
-```json
-{
-  "id": "018c7dbd-a000-7000-8000-abcdef123456",
-  "machine_id": "018c7dbd-c000-7000-8000-fedcba987654",
-  "kernel": {
-    "id": "018c7dbd-b100-7000-8000-123456789abc",
-    "args": ["console=tty0", "console=ttyS0", "ip=dhcp"]
-  },
-  "initrd": {
-    "id": "018c7dbd-b200-7000-8000-987654321fed"
-  }
-}
-```
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
-
-### `PUT /api/v1/boot/{machine_id}/profile`
-
-Update the boot profile for a machine (replaces the existing profile).
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant Boot as Boot Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>Boot: PUT /api/v1/boot/{machine_id}/profile
-    Boot->>DB: Get current active profile
-    DB-->>Boot: Current profile (old kernel_id, old initrd_id)
-    Boot->>Boot: Generate UUIDs for new kernel/initrd
-    Boot->>Storage: PUT new kernel/initrd blobs
-    Storage-->>Boot: Blobs stored
-    Boot->>DB: Update boot profile (replace kernel_id, initrd_id, args)
-    DB-->>Boot: Profile updated
-    Boot->>Storage: DELETE old kernel/initrd blobs
-    Boot-->>Client: 200 OK (updated profile)
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Request Body (multipart/form-data):**
-
-Same as POST request (kernel, initrd, kernel_args).
-
-**Response (200 OK):**
-
-Updated profile metadata.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-| 422 Unprocessable Entity | Validation error |
-
----
-
-### `DELETE /api/v1/boot/{machine_id}/profile`
-
-Delete a machine's boot profile and its associated blobs.
-
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Client as Admin Client
-    participant Boot as Boot Service
-    participant Storage as Cloud Storage
-    participant DB as Firestore
-    
-    Client->>Boot: DELETE /api/v1/boot/{machine_id}/profile
-    Boot->>DB: Get kernel_id and initrd_id
-    DB-->>Boot: Blob IDs
-    Boot->>Storage: DELETE gs://bucket/blobs/{kernel_id}
-    Boot->>Storage: DELETE gs://bucket/blobs/{initrd_id}
-    Boot->>DB: Delete boot profile
-    Boot-->>Client: 204 No Content
-```
-
-**Path Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `machine_id` | string | Yes | Machine identifier (UUIDv7 format) |
-
-**Response (204 No Content):**
-
-Empty response body.
-
-**Error Responses:**
-
-| Status Code | Description |
-|-------------|-------------|
-| 404 Not Found | Machine not found or has no boot profile |
-
----
 
 ## Data Models
 

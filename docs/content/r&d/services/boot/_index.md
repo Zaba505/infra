@@ -22,11 +22,31 @@ The Boot Service is deployed on GCP Cloud Run and accessed through a WireGuard V
 - [ADR-0005: Network Boot Infrastructure Implementation on Google Cloud](../../adrs/0005-network-boot-infrastructure-gcp/) - Architecture decision and design rationale
 - [ADR-0002: Network Boot Architecture](../../adrs/0002-network-boot-architecture/) - Overall network boot strategy
 
-## API Categories
+## API Endpoints
 
-1. **[UEFI HTTP Boot Endpoints](./uefi-boot-endpoints/)** - Accessed by bare metal servers during boot process (via WireGuard VPN)
-2. **[Admin API](./admin-api/)** - Boot profile management endpoints for administrators
-3. **[Health Check Endpoints](./health-checks/)** - Standard Cloud Run health endpoints
+### UEFI HTTP Boot Endpoints
+
+Accessed by bare metal servers during boot process (via WireGuard VPN):
+
+- [GET /boot.ipxe](./boot-ipxe/) - Serves iPXE boot scripts customized for the requesting machine
+- [GET /asset/{boot_profile_id}/kernel](./asset-kernel/) - Streams kernel images from Cloud Storage
+- [GET /asset/{boot_profile_id}/initrd](./asset-initrd/) - Streams initrd images from Cloud Storage
+
+### Admin API
+
+Boot profile management endpoints for administrators:
+
+- [POST /api/v1/profiles](./post-profiles/) - Create a new boot profile for a machine
+- [GET /api/v1/boot/{machine_id}/profile](./get-profile/) - Retrieve the active boot profile for a machine
+- [PUT /api/v1/boot/{machine_id}/profile](./put-profile/) - Update the boot profile for a machine
+- [DELETE /api/v1/boot/{machine_id}/profile](./delete-profile/) - Delete a machine's boot profile
+
+### Health Check Endpoints
+
+Standard Cloud Run health endpoints:
+
+- [GET /health/startup](./health-startup/) - Startup probe endpoint
+- [GET /health/liveness](./health-liveness/) - Liveness probe endpoint
 
 ## Security Model
 
