@@ -78,21 +78,24 @@ The target bare metal servers (HP DL360 Gen 9) have the following network boot c
 6. **Existing Framework**: Leverages `z5labs/humus` patterns already in use across services
 7. **HTTP REST API**: Native HTTP REST admin API via `z5labs/humus` framework provides better integration with existing tooling
 8. **Microservices Architecture**: Separation into Boot Service and Machine Management Service provides better separation of concerns
+9. **Standardized Error Handling**: Implementation follows RFC 7807 Problem Details standard ([ADR-0007](./0007-standard-api-error-response/)) for consistent API error responses
 
 ### Architecture
 
 The implementation consists of two services:
 
-1. **Boot Service**: Serves UEFI HTTP boot endpoints (`/boot.ipxe`, `/assets/{id}/kernel`, `/assets/{id}/initrd`)
-   - Accessed by bare metal servers during boot
-   - Calls Machine Management Service API to resolve machine mappings and profiles
-   - Streams kernel/initrd data from Machine Management Service
+1. **Boot Service**: Serves UEFI HTTP boot endpoints and admin API
+   - **UEFI Boot Endpoints**: `/boot.ipxe`, `/asset/{boot_profile_id}/kernel`, `/asset/{boot_profile_id}/initrd` (accessed by bare metal servers)
+   - **Admin API**: `/api/v1/profiles` (boot profile management), `/api/v1/boot/{machine_id}/profile` (machine-specific profile operations)
+   - Queries Machine Management Service API to resolve machine specifications by MAC address
+   - Stores boot profile metadata in Firestore and boot assets (kernel/initrd) in Cloud Storage
 
-2. **Machine Management Service**: Provides REST API for managing profiles and machine mappings
-   - Stores boot profiles and machine mappings in Firestore
-   - Manages kernel/initrd blobs in Cloud Storage
-   - Provides admin API for creating/updating profiles and machines
-   - Streams kernel/initrd binaries to Boot Service and admin clients
+2. **Machine Management Service**: Manages machine hardware profiles
+   - **API Endpoints**: `/api/v1/machines` (CRUD operations for machine hardware specifications)
+   - Stores machine profiles in Firestore (CPU, memory, NICs, drives, accelerators)
+   - Provides machine lookup by ID or NIC MAC address
+   - Accessed by Boot Service during boot operations to retrieve machine specifications
+   - Does not manage boot profiles or boot assets (handled by Boot Service)
 
 ### Consequences
 
@@ -178,51 +181,61 @@ architecture-beta
 ```mermaid
 sequenceDiagram
     participant Admin
-    participant API as Boot Server API
+    participant MachineAPI as Machine Mgmt API
+    participant BootAPI as Boot Service API
     participant Storage as Cloud Storage
     participant DB as Firestore
     participant Monitor as Cloud Monitoring
 
-    Note over Admin,Monitor: Upload Boot Image
-    Admin->>API: POST /api/v1/images (kernel, initrd, metadata)
-    API->>API: Validate image integrity (checksum)
-    API->>Storage: Upload kernel to gs://boot-images/kernels/
-    API->>Storage: Upload initrd to gs://boot-images/initrd/
-    API->>DB: Store metadata (version, checksum, tags)
-    API->>Monitor: Log upload event
-    API->>Admin: 201 Created (image ID)
+    Note over Admin,Monitor: Register Machine Hardware Profile
+    Admin->>MachineAPI: POST /api/v1/machines (CPUs, memory, NICs, drives)
+    MachineAPI->>DB: Store machine hardware profile
+    MachineAPI->>Monitor: Log registration event
+    MachineAPI->>Admin: 201 Created (machine ID)
 
-    Note over Admin,Monitor: Map Machine to Image
-    Admin->>API: POST /api/v1/machines (MAC, image_id, profile)
-    API->>DB: Store machine mapping
-    API->>Admin: 201 Created
+    Note over Admin,Monitor: Upload Boot Profile
+    Admin->>BootAPI: POST /api/v1/profiles (kernel, initrd, metadata)
+    BootAPI->>BootAPI: Validate image integrity (checksum)
+    BootAPI->>Storage: Upload kernel to gs://boot-images/kernels/
+    BootAPI->>Storage: Upload initrd to gs://boot-images/initrd/
+    BootAPI->>DB: Store boot profile metadata (boot_profile_id)
+    BootAPI->>Monitor: Log upload event
+    BootAPI->>Admin: 201 Created (boot_profile_id)
+
+    Note over Admin,Monitor: Map Machine to Boot Profile
+    Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (boot_profile_id)
+    BootAPI->>DB: Store machine-to-boot-profile mapping
+    BootAPI->>Admin: 200 OK
 
     Note over Admin,Monitor: UEFI HTTP Boot Request
     participant Server as Home Lab Server
     Note right of Server: iLO 4 firmware v2.40+ initiates HTTP request directly
-    Server->>API: HTTP GET /boot?mac=aa:bb:cc:dd:ee:ff (via WireGuard VPN)
-    API->>DB: Query machine mapping by MAC
-    API->>API: Generate iPXE script (kernel, initrd URLs)
-    API->>Monitor: Log boot script request
-    API->>Server: Send iPXE script
+    Server->>BootAPI: HTTP GET /boot.ipxe?mac=aa:bb:cc:dd:ee:ff (via WireGuard VPN)
+    BootAPI->>MachineAPI: GET /api/v1/machines?mac=aa:bb:cc:dd:ee:ff
+    MachineAPI->>DB: Query machine by MAC address
+    MachineAPI->>BootAPI: Return machine profile (machine_id)
+    BootAPI->>DB: Query boot profile by machine_id
+    BootAPI->>BootAPI: Generate iPXE script (kernel, initrd URLs)
+    BootAPI->>Monitor: Log boot script request
+    BootAPI->>Server: Send iPXE script (200 OK)
     
-    Server->>API: HTTP GET /kernels/ubuntu-22.04.img
-    API->>Storage: Fetch kernel from Cloud Storage
-    API->>Monitor: Log kernel download (size, duration)
-    API->>Server: Stream kernel file
+    Server->>BootAPI: HTTP GET /asset/{boot_profile_id}/kernel
+    BootAPI->>Storage: Stream kernel from Cloud Storage
+    BootAPI->>Monitor: Log kernel download (size, duration)
+    BootAPI->>Server: Stream kernel file
     
-    Server->>API: HTTP GET /initrd/ubuntu-22.04.img
-    API->>Storage: Fetch initrd from Cloud Storage
-    API->>Monitor: Log initrd download
-    API->>Server: Stream initrd file
+    Server->>BootAPI: HTTP GET /asset/{boot_profile_id}/initrd
+    BootAPI->>Storage: Stream initrd from Cloud Storage
+    BootAPI->>Monitor: Log initrd download
+    BootAPI->>Server: Stream initrd file
     
     Server->>Server: Boot into OS
     
-    Note over Admin,Monitor: Rollback Image Version
-    Admin->>API: POST /api/v1/machines/{mac}/rollback
-    API->>DB: Update machine mapping to previous image_id
-    API->>Monitor: Log rollback event
-    API->>Admin: 200 OK
+    Note over Admin,Monitor: Update Boot Profile for Machine
+    Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (new_boot_profile_id)
+    BootAPI->>DB: Update machine-to-boot-profile mapping
+    BootAPI->>Monitor: Log profile update event
+    BootAPI->>Admin: 200 OK
 ```
 
 #### Implementation Details
@@ -790,11 +803,10 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
    - Configure Cloud Storage and Firestore clients
    - Implement basic health check endpoints
 
-2. **Profile Management API** (2-3 days)
-   - Boot profile upload endpoint (kernel, initrd, metadata)
-   - Profile listing and retrieval endpoints
-   - Kernel/initrd streaming endpoints (`GET /api/v1/profiles/{id}/kernel`, `GET /api/v1/profiles/{id}/initrd`)
-   - Cloud Storage integration for blob management
+2. **Machine Data Model** (2-3 days)
+   - Define machine hardware specification schema (CPUs, memory, NICs, drives, accelerators)
+   - Firestore schema design for machine profiles
+   - MAC address indexing for efficient lookups
 
 3. **Machine Management API** (2-3 days)
    - Machine registration endpoints
@@ -803,13 +815,20 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
    - Firestore integration for machine mappings
 
 ### Phase 2: Boot Service (Week 2)
-1. **UEFI HTTP Boot Endpoints** (2-3 days)
-   - HTTP endpoint serving boot scripts (iPXE format)
-   - Kernel and initrd streaming endpoints (proxy to Machine Management Service)
-   - MAC-based machine matching via Machine Management Service API
-   - Boot script templating with machine-specific parameters
+1. **Boot Profile Management** (2-3 days)
+   - Boot profile creation endpoint (`POST /api/v1/profiles`) with kernel/initrd upload
+   - Profile-to-machine mapping endpoints (`PUT /api/v1/boot/{machine_id}/profile`)
+   - Cloud Storage integration for boot asset storage
+   - Firestore integration for boot profile metadata
 
-2. **Testing & Deployment** (2-3 days)
+2. **UEFI HTTP Boot Endpoints** (2-3 days)
+   - HTTP endpoint serving boot scripts (`GET /boot.ipxe` in iPXE format)
+   - Kernel and initrd streaming endpoints (`GET /asset/{boot_profile_id}/kernel`, `GET /asset/{boot_profile_id}/initrd`)
+   - MAC-based machine lookup via Machine Management Service API
+   - Boot script templating with machine-specific parameters
+   - Direct Cloud Storage streaming for boot assets
+
+3. **Testing & Deployment** (2-3 days)
    - Deploy both services to Cloud Run with min instances = 1
    - Configure WireGuard VPN connectivity
    - Test UEFI HTTP boot from HP DL360 Gen 9 (iLO 4 v2.40+)
@@ -825,7 +844,7 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
    - OpenTelemetry metrics integration (both services)
    - Distributed tracing across services
    - Cloud Monitoring dashboards
-   - API documentation
+   - API documentation with RFC 7807 error response examples
    - Operational runbooks
 
 ### Success Criteria
@@ -833,10 +852,11 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 - ✅ Boot latency < 100ms for HTTP requests to Boot Service
 - ✅ Service-to-service latency < 50ms (Boot Service → Machine Management Service)
 - ✅ Cloud Run cold start latency < 100ms (with min instances = 1 for both services)
-- ✅ Machine-to-profile mapping works correctly based on MAC address
-- ✅ Cloud Storage integration functional (upload, retrieve boot assets)
-- ✅ HTTP REST API fully functional for boot configuration management
-- ✅ Firestore stores machine mappings and boot profiles correctly
+- ✅ Machine-to-profile mapping works correctly based on MAC address lookup
+- ✅ Cloud Storage integration functional (upload boot assets, stream to servers)
+- ✅ HTTP REST API fully functional for machine and boot profile management
+- ✅ Firestore stores machine hardware profiles and boot profile metadata correctly
+- ✅ RFC 7807 error responses implemented consistently across all API endpoints
 - ✅ OpenTelemetry distributed tracing works across both services
 - ✅ Configuration update workflow clear and documented
 - ✅ Firmware compatibility confirmed (no TFTP fallback needed)
@@ -855,6 +875,7 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 ### Related ADRs
 - [ADR-0002: Network Boot Architecture](./0002-network-boot-architecture/) - Established cloud-hosted boot server with VPN
 - [ADR-0003: Cloud Provider Selection](./0003-cloud-provider-selection/) - Selected GCP as hosting provider
+- [ADR-0007: Standard API Error Response Format](./0007-standard-api-error-response/) - RFC 7807 Problem Details for error handling
 - [ADR-0001: Use MADR for Architecture Decision Records](./0001-use-madr-for-architecture-decision-records/) - MADR format
 
 ### Future Considerations
