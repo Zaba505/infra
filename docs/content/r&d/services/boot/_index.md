@@ -66,19 +66,20 @@ Since HP DL360 Gen 9 servers do not support client-side TLS certificates for UEF
 
 ### Error Responses
 
-All API endpoints follow a consistent error response format:
+All API endpoints follow the RFC 7807 Problem Details standard (see [ADR-0007](../../adrs/0007-standard-api-error-response/)):
 
 ```json
 {
-  "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "Machine with MAC address aa:bb:cc:dd:ee:ff not found",
-    "details": {
-      "mac_address": "aa:bb:cc:dd:ee:ff"
-    }
-  }
+  "type": "https://api.example.com/errors/resource-not-found",
+  "title": "Resource Not Found",
+  "status": 404,
+  "detail": "Machine with MAC address aa:bb:cc:dd:ee:ff not found",
+  "instance": "/api/v1/boot/aa:bb:cc:dd:ee:ff/profile",
+  "mac_address": "aa:bb:cc:dd:ee:ff"
 }
 ```
+
+Error responses use `Content-Type: application/problem+json`.
 
 ### Standard HTTP Status Codes
 
@@ -96,6 +97,7 @@ All API endpoints follow a consistent error response format:
 ### Content Types
 
 - `application/json` - JSON responses (admin API)
+- `application/problem+json` - RFC 7807 error responses
 - `text/plain` - iPXE boot scripts
 - `application/octet-stream` - Binary boot assets (kernel, initrd)
 - `text/cloud-config` - Cloud-init configuration files

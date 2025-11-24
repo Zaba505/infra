@@ -5,7 +5,7 @@ description: >
 type: docs
 weight: 7
 category: "api-design"
-status: "proposed"
+status: "accepted"
 date: 2025-11-24
 deciders: []
 consulted: []

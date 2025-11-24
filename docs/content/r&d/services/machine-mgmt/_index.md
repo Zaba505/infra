@@ -61,19 +61,20 @@ X-RateLimit-Remaining: 95
 X-RateLimit-Reset: 1700000000
 ```
 
-When rate limit is exceeded, API returns `429 Too Many Requests`:
+When rate limit is exceeded, API returns `429 Too Many Requests` using RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)):
 
 ```json
 {
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Rate limit exceeded. Try again in 30 seconds.",
-    "details": {
-      "retry_after": 30
-    }
-  }
+  "type": "https://api.example.com/errors/rate-limit-exceeded",
+  "title": "Rate Limit Exceeded",
+  "status": 429,
+  "detail": "Rate limit exceeded. Try again in 30 seconds.",
+  "instance": "/api/v1/machines",
+  "retry_after": 30
 }
 ```
+
+All error responses use `Content-Type: application/problem+json`.
 
 ## Versioning
 
