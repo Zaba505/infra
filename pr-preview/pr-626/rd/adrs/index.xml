@@ -40,4 +40,11 @@ ADR Categories:
 - api-design: API endpoint design decisions (pagination, filtering, bulk operations)
 --&gt;
 &lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item></channel></rss>
+&lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item><item><title>[0007] Standard API Error Response Format</title><link>https://zaba505.github.io/infra/pr-preview/pr-626/rd/adrs/0007-standard-api-error-response/</link><pubDate>Mon, 24 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-626/rd/adrs/0007-standard-api-error-response/</guid><description>&lt;!--
+ADR Categories:
+- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
+- user-journey: Solutions for specific user journey problems (feature implementation approaches)
+- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
+--&gt;
+&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
+&lt;p&gt;Currently, there is no standardized error response format across API endpoints in the infrastructure. This inconsistency makes it difficult for clients to handle errors uniformly, complicates debugging, and reduces the overall developer experience. How should we structure error responses to ensure consistency, provide adequate debugging information, and follow industry best practices?&lt;/p&gt;</description></item></channel></rss>
