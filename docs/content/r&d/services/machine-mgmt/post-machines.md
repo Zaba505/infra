@@ -64,42 +64,45 @@ sequenceDiagram
 
 ```json
 {
-  "id": "018c7dbd-c000-7000-8000-fedcba987654",
-  "cpus": [
-    {
-      "manufacturer": "Intel",
-      "clock_frequency": 2400000000,
-      "cores": 8
-    }
-  ],
-  "memory_modules": [
-    {
-      "size": 17179869184
-    },
-    {
-      "size": 17179869184
-    }
-  ],
-  "accelerators": [],
-  "nics": [
-    {
-      "mac": "52:54:00:12:34:56"
-    }
-  ],
-  "drives": [
-    {
-      "capacity": 500107862016
-    }
-  ]
+  "id": "018c7dbd-c000-7000-8000-fedcba987654"
 }
 ```
 
 **Error Responses:**
 
-| Status Code | Description |
-|-------------|-------------|
-| 400 Bad Request | Invalid request body or missing required fields |
-| 409 Conflict | Machine with the same NIC MAC address already exists |
+All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+
+**400 Bad Request** - Invalid request body or missing required fields:
+
+```json
+{
+  "type": "https://api.example.com/errors/validation-error",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "The request body failed validation",
+  "instance": "/api/v1/machines",
+  "invalid_fields": [
+    {
+      "field": "nics",
+      "reason": "at least one NIC is required"
+    }
+  ]
+}
+```
+
+**409 Conflict** - Machine with the same NIC MAC address already exists:
+
+```json
+{
+  "type": "https://api.example.com/errors/duplicate-mac-address",
+  "title": "Duplicate MAC Address",
+  "status": 409,
+  "detail": "A machine with MAC address 52:54:00:12:34:56 already exists",
+  "instance": "/api/v1/machines",
+  "mac_address": "52:54:00:12:34:56",
+  "existing_machine_id": "018c7dbd-a000-7000-8000-fedcba987650"
+}
+```
 
 ## Notes
 

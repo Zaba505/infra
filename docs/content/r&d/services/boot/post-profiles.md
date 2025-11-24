@@ -33,17 +33,12 @@ The UUIDv7 identifiers are generated server-side during upload, ensuring:
 sequenceDiagram
     participant Client as Admin Client
     participant Boot as Boot Service
-    participant Machine as Machine Service
     participant Storage as Cloud Storage
     participant DB as Firestore
 
     Client->>Boot: POST /api/v1/profiles (multipart/form-data)
     Boot->>DB: Check if machine already has a boot profile
     DB-->>Boot: No existing profile
-    Boot->>Machine: GET /api/v1/machines/{machine_id}
-    Machine->>DB: Query machine by ID
-    DB-->>Machine: Machine profile
-    Machine-->>Boot: Machine profile
     Boot->>Boot: Generate UUIDv7 for profile
     Boot->>Boot: Generate UUIDv7 for kernel blob
     Boot->>Boot: Generate UUIDv7 for initrd blob
