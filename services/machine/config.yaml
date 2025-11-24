@@ -1,0 +1,6 @@
+openapi:
+  title: "Machine Management Service"
+  version: "v1"
+
+firestore:
+  project_id: "${GCP_PROJECT_ID}"
