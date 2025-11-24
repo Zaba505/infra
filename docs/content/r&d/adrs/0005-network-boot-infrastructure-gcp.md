@@ -86,9 +86,10 @@ The implementation consists of two services:
 
 1. **Boot Service**: Serves UEFI HTTP boot endpoints and admin API
    - **UEFI Boot Endpoints**: `/boot.ipxe`, `/asset/{boot_profile_id}/kernel`, `/asset/{boot_profile_id}/initrd` (accessed by bare metal servers)
-   - **Admin API**: `/api/v1/profiles` (boot profile management), `/api/v1/boot/{machine_id}/profile` (machine-specific profile operations)
+   - **Admin API**: `POST /api/v1/profiles` (create/update boot profile for a machine_id)
    - Queries Machine Management Service API to resolve machine specifications by MAC address
    - Stores boot profile metadata in Firestore and boot assets (kernel/initrd) in Cloud Storage
+   - Each machine can have one active boot profile; creating a new profile for the same machine_id replaces the previous one
 
 2. **Machine Management Service**: Manages machine hardware profiles
    - **API Endpoints**: `/api/v1/machines` (CRUD operations for machine hardware specifications)
@@ -178,7 +179,7 @@ architecture-beta
 
 #### Boot Image Lifecycle
 
-The boot image lifecycle consists of three main workflows: configuration, boot request, and profile updates.
+The boot image lifecycle consists of two main workflows: initial configuration and boot requests. Boot profile updates are handled by creating a new profile with the same machine_id.
 
 ##### Admin Configuration Workflow
 
@@ -197,19 +198,14 @@ sequenceDiagram
     MachineAPI->>Monitor: Log registration event
     MachineAPI->>Admin: 201 Created (machine ID)
 
-    Note over Admin,Monitor: 2. Upload Boot Profile
-    Admin->>BootAPI: POST /api/v1/profiles (kernel, initrd, metadata)
+    Note over Admin,Monitor: 2. Create Boot Profile for Machine
+    Admin->>BootAPI: POST /api/v1/profiles (machine_id, kernel, initrd, metadata)
     BootAPI->>BootAPI: Validate image integrity (checksum)
     BootAPI->>Storage: Upload kernel to gs://boot-images/kernels/
     BootAPI->>Storage: Upload initrd to gs://boot-images/initrd/
-    BootAPI->>DB: Store boot profile metadata (boot_profile_id)
+    BootAPI->>DB: Store boot profile metadata (boot_profile_id, machine_id)
     BootAPI->>Monitor: Log upload event
     BootAPI->>Admin: 201 Created (boot_profile_id)
-
-    Note over Admin,Monitor: 3. Map Machine to Boot Profile
-    Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (boot_profile_id)
-    BootAPI->>DB: Store machine-to-boot-profile mapping
-    BootAPI->>Admin: 200 OK
 ```
 
 ##### UEFI HTTP Boot Request Workflow
@@ -236,12 +232,14 @@ sequenceDiagram
     BootAPI->>Server: Send iPXE script (200 OK)
     
     Server->>BootAPI: HTTP GET /asset/{boot_profile_id}/kernel
-    BootAPI->>Storage: Stream kernel from Cloud Storage
+    BootAPI->>DB: Query boot profile metadata (get kernel_object_id)
+    BootAPI->>Storage: Stream kernel using kernel_object_id
     BootAPI->>Monitor: Log kernel download (size, duration)
     BootAPI->>Server: Stream kernel file
     
     Server->>BootAPI: HTTP GET /asset/{boot_profile_id}/initrd
-    BootAPI->>Storage: Stream initrd from Cloud Storage
+    BootAPI->>DB: Query boot profile metadata (get initrd_object_id)
+    BootAPI->>Storage: Stream initrd using initrd_object_id
     BootAPI->>Monitor: Log initrd download
     BootAPI->>Server: Stream initrd file
     
@@ -254,14 +252,18 @@ sequenceDiagram
 sequenceDiagram
     participant Admin
     participant BootAPI as Boot Service API
+    participant Storage as Cloud Storage
     participant DB as Firestore
     participant Monitor as Cloud Monitoring
 
-    Note over Admin,Monitor: Update Boot Profile Assignment
-    Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (new_boot_profile_id)
-    BootAPI->>DB: Update machine-to-boot-profile mapping
+    Note over Admin,Monitor: Update Boot Profile for Machine
+    Admin->>BootAPI: POST /api/v1/profiles (machine_id, new_kernel, new_initrd, metadata)
+    BootAPI->>BootAPI: Validate image integrity (checksum)
+    BootAPI->>Storage: Upload kernel to gs://boot-images/kernels/
+    BootAPI->>Storage: Upload initrd to gs://boot-images/initrd/
+    BootAPI->>DB: Store new boot profile (replaces previous profile for machine_id)
     BootAPI->>Monitor: Log profile update event
-    BootAPI->>Admin: 200 OK
+    BootAPI->>Admin: 201 Created (new_boot_profile_id)
 ```
 
 #### Implementation Details
@@ -864,10 +866,10 @@ The removal of TFTP complexity fundamentally shifts the cost/benefit analysis:
 
 ### Phase 2: Boot Service (Week 2)
 1. **Boot Profile Management** (2-3 days)
-   - Boot profile creation endpoint (`POST /api/v1/profiles`) with kernel/initrd upload
-   - Profile-to-machine mapping endpoints (`PUT /api/v1/boot/{machine_id}/profile`)
+   - Boot profile creation endpoint (`POST /api/v1/profiles`) with machine_id, kernel/initrd upload
+   - Business logic: one active boot profile per machine_id (creating new profile replaces previous)
    - Cloud Storage integration for boot asset storage
-   - Firestore integration for boot profile metadata
+   - Firestore integration for boot profile metadata with machine_id indexing
 
 2. **UEFI HTTP Boot Endpoints** (2-3 days)
    - HTTP endpoint serving boot scripts (`GET /boot.ipxe` in iPXE format)
