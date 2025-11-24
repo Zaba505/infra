@@ -178,6 +178,10 @@ architecture-beta
 
 #### Boot Image Lifecycle
 
+The boot image lifecycle consists of three main workflows: configuration, boot request, and profile updates.
+
+##### Admin Configuration Workflow
+
 ```mermaid
 sequenceDiagram
     participant Admin
@@ -187,13 +191,13 @@ sequenceDiagram
     participant DB as Firestore
     participant Monitor as Cloud Monitoring
 
-    Note over Admin,Monitor: Register Machine Hardware Profile
+    Note over Admin,Monitor: 1. Register Machine Hardware Profile
     Admin->>MachineAPI: POST /api/v1/machines (CPUs, memory, NICs, drives)
     MachineAPI->>DB: Store machine hardware profile
     MachineAPI->>Monitor: Log registration event
     MachineAPI->>Admin: 201 Created (machine ID)
 
-    Note over Admin,Monitor: Upload Boot Profile
+    Note over Admin,Monitor: 2. Upload Boot Profile
     Admin->>BootAPI: POST /api/v1/profiles (kernel, initrd, metadata)
     BootAPI->>BootAPI: Validate image integrity (checksum)
     BootAPI->>Storage: Upload kernel to gs://boot-images/kernels/
@@ -202,18 +206,30 @@ sequenceDiagram
     BootAPI->>Monitor: Log upload event
     BootAPI->>Admin: 201 Created (boot_profile_id)
 
-    Note over Admin,Monitor: Map Machine to Boot Profile
+    Note over Admin,Monitor: 3. Map Machine to Boot Profile
     Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (boot_profile_id)
     BootAPI->>DB: Store machine-to-boot-profile mapping
     BootAPI->>Admin: 200 OK
+```
 
-    Note over Admin,Monitor: UEFI HTTP Boot Request
+##### UEFI HTTP Boot Request Workflow
+
+```mermaid
+sequenceDiagram
     participant Server as Home Lab Server
-    Note right of Server: iLO 4 firmware v2.40+ initiates HTTP request directly
-    Server->>BootAPI: HTTP GET /boot.ipxe?mac=aa:bb:cc:dd:ee:ff (via WireGuard VPN)
+    participant BootAPI as Boot Service API
+    participant MachineAPI as Machine Mgmt API
+    participant Storage as Cloud Storage
+    participant DB as Firestore
+    participant Monitor as Cloud Monitoring
+
+    Note right of Server: iLO 4 firmware v2.40+ initiates HTTP request
+    Server->>BootAPI: HTTP GET /boot.ipxe?mac=aa:bb:cc:dd:ee:ff<br/>(via WireGuard VPN)
+    
     BootAPI->>MachineAPI: GET /api/v1/machines?mac=aa:bb:cc:dd:ee:ff
     MachineAPI->>DB: Query machine by MAC address
     MachineAPI->>BootAPI: Return machine profile (machine_id)
+    
     BootAPI->>DB: Query boot profile by machine_id
     BootAPI->>BootAPI: Generate iPXE script (kernel, initrd URLs)
     BootAPI->>Monitor: Log boot script request
@@ -230,8 +246,18 @@ sequenceDiagram
     BootAPI->>Server: Stream initrd file
     
     Server->>Server: Boot into OS
-    
-    Note over Admin,Monitor: Update Boot Profile for Machine
+```
+
+##### Boot Profile Update Workflow
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant BootAPI as Boot Service API
+    participant DB as Firestore
+    participant Monitor as Cloud Monitoring
+
+    Note over Admin,Monitor: Update Boot Profile Assignment
     Admin->>BootAPI: PUT /api/v1/boot/{machine_id}/profile (new_boot_profile_id)
     BootAPI->>DB: Update machine-to-boot-profile mapping
     BootAPI->>Monitor: Log profile update event
@@ -371,6 +397,10 @@ architecture-beta
 
 #### Boot Image Lifecycle
 
+The Matchbox boot image lifecycle consists of three main workflows: configuration, boot request, and rollback.
+
+##### Matchbox Configuration Workflow
+
 ```mermaid
 sequenceDiagram
     participant Admin
@@ -379,7 +409,7 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant Monitor as Cloud Monitoring
 
-    Note over Admin,Monitor: Upload Boot Image
+    Note over Admin,Monitor: 1. Upload Boot Assets
     Admin->>CLI: Upload kernel/initrd via gRPC API
     CLI->>Matchbox: gRPC CreateAsset(kernel, initrd)
     Matchbox->>Matchbox: Validate asset integrity
@@ -388,24 +418,31 @@ sequenceDiagram
     Matchbox->>Monitor: Log asset upload event
     Matchbox->>CLI: Asset ID, checksum
 
-    Note over Admin,Monitor: Create Boot Profile
+    Note over Admin,Monitor: 2. Create Boot Profile
     Admin->>CLI: Create profile YAML (kernel, initrd, cmdline)
     CLI->>Matchbox: gRPC CreateProfile(profile.yaml)
     Matchbox->>Matchbox: Store to /var/lib/matchbox/profiles/
     Matchbox->>Storage: Sync profiles to gs://boot-config/
     Matchbox->>CLI: Profile ID
 
-    Note over Admin,Monitor: Create Machine Group
+    Note over Admin,Monitor: 3. Create Machine Group
     Admin->>CLI: Create group YAML (MAC selector, profile mapping)
     CLI->>Matchbox: gRPC CreateGroup(group.yaml)
     Matchbox->>Matchbox: Store to /var/lib/matchbox/groups/
     Matchbox->>Storage: Sync groups to gs://boot-config/
     Matchbox->>CLI: Group ID
+```
 
-    Note over Admin,Monitor: UEFI HTTP Boot Request
+##### Matchbox UEFI HTTP Boot Request Workflow
+
+```mermaid
+sequenceDiagram
     participant Server as Home Lab Server
-    Note right of Server: iLO 4 firmware v2.40+ initiates HTTP request directly
-    Server->>Matchbox: HTTP GET /boot.ipxe?mac=aa:bb:cc:dd:ee:ff (via WireGuard VPN)
+    participant Matchbox as Matchbox Server
+    participant Monitor as Cloud Monitoring
+
+    Note right of Server: iLO 4 firmware v2.40+ initiates HTTP request
+    Server->>Matchbox: HTTP GET /boot.ipxe?mac=aa:bb:cc:dd:ee:ff<br/>(via WireGuard VPN)
     Matchbox->>Matchbox: Match MAC to group
     Matchbox->>Matchbox: Render iPXE template with profile
     Matchbox->>Monitor: Log boot request (MAC, group, profile)
@@ -422,8 +459,19 @@ sequenceDiagram
     Matchbox->>Server: Stream initrd file
     
     Server->>Server: Boot into OS
-    
-    Note over Admin,Monitor: Rollback Machine Group
+```
+
+##### Matchbox Group Rollback Workflow
+
+```mermaid
+sequenceDiagram
+    participant Admin
+    participant CLI as matchbox CLI / API
+    participant Matchbox as Matchbox Server
+    participant Storage as Cloud Storage
+    participant Monitor as Cloud Monitoring
+
+    Note over Admin,Monitor: Rollback Machine Group to Previous Profile
     Admin->>CLI: Update group YAML (change profile reference)
     CLI->>Matchbox: gRPC UpdateGroup(group.yaml)
     Matchbox->>Matchbox: Update /var/lib/matchbox/groups/
