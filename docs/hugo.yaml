@@ -38,6 +38,7 @@ markup:
       unsafe: true
   highlight:
     style: tango
+    noClasses: false
 
 outputs:
   section: [HTML, print, RSS]

@@ -5,10 +5,6 @@ weight: 10
 description: "In-depth analysis of technologies and tools evaluated for home lab infrastructure"
 ---
 
-# Technology Analysis
-
-This section contains detailed research and analysis of various technologies evaluated for potential use in the home lab infrastructure.
-
 ## Network Boot & Provisioning
 
 - [**Matchbox**](./matchbox/) - Network boot service for bare-metal provisioning
