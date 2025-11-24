@@ -254,17 +254,4 @@
 &lt;p&gt;&lt;strong&gt;Response (204 No Content):&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Empty response body.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Error Responses:&lt;/strong&gt;&lt;/p&gt;
-&lt;table&gt;
- &lt;thead&gt;
- &lt;tr&gt;
- &lt;th&gt;Status Code&lt;/th&gt;
- &lt;th&gt;Description&lt;/th&gt;
- &lt;/tr&gt;
- &lt;/thead&gt;
- &lt;tbody&gt;
- &lt;tr&gt;
- &lt;td&gt;404 Not Found&lt;/td&gt;
- &lt;td&gt;Machine with specified ID not found&lt;/td&gt;
- &lt;/tr&gt;
- &lt;/tbody&gt;
-&lt;/table&gt;</description></item></channel></rss>
+&lt;p&gt;All error responses follow RFC 7807 Problem Details format (see &lt;a href="../../adrs/0007-standard-api-error-response/"&gt;ADR-0007&lt;/a&gt;) with &lt;code&gt;Content-Type: application/problem+json&lt;/code&gt;.&lt;/p&gt;</description></item></channel></rss>
