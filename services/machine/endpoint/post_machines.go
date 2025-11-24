@@ -67,38 +67,8 @@ func errorHandler(ctx context.Context, w http.ResponseWriter, err error) {
 	}
 }
 
-type responseWithLocation struct {
-	resp     *models.MachineResponse
-	location string
-}
-
-func (r *responseWithLocation) WriteHttpResponse(ctx context.Context, w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Location", r.location)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(r.resp)
-}
-
-type postMachinesHandlerWithLocation struct {
-	inner *postMachinesHandler
-}
-
-func (h *postMachinesHandlerWithLocation) Handle(ctx context.Context, req *models.MachineRequest) (*responseWithLocation, error) {
-	resp, err := h.inner.Handle(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-
-	return &responseWithLocation{
-		resp:     resp,
-		location: fmt.Sprintf("/api/v1/machines/%s", resp.ID),
-	}, nil
-}
-
 func PostMachines(firestoreClient FirestoreClient) rest.ApiOption {
-	handler := &postMachinesHandlerWithLocation{
-		inner: &postMachinesHandler{firestoreClient: firestoreClient},
-	}
+	handler := &postMachinesHandler{firestoreClient: firestoreClient}
 
 	return rest.Handle(
 		http.MethodPost,
