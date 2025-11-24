@@ -67,17 +67,12 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 &lt;pre class="mermaid"&gt;sequenceDiagram
  participant Client as Admin Client
  participant Boot as Boot Service
- participant Machine as Machine Service
  participant Storage as Cloud Storage
  participant DB as Firestore
 
  Client-&amp;gt;&amp;gt;Boot: POST /api/v1/profiles (multipart/form-data)
  Boot-&amp;gt;&amp;gt;DB: Check if machine already has a boot profile
  DB--&amp;gt;&amp;gt;Boot: No existing profile
- Boot-&amp;gt;&amp;gt;Machine: GET /api/v1/machines/{machine_id}
- Machine-&amp;gt;&amp;gt;DB: Query machine by ID
- DB--&amp;gt;&amp;gt;Machine: Machine profile
- Machine--&amp;gt;&amp;gt;Boot: Machine profile
  Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for profile
  Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for kernel blob
  Boot-&amp;gt;&amp;gt;Boot: Generate UUIDv7 for initrd blob
