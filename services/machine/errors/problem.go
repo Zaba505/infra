@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-
-	"github.com/Zaba505/infra/services/machine/models"
 )
+
+type InvalidField struct {
+	Field  string `json:"field"`
+	Reason string `json:"reason"`
+}
 
 type Problem struct {
 	Type     string `json:"type"`
@@ -28,7 +31,7 @@ func (p *Problem) WriteHttpResponse(ctx context.Context, w http.ResponseWriter) 
 
 type ValidationProblem struct {
 	Problem
-	InvalidFields []models.InvalidField `json:"invalid_fields"`
+	InvalidFields []InvalidField `json:"invalid_fields"`
 }
 
 func (vp *ValidationProblem) WriteHttpResponse(ctx context.Context, w http.ResponseWriter) {
@@ -49,7 +52,7 @@ func (cp *ConflictProblem) WriteHttpResponse(ctx context.Context, w http.Respons
 	json.NewEncoder(w).Encode(cp)
 }
 
-func NewValidationError(instance string, fields []models.InvalidField) *ValidationProblem {
+func NewValidationError(instance string, fields []InvalidField) *ValidationProblem {
 	return &ValidationProblem{
 		Problem: Problem{
 			Type:     "https://api.example.com/errors/validation-error",

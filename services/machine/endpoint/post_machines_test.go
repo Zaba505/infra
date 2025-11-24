@@ -2,29 +2,28 @@ package endpoint
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/Zaba505/infra/services/machine/errors"
-	"github.com/Zaba505/infra/services/machine/models"
+	"github.com/Zaba505/infra/services/machine/service"
 )
 
 type mockFirestoreClient struct {
-	machines      map[string]*models.MachineRequest
+	machines      map[string]*service.MachineRequest
 	createErr     error
 	findByMACErr  error
 	existingMacID string
 }
 
-func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *models.MachineRequest) error {
+func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *service.MachineRequest) error {
 	if m.createErr != nil {
 		return m.createErr
 	}
 	if m.machines == nil {
-		m.machines = make(map[string]*models.MachineRequest)
+		m.machines = make(map[string]*service.MachineRequest)
 	}
 	m.machines[machineID] = machine
 	return nil
@@ -51,17 +50,17 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		mock := &mockFirestoreClient{}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			CPUs: []models.CPU{
+		req := &MachineRequest{
+			CPUs: []CPU{
 				{Manufacturer: "Intel", ClockFrequency: 2400000000, Cores: 8},
 			},
-			MemoryModules: []models.MemoryModule{
+			MemoryModules: []MemoryModule{
 				{Size: 17179869184},
 			},
-			NICs: []models.NIC{
+			NICs: []NIC{
 				{MAC: "52:54:00:12:34:56"},
 			},
-			Drives: []models.Drive{
+			Drives: []Drive{
 				{Capacity: 500107862016},
 			},
 		}
@@ -84,8 +83,8 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		mock := &mockFirestoreClient{}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			NICs: []models.NIC{},
+		req := &MachineRequest{
+			NICs: []NIC{},
 		}
 
 		_, err := handler.Handle(ctx, req)
@@ -111,8 +110,8 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		mock := &mockFirestoreClient{}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			NICs: []models.NIC{
+		req := &MachineRequest{
+			NICs: []NIC{
 				{MAC: "invalid-mac"},
 			},
 		}
@@ -138,8 +137,8 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			NICs: []models.NIC{
+		req := &MachineRequest{
+			NICs: []NIC{
 				{MAC: "52:54:00:12:34:56"},
 			},
 		}
@@ -173,8 +172,8 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			NICs: []models.NIC{
+		req := &MachineRequest{
+			NICs: []NIC{
 				{MAC: "52:54:00:12:34:56"},
 			},
 		}
@@ -200,8 +199,8 @@ func TestPostMachinesHandler_Handle(t *testing.T) {
 		}
 		handler := &postMachinesHandler{firestoreClient: mock}
 
-		req := &models.MachineRequest{
-			NICs: []models.NIC{
+		req := &MachineRequest{
+			NICs: []NIC{
 				{MAC: "52:54:00:12:34:56"},
 			},
 		}
@@ -227,7 +226,7 @@ func TestErrorHandler(t *testing.T) {
 
 	t.Run("handles ValidationProblem", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		err := errors.NewValidationError("/test", []models.InvalidField{
+		err := errors.NewValidationError("/test", []errors.InvalidField{
 			{Field: "test", Reason: "test reason"},
 		})
 
