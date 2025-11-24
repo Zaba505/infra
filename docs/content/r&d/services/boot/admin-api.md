@@ -131,7 +131,7 @@ Content-Type: application/json
 
 ---
 
-### `GET /api/v1/machines/{machine_id}/profile`
+### `GET /api/v1/boot/{machine_id}/profile`
 
 Retrieve the active boot profile for a specific machine.
 
@@ -143,7 +143,7 @@ sequenceDiagram
     participant Boot as Boot Service
     participant DB as Firestore
     
-    Client->>Boot: GET /api/v1/machines/{machine_id}/profile
+    Client->>Boot: GET /api/v1/boot/{machine_id}/profile
     Boot->>DB: Query active boot profile for machine
     DB-->>Boot: Boot profile
     Boot-->>Client: 200 OK (boot profile)
@@ -179,7 +179,7 @@ sequenceDiagram
 
 ---
 
-### `PUT /api/v1/machines/{machine_id}/profile`
+### `PUT /api/v1/boot/{machine_id}/profile`
 
 Update the boot profile for a machine (replaces the existing profile).
 
@@ -192,7 +192,7 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant DB as Firestore
     
-    Client->>Boot: PUT /api/v1/machines/{machine_id}/profile
+    Client->>Boot: PUT /api/v1/boot/{machine_id}/profile
     Boot->>DB: Get current active profile
     DB-->>Boot: Current profile (old kernel_id, old initrd_id)
     Boot->>Boot: Generate UUIDs for new kernel/initrd
@@ -227,7 +227,7 @@ Updated profile metadata.
 
 ---
 
-### `DELETE /api/v1/machines/{machine_id}/profile`
+### `DELETE /api/v1/boot/{machine_id}/profile`
 
 Delete a machine's boot profile and its associated blobs.
 
@@ -240,7 +240,7 @@ sequenceDiagram
     participant Storage as Cloud Storage
     participant DB as Firestore
     
-    Client->>Boot: DELETE /api/v1/machines/{machine_id}/profile
+    Client->>Boot: DELETE /api/v1/boot/{machine_id}/profile
     Boot->>DB: Get kernel_id and initrd_id
     DB-->>Boot: Blob IDs
     Boot->>Storage: DELETE gs://bucket/blobs/{kernel_id}
