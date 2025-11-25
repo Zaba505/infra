@@ -3,22 +3,28 @@ package endpoint
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/Zaba505/infra/services/machine/errors"
 	"github.com/Zaba505/infra/services/machine/service"
 	"github.com/google/uuid"
+	"github.com/z5labs/humus"
 	"github.com/z5labs/humus/rest"
 	"github.com/z5labs/humus/rest/rpc"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type FirestoreClient interface {
-	CreateMachine(ctx context.Context, machineID string, machine *service.MachineRequest) error
-	FindMachineByMAC(ctx context.Context, mac string) (string, bool, error)
+	CreateMachine(ctx context.Context, req *service.CreateMachineRequest) (*service.CreateMachineResponse, error)
+	FindMachineByMAC(ctx context.Context, req *service.FindMachineByMACRequest) (*service.FindMachineByMACResponse, error)
 	Close() error
 }
 
 type postMachinesHandler struct {
+	tracer          trace.Tracer
+	log             *slog.Logger
 	firestoreClient FirestoreClient
 }
 
@@ -36,12 +42,14 @@ func (h *postMachinesHandler) Handle(ctx context.Context, req *MachineRequest) (
 	}
 
 	for _, nic := range req.NICs {
-		existingID, found, err := h.firestoreClient.FindMachineByMAC(ctx, nic.MAC)
+		resp, err := h.firestoreClient.FindMachineByMAC(ctx, &service.FindMachineByMACRequest{
+			MAC: nic.MAC,
+		})
 		if err != nil {
 			return nil, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to check MAC uniqueness: %v", err))
 		}
-		if found {
-			return nil, errors.NewConflictError("/api/v1/machines", nic.MAC, existingID)
+		if resp.Found {
+			return nil, errors.NewConflictError("/api/v1/machines", nic.MAC, resp.MachineID)
 		}
 	}
 
@@ -58,7 +66,11 @@ func (h *postMachinesHandler) Handle(ctx context.Context, req *MachineRequest) (
 		Drives:        convertDrives(req.Drives),
 	}
 
-	if err := h.firestoreClient.CreateMachine(ctx, machineID.String(), serviceReq); err != nil {
+	_, err = h.firestoreClient.CreateMachine(ctx, &service.CreateMachineRequest{
+		MachineID: machineID.String(),
+		Machine:   serviceReq,
+	})
+	if err != nil {
 		return nil, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to create machine: %v", err))
 	}
 
@@ -134,7 +146,11 @@ func errorHandler(ctx context.Context, w http.ResponseWriter, err error) {
 }
 
 func PostMachines(firestoreClient FirestoreClient) rest.ApiOption {
-	handler := &postMachinesHandler{firestoreClient: firestoreClient}
+	handler := &postMachinesHandler{
+		tracer:          otel.Tracer("machine/endpoint"),
+		log:             humus.Logger("machine/endpoint"),
+		firestoreClient: firestoreClient,
+	}
 
 	return rest.Handle(
 		http.MethodPost,

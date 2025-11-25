@@ -6,6 +6,7 @@ import (
 
 	"github.com/Zaba505/infra/services/machine/endpoint"
 	"github.com/Zaba505/infra/services/machine/service"
+	"github.com/z5labs/bedrock/lifecycle"
 	"github.com/z5labs/humus/rest"
 )
 
@@ -23,6 +24,11 @@ func Init(ctx context.Context, cfg Config) (*rest.Api, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	lc, _ := lifecycle.FromContext(ctx)
+	lc.OnPostRun(lifecycle.HookFunc(func(ctx context.Context) error {
+		return fsClient.Close()
+	}))
 
 	healthHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
