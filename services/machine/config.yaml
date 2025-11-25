@@ -1,6 +1,6 @@
 openapi:
-  title: "Machine Management Service"
-  version: "v1"
+  title: {{env "OPENAPI_TITLE" | default "Machine Management Service"}}
+  version: {{env "OPENAPI_VERSION" | default "v1"}}
 
 firestore:
-  project_id: "${GCP_PROJECT_ID}"
+  project_id: {{env "GCP_PROJECT_ID"}}

@@ -12,25 +12,28 @@ type mockFirestoreClient struct {
 	existingMacID string
 }
 
-func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *MachineRequest) error {
+func (m *mockFirestoreClient) CreateMachine(ctx context.Context, req *CreateMachineRequest) (*CreateMachineResponse, error) {
 	if m.createErr != nil {
-		return m.createErr
+		return nil, m.createErr
 	}
 	if m.machines == nil {
 		m.machines = make(map[string]*MachineRequest)
 	}
-	m.machines[machineID] = machine
-	return nil
+	m.machines[req.MachineID] = req.Machine
+	return &CreateMachineResponse{}, nil
 }
 
-func (m *mockFirestoreClient) FindMachineByMAC(ctx context.Context, mac string) (string, bool, error) {
+func (m *mockFirestoreClient) FindMachineByMAC(ctx context.Context, req *FindMachineByMACRequest) (*FindMachineByMACResponse, error) {
 	if m.findByMACErr != nil {
-		return "", false, m.findByMACErr
+		return nil, m.findByMACErr
 	}
 	if m.existingMacID != "" {
-		return m.existingMacID, true, nil
+		return &FindMachineByMACResponse{
+			MachineID: m.existingMacID,
+			Found:     true,
+		}, nil
 	}
-	return "", false, nil
+	return &FindMachineByMACResponse{Found: false}, nil
 }
 
 func (m *mockFirestoreClient) Close() error {
@@ -42,11 +45,14 @@ func TestMockClient(t *testing.T) {
 
 	t.Run("CreateMachine success", func(t *testing.T) {
 		mock := &mockFirestoreClient{}
-		req := &MachineRequest{
-			NICs: []NIC{{MAC: "aa:bb:cc:dd:ee:ff"}},
+		req := &CreateMachineRequest{
+			MachineID: "test-id",
+			Machine: &MachineRequest{
+				NICs: []NIC{{MAC: "aa:bb:cc:dd:ee:ff"}},
+			},
 		}
 
-		err := mock.CreateMachine(ctx, "test-id", req)
+		_, err := mock.CreateMachine(ctx, req)
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
@@ -59,12 +65,14 @@ func TestMockClient(t *testing.T) {
 	t.Run("FindMachineByMAC not found", func(t *testing.T) {
 		mock := &mockFirestoreClient{}
 
-		id, found, err := mock.FindMachineByMAC(ctx, "aa:bb:cc:dd:ee:ff")
+		resp, err := mock.FindMachineByMAC(ctx, &FindMachineByMACRequest{
+			MAC: "aa:bb:cc:dd:ee:ff",
+		})
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		if found {
-			t.Errorf("expected not found, got found with ID %s", id)
+		if resp.Found {
+			t.Errorf("expected not found, got found with ID %s", resp.MachineID)
 		}
 	})
 
@@ -73,15 +81,17 @@ func TestMockClient(t *testing.T) {
 			existingMacID: "existing-id",
 		}
 
-		id, found, err := mock.FindMachineByMAC(ctx, "aa:bb:cc:dd:ee:ff")
+		resp, err := mock.FindMachineByMAC(ctx, &FindMachineByMACRequest{
+			MAC: "aa:bb:cc:dd:ee:ff",
+		})
 		if err != nil {
 			t.Errorf("expected no error, got %v", err)
 		}
-		if !found {
+		if !resp.Found {
 			t.Error("expected found, got not found")
 		}
-		if id != "existing-id" {
-			t.Errorf("expected ID 'existing-id', got '%s'", id)
+		if resp.MachineID != "existing-id" {
+			t.Errorf("expected ID 'existing-id', got '%s'", resp.MachineID)
 		}
 	})
 }

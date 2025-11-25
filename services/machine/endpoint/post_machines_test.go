@@ -18,25 +18,28 @@ type mockFirestoreClient struct {
 	existingMacID string
 }
 
-func (m *mockFirestoreClient) CreateMachine(ctx context.Context, machineID string, machine *service.MachineRequest) error {
+func (m *mockFirestoreClient) CreateMachine(ctx context.Context, req *service.CreateMachineRequest) (*service.CreateMachineResponse, error) {
 	if m.createErr != nil {
-		return m.createErr
+		return nil, m.createErr
 	}
 	if m.machines == nil {
 		m.machines = make(map[string]*service.MachineRequest)
 	}
-	m.machines[machineID] = machine
-	return nil
+	m.machines[req.MachineID] = req.Machine
+	return &service.CreateMachineResponse{}, nil
 }
 
-func (m *mockFirestoreClient) FindMachineByMAC(ctx context.Context, mac string) (string, bool, error) {
+func (m *mockFirestoreClient) FindMachineByMAC(ctx context.Context, req *service.FindMachineByMACRequest) (*service.FindMachineByMACResponse, error) {
 	if m.findByMACErr != nil {
-		return "", false, m.findByMACErr
+		return nil, m.findByMACErr
 	}
 	if m.existingMacID != "" {
-		return m.existingMacID, true, nil
+		return &service.FindMachineByMACResponse{
+			MachineID: m.existingMacID,
+			Found:     true,
+		}, nil
 	}
-	return "", false, nil
+	return &service.FindMachineByMACResponse{Found: false}, nil
 }
 
 func (m *mockFirestoreClient) Close() error {
