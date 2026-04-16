@@ -2,45 +2,45 @@ package app
 
 import (
 	"context"
-	"net/http"
+	"log/slog"
+	"os"
+	"os/signal"
 
-	"github.com/Zaba505/infra/services/machine/endpoint"
 	"github.com/Zaba505/infra/services/machine/service"
-	"github.com/z5labs/bedrock/lifecycle"
-	"github.com/z5labs/humus/rest"
+	"github.com/z5labs/bedrock/config"
 )
 
 type Config struct {
-	rest.Config `config:",squash"`
-	Firestore   FirestoreConfig `config:"firestore"`
+	Firestore FirestoreConfig `config:"firestore"`
 }
 
 type FirestoreConfig struct {
 	ProjectID string `config:"project_id"`
 }
 
-func Init(ctx context.Context, cfg Config) (*rest.Api, error) {
-	fsClient, err := service.NewFirestoreClient(ctx, cfg.Firestore.ProjectID)
-	if err != nil {
-		return nil, err
+func ConfigFromEnv(ctx context.Context) Config {
+	return Config{
+		Firestore: FirestoreConfig{
+			ProjectID: config.Must(ctx, config.Env("GCP_PROJECT_ID")),
+		},
 	}
+}
 
-	lc, _ := lifecycle.FromContext(ctx)
-	lc.OnPostRun(lifecycle.HookFunc(func(ctx context.Context) error {
-		return fsClient.Close()
+func Main(ctx context.Context) int {
+	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		AddSource: true,
 	}))
 
-	healthHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
+	sigCtx, cancel := signal.NotifyContext(ctx)
+	defer cancel()
 
-	api := rest.NewApi(
-		cfg.OpenApi.Title,
-		cfg.OpenApi.Version,
-		rest.Liveness(healthHandler),
-		rest.Readiness(healthHandler),
-		endpoint.PostMachines(fsClient),
-	)
+	cfg := ConfigFromEnv(sigCtx)
 
-	return api, nil
+	fsClient, err := service.NewFirestoreClient(sigCtx, cfg.Firestore.ProjectID)
+	if err != nil {
+		log.ErrorContext(sigCtx, "failed to initialize firestore client", slog.Any("error", err))
+		return 1
+	}
+
+	return 0
 }

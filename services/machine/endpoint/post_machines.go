@@ -10,8 +10,6 @@ import (
 	"github.com/Zaba505/infra/services/machine/service"
 	"github.com/google/uuid"
 	"github.com/z5labs/humus"
-	"github.com/z5labs/humus/rest"
-	"github.com/z5labs/humus/rest/rpc"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -22,13 +20,21 @@ type FirestoreClient interface {
 	Close() error
 }
 
-type postMachinesHandler struct {
+type PostMachinesHandler struct {
 	tracer          trace.Tracer
 	log             *slog.Logger
 	firestoreClient FirestoreClient
 }
 
-func (h *postMachinesHandler) Handle(ctx context.Context, req *MachineRequest) (*MachineResponse, error) {
+func PostMachines(firestoreClient FirestoreClient) *PostMachinesHandler {
+	return &PostMachinesHandler{
+		tracer:          otel.Tracer("machine/endpoint"),
+		log:             humus.Logger("machine/endpoint"),
+		firestoreClient: firestoreClient,
+	}
+}
+
+func (h *PostMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	invalidFields := req.Validate()
 	if len(invalidFields) > 0 {
 		errFields := make([]errors.InvalidField, len(invalidFields))
@@ -143,19 +149,4 @@ func errorHandler(ctx context.Context, w http.ResponseWriter, err error) {
 		genericErr := errors.NewInternalError("", err.Error())
 		genericErr.WriteHttpResponse(ctx, w)
 	}
-}
-
-func PostMachines(firestoreClient FirestoreClient) rest.ApiOption {
-	handler := &postMachinesHandler{
-		tracer:          otel.Tracer("machine/endpoint"),
-		log:             humus.Logger("machine/endpoint"),
-		firestoreClient: firestoreClient,
-	}
-
-	return rest.Handle(
-		http.MethodPost,
-		rest.BasePath("/api/v1/machines"),
-		rpc.HandleJson(handler),
-		rest.OnError(rest.ErrorHandlerFunc(errorHandler)),
-	)
 }

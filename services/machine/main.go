@@ -1,17 +1,13 @@
 package main
 
 import (
-	"bytes"
+	"context"
 	_ "embed"
+	"os"
 
 	"github.com/Zaba505/infra/services/machine/app"
-
-	"github.com/z5labs/humus/rest"
 )
 
-//go:embed config.yaml
-var configBytes []byte
-
 func main() {
-	rest.Run(bytes.NewReader(configBytes), app.Init)
+	os.Exit(app.Main(context.Background()))
 }
