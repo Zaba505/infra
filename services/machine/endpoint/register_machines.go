@@ -11,6 +11,7 @@ import (
 	"github.com/Zaba505/infra/services/machine/endpoint/endpointpb"
 	"github.com/Zaba505/infra/services/machine/errors"
 	"github.com/Zaba505/infra/services/machine/service"
+	"github.com/go-chi/chi/v5"
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
@@ -24,21 +25,23 @@ type FirestoreClient interface {
 	Close() error
 }
 
-type RegisterMachinesHandler struct {
+type registerMachinesHandler struct {
 	tracer          trace.Tracer
 	log             *slog.Logger
 	firestoreClient FirestoreClient
 }
 
-func RegisterMachines(firestoreClient FirestoreClient) *RegisterMachinesHandler {
-	return &RegisterMachinesHandler{
+func RegisterMachines(mux *chi.Mux, firestoreClient FirestoreClient) {
+	handler := &registerMachinesHandler{
 		tracer:          otel.Tracer("machine/endpoint"),
 		log:             slog.Default(),
 		firestoreClient: firestoreClient,
 	}
+
+	mux.Method(http.MethodPost, "/api/v1/machines", handler)
 }
 
-func (h *RegisterMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *registerMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	body, err := io.ReadAll(r.Body)
