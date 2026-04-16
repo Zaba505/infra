@@ -1,0 +1,9 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+message NIC {
+  string mac = 1;             // mac address
+}

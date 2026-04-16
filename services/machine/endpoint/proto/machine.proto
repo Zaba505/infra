@@ -1,0 +1,20 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+import "accelerator.proto";
+import "cpu.proto";
+import "drive.proto";
+import "memory_module.proto";
+import "nic.proto";
+
+message Machine {
+  string id = 1;              // UUIDv7 machine identifier
+  repeated CPU cpus = 2;
+  repeated MemoryModule memory_modules = 3;
+  repeated Accelerator accelerators = 4;
+  repeated NIC nics = 5;
+  repeated Drive drives = 6;
+}

@@ -1,0 +1,9 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+message Drive {
+  int64 capacity = 1;         // capacity in bytes
+}
