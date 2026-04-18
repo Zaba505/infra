@@ -1,0 +1,9 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+message MemoryModule {
+  int64 size = 1;             // measured in bytes
+}

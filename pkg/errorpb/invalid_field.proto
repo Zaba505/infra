@@ -1,0 +1,10 @@
+edition = "2023";
+
+package errorpb;
+
+option go_package = "github.com/Zaba505/infra/pkg/errorpb;errorpb";
+
+message InvalidField {
+  string field  = 1;
+  string reason = 2;
+}

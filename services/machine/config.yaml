@@ -1,0 +1,6 @@
+openapi:
+  title: {{env "OPENAPI_TITLE" | default "Machine Management Service"}}
+  version: {{env "OPENAPI_VERSION" | default "v1"}}
+
+firestore:
+  project_id: {{env "GCP_PROJECT_ID"}}

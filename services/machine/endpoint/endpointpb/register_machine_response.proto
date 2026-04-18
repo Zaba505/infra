@@ -1,0 +1,9 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+message RegisterMachineResponse {
+    string machine_id = 1;              // UUIDv7 machine identifier
+}

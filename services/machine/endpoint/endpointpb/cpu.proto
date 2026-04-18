@@ -1,0 +1,11 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+message CPU {
+  string manufacturer = 1;
+  int64 clock_frequency = 2;  // measured in hertz
+  int64 cores = 3;            // number of cores
+}

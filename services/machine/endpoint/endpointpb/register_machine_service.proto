@@ -1,0 +1,12 @@
+edition = "2023";
+
+package endpointpb;
+
+option go_package = "github.com/Zaba505/infra/services/machine/endpoint/endpointpb;endpointpb";
+
+import "register_machine_request.proto";
+import "register_machine_response.proto";
+
+service RegisterMachineService {
+    rpc RegisterMachine (RegisterMachineRequest) returns (RegisterMachineResponse);
+}
