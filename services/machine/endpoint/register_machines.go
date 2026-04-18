@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/Zaba505/infra/pkg/errorpb"
 	"github.com/Zaba505/infra/services/machine/endpoint/endpointpb"
-	"github.com/Zaba505/infra/services/machine/errors"
 	"github.com/Zaba505/infra/services/machine/service"
 	"github.com/go-chi/chi/v5"
 
@@ -46,37 +46,37 @@ func (h *registerMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		errorHandler(ctx, w, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to read request body: %v", err)))
+		errorHandler(ctx, w, errorpb.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to read request body: %v", err)))
 		return
 	}
 
 	var req endpointpb.RegisterMachineRequest
 	if err := proto.Unmarshal(body, &req); err != nil {
-		errorHandler(ctx, w, errors.NewValidationError("/api/v1/machines", []errors.InvalidField{
-			{Field: "body", Reason: fmt.Sprintf("invalid protobuf: %v", err)},
+		errorHandler(ctx, w, errorpb.NewValidationError("/api/v1/machines", []*errorpb.InvalidField{
+			{Field: proto.String("body"), Reason: proto.String(fmt.Sprintf("invalid protobuf: %v", err))},
 		}))
 		return
 	}
 
 	nics := req.GetNics()
 	if len(nics) == 0 {
-		errorHandler(ctx, w, errors.NewValidationError("/api/v1/machines", []errors.InvalidField{
-			{Field: "nics", Reason: "at least one NIC is required"},
+		errorHandler(ctx, w, errorpb.NewValidationError("/api/v1/machines", []*errorpb.InvalidField{
+			{Field: proto.String("nics"), Reason: proto.String("at least one NIC is required")},
 		}))
 		return
 	}
 
-	var invalidFields []errors.InvalidField
+	var invalidFields []*errorpb.InvalidField
 	for i, nic := range nics {
 		if err := validateMACAddress(nic.GetMac()); err != nil {
-			invalidFields = append(invalidFields, errors.InvalidField{
-				Field:  fmt.Sprintf("nics[%d].mac", i),
-				Reason: err.Error(),
+			invalidFields = append(invalidFields, &errorpb.InvalidField{
+				Field:  proto.String(fmt.Sprintf("nics[%d].mac", i)),
+				Reason: proto.String(err.Error()),
 			})
 		}
 	}
 	if len(invalidFields) > 0 {
-		errorHandler(ctx, w, errors.NewValidationError("/api/v1/machines", invalidFields))
+		errorHandler(ctx, w, errorpb.NewValidationError("/api/v1/machines", invalidFields))
 		return
 	}
 
@@ -85,18 +85,18 @@ func (h *registerMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 			MAC: nic.GetMac(),
 		})
 		if err != nil {
-			errorHandler(ctx, w, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to check MAC uniqueness: %v", err)))
+			errorHandler(ctx, w, errorpb.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to check MAC uniqueness: %v", err)))
 			return
 		}
 		if resp.Found {
-			errorHandler(ctx, w, errors.NewConflictError("/api/v1/machines", nic.GetMac(), resp.MachineID))
+			errorHandler(ctx, w, errorpb.NewConflictError("/api/v1/machines", resp.MachineID, map[string]string{"mac_address": nic.GetMac()}))
 			return
 		}
 	}
 
 	machineID, err := uuid.NewV7()
 	if err != nil {
-		errorHandler(ctx, w, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to generate machine ID: %v", err)))
+		errorHandler(ctx, w, errorpb.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to generate machine ID: %v", err)))
 		return
 	}
 
@@ -113,7 +113,7 @@ func (h *registerMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 		Machine:   serviceReq,
 	})
 	if err != nil {
-		errorHandler(ctx, w, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to create machine: %v", err)))
+		errorHandler(ctx, w, errorpb.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to create machine: %v", err)))
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h *registerMachinesHandler) ServeHTTP(w http.ResponseWriter, r *http.Reque
 	}
 	respBody, err := proto.Marshal(resp)
 	if err != nil {
-		errorHandler(ctx, w, errors.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to marshal response: %v", err)))
+		errorHandler(ctx, w, errorpb.NewInternalError("/api/v1/machines", fmt.Sprintf("failed to marshal response: %v", err)))
 		return
 	}
 
@@ -198,14 +198,14 @@ func convertDrives(drives []*endpointpb.Drive) []service.Drive {
 
 func errorHandler(ctx context.Context, w http.ResponseWriter, err error) {
 	switch e := err.(type) {
-	case *errors.ValidationProblem:
+	case *errorpb.ValidationProblem:
 		e.WriteHttpResponse(ctx, w)
-	case *errors.ConflictProblem:
+	case *errorpb.ConflictProblem:
 		e.WriteHttpResponse(ctx, w)
-	case *errors.Problem:
+	case *errorpb.Problem:
 		e.WriteHttpResponse(ctx, w)
 	default:
-		genericErr := errors.NewInternalError("", err.Error())
+		genericErr := errorpb.NewInternalError("", err.Error())
 		genericErr.WriteHttpResponse(ctx, w)
 	}
 }

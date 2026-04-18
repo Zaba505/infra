@@ -3,15 +3,14 @@ package endpoint
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Zaba505/infra/pkg/errorpb"
 	"github.com/Zaba505/infra/services/machine/endpoint/endpointpb"
-	machineerrors "github.com/Zaba505/infra/services/machine/errors"
 	"github.com/Zaba505/infra/services/machine/service"
 	"go.opentelemetry.io/otel/trace/noop"
 	"google.golang.org/protobuf/proto"
@@ -115,12 +114,12 @@ func TestRegisterMachinesHandler_ServeHTTP(t *testing.T) {
 			client:   &mockFirestoreClient{},
 			wantCode: http.StatusBadRequest,
 			checkBody: func(t *testing.T, body []byte) {
-				var p machineerrors.ValidationProblem
-				if err := json.Unmarshal(body, &p); err != nil {
+				var p errorpb.ValidationProblem
+				if err := proto.Unmarshal(body, &p); err != nil {
 					t.Fatalf("failed to decode response: %v", err)
 				}
-				if len(p.InvalidFields) == 0 || p.InvalidFields[0].Field != "body" {
-					t.Errorf("expected invalid field 'body', got %v", p.InvalidFields)
+				if len(p.GetInvalidFields()) == 0 || p.GetInvalidFields()[0].GetField() != "body" {
+					t.Errorf("expected invalid field 'body', got %v", p.GetInvalidFields())
 				}
 			},
 		},
@@ -133,12 +132,12 @@ func TestRegisterMachinesHandler_ServeHTTP(t *testing.T) {
 			client:   &mockFirestoreClient{},
 			wantCode: http.StatusBadRequest,
 			checkBody: func(t *testing.T, body []byte) {
-				var p machineerrors.ValidationProblem
-				if err := json.Unmarshal(body, &p); err != nil {
+				var p errorpb.ValidationProblem
+				if err := proto.Unmarshal(body, &p); err != nil {
 					t.Fatalf("failed to decode response: %v", err)
 				}
-				if len(p.InvalidFields) == 0 || p.InvalidFields[0].Field != "nics" {
-					t.Errorf("expected invalid field 'nics', got %v", p.InvalidFields)
+				if len(p.GetInvalidFields()) == 0 || p.GetInvalidFields()[0].GetField() != "nics" {
+					t.Errorf("expected invalid field 'nics', got %v", p.GetInvalidFields())
 				}
 			},
 		},
@@ -154,12 +153,12 @@ func TestRegisterMachinesHandler_ServeHTTP(t *testing.T) {
 			client:   &mockFirestoreClient{},
 			wantCode: http.StatusBadRequest,
 			checkBody: func(t *testing.T, body []byte) {
-				var p machineerrors.ValidationProblem
-				if err := json.Unmarshal(body, &p); err != nil {
+				var p errorpb.ValidationProblem
+				if err := proto.Unmarshal(body, &p); err != nil {
 					t.Fatalf("failed to decode response: %v", err)
 				}
-				if len(p.InvalidFields) == 0 || p.InvalidFields[0].Field != "nics[0].mac" {
-					t.Errorf("expected invalid field 'nics[0].mac', got %v", p.InvalidFields)
+				if len(p.GetInvalidFields()) == 0 || p.GetInvalidFields()[0].GetField() != "nics[0].mac" {
+					t.Errorf("expected invalid field 'nics[0].mac', got %v", p.GetInvalidFields())
 				}
 			},
 		},
@@ -177,12 +176,12 @@ func TestRegisterMachinesHandler_ServeHTTP(t *testing.T) {
 			},
 			wantCode: http.StatusConflict,
 			checkBody: func(t *testing.T, body []byte) {
-				var p machineerrors.ConflictProblem
-				if err := json.Unmarshal(body, &p); err != nil {
+				var p errorpb.ConflictProblem
+				if err := proto.Unmarshal(body, &p); err != nil {
 					t.Fatalf("failed to decode response: %v", err)
 				}
-				if p.ExistingMachineID != "existing-id" {
-					t.Errorf("want existing_machine_id 'existing-id', got %q", p.ExistingMachineID)
+				if p.GetExistingResourceId() != "existing-id" {
+					t.Errorf("want existing_resource_id 'existing-id', got %q", p.GetExistingResourceId())
 				}
 			},
 		},
