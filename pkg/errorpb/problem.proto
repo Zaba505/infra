@@ -1,0 +1,13 @@
+edition = "2023";
+
+package errorpb;
+
+option go_package = "github.com/Zaba505/infra/pkg/errorpb;errorpb";
+
+message Problem {
+  string type     = 1;
+  string title    = 2;
+  int32  status   = 3;
+  string detail   = 4;
+  string instance = 5;
+}

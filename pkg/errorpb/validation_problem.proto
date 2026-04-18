@@ -1,0 +1,13 @@
+edition = "2023";
+
+package errorpb;
+
+option go_package = "github.com/Zaba505/infra/pkg/errorpb;errorpb";
+
+import "problem.proto";
+import "invalid_field.proto";
+
+message ValidationProblem {
+  Problem               problem        = 1;
+  repeated InvalidField invalid_fields = 2;
+}
