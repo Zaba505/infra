@@ -6,12 +6,16 @@ on:
       - main
     paths:
       - '**.go'
+      - go.mod
+      - .github/workflows/codeql.yaml
 
   pull_request:
     branches:
       - main
     paths:
       - '**.go'
+      - go.mod
+      - .github/workflows/codeql.yaml
 
   schedule:
     - cron: '34 11 * * 3'
