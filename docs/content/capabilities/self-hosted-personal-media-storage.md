@@ -1,4 +1,10 @@
-# Business Capability: Self-Hosted Personal Media Storage
+---
+title: "Self-Hosted Personal Media Storage"
+description: >
+    A self-operated place where the operator, family, and friends can store and share personal media under their own control.
+type: docs
+weight: 10
+---
 
 > **One-line definition:** Provide a self-operated place where the operator, family, and friends can store and share their personal media (photos, videos, files) under their own control instead of paying a third-party cloud provider.
 
