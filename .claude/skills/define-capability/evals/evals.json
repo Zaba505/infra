@@ -1,0 +1,26 @@
+{
+  "skill_name": "define-capability",
+  "evals": [
+    {
+      "id": 0,
+      "name": "rich-context-greenfield",
+      "prompt": "I want to define a business capability for our SaaS product. The capability is customer onboarding for a B2B project-management tool. New paying customers (companies, not individual users) sign up via our website. We need them to go from 'just paid' to 'their team is actively using the product on real work' as fast as possible — that's how we reduce churn in the first 90 days. The account admin is the primary actor; they invite teammates, set up their first project, and connect their existing tools (Slack, GitHub, Google Drive). Customer success owns the capability. Compliance has rules: we can't surface any customer data until the company has accepted our DPA. We measure success by 'time to first meaningful action by a non-admin user' and 'percentage of accounts with 3+ active users by day 14'. Help me write this up as a business capability document.",
+      "expected_output": "A complete business capability markdown document filling all sections from the template, in business terms, no technical implementation details.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "technical-drift-redirect",
+      "prompt": "Help me define a business capability for order refunds. Customers should be able to request a refund through their account page. We'll build a REST API at /api/v1/refunds that writes to Postgres and publishes an event to Kafka so the finance service can pick it up. Refunds under $100 should auto-approve, larger ones go to a human reviewer. We'll use Redis for rate limiting so customers can't spam refund requests. Process this and give me the capability document.",
+      "expected_output": "A business capability document that captures the business intent (refund requests, auto-approval threshold, human review for large refunds, anti-abuse rule) but explicitly redirects away from or omits the technical choices (REST API path, Postgres, Kafka, Redis). Should call out technical items as parked/out-of-scope/open-questions or simply not include them.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "vague-prompt-elicitation",
+      "prompt": "I want to define a capability for 'improving the checkout experience'. Help me.",
+      "expected_output": "Should NOT immediately produce a full document. Should push back on the vagueness, ask focused clarifying questions about whose experience, what specifically should change, what the business outcome is. May offer a skeletal draft with many open questions, but should clearly elicit more from the user before finalizing.",
+      "files": []
+    }
+  ]
+}
