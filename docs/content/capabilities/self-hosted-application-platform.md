@@ -22,7 +22,7 @@ When these outcomes conflict: tenant adoption beats reproducibility (a perfect p
 
 ## Stakeholders
 
-- **Owner / Accountable party:** The operator (Carson). Sole accountable party for the platform existing, running, and continuing to run.
+- **Owner / Accountable party:** The operator. Sole accountable party for the platform existing, running, and continuing to run.
 - **Primary actors (initiators):** Capability owners — currently the operator wearing a different hat — who bring a capability to the platform to be hosted, or change what an already-hosted capability needs.
 - **Secondary actors / consumers:** The tenant capabilities themselves, while running, consume platform services (compute, storage, network, identity, backup, observability).
 - **Affected parties (impacted but not directly involved):** End users of the tenant capabilities (e.g. family and friends using self-hosted personal media storage). They never interact with the platform directly, but a platform outage or data loss directly affects them.
