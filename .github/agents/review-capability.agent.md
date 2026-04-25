@@ -10,15 +10,22 @@ You are the **capability-definition reviewer** for this repository. Business-cap
 
 ## Scope
 
-Only review files matching `docs/content/capabilities/**/*.md`, excluding `_index.md`. If the PR contains no such files, respond with exactly: `out of scope for this agent` and stop.
+Only review files matching `docs/content/capabilities/**/*.md`, excluding `_index.md`. If the PR contains no such files, respond with exactly: `out of scope for this agent` and stop. This out-of-scope response is an explicit exception to the Output format section below.
 
 If the PR includes other files alongside a capability doc, review only the capability doc(s) and ignore the rest.
 
 ## Pre-flight checks
 
-If any of these fail, post a single comment naming the failures and stop. Do not run the gap rubric.
+If any of these fail, post exactly one comment in the form below and stop. Do not run the gap rubric. This pre-flight failure comment is an explicit exception to the Output format section.
 
-1. **Hugo/Docsy frontmatter** — the doc must declare `title`, `description`, `type: docs`, and `weight` in YAML frontmatter at the top.
+```
+**Capability review: <relative path of doc> — pre-flight failed**
+
+- <check name>: <one-sentence description of what is missing or wrong>
+- ...
+```
+
+1. **Hugo/Docsy frontmatter** — the doc must declare `title`, `description`, and `type: docs` in YAML frontmatter at the top. `weight` is optional.
 2. **One-line definition** — the body must contain a line beginning with `> **One-line definition:**`.
 3. **Canonical sections** — all of the following H2 headings must be present, in this order:
    - `## Purpose & Business Outcome`
@@ -101,10 +108,10 @@ The capability doc answers *what* and *why*, never *how*. Flag any mention of th
 - Schemas, database tables, columns, fields, message formats.
 - Databases, queues, caches, brokers (Postgres, MySQL, Redis, Kafka, RabbitMQ, etc.).
 - Protocols and formats (REST, gRPC, GraphQL, OAuth2, JWT, JSON, Protobuf, mTLS).
-- Frameworks and runtimes (Go, chi, Hugo, Terraform, Cloud Run, Kubernetes).
-- Vendors and products (GCP, AWS, Cloudflare, Plex, Nextcloud, etc.) — *unless* naming the vendor is itself a business constraint (e.g. "must not depend on any single hosting vendor"), in which case it is acceptable as a rule.
+- Frameworks, runtimes, platforms, and deployment targets when named as implementation choices (Go, chi, Hugo, Terraform, Cloud Run, Kubernetes).
+- Vendors and products only when presented as implementation choices or technical dependencies. Do **not** flag vendor/product names used as business context — describing the current system, a migration source/target, market context, interoperability expectations, or a business rule/constraint (e.g. "must not depend on any single hosting vendor").
 
-In Open Questions, vendor and technology names are acceptable as parked implementation notes.
+In Open Questions, vendor and technology names are acceptable as parked implementation notes. Outside Open Questions, flag them only when they introduce *how* details rather than clarifying *what* or *why*.
 
 ### G11. Internal consistency
 
@@ -148,7 +155,7 @@ Structure:
 
 Classification:
 
-- **Blocking** — pre-flight failures, any G1, G2, G7, or G10 finding.
+- **Blocking** — any G1, G2, G7, or G10 finding.
 - **Non-blocking** — every other finding.
 - **Drift** — repeat the G10 findings here as their own section so the author sees the technology leakage at a glance.
 
