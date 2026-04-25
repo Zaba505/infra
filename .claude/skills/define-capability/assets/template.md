@@ -1,4 +1,9 @@
-# Business Capability: {{name}}
+---
+title: "{{name}}"
+description: >
+    {{one_liner}}
+type: docs
+---
 
 > **One-line definition:** {{one_liner}}
 
