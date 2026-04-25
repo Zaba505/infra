@@ -65,6 +65,7 @@ What does the capability produce? What changes in the world after it runs?
 - **No illegal content.** Users may not store content that is illegal in the operator's jurisdiction. The operator reserves the right to terminate a user's access on credible evidence of a violation, even though the operator cannot inspect user content directly.
 - **Off-site backup is allowed.** Content may be replicated to an off-site location for durability, provided the off-site copy preserves the same privacy properties (no third party can read user content).
 - **30-day retention after deletion / departure.** When a user deletes content, or when a user leaves the system entirely, their data is retained for 30 days and then purged. The window exists for accident recovery; after it elapses, the data is gone.
+- **Operator succession.** Longevity is preserved through two complementary mechanisms: (a) every user can pull a complete on-demand archive of their own content, without operator involvement, *while the system is healthy* — users are expected to pull these proactively (and may schedule periodic pulls), since on-demand export is only available when the system is up; and (b) a designated successor operator holds the credentials and runbook needed to keep the system running if the primary operator becomes unavailable. Successor credentials are sealed/escrowed (e.g. via a password-manager handoff or physical envelope) and not used for routine operation; takeover is a discrete event triggered by operator unavailability, not ongoing shared administration. Exports preserve user data even if no successor takes over; the successor preserves continuity of the system itself. If the system is down and no successor takes over, only previously-pulled exports survive — this is the accepted trade-off behind "lost credentials = lost data." The successor's access is to operate the system, not to read user content — the privacy properties (private by default, lost credentials = lost data) continue to hold.
 
 ## Success Criteria & KPIs
 
@@ -81,7 +82,6 @@ What does the capability produce? What changes in the world after it runs?
 
 ## Open Questions
 
-- **Operator succession / "hit by a bus" plan.** Longevity ranks above control, which implies the system should outlive the operator's active involvement. What is the plan for users to retain access to their content if the operator can no longer run the system? (Possible directions: documented handoff to a designated successor, exportable archives users can pull on demand. To be decided.)
 - **Definition of "active user"** for the KPI — what threshold of activity (uploads in the last N days? data stored? logins?) counts a user as active rather than dormant?
 - **Affected-party recourse.** If someone depicted in a shared photo objects to its presence, is there a defined process for them to request its removal, given they may not be a user of the system themselves?
 - **Operator's jurisdiction for "no illegal content."** Whose laws apply when users may live in different jurisdictions than the operator?
