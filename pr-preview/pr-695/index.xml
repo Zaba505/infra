@@ -148,7 +148,12 @@ ADR Categories:
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id
  Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
 &lt;h2 id="request"&gt;Request&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/kernel</title><link>https://zaba505.github.io/infra/pr-preview/pr-695/rd/services/boot/asset-kernel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/rd/services/boot/asset-kernel/</guid><description>&lt;p&gt;Streams kernel images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Self-Hosted Personal Media Storage</title><link>https://zaba505.github.io/infra/pr-preview/pr-695/capabilities/self-hosted-personal-media-storage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/capabilities/self-hosted-personal-media-storage/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; Provide a self-operated place where the operator, family, and friends can store and share their personal media (photos, videos, files) under their own control instead of paying a third-party cloud provider.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="purpose--business-outcome"&gt;Purpose &amp;amp; Business Outcome&lt;/h2&gt;
+&lt;p&gt;What business outcome does this capability deliver? Why does it exist?&lt;/p&gt;
+&lt;p&gt;This capability exists so that a small, trusted circle of people (the operator, their family, and their friends) can keep their personal media without surrendering it to a commercial cloud provider. The outcomes it delivers, in order of importance:&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/kernel</title><link>https://zaba505.github.io/infra/pr-preview/pr-695/rd/services/boot/asset-kernel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/rd/services/boot/asset-kernel/</guid><description>&lt;p&gt;Streams kernel images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
 &lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
 &lt;pre class="mermaid"&gt;sequenceDiagram
  participant Client as Bare Metal Server
@@ -712,13 +717,7 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 &lt;li&gt;&lt;strong&gt;Consecutive Failures&lt;/strong&gt;: After 3 consecutive failures (30 seconds), Cloud Run restarts the instance&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="graceful-degradation"&gt;Graceful Degradation&lt;/h2&gt;
-&lt;p&gt;The health check is designed with graceful degradation in mind:&lt;/p&gt;</description></item><item><title/><link>https://zaba505.github.io/infra/pr-preview/pr-695/capabilities/self-hosted-personal-media-storage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/capabilities/self-hosted-personal-media-storage/</guid><description>&lt;h1 id="business-capability-self-hosted-personal-media-storage"&gt;Business Capability: Self-Hosted Personal Media Storage&lt;/h1&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; Provide a self-operated place where the operator, family, and friends can store and share their personal media (photos, videos, files) under their own control instead of paying a third-party cloud provider.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id="purpose--business-outcome"&gt;Purpose &amp;amp; Business Outcome&lt;/h2&gt;
-&lt;p&gt;What business outcome does this capability deliver? Why does it exist?&lt;/p&gt;
-&lt;p&gt;This capability exists so that a small, trusted circle of people (the operator, their family, and their friends) can keep their personal media without surrendering it to a commercial cloud provider. The outcomes it delivers, in order of importance:&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-695/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
+&lt;p&gt;The health check is designed with graceful degradation in mind:&lt;/p&gt;</description></item><item><title>AWS Network Boot Protocol Support</title><link>https://zaba505.github.io/infra/pr-preview/pr-695/rd/analysis/aws/network-boot/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-695/rd/analysis/aws/network-boot/</guid><description>&lt;h1 id="network-boot-protocol-support-on-amazon-web-services"&gt;Network Boot Protocol Support on Amazon Web Services&lt;/h1&gt;
 &lt;p&gt;This document analyzes AWS&amp;rsquo;s capabilities for hosting network boot infrastructure, specifically focusing on TFTP, HTTP, and HTTPS protocol support.&lt;/p&gt;
 &lt;h2 id="tftp-trivial-file-transfer-protocol-support"&gt;TFTP (Trivial File Transfer Protocol) Support&lt;/h2&gt;
 &lt;h3 id="native-support"&gt;Native Support&lt;/h3&gt;
