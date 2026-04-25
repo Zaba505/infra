@@ -148,7 +148,17 @@ ADR Categories:
  Boot-&amp;gt;&amp;gt;Boot: Generate iPXE script with profile_id
  Boot--&amp;gt;&amp;gt;Client: 200 OK (iPXE script)&lt;/pre&gt;
 &lt;h2 id="request"&gt;Request&lt;/h2&gt;
-&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/kernel</title><link>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</guid><description>&lt;p&gt;Streams kernel images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Query Parameters:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Self-Hosted Application Platform</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; Provide a reproducible, operator-controlled platform on which the operator&amp;rsquo;s other capabilities run by default, so that no capability has to depend on a vendor-specific hosting solution to be delivered.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="purpose--business-outcome"&gt;Purpose &amp;amp; Business Outcome&lt;/h2&gt;
+&lt;p&gt;What business outcome does this capability deliver? Why does it exist?&lt;/p&gt;
+&lt;p&gt;This capability exists so that the operator&amp;rsquo;s other capabilities (e.g. self-hosted personal media storage) have a well-defined, reproducible place to run that the operator controls end-to-end, instead of each capability independently choosing a vendor (e.g. a hosted Plex provider, a hosted Minecraft provider, a hosted Nextcloud provider). The outcomes it delivers, in order of importance:&lt;/p&gt;</description></item><item><title>Self-Hosted Personal Media Storage</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-personal-media-storage/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-personal-media-storage/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; Provide a self-operated place where the operator, family, and friends can store and share their personal media (photos, videos, files) under their own control instead of paying a third-party cloud provider.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="purpose--business-outcome"&gt;Purpose &amp;amp; Business Outcome&lt;/h2&gt;
+&lt;p&gt;What business outcome does this capability deliver? Why does it exist?&lt;/p&gt;
+&lt;p&gt;This capability exists so that a small, trusted circle of people (the operator, their family, and their friends) can keep their personal media without surrendering it to a commercial cloud provider. The outcomes it delivers, in order of importance:&lt;/p&gt;</description></item><item><title>GET /asset/{boot_profile_id}/kernel</title><link>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/asset-kernel/</guid><description>&lt;p&gt;Streams kernel images from Cloud Storage for the boot process. This endpoint is accessed by bare metal servers during UEFI HTTP boot through the WireGuard VPN tunnel.&lt;/p&gt;
 &lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
 &lt;pre class="mermaid"&gt;sequenceDiagram
  participant Client as Bare Metal Server
