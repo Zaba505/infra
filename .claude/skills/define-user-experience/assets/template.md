@@ -3,7 +3,6 @@ title: "{{name}}"
 description: >
     {{one_liner}}
 type: docs
-weight: 10
 ---
 
 > **One-line definition:** {{one_liner}}
