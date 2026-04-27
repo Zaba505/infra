@@ -33,7 +33,7 @@ The deadline is therefore *inherited* from the external event, not invented by t
 
 What they have in hand: knowledge of which platform offering is changing, by when, and which currently-hosted tenants are using it.
 
-There is no formal tenant-facing pending-update view ahead of this moment. The operator-filed issue is the first official signal to a capability owner that this journey has begun.
+There is no formal tenant-facing pending-update view ahead of this moment. If the platform ever adds an earlier deprecation or pending-update signal for capability owners, that signal would live in [Tenant-Facing Observability](./tenant-facing-observability.md) rather than in this operator-side journey. The operator-filed issue remains the first official signal that this journey has begun.
 
 ## Journey
 
@@ -140,7 +140,7 @@ This UX must respect the following items from the parent capability — by name,
 - **Platform-contract changes that aren't forced by an external dependency event.** When the *operator* decides to change the platform's contract (retire a packaging form, alter availability characteristics) absent external pressure, that's the *platform-contract-change rollout* UX, not this one. The seam: this UX is reactive (something outside the operator's control forced the update); the contract-change UX is proactive (the operator chose to change something).
 - **The capability owner's side as a primary journey.** This UX is written from the operator's seat. The capability owner's experience of receiving and responding to one of these issues is captured here as a responder, not as a separate document — it shares enough surface with `modify my capability` (artifacts, test, iterate, close) that a separate doc would mostly duplicate.
 - **Detection of fall-behind itself.** *How* the operator notices a tenant is on a falling-behind component (vendor announcement watching, CVE feeds, manual review) is operational detail, not part of the user experience. This UX starts at the moment the operator has decided to act.
-- **Tenant-facing visibility into pending platform updates before the issue is filed.** Capability owners do not get an official warning surface ahead of the issue in this UX. If the platform ever adds one later, that surface is a separate UX and does not replace issue filing as the start of this journey.
+- **Tenant-facing visibility into pending platform updates before the issue is filed.** Capability owners do not get an official warning surface ahead of the issue in this UX. If the platform later adds an earlier deprecation or pending-update signal, that signal belongs in [Tenant-Facing Observability](./tenant-facing-observability.md), not here, and does not replace issue filing as the start of this journey.
 - **Routine modify requests.** A capability owner shipping a version bump on their own initiative is the change-later loop in `host-a-capability`, not this UX.
 
 ## Open Questions
