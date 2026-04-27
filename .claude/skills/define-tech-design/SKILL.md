@@ -1,6 +1,19 @@
 ---
 name: define-tech-design
-description: Guide the user through defining the technical design for an already-defined business capability and its user experiences. Produces three artifacts in a strict three-stage flow: (1) a living technical-requirements document extracted from the capability + UX docs, (2) one or more capability-scoped MADR ADRs, and (3) a composed human-friendly tech-design document describing the final state. Use this skill whenever the user wants to design, architect, or technically scope how a capability will be built — phrases like "design the system for {capability}", "what's the architecture for X", "tech design for this capability", "ADRs for this capability", "how do we build {capability}". Do NOT use for implementation (writing code or Terraform), for defining capabilities or UX (use `define-capability` / `define-user-experience` first), or for shared cross-capability decisions (those belong in `docs/content/r&d/adrs/` and are out of scope here).
+description: >-
+  Guide the user through defining the technical design for an already-defined
+  business capability and its user experiences. Produces three artifacts in a
+  strict three-stage flow: (1) a living technical-requirements document
+  extracted from the capability + UX docs, (2) one or more capability-scoped
+  MADR ADRs, and (3) a composed human-friendly tech-design document describing
+  the final state. Use this skill whenever the user wants to design,
+  architect, or technically scope how a capability will be built — phrases like
+  "design the system for {capability}", "what's the architecture for X", "tech
+  design for this capability", "ADRs for this capability", "how do we build
+  {capability}". Do NOT use for implementation (writing code or Terraform), for
+  defining capabilities or UX (use `define-capability` /
+  `define-user-experience` first), or for shared cross-capability decisions
+  (those belong in `docs/content/r&d/adrs/` and are out of scope here).
 ---
 
 # Define a Technical Design for a Capability
