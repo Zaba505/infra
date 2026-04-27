@@ -31,7 +31,7 @@ Three triggers converge on this same flow:
 
 - **First-ever build.** No platform has existed before; the operator is bringing it into being.
 - **Disaster recovery.** The platform existed and is now gone (cloud project lost, home-lab destroyed, ransomware, etc.); the operator is rebuilding on top of root-level access that survived the disaster.
-- **Drift / reproducibility drill.** The operator rebuilds the platform *in parallel* on scratch infrastructure after every significant platform change and at least quarterly to prove the KPI still holds while the live platform keeps serving. The drill is identical to the real flow — only the underlying infrastructure differs.
+- **Drift / reproducibility drill.** The operator rebuilds the platform *in parallel* on scratch infrastructure after every significant platform change — meaning any change that would alter what they are rebuilding, what they must validate, or what they must trust before calling the platform ready again — and at least quarterly to prove the KPI still holds while the live platform keeps serving. The drill is identical to the real flow — only the underlying infrastructure differs.
 
 What the operator has in hand at minute zero:
 - The **definitions repo**, pulled fresh.
@@ -41,7 +41,7 @@ What the operator has in hand at minute zero:
 The operator's state of mind is steady, not panicked: this journey exists precisely so total loss isn't catastrophic, and a drill rehearses it on purpose.
 
 What is **not** assumed at entry:
-- Definitions drift. Before any rebuild with prior platform state starts, the operator runs a **required preflight drift check** against the live platform or the last known-good environment. On a first-ever build, the check is vacuously clean because there is no prior platform state yet. If drift exists, it must be detected and fixed *before* this journey begins, not discovered partway through. (See *Constraints*.)
+- Definitions drift. Before any rebuild with prior platform state starts, the operator performs a required preflight drift check against the live platform or the last known-good environment. On a first-ever build, the check is vacuously clean because there is no prior platform state yet. The check passes only when the platform state the operator is treating as real still matches the definitions closely enough that no unexplained differences remain. If drift exists, it must be detected and fixed *before* this journey begins, not discovered partway through. (See *Constraints*.)
 - The sealed successor credentials. They stay sealed during routine standup, including DR.
 
 ## Journey
@@ -50,7 +50,7 @@ The rebuild is **automated, with manual operator-validation checkpoints between 
 
 ### 1. Decide to rebuild and confirm preconditions
 
-The operator decides to rebuild — first build, DR, or scheduled drill — and confirms what they have in hand: a fresh pull of the definitions repo and root-level access to the target infrastructure (the live infra for first-build/DR, scratch infra for a drill). Before they kick anything off, they run the required preflight drift check whenever prior platform state exists, using the live platform or the last known-good environment as the reference, and confirm the definitions still match the intended platform state. If the check fails, they stop and resolve drift before starting the rebuild.
+The operator decides to rebuild — first build, DR, or scheduled drill — and confirms what they have in hand: a fresh pull of the definitions repo and root-level access to the target infrastructure (the live infra for first-build/DR, scratch infra for a drill). Before they kick anything off, they perform the required preflight drift check whenever prior platform state exists, using the live platform or the last known-good environment as the reference, and confirm the platform they intend to trust still matches the intended definitions closely enough to rebuild from them honestly. If the check fails because unexplained differences remain, they stop and resolve drift before starting the rebuild.
 
 What they perceive: nothing yet on the target infrastructure; a clean definitions repo on their workstation; the underlying provider UIs (cloud console, IPMI) showing the empty starting state.
 
@@ -64,21 +64,21 @@ What they perceive: log output begins streaming. The first phase is underway.
 
 Automation provisions the underlying foundations: cloud project / home-lab base, network plumbing including the connectivity between cloud and home-lab. On completion the automation **pauses** and prints a phase summary.
 
-The operator validates by checking the underlying provider's UIs (cloud console, home-lab IPMI) and completing the maintained, phase-specific verification checklist stored with the repo or runbook. Only when that checklist passes do they signal `continue`.
+The operator validates by checking the underlying provider's UIs (cloud console, home-lab IPMI) and the expected signals for this phase. Only when they are satisfied that the foundations really are in place do they signal `continue`.
 
 If validation fails, see *Edge Cases — Phase fails*.
 
 ### 4. Phase 2 — Core platform services
 
-Automation provisions compute, persistent storage, and the platform-provided identity service on top of the foundations. Pauses. The operator validates the same way — provider UIs plus the maintained checklist for this phase (e.g. identity service is reachable and issuing tokens) — then signals `continue`.
+Automation provisions compute, persistent storage, and the platform-provided identity service on top of the foundations. Pauses. The operator validates the same way — provider UIs plus the expected signs that compute, storage, and identity are really available (e.g. the identity service is reachable and issuing tokens) — then signals `continue`.
 
 ### 5. Phase 3 — Cross-cutting services
 
-Automation provisions backup and observability so they cover the platform itself before any tenant arrives. Pauses. The operator validates via the maintained checklist that backup is wired in and observability is collecting, then signals `continue`.
+Automation provisions backup and observability so they cover the platform itself before any tenant arrives. Pauses. The operator validates that backup is wired in and observability is collecting, then signals `continue`.
 
 ### 6. Phase 4 — Readiness verification and canary tenant
 
-The platform deploys a **purpose-built canary tenant maintained alongside the platform definitions** end-to-end. It exists solely to prove the platform can host tenants without coupling readiness to any real tenant's lifecycle. The canary is exercised (it should run, be reachable, store and read back data, authenticate against the platform-provided identity service, be picked up by backup and observability), then torn down.
+The platform deploys a **purpose-built canary tenant maintained alongside the platform definitions** end-to-end. It exists solely to prove the platform can host tenants without coupling readiness to any real tenant's lifecycle. The trade-off is that this is less representative than using a small real tenant, so it may miss tenant-specific workload quirks; it is preferred anyway because it keeps readiness verification deterministic, disposable, and independent of any real tenant's lifecycle. The canary is exercised (it should run, be reachable, store and read back data, authenticate against the platform-provided identity service, be picked up by backup and observability), then torn down.
 
 What the operator perceives: a clear pass/fail on the canary. The canary's success is the readiness signal — "ready to host tenants" is operationally identical to "did host a tenant just now."
 
