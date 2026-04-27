@@ -72,15 +72,40 @@ Requirements are identified `TR-01`, `TR-02`, … and **numbers are append-only 
 - If a TR's source no longer resolves (UX deleted, capability rule rewritten), **flag it** with `> ⚠️ source no longer resolves — human review` — do not delete it. The human resolves the flag.
 - Never renumber. Gaps are honest history. ADRs cite TR-NN, so renumbering silently breaks ADR provenance.
 
-### Source links
+### Source links — Hugo conventions
 
-Every TR must link back. Use Hugo-relative paths:
-- Capability section: `[Capability §Business Rules](_index.md#business-rules)`
-- UX page or section: `[UX: upload-photo §Edge Cases](user-experiences/upload-photo.md#edge-cases)`
-- Prior shared ADR: `[ADR-0006](/r&d/adrs/0006-resource-identifier-standard/)`
-- Repo pattern from CLAUDE.md: `[CLAUDE.md §Critical Go Patterns](/CLAUDE.md)` (or just cite inline)
+The site is rendered by Hugo with Docsy. Two rules govern every cross-document link in the artifacts this skill produces:
+
+1. **Use `{{< relref >}}` for cross-document links — never raw `path/file.md`.** Hugo renders pages at directory URLs (e.g. `/capabilities/{name}/`), so a literal `_index.md` link does not resolve in the rendered site. `relref` resolves correctly and is build-validated (Hugo errors out if the target doesn't exist), which catches link rot during `hugo build` rather than at read time.
+2. **For headings you intend to link to, add explicit `{#id}` attributes.** Auto-generated slugs are fragile when headings contain `:`, `&`, `§`, `(`, em-dashes, etc. Explicit IDs are short, stable, and survive heading-text rewordings.
+
+#### Source-link cookbook
+
+- Capability section (linkable heading carries `{#business-rules}`):
+  `[Capability §Business Rules]({{</* relref "_index.md#business-rules" */>}})`
+- UX page (no anchor, just the page):
+  `[UX: upload-photo]({{</* relref "user-experiences/upload-photo.md" */>}})`
+- UX page section (target heading carries `{#edge-cases}`):
+  `[UX: upload-photo §Edge Cases]({{</* relref "user-experiences/upload-photo.md#edge-cases" */>}})`
+- Prior shared ADR:
+  `[ADR-0006]({{</* relref "/r&d/adrs/0006-resource-identifier-standard.md" */>}})`
+- Repo pattern from CLAUDE.md: cite inline (CLAUDE.md is not part of the Hugo site).
 
 If a requirement has multiple sources, list them all. Multi-sourced requirements are usually the most important ones.
+
+#### Linkable-heading convention
+
+Every heading you expect another doc to link to gets an explicit ID:
+
+```markdown
+## Business Rules & Constraints {#business-rules}
+### TR-01: Provide compute as a tenant offering {#tr-01}
+## Considered Options {#considered-options}
+```
+
+ID rules: lowercase, hyphenated, no spaces, no punctuation. For TRs use `{#tr-NN}` so ADRs can cite them with stable two-character anchors.
+
+This skill is responsible for adding `{#id}` to headings in the docs it produces (TRs, ADR sections). It is **not** responsible for backfilling IDs into capability or UX docs — if a TR needs to link to a section in a UX or `_index.md` doc and that heading lacks an ID, either link to the page (no anchor) or ask the user to add the heading attribute to the source doc.
 
 ### The hard gate
 
