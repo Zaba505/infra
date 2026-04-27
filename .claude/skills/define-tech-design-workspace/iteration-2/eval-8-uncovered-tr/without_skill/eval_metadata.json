@@ -1,0 +1,12 @@
+{
+  "eval_id": 8,
+  "eval_name": "stage-3-detects-uncovered-tr",
+  "prompt": "All ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/ are accepted. tech-requirements.md has TR-01 through TR-08. Compose tech-design.md.",
+  "assertions": [
+    {"text": "detects that TR-08 has no ADR addressing it"},
+    {"text": "does NOT produce a complete tech-design.md that papers over TR-08"},
+    {"text": "proposes returning to Stage 2 to draft an ADR for TR-08"},
+    {"text": "actually reads the existing ADRs and tech-requirements.md to verify the gap (rather than trusting the prompt)"},
+    {"text": "if a tech-design.md is produced, it explicitly flags TR-08 as uncovered rather than inventing a realization"}
+  ]
+}

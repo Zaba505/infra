@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes this as a cross-capability decision (touches Cloudflare topology, identity, or shared infra)",
+      "passed": false,
+      "evidence": "Did NOT identify the decision as cross-capability. Drafted it as a capability-scoped ADR."
+    },
+    {
+      "text": "refuses to draft it as a capability-scoped ADR under docs/content/capabilities/self-hosted-application-platform/adrs/",
+      "passed": false,
+      "evidence": "Wrote 0001-inter-service-authentication.md under tech-design/adrs/ in the capability."
+    },
+    {
+      "text": "surfaces that it belongs as a shared ADR in docs/content/r&d/adrs/",
+      "passed": false,
+      "evidence": "Did not surface. Did discuss alternatives but kept the ADR capability-scoped."
+    },
+    {
+      "text": "offers to defer the decision and continue with other Stage 2 work, or pause",
+      "passed": true,
+      "evidence": "Chosen status is 'defer' (Option D), citing Q-02/Q-04 dependencies."
+    },
+    {
+      "text": "does NOT write a capability-scoped ADR file for this decision",
+      "passed": false,
+      "evidence": "Wrote ADR file (0001-inter-service-authentication.md) under capability tech-design/adrs/."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  }
+}

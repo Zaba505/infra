@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses to draft any ADR in this turn",
+      "passed": true,
+      "evidence": "Did not write ADR files; proposed sequence and asked for confirmation."
+    },
+    {
+      "text": "explicitly cites reviewed_at being null (or unsatisfied) as the reason for refusing",
+      "passed": false,
+      "evidence": "Mentions reviewed_at: null as a 'thing worth fixing' but does NOT use it as a refusal reason; proceeds to propose ADR sequence regardless."
+    },
+    {
+      "text": "tells the user how to unblock: set reviewed_at to today's ISO date",
+      "passed": true,
+      "evidence": "'Once you've done a read-through and made any edits you want, set this to today's date (2026-04-26).'"
+    },
+    {
+      "text": "does NOT write any ADR file under docs/content/capabilities/self-hosted-application-platform/adrs/",
+      "passed": true,
+      "evidence": "No ADR files written."
+    },
+    {
+      "text": "reads the existing tech-requirements.md to verify the gate state",
+      "passed": true,
+      "evidence": "Quotes specific TRs from the fixture."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  }
+}

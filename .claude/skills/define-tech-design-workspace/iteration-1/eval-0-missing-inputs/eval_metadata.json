@@ -1,0 +1,12 @@
+{
+  "eval_id": 0,
+  "eval_name": "missing-inputs-refuses",
+  "prompt": "Help me design the tech for a new 'shared file vault' capability. We haven't written the capability doc yet but I know what I want — let's just go.",
+  "assertions": [
+    {"text": "refuses to proceed with tech design (does not start Stage 1)"},
+    {"text": "explicitly mentions running define-capability skill first"},
+    {"text": "mentions that user experiences are also a precondition (define-user-experience)"},
+    {"text": "does not write any tech-requirements.md, ADR, or tech-design.md artifact"},
+    {"text": "explains why tech design without inputs would be invalid (no source to link back to)"}
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses to proceed with tech design (does not start Stage 1)",
+      "passed": true,
+      "evidence": "Response opens 'I can't start a tech design for shared file vault yet \u2014 it isn't a defined capability'. No artifacts written."
+    },
+    {
+      "text": "explicitly mentions running define-capability skill first",
+      "passed": true,
+      "evidence": "Path 1: 'Run the define-capability skill for shared-file-vault.'"
+    },
+    {
+      "text": "mentions that user experiences are also a precondition (define-user-experience)",
+      "passed": true,
+      "evidence": "'Then run define-user-experience once per user journey'"
+    },
+    {
+      "text": "does not write any tech-requirements.md, ADR, or tech-design.md artifact",
+      "passed": true,
+      "evidence": "actions.md and empty artifacts/ confirm no docs/ files written."
+    },
+    {
+      "text": "explains why tech design without inputs would be invalid (no source to link back to)",
+      "passed": true,
+      "evidence": "'every requirement I produced would be invented, every ADR would be unjustified, and the whole audit chain would be fiction'"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

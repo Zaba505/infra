@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses to draft any ADR in this turn",
+      "passed": true,
+      "evidence": "Refused; held the gate. (Note: only because the fixture frontmatter literally describes the skill's gating behavior, leaking the rule to the baseline.)"
+    },
+    {
+      "text": "explicitly cites reviewed_at being null (or unsatisfied) as the reason for refusing",
+      "passed": true,
+      "evidence": "'frontmatter still has reviewed_at: null'."
+    },
+    {
+      "text": "tells the user how to unblock: set reviewed_at to today's ISO date",
+      "passed": true,
+      "evidence": "Asks user to 'Set reviewed_at: in the frontmatter to today's ISO date (2026-04-26)'."
+    },
+    {
+      "text": "does NOT write any ADR file under docs/content/capabilities/self-hosted-application-platform/adrs/",
+      "passed": true,
+      "evidence": "No ADR files written."
+    },
+    {
+      "text": "reads the existing tech-requirements.md to verify the gate state (rather than just trusting the prompt)",
+      "passed": true,
+      "evidence": "Read fixture content directly; references all 7 TRs."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

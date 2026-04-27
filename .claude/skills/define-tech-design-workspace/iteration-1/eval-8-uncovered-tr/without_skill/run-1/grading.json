@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "detects that TR-08 has no ADR addressing it",
+      "passed": true,
+      "evidence": "Coverage table marks TR-08 as 'none'. Also detected TR-03, TR-06, TR-07 gaps."
+    },
+    {
+      "text": "does NOT produce a complete tech-design.md that papers over TR-08",
+      "passed": false,
+      "evidence": "DID produce a tech-design.md, though with a 'Status: Incomplete' callout. Skill discipline says don't compose at all when gaps exist; this composes anyway with caveats."
+    },
+    {
+      "text": "proposes returning to Stage 2 to draft an ADR for TR-08",
+      "passed": true,
+      "evidence": "'Recommended next step: Author ADRs for TR-03, TR-06, TR-07, TR-08, and a TR-04 rollout ADR.'"
+    },
+    {
+      "text": "actually reads the existing ADRs and tech-requirements.md to verify the gap",
+      "passed": true,
+      "evidence": "Per-TR coverage table is accurate to the fixture inputs."
+    },
+    {
+      "text": "if a tech-design.md is produced, it explicitly flags TR-08 as uncovered rather than inventing a realization",
+      "passed": true,
+      "evidence": "Status: Incomplete callout; TR-08 listed under 'Open items' rather than fabricated realization."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 7,
+  "eval_name": "stage-3-gate-enforced",
+  "prompt": "Three ADRs exist: 0001 (accepted), 0002 (proposed), 0003 (proposed). Compose the tech-design.md.",
+  "assertions": [
+    {"text": "refuses to enter Stage 3 because not every ADR is accepted"},
+    {"text": "explicitly identifies which ADRs are not yet accepted (0002 and 0003)"},
+    {"text": "asks the user to either accept the proposed ADRs or revise them before composing"},
+    {"text": "does NOT write tech-design.md to disk"},
+    {"text": "actually reads the ADR files to check status (rather than trusting the prompt)"}
+  ]
+}
