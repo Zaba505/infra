@@ -47,6 +47,7 @@ By the time the capability owner has a live tenant, they already have:
 - A working login to the observability offering, scoped to their tenant.
 - Email alerting wired to the address they use for platform communication.
 - A platform-standard health bundle for their capability: availability, latency, error rate, resource saturation, and restart / deployment events.
+- A clear contract about trust: the tenant view is the source of truth for current health, while email alerts are a best-effort nudge that helps them notice trouble sooner.
 
 Nothing in this UX requires them to set any of that up. Threshold tuning happens inside the observability offering, but any request to expand the signal bundle or add new delivery channels goes through `modify my capability` — not this journey.
 
@@ -61,6 +62,8 @@ What they perceive: a current-state read of their capability's health, plus enou
 While in the offering, the capability owner can self-serve their alert thresholds — the values that, when crossed, will fire an email alert to them. Thresholds are *their* call: the platform does not prescribe what's unhealthy enough to wake them up.
 
 This is the one self-service surface the platform exposes to capability owners. Everything else still goes through GitHub issues; thresholds are an exception because they are a tuning knob the capability owner needs to iterate on without operator involvement.
+
+If the observability offering knows email delivery is degraded for this tenant, it says so in the tenant view. What the capability owner perceives: do not treat silence from email as reassurance until the delivery path is healthy again; use the pull view as the authoritative answer in the meantime.
 
 ### 4. (Push mode) An alert reaches the capability owner
 
@@ -113,6 +116,7 @@ A successful experience looks like:
 - They could tell, from the signals alone, whether the problem was theirs or the platform's — without having to interrupt the operator to ask.
 - If it was theirs, they fixed it through the channels they already use (modify issue, in-tenant tools, redeploy).
 - If it was the platform's, they had something concrete to watch (the operator's issue) and could relay status to their own end users.
+- They understood that the tenant view was authoritative and email was an acceleration path, so silence from email was never the only evidence they relied on.
 - They did not have to set anything up to make this work — onboarding put it in place.
 
 ## Edge Cases & Failure Modes
@@ -122,7 +126,7 @@ A successful experience looks like:
 - **Threshold set too loose, real problems missed.** Same — their call, their consequence. The platform's defaults (whatever the observability offering ships with) provide a starting point.
 - **Operator hasn't opened a platform-side issue yet when the capability owner is investigating.** The capability owner does not need to file one themselves. The operator gets the same signals and will open one. If they don't and the problem persists, that is an operator-side failure, not a capability-owner-side action.
 - **Capability owner suspects the platform but signals look fine for the platform.** They surface this on a *modify my capability* issue or a comment to the operator — same surface they would use for anything ambiguous. This UX does not introduce a new issue type for "I think it's you, not me."
-- **Alert delivery is broken (email bounces, mailbox rule hides it, etc.).** Out of scope here — the alert simply doesn't arrive. The pull mode still works, and the capability owner will notice eventually. Email reliability is a property of the delivery path, not something this UX engineers around.
+- **Alert delivery is broken (email bounces, mailbox rule hides it, etc.).** The capability owner does **not** treat silence from email as proof of health; the pull view remains the source of truth. If the offering knows delivery is failing, the tenant view shows alerting as degraded so the capability owner understands email is currently unavailable as a nudge.
 - **Capability owner wants more than email alerts or wants a broader signal bundle.** Goes through `modify my capability`, not this UX — it's a contract change about what the platform delivers to the tenant, even if a small one.
 
 ## Constraints Inherited from the Capability
