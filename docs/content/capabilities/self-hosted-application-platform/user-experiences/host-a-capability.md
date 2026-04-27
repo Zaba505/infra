@@ -157,7 +157,7 @@ This UX must respect the following items from the parent capability's Business R
 
 - **Data migration of an existing tenant.** Bringing data from a prior vendor or local install into the newly-provisioned tenant is a separate UX, not covered here. This UX is strictly about *provisioning the capability on the platform*.
 - **Operator-initiated tenant updates ("your component has fallen behind").** When the operator notices a tenant's components have aged out of platform support, the operator initiates the conversation — that is a different journey with the operator as the primary actor and the capability owner as the responder. It belongs in its own UX doc.
-- **End-user observability for the capability owner.** Today, observability of running tenants is purely operator-facing. The capability owner does not get a "is my thing healthy right now?" view as part of this journey; they learn about problems through their own end users (or by their own checks). Tenant-facing observability is out of scope for this UX.
+- **Running-tenant observability for the capability owner.** This onboarding journey provisions observability as part of bringing the tenant live, but it does not cover the later "is my thing healthy right now?" monitoring journey itself. That ongoing experience belongs in [Tenant-Facing Observability](./tenant-facing-observability.md), not here.
 - **Platform-side standup or rebuild.** The operator standing up the platform from scratch is one of the parent capability's other triggers, not this UX.
 - **The capability owner's tech-design phase.** The decision to use this platform was made before this journey starts. How that decision is made (build vs. buy, host-here vs. host-elsewhere) is a tech-design concern, not a hosting-UX concern.
 
