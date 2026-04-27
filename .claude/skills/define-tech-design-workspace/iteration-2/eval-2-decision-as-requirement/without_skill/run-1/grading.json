@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses to add 'use Postgres' as a requirement",
+      "passed": false,
+      "evidence": "Inserted TR-04 anyway with the Postgres content (just added an inline note that it 'reads more like a design decision')."
+    },
+    {
+      "text": "explains that 'use Postgres' is a decision (one of several options), not a requirement",
+      "passed": true,
+      "evidence": "Pushback section explains the framing issue and lists availability/RTO/RPO as the underlying requirement."
+    },
+    {
+      "text": "asks the user what the underlying requirement is",
+      "passed": true,
+      "evidence": "Lists availability/RTO and durability/RPO questions explicitly."
+    },
+    {
+      "text": "captures 'consider Postgres + logical replication' as an open question for Stage 2",
+      "passed": false,
+      "evidence": "Did NOT add as an open question; instead wrote it into a TR."
+    },
+    {
+      "text": "does NOT modify tech-requirements.md to add a Postgres-specific TR",
+      "passed": false,
+      "evidence": "Inserted new TR-04 AND renumbered existing TR-04..TR-07 \u2192 TR-05..TR-08, breaking the append-only contract that ADRs would have cited."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  }
+}

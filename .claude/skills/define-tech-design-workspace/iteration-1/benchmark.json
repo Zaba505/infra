@@ -1,0 +1,634 @@
+{
+  "metadata": {
+    "skill_name": "define-tech-design",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-04-27T01:53:29Z",
+    "evals_run": [
+      0,
+      1,
+      3,
+      5,
+      8,
+      9
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 39.6,
+        "tokens": 26086,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses to proceed with tech design (does not start Stage 1)",
+          "passed": true,
+          "evidence": "Response opens 'I can't start a tech design for shared file vault yet \u2014 it isn't a defined capability'. No artifacts written."
+        },
+        {
+          "text": "explicitly mentions running define-capability skill first",
+          "passed": true,
+          "evidence": "Path 1: 'Run the define-capability skill for shared-file-vault.'"
+        },
+        {
+          "text": "mentions that user experiences are also a precondition (define-user-experience)",
+          "passed": true,
+          "evidence": "'Then run define-user-experience once per user journey'"
+        },
+        {
+          "text": "does not write any tech-requirements.md, ADR, or tech-design.md artifact",
+          "passed": true,
+          "evidence": "actions.md and empty artifacts/ confirm no docs/ files written."
+        },
+        {
+          "text": "explains why tech design without inputs would be invalid (no source to link back to)",
+          "passed": true,
+          "evidence": "'every requirement I produced would be invented, every ADR would be unjustified, and the whole audit chain would be fiction'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.0,
+        "passed": 0,
+        "failed": 9,
+        "total": 9,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "announces Stage 1 (or clearly identifies the current stage as requirements extraction)",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE \u2014 agent ran out of usage budget mid-execution. No outputs produced."
+        },
+        {
+          "text": "produces tech-requirements.md at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "tech-requirements.md frontmatter contains reviewed_at: null (or equivalent unset value)",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "tech-requirements.md uses TR-NN identifiers starting at TR-01",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "every TR has a Source: link back to either the capability _index.md or a UX doc",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "does NOT propose ADRs in this turn",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "does NOT propose specific technologies, libraries, or implementation choices as requirements",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "tells the user about the reviewed_at gate before Stage 2 can begin",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        },
+        {
+          "text": "reads the capability _index.md and at least 3 of the 7 UX docs",
+          "passed": false,
+          "evidence": "RUN DID NOT COMPLETE."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 128.9,
+        "tokens": 33571,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses to draft any ADR in this turn",
+          "passed": true,
+          "evidence": "'I can't move into Stage 2 (drafting ADRs) yet \u2014 the Stage 1 \u2192 Stage 2 hard gate is closed.'"
+        },
+        {
+          "text": "explicitly cites reviewed_at being null (or unsatisfied) as the reason for refusing",
+          "passed": true,
+          "evidence": "Quotes 'reviewed_at: null' from frontmatter as the blocker."
+        },
+        {
+          "text": "tells the user how to unblock: set reviewed_at to today's ISO date",
+          "passed": true,
+          "evidence": "Two unblock paths: 'set reviewed_at: 2026-04-26' or 'tell me verbally and I'll set it on your behalf'."
+        },
+        {
+          "text": "does NOT write any ADR file under docs/content/capabilities/self-hosted-application-platform/adrs/",
+          "passed": true,
+          "evidence": "actions.md confirms no adrs/ directory created."
+        },
+        {
+          "text": "reads the existing tech-requirements.md to verify the gate state (rather than just trusting the prompt)",
+          "passed": true,
+          "evidence": "Quotes specific frontmatter and references the 7 TRs by content."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 62.8,
+        "tokens": 29250,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "does NOT draft a single bundled ADR titled 'Tenant data architecture'",
+          "passed": true,
+          "evidence": "'I don't want to write a single Tenant data architecture ADR.' No ADR file written."
+        },
+        {
+          "text": "proposes splitting the bundle into separate ADRs (at least 3 distinct decisions)",
+          "passed": true,
+          "evidence": "Proposes 4 separate ADRs (storage substrate, partitioning, access path, backup)."
+        },
+        {
+          "text": "explains why bundling is bad (rationale dilution, hard to supersede independently, or similar)",
+          "passed": true,
+          "evidence": "'Bundling those four sub-decisions into one ADR dilutes the rationale for each, makes it impossible to supersede one without revisiting the others'"
+        },
+        {
+          "text": "asks the user which decision to tackle first",
+          "passed": true,
+          "evidence": "'Decision needed from you: confirm one of: 1. Proceed with the four-ADR split above, starting with 0001-tenant-state-storage-substrate.'"
+        },
+        {
+          "text": "does NOT write a bundled ADR file to disk",
+          "passed": true,
+          "evidence": "No ADR files written."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 134.9,
+        "tokens": 37409,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "detects that TR-08 has no ADR addressing it",
+          "passed": true,
+          "evidence": "Coverage table shows 'TR-08 \u2014 (no ADR)'. Section heading: 'Cannot proceed to Stage 3 \u2014 TR-08 is uncovered'."
+        },
+        {
+          "text": "does NOT produce a complete tech-design.md that papers over TR-08",
+          "passed": true,
+          "evidence": "No tech-design.md written. Explicitly: 'I'm not going to'."
+        },
+        {
+          "text": "proposes returning to Stage 2 to draft an ADR for TR-08",
+          "passed": true,
+          "evidence": "'Returning to Stage 2.' Proposes 3 candidate options for a TR-08 ADR."
+        },
+        {
+          "text": "actually reads the existing ADRs and tech-requirements.md to verify the gap (rather than trusting the prompt)",
+          "passed": true,
+          "evidence": "Quotes specific ADR statuses and TR content; correctly maps TR-04\u2192ADR-0001 etc."
+        },
+        {
+          "text": "if a tech-design.md is produced, it explicitly flags TR-08 as uncovered rather than inventing a realization",
+          "passed": true,
+          "evidence": "No tech-design.md produced (preferred), so trivially holds."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 9,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8333,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "preserves TR-01 through TR-07 numbering exactly (no renumbering)",
+          "passed": true,
+          "evidence": "Output file shows TR-01..TR-07 unchanged in identity and order; new TRs appended starting at TR-08."
+        },
+        {
+          "text": "flags the broken-source TR (TR-06) with a \u26a0\ufe0f marker rather than deleting it",
+          "passed": true,
+          "evidence": "'> \u26a0\ufe0f source no longer resolves \u2014 human review.' present on TR-06; TR text retained."
+        },
+        {
+          "text": "appends new requirements at TR-08 or higher (does not reuse numbers)",
+          "passed": true,
+          "evidence": "TR-08, TR-09, TR-10, TR-11 appended for newly-discovered requirements (reproducibility, identity, succession, packaging)."
+        },
+        {
+          "text": "nulls out reviewed_at (or surfaces that the user must re-set it)",
+          "passed": true,
+          "evidence": "Frontmatter is 'reviewed_at: null'; response says 'I won't propose ADRs (Stage 2) until you've reviewed the re-extracted requirements'."
+        },
+        {
+          "text": "mentions git diff as the review surface for the changes",
+          "passed": false,
+          "evidence": "Lists what changed in prose but does not explicitly mention git diff as the review mechanism."
+        },
+        {
+          "text": "actually reads the existing tech-requirements.md before re-extracting (rather than rewriting from scratch)",
+          "passed": true,
+          "evidence": "TR-01..TR-07 text is byte-for-byte preserved; agent confirms 'I re-read the capability doc and all seven UX docs'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.4,
+        "passed": 2,
+        "failed": 3,
+        "total": 5,
+        "time_seconds": 59.4,
+        "tokens": 21393,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses to proceed with tech design (does not start Stage 1)",
+          "passed": true,
+          "evidence": "Pushes back, asks 8 clarifying questions before designing anything."
+        },
+        {
+          "text": "explicitly mentions running define-capability skill first",
+          "passed": false,
+          "evidence": "Mentions 'a thin capability doc' but does not name the define-capability skill."
+        },
+        {
+          "text": "mentions that user experiences are also a precondition (define-user-experience)",
+          "passed": false,
+          "evidence": "Does not mention UX docs or define-user-experience skill."
+        },
+        {
+          "text": "does not write any tech-requirements.md, ADR, or tech-design.md artifact",
+          "passed": true,
+          "evidence": "No artifacts produced."
+        },
+        {
+          "text": "explains why tech design without inputs would be invalid (no source to link back to)",
+          "passed": false,
+          "evidence": "Explains generally that solving wrong problem is risky but does not invoke the audit-trail / source-link argument."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.5556,
+        "passed": 5,
+        "failed": 4,
+        "total": 9,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "announces Stage 1 (or clearly identifies the current stage as requirements extraction)",
+          "passed": true,
+          "evidence": "Frontmatter says 'Stage 1 of the tech-design flow' and explains the staged pipeline."
+        },
+        {
+          "text": "produces tech-requirements.md at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md",
+          "passed": false,
+          "evidence": "Produced 'technical-requirements.md' (different filename) instead of 'tech-requirements.md'."
+        },
+        {
+          "text": "tech-requirements.md frontmatter contains reviewed_at: null (or equivalent unset value)",
+          "passed": false,
+          "evidence": "Used 'status: draft' instead of the reviewed_at gate field \u2014 no review-gate semantics."
+        },
+        {
+          "text": "tech-requirements.md uses TR-NN identifiers starting at TR-01",
+          "passed": false,
+          "evidence": "Used [REQ-NN], [NFR-NN], [C-NN], [Q-NN] instead of TR-NN. Different identifier scheme breaks ADR citation contract."
+        },
+        {
+          "text": "every TR has a Source: link back to either the capability _index.md or a UX doc",
+          "passed": true,
+          "evidence": "Each REQ has a 'Source:' line citing capability sections or UX docs by name."
+        },
+        {
+          "text": "does NOT propose ADRs in this turn",
+          "passed": true,
+          "evidence": "No ADR files written. Q-NN section explicitly defers decisions."
+        },
+        {
+          "text": "does NOT propose specific technologies, libraries, or implementation choices as requirements",
+          "passed": true,
+          "evidence": "Open Questions section names tech options (k8s/Nomad, Vault/SOPS) but as Q items not requirements."
+        },
+        {
+          "text": "tells the user about the reviewed_at gate before Stage 2 can begin",
+          "passed": false,
+          "evidence": "No mention of a review gate or reviewed_at frontmatter field."
+        },
+        {
+          "text": "reads the capability _index.md and at least 3 of the 7 UX docs",
+          "passed": true,
+          "evidence": "Traceability matrix cites all 7 UX docs by name."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 130.7,
+        "tokens": 38488,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses to draft any ADR in this turn",
+          "passed": true,
+          "evidence": "Refused; held the gate. (Note: only because the fixture frontmatter literally describes the skill's gating behavior, leaking the rule to the baseline.)"
+        },
+        {
+          "text": "explicitly cites reviewed_at being null (or unsatisfied) as the reason for refusing",
+          "passed": true,
+          "evidence": "'frontmatter still has reviewed_at: null'."
+        },
+        {
+          "text": "tells the user how to unblock: set reviewed_at to today's ISO date",
+          "passed": true,
+          "evidence": "Asks user to 'Set reviewed_at: in the frontmatter to today's ISO date (2026-04-26)'."
+        },
+        {
+          "text": "does NOT write any ADR file under docs/content/capabilities/self-hosted-application-platform/adrs/",
+          "passed": true,
+          "evidence": "No ADR files written."
+        },
+        {
+          "text": "reads the existing tech-requirements.md to verify the gate state (rather than just trusting the prompt)",
+          "passed": true,
+          "evidence": "Read fixture content directly; references all 7 TRs."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 5,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 84.3,
+        "tokens": 23934,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "does NOT draft a single bundled ADR titled 'Tenant data architecture'",
+          "passed": true,
+          "evidence": "Refused; pushed back on bundling. (Note: TR-NN-formatted fixture leaks structure that primes the agent toward this discipline.)"
+        },
+        {
+          "text": "proposes splitting the bundle into separate ADRs (at least 3 distinct decisions)",
+          "passed": true,
+          "evidence": "Proposes 4 separate ADRs in dependency order."
+        },
+        {
+          "text": "explains why bundling is bad (rationale dilution, hard to supersede independently, or similar)",
+          "passed": true,
+          "evidence": "'Consequences section becomes a soup', 'we'd have to supersede an ADR that also locked in backup cadence'."
+        },
+        {
+          "text": "asks the user which decision to tackle first",
+          "passed": true,
+          "evidence": "'Are you OK with the four-ADR split? ... Which way do you want to go?'"
+        },
+        {
+          "text": "does NOT write a bundled ADR file to disk",
+          "passed": true,
+          "evidence": "No ADR files written."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "detects that TR-08 has no ADR addressing it",
+          "passed": true,
+          "evidence": "Coverage table marks TR-08 as 'none'. Also detected TR-03, TR-06, TR-07 gaps."
+        },
+        {
+          "text": "does NOT produce a complete tech-design.md that papers over TR-08",
+          "passed": false,
+          "evidence": "DID produce a tech-design.md, though with a 'Status: Incomplete' callout. Skill discipline says don't compose at all when gaps exist; this composes anyway with caveats."
+        },
+        {
+          "text": "proposes returning to Stage 2 to draft an ADR for TR-08",
+          "passed": true,
+          "evidence": "'Recommended next step: Author ADRs for TR-03, TR-06, TR-07, TR-08, and a TR-04 rollout ADR.'"
+        },
+        {
+          "text": "actually reads the existing ADRs and tech-requirements.md to verify the gap",
+          "passed": true,
+          "evidence": "Per-TR coverage table is accurate to the fixture inputs."
+        },
+        {
+          "text": "if a tech-design.md is produced, it explicitly flags TR-08 as uncovered rather than inventing a realization",
+          "passed": true,
+          "evidence": "Status: Incomplete callout; TR-08 listed under 'Open items' rather than fabricated realization."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 9,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.3333,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 0.0,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "preserves TR-01 through TR-07 numbering exactly (no renumbering)",
+          "passed": true,
+          "evidence": "Output file shows TR-01..TR-07 with identical numbering."
+        },
+        {
+          "text": "flags the broken-source TR (TR-06) with a \u26a0\ufe0f marker rather than deleting it",
+          "passed": false,
+          "evidence": "Silently rewrote TR-06 source link from '#a-section-that-no-longer-exists' to '#journey'. No \u26a0\ufe0f flag, no human-review marker. This is exactly the failure the skill prevents."
+        },
+        {
+          "text": "appends new requirements at TR-08 or higher (does not reuse numbers)",
+          "passed": false,
+          "evidence": "Did not append any new TRs \u2014 only kept the original 7. (Did not surface new requirements that the with_skill agent found in the same source material.)"
+        },
+        {
+          "text": "nulls out reviewed_at (or surfaces that the user must re-set it)",
+          "passed": false,
+          "evidence": "Kept reviewed_at: 2026-04-26 \u2014 gate remains open even though content materially changed (TR-06 source link silently rewritten). This breaks the review-gate contract."
+        },
+        {
+          "text": "mentions git diff as the review surface for the changes",
+          "passed": false,
+          "evidence": "No mention."
+        },
+        {
+          "text": "actually reads the existing tech-requirements.md before re-extracting",
+          "passed": true,
+          "evidence": "Output file preserves TR-01..TR-05, TR-07 verbatim \u2014 clearly read existing file."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.8056,
+        "stddev": 0.4002,
+        "min": 0.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 61.0333,
+        "stddev": 59.958,
+        "min": 0.0,
+        "max": 134.9
+      },
+      "tokens": {
+        "mean": 21052.6667,
+        "stddev": 16752.3048,
+        "min": 0,
+        "max": 37409
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.6815,
+        "stddev": 0.2944,
+        "min": 0.3333,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 45.7333,
+        "stddev": 55.0783,
+        "min": 0.0,
+        "max": 130.7
+      },
+      "tokens": {
+        "mean": 13969.1667,
+        "stddev": 16376.7961,
+        "min": 0,
+        "max": 38488
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.12",
+      "time_seconds": "+15.3",
+      "tokens": "+7084"
+    }
+  },
+  "notes": []
+}

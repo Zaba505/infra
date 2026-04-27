@@ -1,0 +1,13 @@
+{
+  "eval_id": 9,
+  "eval_name": "re-extraction-preserves-tr-numbers",
+  "prompt": "Re-extract tech-requirements.md for the self-hosted-application-platform capability. The existing file has TR-01 through TR-07 with reviewed_at: 2026-04-20. The file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md and one of the existing UX-sourced TRs has a source link that no longer resolves.",
+  "assertions": [
+    {"text": "preserves TR-01 through TR-07 numbering exactly (no renumbering)"},
+    {"text": "flags the broken-source TR (TR-06) with a ⚠️ marker rather than deleting it"},
+    {"text": "appends new requirements at TR-08 or higher (does not reuse numbers)"},
+    {"text": "nulls out reviewed_at (or surfaces that the user must re-set it)"},
+    {"text": "mentions git diff as the review surface for the changes"},
+    {"text": "actually reads the existing tech-requirements.md before re-extracting (rather than rewriting from scratch)"}
+  ]
+}

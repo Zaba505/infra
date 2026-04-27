@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "decision-disguised-as-requirement",
+  "prompt": "Add: TR-04: use Postgres for tenant metadata storage with logical replication for cross-region failover.",
+  "assertions": [
+    {"text": "refuses to add 'use Postgres' as a requirement"},
+    {"text": "explains that 'use Postgres' is a decision (one of several options), not a requirement"},
+    {"text": "asks the user what the underlying requirement is (durability, query patterns, failover behavior)"},
+    {"text": "captures 'consider Postgres + logical replication' as an open question for Stage 2 (not as a TR)"},
+    {"text": "does NOT modify tech-requirements.md to add a Postgres-specific TR"}
+  ]
+}

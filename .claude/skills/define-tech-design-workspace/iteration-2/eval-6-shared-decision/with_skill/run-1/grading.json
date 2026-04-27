@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes this as a cross-capability decision (touches Cloudflare topology, identity, or shared infra)",
+      "passed": true,
+      "evidence": "Lists three specific triggers: Cloudflare topology, identity, networking."
+    },
+    {
+      "text": "refuses to draft it as a capability-scoped ADR under docs/content/capabilities/self-hosted-application-platform/adrs/",
+      "passed": true,
+      "evidence": "'I'm stopping rather than writing the ADR you asked for.' No ADR file written."
+    },
+    {
+      "text": "surfaces that it belongs as a shared ADR in docs/content/r&d/adrs/",
+      "passed": true,
+      "evidence": "'shared, repo-wide, owned at docs/content/r&d/adrs/'"
+    },
+    {
+      "text": "offers to defer the decision and continue with other Stage 2 work, or pause",
+      "passed": true,
+      "evidence": "Three options: defer-and-continue, pause, or both."
+    },
+    {
+      "text": "does NOT write a capability-scoped ADR file for this decision",
+      "passed": true,
+      "evidence": "No ADR files written. Bonus: caught substantive bug \u2014 mTLS at edge \u2260 service-to-service auth."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

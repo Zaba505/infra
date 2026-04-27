@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "proposes options that fit the repo's house style from CLAUDE.md (chi router, bedrock config-from-env, protobuf, pkg/errorpb)",
+      "passed": true,
+      "evidence": "Recommended chi + protobuf + Cloudflare \u2192 GCP HTTPS LB with mTLS, references services/machine/."
+    },
+    {
+      "text": "does NOT silently invent humus framework usage",
+      "passed": true,
+      "evidence": "No mention of humus."
+    },
+    {
+      "text": "treats house patterns as constraints to cite, not as the only option",
+      "passed": true,
+      "evidence": "Considered gRPC, GraphQL, JSON REST, Cloud Run direct invocation."
+    },
+    {
+      "text": "decision rationale references inherited repo patterns",
+      "passed": true,
+      "evidence": "Cites cloud/rest-api/, cloud/https-load-balancer/, cloud/mtls/cloudflare-gcp/ modules."
+    },
+    {
+      "text": "decision rationale references TR-NN identifiers (skill) OR cites at least one tech requirement (baseline)",
+      "passed": true,
+      "evidence": "Cites TR-01, TR-02, TR-04, TR-07 explicitly."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "eval_id": 6,
+  "eval_name": "shared-decision-flagged",
+  "prompt": "Draft an ADR for service-to-service mTLS terminated at Cloudflare with 30-day cert rotation.",
+  "assertions": [
+    {"text": "recognizes this as a cross-capability decision (touches Cloudflare topology, identity, or shared infra)"},
+    {"text": "refuses to draft it as a capability-scoped ADR under docs/content/capabilities/self-hosted-application-platform/adrs/"},
+    {"text": "surfaces that it belongs as a shared ADR in docs/content/r&d/adrs/"},
+    {"text": "offers to defer the decision and continue with other Stage 2 work, or pause"},
+    {"text": "does NOT write a capability-scoped ADR file for this decision"}
+  ]
+}

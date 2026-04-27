@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses to proceed with tech design (does not start Stage 1)",
+      "passed": true,
+      "evidence": "Pushes back, asks 8 clarifying questions before designing anything."
+    },
+    {
+      "text": "explicitly mentions running define-capability skill first",
+      "passed": false,
+      "evidence": "Mentions 'a thin capability doc' but does not name the define-capability skill."
+    },
+    {
+      "text": "mentions that user experiences are also a precondition (define-user-experience)",
+      "passed": false,
+      "evidence": "Does not mention UX docs or define-user-experience skill."
+    },
+    {
+      "text": "does not write any tech-requirements.md, ADR, or tech-design.md artifact",
+      "passed": true,
+      "evidence": "No artifacts produced."
+    },
+    {
+      "text": "explains why tech design without inputs would be invalid (no source to link back to)",
+      "passed": false,
+      "evidence": "Explains generally that solving wrong problem is risky but does not invoke the audit-trail / source-link argument."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  }
+}

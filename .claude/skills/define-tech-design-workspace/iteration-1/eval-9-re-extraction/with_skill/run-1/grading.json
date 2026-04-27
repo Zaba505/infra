@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "text": "preserves TR-01 through TR-07 numbering exactly (no renumbering)",
+      "passed": true,
+      "evidence": "Output file shows TR-01..TR-07 unchanged in identity and order; new TRs appended starting at TR-08."
+    },
+    {
+      "text": "flags the broken-source TR (TR-06) with a \u26a0\ufe0f marker rather than deleting it",
+      "passed": true,
+      "evidence": "'> \u26a0\ufe0f source no longer resolves \u2014 human review.' present on TR-06; TR text retained."
+    },
+    {
+      "text": "appends new requirements at TR-08 or higher (does not reuse numbers)",
+      "passed": true,
+      "evidence": "TR-08, TR-09, TR-10, TR-11 appended for newly-discovered requirements (reproducibility, identity, succession, packaging)."
+    },
+    {
+      "text": "nulls out reviewed_at (or surfaces that the user must re-set it)",
+      "passed": true,
+      "evidence": "Frontmatter is 'reviewed_at: null'; response says 'I won't propose ADRs (Stage 2) until you've reviewed the re-extracted requirements'."
+    },
+    {
+      "text": "mentions git diff as the review surface for the changes",
+      "passed": false,
+      "evidence": "Lists what changed in prose but does not explicitly mention git diff as the review mechanism."
+    },
+    {
+      "text": "actually reads the existing tech-requirements.md before re-extracting (rather than rewriting from scratch)",
+      "passed": true,
+      "evidence": "TR-01..TR-07 text is byte-for-byte preserved; agent confirms 'I re-read the capability doc and all seven UX docs'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333
+  }
+}

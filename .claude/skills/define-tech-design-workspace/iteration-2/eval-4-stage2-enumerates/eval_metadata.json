@@ -1,0 +1,12 @@
+{
+  "eval_id": 4,
+  "eval_name": "stage-2-enumerates-before-solving",
+  "prompt": "Tech-requirements.md is reviewed. Let's do the ADRs.",
+  "assertions": [
+    {"text": "does NOT immediately start drafting an ADR file"},
+    {"text": "first reads tech-requirements.md before proposing anything"},
+    {"text": "enumerates the discrete decisions the requirements force (lists multiple candidate ADRs)"},
+    {"text": "asks the user to confirm the decision list before proceeding"},
+    {"text": "does NOT write any ADR file to disk in this turn"}
+  ]
+}
