@@ -12,18 +12,18 @@ consulted: []
 informed: []
 ---
 
-**Parent capability:** [Self-Hosted Application Platform](../_index.md)
-**Addresses requirements:** [TR-02](../tech-requirements.md#tr-02-provide-persistent-storage-as-a-tenant-offering), [TR-05](../tech-requirements.md#tr-05-provide-backup-and-disaster-recovery-of-tenant-data), [TR-15](../tech-requirements.md#tr-15-support-tenant-lifecycle-stage-live--eviction-frozen-computenetwork-deprovisioned-data-read-only--tenant-accessible-copy-removed-at-30-days), [TR-32](../tech-requirements.md#tr-32-per-tenant-authentication-and-isolation-strong-enough-that-no-tenant-or-its-capability-owner-via-the-observability-offering-can-read-another-tenants-data-or-signals), [TR-33](../tech-requirements.md#tr-33-routine-platform-operation-must-fit-within-2-hoursweek-of-operator-time)
+**Parent capability:** [Self-Hosted Application Platform]({{< relref "../_index.md" >}})
+**Addresses requirements:** [TR-02]({{< relref "../tech-requirements.md#tr-02" >}}), [TR-05]({{< relref "../tech-requirements.md#tr-05" >}}), [TR-15]({{< relref "../tech-requirements.md#tr-15" >}}), [TR-32]({{< relref "../tech-requirements.md#tr-32" >}}), [TR-33]({{< relref "../tech-requirements.md#tr-33" >}})
 
-## Context and Problem Statement
+## Context and Problem Statement {#context}
 
-[ADR-0001](./0001-public-private-infrastructure-split.md) places bulk persistent storage on the home-lab side. [ADR-0002](./0002-compute-substrate.md) chose Kubernetes. This ADR decides what persistent-storage *offerings* the platform exposes to tenants and how the eviction-frozen state from [TR-15](../tech-requirements.md#tr-15-support-tenant-lifecycle-stage-live--eviction-frozen-computenetwork-deprovisioned-data-read-only--tenant-accessible-copy-removed-at-30-days) works against them.
+[ADR-0001]({{< relref "0001-public-private-infrastructure-split.md" >}}) places bulk persistent storage on the home-lab side. [ADR-0002]({{< relref "0002-compute-substrate.md" >}}) chose Kubernetes. This ADR decides what persistent-storage *offerings* the platform exposes to tenants and how the eviction-frozen state from [TR-15]({{< relref "../tech-requirements.md#tr-15" >}}) works against them.
 
-There is real tension to resolve here. On one side, tenants will need different shapes of storage over time — object stores for media, relational DBs for transactional data, possibly graph or time-series later. On the other side, the parent capability's *evolves with its tenants* rule says the platform should grow when tenants need it, not before. Adding three managed offerings up front, ahead of any tenant who needs them, fails that rule by going ahead of the tenants and inflates [TR-33](../tech-requirements.md#tr-33-routine-platform-operation-must-fit-within-2-hoursweek-of-operator-time) routine maintenance for offerings nobody yet uses.
+There is real tension to resolve here. On one side, tenants will need different shapes of storage over time — object stores for media, relational DBs for transactional data, possibly graph or time-series later. On the other side, the parent capability's *evolves with its tenants* rule says the platform should grow when tenants need it, not before. Adding three managed offerings up front, ahead of any tenant who needs them, fails that rule by going ahead of the tenants and inflates [TR-33]({{< relref "../tech-requirements.md#tr-33" >}}) routine maintenance for offerings nobody yet uses.
 
 The reconciliation: pick a foundational primitive that *every* higher-level storage offering can be built on, and treat each higher-level offering as its own platform offering with its own ADR, brought in when the first tenant needs it.
 
-## Decision Drivers
+## Decision Drivers {#decision-drivers}
 
 - **TR-02 — persistent storage as a tenant offering.** Some persistent storage must exist from day one, because no realistic tenant runs without persistence.
 - **The capability rule "the capability evolves with its tenants."** The platform should grow when tenants demand it, not pre-emptively. Higher-level managed offerings should be ADRs in their own right.
@@ -31,9 +31,9 @@ The reconciliation: pick a foundational primitive that *every* higher-level stor
 - **TR-15 eviction-frozen state.** Block has a clean substrate-level answer (CSI volume snapshot, mount read-only); managed offerings will each define their own freeze semantics in their own ADRs.
 - **TR-05 backup/DR.** Block backup is generic (snapshot + ship snapshot off-site). Managed-offering backup is offering-specific (logical dumps, bucket replication, etc.) and lives with each managed offering's ADR.
 - **TR-33 (≤2 hr/week).** Each offering carries weekly cost. Adding a managed offering before a tenant is using it pays cost for nothing.
-- **TR-17 (≤1 hr rebuild).** Each offering eats rebuild budget. Block alone keeps Phase 2 of the rebuild ([stand-up-the-platform §4](../user-experiences/stand-up-the-platform.md#4-phase-2--core-platform-services)) tight.
+- **TR-17 (≤1 hr rebuild).** Each offering eats rebuild budget. Block alone keeps Phase 2 of the rebuild ([stand-up-the-platform §4]({{< relref "../user-experiences/stand-up-the-platform.md" >}})) tight.
 
-## Considered Options
+## Considered Options {#considered-options}
 
 ### Option A — Block only as the foundational primitive; managed offerings are separate ADRs, born per tenant demand
 
@@ -67,7 +67,7 @@ The lean version: block forever, every tenant ships its own everything.
 - Pros: smallest possible platform surface forever.
 - Cons: actively contradicts the *evolves with its tenants* rule the moment a second tenant needs the same shape and the platform refuses to absorb the leverage; pushes maintenance back onto every tenant separately; produces N copies of "your own Postgres in a pod" — exactly the per-capability re-litigation the parent capability exists to avoid.
 
-## Decision Outcome
+## Decision Outcome {#decision-outcome}
 
 Chosen option: **Option A — CSI-backed block storage is the foundational persistent-storage primitive. Higher-level managed offerings (object, relational, graph, time-series, etc.) are separate platform offerings, each with its own ADR, drafted when a tenant first needs them under the *evolves with its tenants* rule.**
 
@@ -81,14 +81,14 @@ This option is chosen because:
 
 This ADR commits only to the foundational primitive: **CSI-compatible block storage, snapshotable, exposed to tenants as PVCs**. The specific CSI driver / product (e.g. Longhorn, Rook-Ceph, local-path-provisioner with snapshot support, or another) is deferred to the deployment-time decision; this ADR pins the constraint as "CSI-compatible and snapshotable," not the product.
 
-### Consequences
+### Consequences {#consequences}
 
 - **Good, because** the platform's day-one storage surface is exactly one offering, with one operational pattern. TR-33 is honored.
 - **Good, because** TR-15 freeze and TR-05 backup at the block layer are simple and uniform — the export tool (TR-14) reads from a snapshot mounted read-only, regardless of what was on the volume.
 - **Good, because** every future managed-offering ADR composes onto a stable foundation rather than re-deciding the foundation.
 - **Good, because** the *evolves with its tenants* rule is honored mechanically: managed offerings exist iff tenants justify them.
 - **Bad, because** the *first* tenant of any new managed shape pays the cost of shipping that shape inside their own pod. They knew this when they submitted their tech design (which named the platform as host), so it is a known cost rather than a surprise — but it is a real cost.
-- **Bad, because** the platform now has a "second tenant of shape X" trip-wire that is partly social: the operator has to actually notice the pattern and draft the ADR, not let two tenants both ship their own Postgres pod. The host-a-capability "new offering needed" branch ([§3b](../user-experiences/host-a-capability.md#3-resolution--one-of-three-branches)) is the place this is meant to be caught, but absent a deliberate review the trip-wire can be missed.
+- **Bad, because** the platform now has a "second tenant of shape X" trip-wire that is partly social: the operator has to actually notice the pattern and draft the ADR, not let two tenants both ship their own Postgres pod. The host-a-capability "new offering needed" branch ([§3b]({{< relref "../user-experiences/host-a-capability.md" >}})) is the place this is meant to be caught, but absent a deliberate review the trip-wire can be missed.
 - **Bad, because** managed-offering ADRs drafted later may discover that block alone is *not* the right substrate for them (e.g. a future graph DB might prefer a particular file-system layout or object-store-backed storage that itself rests on a different primitive). When that happens, that ADR is allowed to introduce a new substrate; this ADR does not promise that block is the *only* substrate forever, only that it is the day-one foundational primitive.
 - **Requires:**
   - ADR #7 (backup & DR) defines how block snapshots reach the cloud archive — the offering-agnostic backup path.
@@ -97,18 +97,18 @@ This ADR commits only to the foundational primitive: **CSI-compatible block stor
   - **Future managed-offering ADRs**, drafted as tenants demand them, will compose on this primitive. Each will own its own freeze, backup, and admission semantics in its own ADR.
   - The host-a-capability review (§2) gains an explicit check: "is this the second tenant shipping its own X-shaped storage in a pod?" If yes, draft a managed-offering ADR before approving.
 
-### Realization
+### Realization {#realization}
 
 How this decision shows up in the repo:
 
-- **The cluster's storage class** is a single `StorageClass` resource backed by the chosen CSI driver, expressed in the platform definitions and applied during Phase 2 of the rebuild ([stand-up-the-platform §4](../user-experiences/stand-up-the-platform.md#4-phase-2--core-platform-services)).
+- **The cluster's storage class** is a single `StorageClass` resource backed by the chosen CSI driver, expressed in the platform definitions and applied during Phase 2 of the rebuild ([stand-up-the-platform §4]({{< relref "../user-experiences/stand-up-the-platform.md" >}})).
 - **A `VolumeSnapshotClass`** is provisioned alongside, used by both backup (TR-05) and the eviction-freeze flow (TR-15).
 - **Per-tenant PVCs** are emitted by the translator from ADR #3 against the tenant's declared storage need (TR-26). Quotas (TR-13 / TR-26) are expressed via `ResourceQuota` in the tenant's namespace.
 - **The eviction-freeze flow**, when triggered by the eviction lifecycle (ADR #17), takes a `VolumeSnapshot` of every PVC in the tenant's namespace, deprovisions compute and network, and leaves the snapshot accessible to the export tool (TR-14) for 30 days.
 - **Managed-offering ADRs**, when written, will land at `adrs/00NN-{name}-storage-offering.md` and will reference this ADR as the substrate they compose on.
 - **A trip-wire note** lives in the host-a-capability review checklist (or equivalent operator-side runbook): if a tenant submission ships its own X-shaped storage and another tenant has done the same, draft a managed-offering ADR.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 - **Which CSI driver** (Longhorn, Rook-Ceph, local-path-provisioner with snapshots, OpenEBS, …). Deferred to the deployment-time decision; this ADR pins "CSI-compatible and snapshotable."
 - **Single-node failure mode for block.** Whether home-lab block storage is replicated across nodes, or single-node-with-backup, depends on the CSI driver and is decided alongside the driver. Replicated is the convenience/resiliency-favoring choice; single-node-with-backup is the simpler one. Either is consistent with this ADR.

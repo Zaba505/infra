@@ -12,18 +12,18 @@ consulted: []
 informed: []
 ---
 
-**Parent capability:** [Self-Hosted Application Platform](../_index.md)
-**Addresses requirements:** [TR-27](../tech-requirements.md#tr-27-span-public-cloud-and-privatehome-lab-infrastructure-with-the-connectivity-between-them-part-of-the-foundation), [TR-01](../tech-requirements.md#tr-01-provide-compute-as-a-tenant-offering), [TR-02](../tech-requirements.md#tr-02-provide-persistent-storage-as-a-tenant-offering), [TR-03](../tech-requirements.md#tr-03-provide-network-reachability--internal-between-tenants-and-external-for-end-users), [TR-05](../tech-requirements.md#tr-05-provide-backup-and-disaster-recovery-of-tenant-data), [TR-17](../tech-requirements.md#tr-17-definitions-driven-single-entry-point-rebuild-of-the-platform-end-to-end), [TR-22](../tech-requirements.md#tr-22-tracked-changes-and-immutability-for-all-platform-state-modifying-actions), [TR-32](../tech-requirements.md#tr-32-per-tenant-authentication-and-isolation-strong-enough-that-no-tenant-or-its-capability-owner-via-the-observability-offering-can-read-another-tenants-data-or-signals), [TR-33](../tech-requirements.md#tr-33-routine-platform-operation-must-fit-within-2-hoursweek-of-operator-time)
+**Parent capability:** [Self-Hosted Application Platform]({{< relref "../_index.md" >}})
+**Addresses requirements:** [TR-27]({{< relref "../tech-requirements.md#tr-27" >}}), [TR-01]({{< relref "../tech-requirements.md#tr-01" >}}), [TR-02]({{< relref "../tech-requirements.md#tr-02" >}}), [TR-03]({{< relref "../tech-requirements.md#tr-03" >}}), [TR-05]({{< relref "../tech-requirements.md#tr-05" >}}), [TR-17]({{< relref "../tech-requirements.md#tr-17" >}}), [TR-22]({{< relref "../tech-requirements.md#tr-22" >}}), [TR-32]({{< relref "../tech-requirements.md#tr-32" >}}), [TR-33]({{< relref "../tech-requirements.md#tr-33" >}})
 
-## Context and Problem Statement
+## Context and Problem Statement {#context}
 
-[TR-27](../tech-requirements.md#tr-27-span-public-cloud-and-privatehome-lab-infrastructure-with-the-connectivity-between-them-part-of-the-foundation) forces the platform to span public-cloud and private/home-lab infrastructure, with the connectivity between them part of the foundation. The capability rule that grounds this — *"self-hosted means the operator controls end-to-end, not that every component runs on hardware the operator owns"* — leaves the *split* unspecified: any of the platform's offerings (TR-01 compute, TR-02 storage, TR-03 reachability, TR-04 identity, TR-05 backup, TR-06 observability) may be placed on either side.
+[TR-27]({{< relref "../tech-requirements.md#tr-27" >}}) forces the platform to span public-cloud and private/home-lab infrastructure, with the connectivity between them part of the foundation. The capability rule that grounds this — *"self-hosted means the operator controls end-to-end, not that every component runs on hardware the operator owns"* — leaves the *split* unspecified: any of the platform's offerings (TR-01 compute, TR-02 storage, TR-03 reachability, TR-04 identity, TR-05 backup, TR-06 observability) may be placed on either side.
 
 This ADR decides where each major offering category lives, and how the two sides are connected. Subsequent ADRs (compute substrate, storage shape, identity product, etc.) will pick concrete implementations within whichever side this ADR places them on; the placement is what they need to know.
 
 The capability's own tiebreaker is explicit: *reproducibility beats vendor independence beats minimizing operator effort*, and *cost is secondary to convenience and resiliency*. The split must be evaluated against those, not against ease of any particular offering's implementation.
 
-## Decision Drivers
+## Decision Drivers {#decision-drivers}
 
 - **TR-27** — must span both sides; connectivity is part of the foundation, not glue added later.
 - **TR-17** — full rebuild ≤1 hour. The rebuild has to provision *both* sides, so the more cross-boundary coordination at startup, the harder the KPI.
@@ -33,7 +33,7 @@ The capability's own tiebreaker is explicit: *reproducibility beats vendor indep
 - **Capability tiebreaker — vendor independence > minimizing operator effort.** Pure cloud is the operator-effort-minimizing option but trades against vendor independence.
 - **Capability tiebreaker — cost secondary to convenience/resiliency.** Cost is allowed to grow when it buys meaningful convenience or resiliency; it is not allowed to grow gratuitously.
 
-## Considered Options
+## Considered Options {#considered-options}
 
 ### Option A — Cloud-heavy (everything in cloud, home-lab as secondary/staging)
 
@@ -60,7 +60,7 @@ No global rule; each offering placed where it is locally optimal. E.g. compute h
 
 Whichever split is chosen, the cloud↔home-lab link must be operator-controllable, reproducible from definitions (TR-17, TR-22), and cheap. Vendor private-interconnect products fail the cost test at personal scale and fail the vendor-independence tiebreaker. A self-hosted VPN (e.g. WireGuard) terminated on both sides satisfies all three. The specific VPN product is left to the side that hosts the terminator and is not material to this ADR's split.
 
-## Decision Outcome
+## Decision Outcome {#decision-outcome}
 
 Chosen option: **Option B — Home-lab-heavy with a small cloud edge** (compute / persistent storage / backup primary / observability collection in home-lab; external ingress and off-site backup archive in cloud), connected by a self-hosted VPN.
 
@@ -70,21 +70,21 @@ This option is chosen because:
 - It makes TR-27 (spanning) *load-bearing* rather than ceremonial: external tenant traffic and the off-site archive really do cross the boundary, so the connectivity is exercised continuously and stays trustworthy.
 - TR-22 enforcement is cheap on the cloud side because the cloud side is small; on the home-lab side, the operator already has root and can lock down the change paths directly.
 - TR-32 isolation reasoning is concentrated on the home-lab side, where the bulk of tenant state lives and the isolation mechanism (chosen in later ADRs) operates within a single substrate.
-- The acknowledged downsides — ISP-outage tenant reachability, harder home-lab provisioning during TR-17 rebuild — are explicitly within the capability's tolerance: there is no availability SLA, and the rebuild KPI is a target with a tracked-issue follow-up when missed (per [stand-up-the-platform §7](../user-experiences/stand-up-the-platform.md#7-note-the-wall-clock-and-close-out)).
+- The acknowledged downsides — ISP-outage tenant reachability, harder home-lab provisioning during TR-17 rebuild — are explicitly within the capability's tolerance: there is no availability SLA, and the rebuild KPI is a target with a tracked-issue follow-up when missed (per [stand-up-the-platform §7]({{< relref "../user-experiences/stand-up-the-platform.md" >}})).
 
 The cloud↔home-lab link is a self-hosted VPN, terminated by the operator on both sides; the specific product is deferred to where it is deployed and is not a separate ADR.
 
-### Consequences
+### Consequences {#consequences}
 
 - **Good, because** the home-lab carries the substrate the operator most wants to control (tenant compute and tenant data), and the cloud carries only what objectively needs the public internet (ingress) or off-site placement (archive). Each side has a clear reason to exist.
 - **Good, because** the cloud surface is small and bounded, which makes the cloud-side definitions (TR-22) compact and easy to audit.
 - **Good, because** vendor swap on the cloud edge is a constrained problem (replace ingress + archive on the new vendor) rather than an everything-moves migration.
 - **Bad, because** ISP or home-lab power loss takes hosted tenants offline. End users see whatever connection failure the underlying infra produces. This is consistent with the capability's no-SLA stance but should be communicated to capability owners during onboarding.
-- **Bad, because** TR-17 rebuild must include home-lab provisioning. The 1-hour budget is tighter against this option than against Option A, and rebuild drills (per [stand-up-the-platform §Entry Point](../user-experiences/stand-up-the-platform.md#entry-point)) must really be run on parallel home-lab hardware to be honest.
+- **Bad, because** TR-17 rebuild must include home-lab provisioning. The 1-hour budget is tighter against this option than against Option A, and rebuild drills (per [stand-up-the-platform §Entry Point]({{< relref "../user-experiences/stand-up-the-platform.md" >}})) must really be run on parallel home-lab hardware to be honest.
 - **Bad, because** the home-lab is a real DR event surface — hardware loss, fire, theft. Mitigation is the cloud-side off-site archive (TR-05) plus the export tooling (TR-14); both must actually work, not just exist.
-- **Requires:** ADR #2 (compute substrate) chooses a substrate that runs on home-lab hardware. ADR #4 (storage offering) chooses a storage stack the home-lab can host with the off-site archive in cloud. ADR #6 (network reachability) addresses the cloud-edge ingress mechanism and home-lab egress for archive uploads. ADR #7 (backup & DR) pairs a home-lab primary with a cloud archive tier. ADR #12 (definitions tooling) chooses a tool capable of provisioning *both* sides from the same repo. The cloud↔home-lab VPN is realized as part of Phase 1 (Foundations) of [stand-up-the-platform](../user-experiences/stand-up-the-platform.md#3-phase-1--foundations).
+- **Requires:** ADR #2 (compute substrate) chooses a substrate that runs on home-lab hardware. ADR #4 (storage offering) chooses a storage stack the home-lab can host with the off-site archive in cloud. ADR #6 (network reachability) addresses the cloud-edge ingress mechanism and home-lab egress for archive uploads. ADR #7 (backup & DR) pairs a home-lab primary with a cloud archive tier. ADR #12 (definitions tooling) chooses a tool capable of provisioning *both* sides from the same repo. The cloud↔home-lab VPN is realized as part of Phase 1 (Foundations) of [stand-up-the-platform]({{< relref "../user-experiences/stand-up-the-platform.md" >}}).
 
-### Realization
+### Realization {#realization}
 
 How this decision shows up in the repo:
 
@@ -93,7 +93,7 @@ How this decision shows up in the repo:
 - **A single top-level entry point** (per TR-17) drives both sides; the rebuild flow's Phase 1 (Foundations) is where the cross-boundary VPN is brought up and validated before any offering depending on it is provisioned.
 - **`services/`** Go services, where any are needed for platform offerings (e.g. a custom export-tooling service), default to running on the home-lab compute substrate. Cloud-side Go services should be the exception, justified by their offering being placed on the cloud side by this ADR.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 - **Which cloud provider hosts the cloud edge?** Not decided here. The cloud edge is small enough that this is a follow-on choice with bounded consequences; a one-line decision can name it (or it can be left at "the cloud edge" in the design and named when first deployed).
 - **Identity placement.** Deferred to ADR #5. If it lands on a self-hosted product, it can be placed on either side at that point. The cloud edge is reserved for ingress + archive in this ADR; identity is not assumed to live there.

@@ -12,12 +12,12 @@ consulted: []
 informed: []
 ---
 
-**Parent capability:** [Self-Hosted Application Platform](../_index.md)
-**Addresses requirements:** [TR-10](../tech-requirements.md#tr-10-provide-a-packaging-form-the-platform-accepts-for-all-tenant-components), [TR-11](../tech-requirements.md#tr-11-provide-a-secret-management-offering-tenants-can-register-secrets-with-and-reference-by-name), [TR-12](../tech-requirements.md#tr-12-provide-a-one-shot-migration-process-offering-that-runs-tenant-supplied-migration-jobs), [TR-22](../tech-requirements.md#tr-22-tracked-changes-and-immutability-for-all-platform-state-modifying-actions), [TR-24](../tech-requirements.md#tr-24-tenant-provisioning-must-run-only-through-the-platforms-existing-definitions), [TR-26](../tech-requirements.md#tr-26-tenants-declare-resource-needs-at-onboarding-and-on-every-modify-the-platform-admits-or-refuses-based-on-those-declarations), [TR-31](../tech-requirements.md#tr-31-migration-jobs-declare-a-re-run-contract-that-the-platform-records-and-respects), [TR-32](../tech-requirements.md#tr-32-per-tenant-authentication-and-isolation-strong-enough-that-no-tenant-or-its-capability-owner-via-the-observability-offering-can-read-another-tenants-data-or-signals)
+**Parent capability:** [Self-Hosted Application Platform]({{< relref "../_index.md" >}})
+**Addresses requirements:** [TR-10]({{< relref "../tech-requirements.md#tr-10" >}}), [TR-11]({{< relref "../tech-requirements.md#tr-11" >}}), [TR-12]({{< relref "../tech-requirements.md#tr-12" >}}), [TR-22]({{< relref "../tech-requirements.md#tr-22" >}}), [TR-24]({{< relref "../tech-requirements.md#tr-24" >}}), [TR-26]({{< relref "../tech-requirements.md#tr-26" >}}), [TR-31]({{< relref "../tech-requirements.md#tr-31" >}}), [TR-32]({{< relref "../tech-requirements.md#tr-32" >}})
 
-## Context and Problem Statement
+## Context and Problem Statement {#context}
 
-[ADR-0002](./0002-compute-substrate.md) chose Kubernetes as the compute substrate. That constrains but does not fully decide the tenant packaging form: K8s can accept anything from "an OCI image and we'll write the manifests for you" to "a full Helm chart" to "raw Deployment YAML." TR-10 demands one accepted form for tenant components, and that same form must be acceptable for migration-process artifacts (TR-12).
+[ADR-0002]({{< relref "0002-compute-substrate.md" >}}) chose Kubernetes as the compute substrate. That constrains but does not fully decide the tenant packaging form: K8s can accept anything from "an OCI image and we'll write the manifests for you" to "a full Helm chart" to "raw Deployment YAML." TR-10 demands one accepted form for tenant components, and that same form must be acceptable for migration-process artifacts (TR-12).
 
 Several other TRs ride on this choice:
 
@@ -27,9 +27,9 @@ Several other TRs ride on this choice:
 - TR-22 / TR-24 say platform state is tracked, immutable, and provisioned only through definitions. The form's expressiveness directly determines how much of the K8s surface a tenant can reach into versus what the platform mediates.
 - TR-32 says isolation must hold. A form that lets tenants ship NetworkPolicy / RBAC / Pod Security overrides hands them the keys to the isolation primitives.
 
-The host-a-capability UX further treats artifact handoff as the moment the contract is accepted ([§4](../user-experiences/host-a-capability.md#4-hand-off-packaged-artifacts), [§Constraints — Tenants must accept the platform's contract](../user-experiences/host-a-capability.md#constraints-inherited-from-the-capability)): the design *is* the acceptance, and the artifact is what the design promised. The form must make that submission complete on its own, not require side-channel coordination on the issue thread.
+The host-a-capability UX further treats artifact handoff as the moment the contract is accepted ([§4]({{< relref "../user-experiences/host-a-capability.md" >}}), [§Constraints — Tenants must accept the platform's contract]({{< relref "../user-experiences/host-a-capability.md" >}})): the design *is* the acceptance, and the artifact is what the design promised. The form must make that submission complete on its own, not require side-channel coordination on the issue thread.
 
-## Decision Drivers
+## Decision Drivers {#decision-drivers}
 
 - **TR-10 — single accepted form.** Whatever is chosen must serve every tenant component and every migration job. Multiple forms break the rule.
 - **TR-26 / TR-31 declarations live with the artifact.** Submission is acceptance; the declarations have to be inside what is submitted.
@@ -38,7 +38,7 @@ The host-a-capability UX further treats artifact handoff as the moment the contr
 - **TR-22 / TR-24 platform-controlled provisioning.** The platform translates the form into the substrate's manifests; the platform owns those manifests, not the tenant.
 - **TR-33 (≤2 hr/week).** A form whose schema turns into a 50-field nightmare costs ongoing review effort. Smaller is better; growth is allowed only through the contract-change UX.
 
-## Considered Options
+## Considered Options {#considered-options}
 
 ### Option A — OCI image only
 
@@ -80,7 +80,7 @@ Capability owner ships a tarball / set of manifests (`Deployment.yaml`, `Service
 - **Friction:** maximum K8s fluency demanded of capability owners.
 - **Cost over time:** every K8s API change is a contract change, whether the platform wanted one or not.
 
-## Decision Outcome
+## Decision Outcome {#decision-outcome}
 
 Chosen option: **Option C — OCI image + a small platform-defined manifest schema**.
 
@@ -94,7 +94,7 @@ This option is chosen because:
 
 The schema starts minimal and grows by contract change. The exact wire format (YAML vs. JSON vs. some other) and field-set are deferred to the working schema document that lives alongside the platform definitions; this ADR commits to "the schema is small, platform-defined, and grows only through UX #5."
 
-### Consequences
+### Consequences {#consequences}
 
 - **Good, because** the artifact + schema is self-sufficient at submission time; the operator's review (host-a-capability §2) reads the schema fields directly rather than reconstructing intent from issue-thread discussion.
 - **Good, because** the same form covers tenant components and migration jobs, so the migration-process offering (TR-12) does not need a parallel packaging path.
@@ -104,7 +104,7 @@ The schema starts minimal and grows by contract change. The exact wire format (Y
 - **Bad, because** capability owners with truly non-standard topology (e.g. statefulsets with niche volume layouts, headless services for peer-to-peer, daemonsets) hit the schema's expressivity ceiling. The intended response per the *capability evolves with its tenants* rule is to consider whether the platform should grow an offering — not to widen the schema indefinitely.
 - **Requires:** a translator from the schema to K8s manifests, owned by the platform. This is realized either as a thin tool inside ADR #12's definitions tooling, or as a Kubernetes controller in `services/`. The choice between those is deferred to ADR #12; both are compatible with this ADR. ADR #9 (secrets) must define how secret-name references in the schema resolve to in-pod values. ADR #10 (migration runner) consumes the same schema with the migration-specific fields populated.
 
-### Realization
+### Realization {#realization}
 
 How this decision shows up in the repo:
 
@@ -115,9 +115,9 @@ How this decision shows up in the repo:
 - **The canary tenant (TR-20)** is itself an instance of this schema, kept alongside the platform definitions, exercising the translator end-to-end as part of every rebuild.
 - **Per-tenant manifests in the platform definitions repo** consist of: the canonical tenant manifest (the one submitted by the capability owner), the per-tenant overrides the platform applies (resource quota expressing TR-26 declarations and TR-13 caps), and the namespace + isolation-primitive set the platform owns.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 - **Schema wire format (YAML / JSON / protobuf).** Deferred to the working schema document.
 - **Translator placement — CLI tool vs. in-cluster controller.** Deferred to ADR #12 (definitions tooling); both are compatible with this ADR. A controller has the advantage of keeping the schema → manifest translation continuous (TR-22 / TR-24); a CLI is simpler. Pick when the tooling is chosen.
 - **Image registry.** Where tenant images live. The schema references registry-qualified image names; *which* registry is a deployment concern, not a schema concern, and is decided alongside ADR #6 (network) or a small follow-on.
-- **Schema ceiling and the "capability evolves with its tenants" path.** When a tenant need exceeds the schema, the right response per the capability rule is sometimes to grow an offering and sometimes to widen the schema. The judgement is per case and lives in the host-a-capability "new offering needed" branch ([§3b](../user-experiences/host-a-capability.md#3-resolution--one-of-three-branches)).
+- **Schema ceiling and the "capability evolves with its tenants" path.** When a tenant need exceeds the schema, the right response per the capability rule is sometimes to grow an offering and sometimes to widen the schema. The judgement is per case and lives in the host-a-capability "new offering needed" branch ([§3b]({{< relref "../user-experiences/host-a-capability.md" >}})).

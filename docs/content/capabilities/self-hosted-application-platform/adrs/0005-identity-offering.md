@@ -12,30 +12,30 @@ consulted: []
 informed: []
 ---
 
-**Parent capability:** [Self-Hosted Application Platform](../_index.md)
-**Addresses requirements:** [TR-04](../tech-requirements.md#tr-04-provide-an-identity-and-authentication-offering-for-end-users-that-can-honor-credentials-cannot-be-recovered), [TR-32](../tech-requirements.md#tr-32-per-tenant-authentication-and-isolation-strong-enough-that-no-tenant-or-its-capability-owner-via-the-observability-offering-can-read-another-tenants-data-or-signals), [TR-17](../tech-requirements.md#tr-17-definitions-driven-single-entry-point-rebuild-of-the-platform-end-to-end), [TR-22](../tech-requirements.md#tr-22-tracked-changes-and-immutability-for-all-platform-state-modifying-actions), [TR-33](../tech-requirements.md#tr-33-routine-platform-operation-must-fit-within-2-hoursweek-of-operator-time)
+**Parent capability:** [Self-Hosted Application Platform]({{< relref "../_index.md" >}})
+**Addresses requirements:** [TR-04]({{< relref "../tech-requirements.md#tr-04" >}}), [TR-32]({{< relref "../tech-requirements.md#tr-32" >}}), [TR-17]({{< relref "../tech-requirements.md#tr-17" >}}), [TR-22]({{< relref "../tech-requirements.md#tr-22" >}}), [TR-33]({{< relref "../tech-requirements.md#tr-33" >}})
 
-## Context and Problem Statement
+## Context and Problem Statement {#context}
 
-[TR-04](../tech-requirements.md#tr-04-provide-an-identity-and-authentication-offering-for-end-users-that-can-honor-credentials-cannot-be-recovered) requires the platform to offer tenants an identity-and-authentication service for *their* end users, and constrains that service to be capable of honoring "lost credentials cannot be recovered" (Signal-style). This is a hard gate: any product that cannot be configured to enforce no-recovery is ineligible.
+[TR-04]({{< relref "../tech-requirements.md#tr-04" >}}) requires the platform to offer tenants an identity-and-authentication service for *their* end users, and constrains that service to be capable of honoring "lost credentials cannot be recovered" (Signal-style). This is a hard gate: any product that cannot be configured to enforce no-recovery is ineligible.
 
-[ADR-0001](./0001-public-private-infrastructure-split.md) reserves the cloud edge for ingress and the off-site backup archive only, so identity, if self-hosted, lives in the home-lab cluster. [ADR-0002](./0002-compute-substrate.md) makes the home-lab a Kubernetes cluster with namespaces as the per-tenant boundary; whatever IdP we choose has to plug into that.
+[ADR-0001]({{< relref "0001-public-private-infrastructure-split.md" >}}) reserves the cloud edge for ingress and the off-site backup archive only, so identity, if self-hosted, lives in the home-lab cluster. [ADR-0002]({{< relref "0002-compute-substrate.md" >}}) makes the home-lab a Kubernetes cluster with namespaces as the per-tenant boundary; whatever IdP we choose has to plug into that.
 
 The capability's vendor-independence tiebreaker presses against vendor-managed identity products. Identity is precisely the kind of foundational offering that, once tenants are on it, is painful to leave — making the tiebreaker more salient here than for offerings whose data is more portable.
 
 The decision is also potentially cross-capability — other capabilities the operator defines later may want to consume the same identity service. This ADR keeps the decision capability-scoped for now, with the explicit caveat that it is a candidate for lifting to a shared ADR if other capabilities standardize on it.
 
-## Decision Drivers
+## Decision Drivers {#decision-drivers}
 
 - **TR-04 hard gate** — no-recovery property must be configurable. This rules out products without that capability; it does not select among the rest.
 - **Capability tiebreaker — vendor independence > minimizing operator effort.** Identity is foundational; vendor lock-in here is harder to unwind than at most other layers.
 - **TR-33 (≤2 hr/week).** The IdP is a stateful product running continuously. A heavy IdP eats weekly budget directly.
-- **TR-17 (≤1 hr rebuild).** The IdP and its persistent state must come up within Phase 2 of the rebuild ([stand-up-the-platform §4](../user-experiences/stand-up-the-platform.md#4-phase-2--core-platform-services)) without blowing the budget.
+- **TR-17 (≤1 hr rebuild).** The IdP and its persistent state must come up within Phase 2 of the rebuild ([stand-up-the-platform §4]({{< relref "../user-experiences/stand-up-the-platform.md" >}})) without blowing the budget.
 - **TR-32 isolation.** Tenants must not be able to read each other's identity data. The IdP's per-tenant-separation primitive (realm, organization, tenant, …) is the relevant boundary.
 - **TR-22 / TR-24 definitions-driven.** IdP configuration (realms, providers, flows) must be expressible declaratively and tracked, not clicked into a console.
 - **Capability rule "evolves with its tenants" — modulated.** For shape-y offerings (storage, ADR-0004) deferral works. For identity, a cross-cutting protocol that tenants' tech designs commit to at design time, deferral creates path-dependence that costs more to unwind later than the upfront cost saves.
 
-## Considered Options
+## Considered Options {#considered-options}
 
 ### Option A — Self-hosted Keycloak in the home-lab cluster
 
@@ -88,7 +88,7 @@ The strict *evolves with its tenants* reading: defer the offering until a tenant
 - **Path-dependence cost:** every early tenant designs against bring-your-own-identity, which makes later adoption of the platform-provided offering an explicit migration per tenant. Identity is unlike storage shapes here — storage shapes can be retrofitted per tenant; identity is woven into a tenant's design.
 - **Cost / TR-33:** lowest day-one cost; offset by likely-higher eventual cost when the offering is finally drafted under pressure from a real tenant.
 
-## Decision Outcome
+## Decision Outcome {#decision-outcome}
 
 Chosen option: **Option B — Self-hosted Authentik in the home-lab cluster**, with Authentik tenants/providers as the per-tenant boundary on top of the K8s namespace boundary, and per-tenant flow configuration realizing the "lost credentials cannot be recovered" property.
 
@@ -102,14 +102,14 @@ This option is chosen because:
 
 The IdP runs in its own Kubernetes namespace in the home-lab cluster. Per-tenant configuration is captured in the platform definitions and applied declaratively (via Authentik's Kubernetes operator or equivalent), satisfying TR-22 / TR-24.
 
-Authentik depends on Postgres. Per [ADR-0004](./0004-persistent-storage-offering.md), the platform does not yet offer a tenant-facing relational storage offering — managed offerings appear when a *tenant* demands them. Authentik is not a tenant; it is a platform offering. The Postgres it requires is *internal to the identity offering* — it ships in the same namespace as Authentik, is not exposed to tenants, and is operated as part of the IdP's own footprint. The day a tenant needs Postgres-shaped storage, ADR-0004's trip-wire fires and a tenant-facing relational managed-offering ADR is drafted; that future offering may or may not consolidate with Authentik's internal Postgres, but that is a decision for that ADR, not this one.
+Authentik depends on Postgres. Per [ADR-0004]({{< relref "0004-persistent-storage-offering.md" >}}), the platform does not yet offer a tenant-facing relational storage offering — managed offerings appear when a *tenant* demands them. Authentik is not a tenant; it is a platform offering. The Postgres it requires is *internal to the identity offering* — it ships in the same namespace as Authentik, is not exposed to tenants, and is operated as part of the IdP's own footprint. The day a tenant needs Postgres-shaped storage, ADR-0004's trip-wire fires and a tenant-facing relational managed-offering ADR is drafted; that future offering may or may not consolidate with Authentik's internal Postgres, but that is a decision for that ADR, not this one.
 
-### Consequences
+### Consequences {#consequences}
 
 - **Good, because** TR-04's no-recovery property is realized by configuration we own, not negotiated with a vendor.
 - **Good, because** Authentik runs on the same substrate as every other home-lab offering (TR-32 isolation reasoning is uniform with the rest of the design — namespace + RBAC + NetworkPolicy).
-- **Good, because** the platform retains the option to swap to another self-hosted IdP later. The cost of swapping is bounded by how many tenants are on the platform-provided identity at the time, which the contract-change UX already governs ([UX #5](../user-experiences/platform-contract-change-rollout.md)).
-- **Good, because** tenants who need stronger guarantees than Authentik provides can bring their own per [TR-04](../tech-requirements.md#tr-04-provide-an-identity-and-authentication-offering-for-end-users-that-can-honor-credentials-cannot-be-recovered)'s explicit BYO carve-out — the platform-provided offering is not the only path.
+- **Good, because** the platform retains the option to swap to another self-hosted IdP later. The cost of swapping is bounded by how many tenants are on the platform-provided identity at the time, which the contract-change UX already governs ([UX #5]({{< relref "../user-experiences/platform-contract-change-rollout.md" >}})).
+- **Good, because** tenants who need stronger guarantees than Authentik provides can bring their own per [TR-04]({{< relref "../tech-requirements.md#tr-04" >}})'s explicit BYO carve-out — the platform-provided offering is not the only path.
 - **Bad, because** the platform now operates a stateful identity product. Authentik plus its Postgres is a real surface on TR-33; upgrades require attention; backup of the IdP's state must be in the backup scope (ADR #7).
 - **Bad, because** the rebuild (TR-17) must bring up Authentik *and* its Postgres in Phase 2 alongside compute and storage. The 1-hour budget is tighter for it.
 - **Bad, because** Authentik's internal Postgres is a *second* DB engine on the platform when ADR-0004's tenant-facing relational ADR is eventually drafted. That future ADR may consolidate or may not; for now there is a small, deliberate duplication between "Authentik's DB" and "future tenant DB offering."
@@ -121,11 +121,11 @@ Authentik depends on Postgres. Per [ADR-0004](./0004-persistent-storage-offering
   - ADR-0003's schema gains a field expressing which identity the tenant uses (`platform-authentik` vs. `byo` with reachability info).
   - The canary tenant (TR-20, ADR #15) authenticates against the platform-provided identity service end-to-end so identity is exercised on every rebuild.
 
-### Realization
+### Realization {#realization}
 
 How this decision shows up in the repo:
 
-- **An `authentik` namespace** in the home-lab cluster, provisioned as part of Phase 2 of the rebuild ([stand-up-the-platform §4](../user-experiences/stand-up-the-platform.md#4-phase-2--core-platform-services)), holds:
+- **An `authentik` namespace** in the home-lab cluster, provisioned as part of Phase 2 of the rebuild ([stand-up-the-platform §4]({{< relref "../user-experiences/stand-up-the-platform.md" >}})), holds:
   - The Authentik server and worker Deployments (or whatever Authentik's recommended layout is at the chosen version).
   - A Postgres workload (StatefulSet or operator-managed) backing Authentik. Its PVCs use the block storage class from ADR-0004.
   - A NetworkPolicy permitting only Authentik pods to reach the Postgres.
@@ -135,7 +135,7 @@ How this decision shows up in the repo:
 - **Authentik's Postgres** is in the backup scope (ADR #7) on equal footing with tenant data — its loss is recoverable.
 - **The canary tenant** (ADR #15) authenticates against the platform-provided identity service, so a broken Authentik fails the canary and prevents the rebuild from declaring readiness.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 - **Authentik version pinning policy.** Deferred to deployment-time. The platform's contract for tenants (which Authentik features they can rely on) is captured in the schema (ADR-0003), not in a pinned version field.
 - **Will any other operator capability adopt this identity service?** If yes, this ADR is a candidate for lifting to a shared ADR in `r&d/adrs/`. Out of scope here.
