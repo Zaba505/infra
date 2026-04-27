@@ -44,7 +44,7 @@ The capability owner's journey is a single end-to-end flow with three branches t
 
 ### 1. File an "onboard my capability" issue on GitHub
 
-The capability owner opens an issue against the infra repo using the *onboard my capability* issue type. This is the **only** way to engage the platform — there is no self-service portal and no other front door. They link or attach the capability doc and the tech design.
+The capability owner opens an issue against the infra repo using the *onboard my capability* issue type. GitHub issues are the **only** channel for engaging the platform — there is no self-service portal and no other front door — and this is the issue type for onboarding. They link or attach the capability doc and the tech design.
 
 What they perceive: the issue is filed, and now they wait. There is no response-time guarantee — this is personal-scale, async by default.
 
@@ -156,7 +156,7 @@ This UX must respect the following items from the parent capability's Business R
 
 - **Data migration of an existing tenant.** Bringing data from a prior vendor or local install into the newly-provisioned tenant is a separate UX, not covered here. This UX is strictly about *provisioning the capability on the platform*.
 - **Operator-initiated tenant updates ("your component has fallen behind").** When the operator notices a tenant's components have aged out of platform support, the operator initiates the conversation — that is a different journey with the operator as the primary actor and the capability owner as the responder. It belongs in its own UX doc.
-- **End-user observability for the capability owner.** Today, observability of running tenants is purely operator-facing. The capability owner does not get a "is my thing healthy right now?" view; they learn about problems through their own end users (or by their own checks). Adding a tenant-facing observability view is a future UX, not this one.
+- **End-user observability for the capability owner.** Today, observability of running tenants is purely operator-facing. The capability owner does not get a "is my thing healthy right now?" view as part of this journey; they learn about problems through their own end users (or by their own checks). Tenant-facing observability is out of scope for this UX.
 - **Platform-side standup or rebuild.** The operator standing up the platform from scratch is one of the parent capability's other triggers, not this UX.
 - **The capability owner's tech-design phase.** The decision to use this platform was made before this journey starts. How that decision is made (build vs. buy, host-here vs. host-elsewhere) is a tech-design concern, not a hosting-UX concern.
 

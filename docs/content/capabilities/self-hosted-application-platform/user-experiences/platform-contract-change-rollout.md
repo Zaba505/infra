@@ -38,7 +38,7 @@ The seam with `operator-initiated-tenant-update` (UX #2) is sharp: that journey 
 
 ### 1. File a "platform contract change" umbrella issue
 
-The operator opens a single **umbrella issue** against the infra repo using the **platform contract change** issue type. This is a *third* distinct issue type, separate from `onboard my capability`, `modify my capability`, and `platform update required`. The distinct type is the signal to capability owners that this is the operator changing the rules — not an externally-forced update and not optional cleanup.
+The operator opens a single **umbrella issue** against the infra repo using the **platform contract change** issue type. This is a distinct issue type, separate from `onboard my capability`, `modify my capability`, and `platform update required`. The distinct type is the signal to capability owners that this is the operator changing the rules — not an externally-forced update and not optional cleanup.
 
 A single umbrella issue is used (rather than one issue per tenant, as in UX #2) because the change applies identically to everyone, the migration guideline is shared, and tenants benefit from cross-tenant visibility — a clarifying question one tenant asks may be the answer another tenant needed.
 
