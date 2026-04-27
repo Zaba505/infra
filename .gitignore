@@ -1,4 +1,9 @@
 #############
+# Claude    #
+#############
+.claude/worktrees/
+
+#############
 # Node      #
 #############
 node_modules/
