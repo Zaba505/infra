@@ -9,7 +9,7 @@
 &lt;p&gt;&lt;strong&gt;Parent capability:&lt;/strong&gt; &lt;a href="../_index.md"&gt;Self-Hosted Application Platform&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="persona"&gt;Persona&lt;/h2&gt;
 &lt;p&gt;The actor here is the &lt;strong&gt;same capability owner&lt;/strong&gt; described in &lt;a href="./host-a-capability.md"&gt;Host a Capability&lt;/a&gt;. They are not a different role for this journey — they are mid-lifecycle, having already completed onboarding, and now coming back to deal with one specific concern: their pre-existing data.&lt;/p&gt;</description></item><item><title>Move Off the Platform After Eviction</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/move-off-the-platform-after-eviction/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/move-off-the-platform-after-eviction/</guid><description>&lt;blockquote&gt;
-&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and nothing left behind, before the platform permanently removes everything.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and no tenant-accessible copy left on the platform once the retention window closes.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Parent capability:&lt;/strong&gt; &lt;a href="../_index.md"&gt;Self-Hosted Application Platform&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="persona"&gt;Persona&lt;/h2&gt;
