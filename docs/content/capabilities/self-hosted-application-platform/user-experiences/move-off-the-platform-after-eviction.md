@@ -1,11 +1,11 @@
 ---
 title: "Move Off the Platform After Eviction"
 description: >
-    A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and nothing left behind, before the platform permanently removes everything.
+    A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and no tenant-accessible copy left on the platform once the retention window closes.
 type: docs
 ---
 
-> **One-line definition:** A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and nothing left behind, before the platform permanently removes everything.
+> **One-line definition:** A capability owner whose capability has been evicted gets their data out cleanly and walks away with no obligations and no tenant-accessible copy left on the platform once the retention window closes.
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
@@ -15,7 +15,7 @@ The actor here is a **capability owner** whose capability has been evicted — a
 
 - **Role:** Capability owner. The party who originally onboarded a capability onto the platform via `host-a-capability`, has been hosting it for some period, and is now being removed.
 - **Context they come from:** The parting is **amicable**. Eviction was triggered by a divergence the platform legitimately cannot meet — specialized hardware, regulatory constraints, an availability target stronger than the platform offers — *not* by a missed deadline in the `operator-initiated-tenant-update` flow. Negotiation over the eviction date has already happened upstream, before this UX begins. The capability owner accepts that they are leaving and has agreed to the date.
-- **What they care about here:** A clean exit. By the eviction date their capability is fully off the platform, their data is in their hands in a portable form they can verify, and nothing of theirs lingers on the platform afterward. They are *not* asking the platform to help them figure out where to run next — that is their problem to solve.
+- **What they care about here:** A clean exit. By the eviction date their capability is fully off the platform, their data is in their hands in a portable form they can verify, and nothing remains available for them to retrieve from the platform after the retention window ends. They are *not* asking the platform to help them figure out where to run next — that is their problem to solve.
 
 ## Goal
 
@@ -33,7 +33,7 @@ That is all the issue carries. The capability owner's state of mind is "the date
 
 ## Journey
 
-The journey runs in three phases keyed off the eviction date: a pre-eviction window where the tenant is still live, the eviction date itself when compute and network resources go away, and a 30-day grace window where data is held in an export-only, read-only state before being permanently removed.
+The journey runs in three phases keyed off the eviction date: a pre-eviction window where the tenant is still live, the eviction date itself when compute and network resources go away, and a 30-day grace window where data is held in an export-only, read-only state before the tenant-accessible copy is removed.
 
 ### Phase A — Before the eviction date (tenant still live)
 
@@ -47,11 +47,11 @@ The capability owner tells *their* end users that the capability is going away o
 
 #### 3. Run the export and verify it themselves
 
-The capability owner kicks off the export using the platform's export tool. What they perceive is an archive of their tenant's data, plus a checksum/hash and total size in bytes that the platform produces alongside it. **Validation that the export is complete and correct is the capability owner's responsibility, not the platform's.** Only the capability owner knows their data well enough to say "yes, this is all of it and it is intact." The platform offers checksum/hash and total size as the ceiling of what it can verify on the capability owner's behalf — anything beyond that (record counts, schema integrity, business invariants) is theirs.
+The capability owner kicks off the export using the platform's export tool. What they perceive is an archive of their tenant's data, produced for them to download then and there, plus a checksum/hash and total size in bytes that the platform produces alongside it. **Validation that the export is complete and correct is the capability owner's responsibility, not the platform's.** Only the capability owner knows their data well enough to say "yes, this is all of it and it is intact." The platform offers checksum/hash and total size as the ceiling of what it can verify on the capability owner's behalf — anything beyond that (record counts, schema integrity, business invariants) is theirs.
 
 #### 4. (Optional) Run the export iteratively
 
-Because end users may still be writing data while the tenant is live, an export taken in Phase A is not necessarily the *final* export. The capability owner may run multiple exports across Phase A — one early to validate that the tooling produces something usable, another later to capture more recent writes. Whether they do this is their call; the platform supports it because the export tool simply runs whenever invoked.
+Because end users may still be writing data while the tenant is live, an export taken in Phase A is not necessarily the *final* export. The capability owner may run multiple exports across Phase A — one early to validate that the tooling produces something usable, another later to capture more recent writes. Whether they do this is their call; the platform supports it because the export tool simply runs whenever invoked. Each run is ephemeral: if they want to keep an export, they download it when it is produced. The platform does not keep a history of prior exports around for them.
 
 ### Phase B — The eviction date
 
@@ -65,13 +65,13 @@ What the capability owner perceives: the issue gets a status comment, and they n
 
 #### 6. Run the export of record (if not already taken)
 
-In Phase C the export tool still works, but now against a stable, read-only snapshot. For capability owners with more data than they could extract during Phase A, or for those who deliberately deferred to avoid racing live writes, this is when the **definitive** export is pulled. They re-run the same export tool, get back an archive plus checksum/hash and size, and validate it the same way they validated in Phase A.
+In Phase C the export tool still works, but now against a stable, read-only snapshot. For capability owners with more data than they could extract during Phase A, or for those who deliberately deferred to avoid racing live writes, this is when the **definitive** export is pulled. As in Phase A, the generated export artifact is ephemeral: they re-run the same export tool, get back an archive plus checksum/hash and size, and must download it when it is produced rather than assuming the platform will keep that generated file around for later pickup. If they miss that download, they can run the export tool again at any point within the 30-day retention window and validate the newly generated archive the same way they validated in Phase A.
 
 For capability owners who already pulled what they needed in Phase A, Phase C is a safety net — "I forgot a thing, let me grab it" — rather than the main event.
 
 #### 7. Walk away
 
-Once the capability owner is satisfied they have everything, they comment on the issue indicating they are done. The operator closes the issue. After 30 days from the eviction date, all retained data is permanently removed from the platform regardless of whether the capability owner ever closed the loop. There is no "are you sure?" — the 30-day clock is hard.
+Once the capability owner is satisfied they have everything, they comment on the issue indicating they are done. The operator closes the issue. After 30 days from the eviction date, the platform stops offering any tenant-accessible copy of their data regardless of whether the capability owner ever closed the loop. Whether any deeper backup-tier copies remain after that point, how long they are retained, and who can access them is an explicit platform policy TBD and is not defined by this UX document. There is no "are you sure?" — the 30-day clock is hard.
 
 ### Flow Diagram
 
@@ -84,11 +84,11 @@ flowchart TD
     Iter -->|Yes| ExportLive
     Iter -->|No| Wait[Wait for eviction date]
     Wait --> Cutover[Eviction date:<br/>compute/network torn down<br/>data → read-only<br/>comment posted on issue]
-    Cutover --> Phase C{Need more data<br/>from final snapshot?}
-    Phase C -->|Yes| ExportFinal[Run export against frozen snapshot<br/>verify the same way]
-    Phase C -->|No, already complete| Done
+    Cutover --> PhaseC{Need more data<br/>from final snapshot?}
+    PhaseC -->|Yes| ExportFinal[Run export against frozen snapshot<br/>download now + verify]
+    PhaseC -->|No, already complete| Done
     ExportFinal --> Done[Comment 'done' on issue;<br/>operator closes it]
-    Done --> Permanent([30 days post-eviction:<br/>all data permanently removed])
+    Done --> RetentionEnds([30 days post-eviction:<br/>tenant-accessible copy removed])
 ```
 
 ## Success
@@ -97,16 +97,16 @@ When the journey ends cleanly, the capability owner walks away with:
 
 - A verified, complete archive of their tenant's data, sized and checksummed by the platform, validated by them.
 - A clear paper trail on the eviction issue showing the date, the reason, and confirmation that they pulled what they needed.
-- Nothing left behind. After the 30-day window the platform retains none of their data; the parting is genuinely complete.
+- Nothing left to chase down on the platform. After the 30-day window the platform offers no tenant-accessible copy of their data. Any deeper residual backup copies, their retention duration, deletion behavior, and operator-access/privacy constraints are **TBD** and are not part of the 30-day guarantee in this document.
 - An amicable ending. The operator filed the issue, the platform held the data the agreed amount of time, and the capability owner left under their own power. The relationship is intact for whatever comes next.
 
 ## Edge Cases & Failure Modes
 
 - **Capability owner asks for more time after the eviction date.** Hard wall. The negotiation over the eviction date happened upstream of this journey; once that date is set, it is the date. The 30-day post-eviction retention is the only post-date slack and it is fixed.
 - **Export takes longer than 30 days to actually run on a very large dataset.** Same hard wall — the capability owner had Phase A *plus* 30 days of Phase C to extract; if that is not enough, they had advance warning during eviction-date negotiation and should have raised it then. The platform does not extend the retention window for slow extracts.
-- **Export comes back wrong** (checksum mismatch, missing files, corruption visible to the capability owner). The capability owner files a **new** issue with the operator describing what is wrong. This is the *one* exception to the 30-day hard wall: if the failure is shown to be in the platform's export tooling or its data hosting, the operator pauses the permanent-removal clock for that tenant until the platform-side issue is resolved and a clean export has been produced. Failures rooted in the capability owner's own validation steps do not pause the clock.
-- **Export tooling does not exist for this tenant's data shape at the time of eviction.** Cannot happen by design — export tooling is a **core platform feature**, present for every kind of data the platform hosts. If a hole is discovered, that is itself a platform bug, handled the same way as the previous bullet (new issue, retention clock paused).
-- **Capability owner ignores the issue entirely and never extracts anything.** No special handling. The 30-day clock runs, data is permanently removed, the issue is closed by the operator. The capability owner may have made themselves whole through other means (their own backups, accepting the loss); the platform does not chase them.
+- **Export comes back wrong** (checksum mismatch, missing files, corruption visible to the capability owner). The capability owner reports the problem on the eviction issue so that thread remains the coordination record. This is the *one* exception to the 30-day hard wall: if the failure is shown to be in the platform's export tooling or its data hosting, the operator pauses that tenant's retention-window countdown for removal of tenant-accessible data until the platform-side issue is resolved and a clean export has been produced, so the capability owner can continue exporting during that pause. No separate restoration SLA is promised in this UX; the issue stays open until the capability owner can pull a clean export. Failures rooted in the capability owner's own validation steps do not pause that retention-window countdown.
+- **Export tooling does not exist for this tenant's data shape at the time of eviction.** Cannot happen by design — export tooling is a **core platform feature**, present for every kind of data the platform hosts. If a hole is discovered, that is itself a platform bug, handled the same way as the previous bullet (eviction issue remains open, that tenant's retention-window countdown for removal of tenant-accessible data is paused).
+- **Capability owner ignores the issue entirely and never extracts anything.** No special handling. The 30-day clock runs, tenant-accessible data is removed, the issue is closed by the operator. The capability owner may have made themselves whole through other means (their own backups, accepting the loss); the platform does not chase them.
 - **End users keep hitting the tenant after the eviction date.** They get whatever connection failure the underlying infra produces. The capability owner is responsible for having warned their end users; the platform does not present a "this tenant has been retired" page or otherwise communicate with end users — end users belong to the capability, and from the platform's seat, *the capability is the end user*.
 - **Capability owner wants to come back later** (re-onboard the same capability after the divergence is resolved). That is a *new* `host-a-capability` journey, not a continuation of this one. It is not blocked, but nothing about this UX preserves state to make it easier.
 
@@ -133,6 +133,4 @@ This UX must respect the following items from the parent capability — by name:
 
 ## Open Questions
 
-- **Multiple successive exports during Phase A — does the platform retain them all, or is each export ephemeral and the capability owner is expected to pull them down as they are produced?** Likely the latter (export = "produce an archive the capability owner downloads now"), but worth confirming the first time a real eviction happens.
-- **What "permanently removed" means in practice across backups.** The 30-day clock describes when the platform stops offering access; how long residual copies live in deeper backup tiers is a platform-implementation detail with privacy implications worth pinning down separately.
-- **Whether the eviction-pause-on-platform-bug branch needs a documented SLA.** The "platform bug → 30-day clock pauses" carve-out is open-ended; if a platform bug took weeks to fix, the capability owner is in limbo. Probably fine in practice (one operator, motivated to close the loop), but flagged for the first real occurrence.
+- **What is the authoritative policy for deeper backup-tier copies after the 30-day retention window ends?** This UX now defines only the tenant-facing guarantee: no tenant-accessible copy remains after day 30. The deeper backup-tier policy — retention duration, deletion behavior, and operator-access/privacy constraints — still needs to be defined or linked from an authoritative platform policy.
