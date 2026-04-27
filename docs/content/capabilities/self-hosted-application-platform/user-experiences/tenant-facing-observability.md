@@ -32,9 +32,9 @@ Two distinct entries, converging on the same view.
 - Reactively, because an end user reported something looked off and they want to confirm.
 - Out of curiosity / habit.
 
-They reach it by authenticating to the observability offering and being scoped to their tenant. There is no separate URL per tenant — the same offering serves everyone, and access control narrows the data.
+They reach it by authenticating to the shared observability offering. After login they land directly in their own tenant's view and stay confined there for the rest of the session. There is no separate URL per tenant — the same offering serves everyone, but capability owners do not browse across tenants or switch into an operator-wide view.
 
-**Push entry.** The platform's alerting reaches them on the channel they chose during onboarding. They are pulled away from whatever they were doing and now have a concrete "your capability looks unhealthy" signal in hand.
+**Push entry.** The platform's alerting reaches them by email. They are pulled away from whatever they were doing and now have a concrete "your capability looks unhealthy" signal in hand.
 
 In both cases their access was provisioned automatically as part of the original `onboard my capability` flow (step 5 of [Host a Capability](./host-a-capability.md#5-wait-while-the-operator-provisions)) — observability is part of being hosted, not an add-on they request later.
 
@@ -45,26 +45,26 @@ In both cases their access was provisioned automatically as part of the original
 By the time the capability owner has a live tenant, they already have:
 
 - A working login to the observability offering, scoped to their tenant.
-- A configured alert channel — chosen during onboarding from whatever the platform supports (email, chat, push notification, etc.).
-- A set of signals being measured for their capability — the specifics were nailed down in the tech-design phase, drawing from the *category* of signals the platform's observability offering provides.
+- Email alerting wired to the address they use for platform communication.
+- A platform-standard health bundle for their capability: availability, latency, error rate, resource saturation, and restart / deployment events.
 
-Nothing in this UX requires them to set any of that up. If they ever need to change the channel or the measured signals, that goes through `modify my capability` — not this journey.
+Nothing in this UX requires them to set any of that up. Threshold tuning happens inside the observability offering, but any request to expand the signal bundle or add new delivery channels goes through `modify my capability` — not this journey.
 
 ### 2. (Pull mode) Capability owner opens the observability view
 
-They authenticate to the observability offering and land on a view scoped to their tenant. They see the current state of every signal being measured for their capability — error rates, latencies, restarts, resource pressure, whatever the tech design specified.
+They authenticate to the observability offering and land on a view scoped to their tenant. They see the current state of the platform-standard health bundle for their capability: whether it is up, how quickly it is responding, how often it is failing, whether it is under resource pressure, and whether it has recently restarted or been redeployed.
 
-What they perceive: a current-state read of their capability's health, plus enough recent history to tell whether something is trending bad. They cannot see other tenants — only the operator can.
+What they perceive: a current-state read of their capability's health, plus enough recent history to tell whether something is trending bad. They cannot see other tenants, and there is no mode-switch that broadens their scope — only the operator can do that.
 
 ### 3. (Pull mode) Capability owner tunes thresholds, if needed
 
-While in the offering, the capability owner can self-serve their alert thresholds — the values that, when crossed, will fire a push alert to them. Thresholds are *their* call: the platform does not prescribe what's unhealthy enough to wake them up.
+While in the offering, the capability owner can self-serve their alert thresholds — the values that, when crossed, will fire an email alert to them. Thresholds are *their* call: the platform does not prescribe what's unhealthy enough to wake them up.
 
 This is the one self-service surface the platform exposes to capability owners. Everything else still goes through GitHub issues; thresholds are an exception because they are a tuning knob the capability owner needs to iterate on without operator involvement.
 
 ### 4. (Push mode) An alert reaches the capability owner
 
-A signal crossed a threshold they set. The platform pushes an alert on their chosen channel. The alert names *which* signal and *which* capability — enough for them to start without opening anything else.
+A signal crossed a threshold they set. The platform sends an email alert. The alert names *which* signal and *which* capability — enough for them to start without opening anything else.
 
 What they perceive: their capability is unhealthy enough that they wanted to be told. They now have to figure out whose problem it is.
 
@@ -88,9 +88,9 @@ In either case the capability owner walks away with the same end state: their ca
 
 ```mermaid
 flowchart TD
-    Onboarded([Capability is live — observability access<br/>and alert channel provisioned during onboarding]) --> Trigger{What brought<br/>them here?}
+    Onboarded([Capability is live — observability access<br/>and email alerts provisioned during onboarding]) --> Trigger{What brought<br/>them here?}
     Trigger -->|Routine check / end user reported| Pull[Open observability view —<br/>see tenant-scoped signals]
-    Trigger -->|Push alert from platform| Alert[Receive alert on chosen channel:<br/>which signal, which capability]
+    Trigger -->|Push alert from platform| Alert[Receive email alert:<br/>which signal, which capability]
     Pull --> Tune{Want to adjust<br/>thresholds?}
     Tune -->|Yes| Self[Self-serve threshold change<br/>in the observability offering]
     Tune -->|No| Read[Read the signals]
@@ -122,23 +122,23 @@ A successful experience looks like:
 - **Threshold set too loose, real problems missed.** Same — their call, their consequence. The platform's defaults (whatever the observability offering ships with) provide a starting point.
 - **Operator hasn't opened a platform-side issue yet when the capability owner is investigating.** The capability owner does not need to file one themselves. The operator gets the same signals and will open one. If they don't and the problem persists, that is an operator-side failure, not a capability-owner-side action.
 - **Capability owner suspects the platform but signals look fine for the platform.** They surface this on a *modify my capability* issue or a comment to the operator — same surface they would use for anything ambiguous. This UX does not introduce a new issue type for "I think it's you, not me."
-- **Alert channel itself is broken (email bounces, chat down).** Out of scope here — the alert simply doesn't arrive. The pull mode still works, and the capability owner will notice eventually. Channel reliability is a property of the chosen channel, not something the platform engineers around.
-- **Capability owner wants to change channel or measured signals.** Goes through `modify my capability`, not this UX — it's a contract change about what the platform delivers to the tenant, even if a small one.
+- **Alert delivery is broken (email bounces, mailbox rule hides it, etc.).** Out of scope here — the alert simply doesn't arrive. The pull mode still works, and the capability owner will notice eventually. Email reliability is a property of the delivery path, not something this UX engineers around.
+- **Capability owner wants more than email alerts or wants a broader signal bundle.** Goes through `modify my capability`, not this UX — it's a contract change about what the platform delivers to the tenant, even if a small one.
 
 ## Constraints Inherited from the Capability
 
 This UX must respect the following items from the parent capability's Business Rules and Success Criteria:
 
-- **Operator-only operation.** The capability owner is *not* an operator. Their access is scoped to their own tenant; the operator is the only role that sees across tenants. The one self-service surface (threshold tuning) does not violate this — it adjusts only their own alerts, not platform configuration.
+- **Operator-only operation.** The capability owner is *not* an operator. Their access is scoped to their own tenant; the operator is the only role that sees across tenants. The one self-service surface (threshold tuning) does not violate this — it adjusts only their own email alerts, not platform configuration.
 - **Direct outputs include observability.** The parent capability lists observability as a direct output: *"the operator can tell whether each tenant is up and healthy without the tenant having to instrument that itself."* This UX extends that same plumbing to the capability owner with tenant-scoped data access — observability is offered *as an offering*, with cross-tenant visibility kept to the operator.
 - **No direct end-user access to the platform.** The capability owner's end users do not get observability access. This view stops at the capability owner.
-- **Tenants must accept the platform's contract.** The signals available are whatever the observability offering measures; capability owners pick from that menu in their tech design rather than asking the platform to instrument arbitrary metrics.
-- **The capability evolves with its tenants.** If multiple tenants need a signal the offering does not yet measure, the right response is to expand the offering's category — not to push instrumentation back onto the tenant.
+- **Tenants must accept the platform's contract.** The signals available are the platform-standard health bundle — availability, latency, error rate, resource saturation, and restart / deployment events. Capability owners do not ask the platform to instrument arbitrary tenant-specific metrics as part of this UX.
+- **The capability evolves with its tenants.** If multiple tenants need observability beyond the standard health bundle, the right response is to expand the offering's category — not to push instrumentation back onto the tenant.
 - **KPI: 2-hr/week operator maintenance budget.** Implication: the alerting path must not produce so many false positives that the operator is constantly fielding "is this me or you?" questions from capability owners. Self-serve thresholds and "operator gets the same signals" are both pressure-reliefs on this — capability owners can tune their noise themselves, and they do not need to escalate "is this the platform?" questions to the operator because they can read the signals directly.
 
 ## Out of Scope
 
-- **Changing measured signals or alert channel.** Both go through [Host a Capability](./host-a-capability.md)'s *modify* loop, not here. They are contract changes about what the platform delivers.
+- **Changing the signal bundle or adding non-email alert channels.** Both go through [Host a Capability](./host-a-capability.md)'s *modify* loop, not here. They are contract changes about what the platform delivers.
 - **End-user-facing observability.** End users of a tenant do not get a "is the thing I use up?" view from the platform. If a tenant wants a status page for their end users, that is a feature of the tenant capability, not the platform.
 - **Operator-side observability.** The operator's view across all tenants is its own surface, used during operator-driven journeys (rebuild, contract rollout, eviction decisions). This UX is strictly the *capability owner's* slice.
 - **Platform-side incident management.** When the capability owner concludes "this is the platform's problem and I'll watch the operator's issue," what the operator does inside that issue is operator workflow — not part of this UX.
@@ -146,6 +146,4 @@ This UX must respect the following items from the parent capability's Business R
 
 ## Open Questions
 
-- **Concrete signal category.** This UX names "signals" generically — error rate, latency, restarts, resource pressure — but the *exact* category the observability offering will provide is a design-time decision for that offering, not for this UX. The category needs to be wide enough that tech designs across capabilities can pick from it without the offering having to be expanded for every new tenant.
-- **Channel menu.** The set of supported alert channels is undefined. Email is the obvious floor; chat / push are plausible adds. Whichever ships first must be reliable enough that capability owners trust silence to mean health, not channel failure.
-- **What "tenant-scoped access" looks like in practice.** This UX takes for granted that the observability offering can scope a capability owner's view to their own tenant. The mechanism (separate auth, ACLs in the offering, per-tenant dashboards) is an implementation detail to be settled when the offering is designed.
+_None at this time._
