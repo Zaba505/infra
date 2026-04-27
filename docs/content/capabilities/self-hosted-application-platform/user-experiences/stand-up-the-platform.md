@@ -31,7 +31,7 @@ Three triggers converge on this same flow:
 
 - **First-ever build.** No platform has existed before; the operator is bringing it into being.
 - **Disaster recovery.** The platform existed and is now gone (cloud project lost, home-lab destroyed, ransomware, etc.); the operator is rebuilding on top of root-level access that survived the disaster.
-- **Drift / reproducibility drill.** The operator periodically rebuilds the platform *in parallel* on scratch infrastructure to prove the KPI still holds, while the live platform keeps serving. The drill is identical to the real flow — only the underlying infrastructure differs.
+- **Drift / reproducibility drill.** The operator rebuilds the platform *in parallel* on scratch infrastructure after every significant platform change — meaning any change that would alter what they are rebuilding, what they must validate, or what they must trust before calling the platform ready again — and at least quarterly to prove the KPI still holds while the live platform keeps serving. The drill is identical to the real flow — only the underlying infrastructure differs.
 
 What the operator has in hand at minute zero:
 - The **definitions repo**, pulled fresh.
@@ -41,7 +41,7 @@ What the operator has in hand at minute zero:
 The operator's state of mind is steady, not panicked: this journey exists precisely so total loss isn't catastrophic, and a drill rehearses it on purpose.
 
 What is **not** assumed at entry:
-- Definitions drift. The operator is trusting the definitions repo to reflect reality. If drift exists, it must be detected and fixed *before* this journey begins, not discovered partway through. (See *Constraints*.)
+- Definitions drift. Before any rebuild with prior platform state starts, the operator performs a required preflight drift check against the live platform or the last known-good environment. On a first-ever build, the check is vacuously clean because there is no prior platform state yet. The check passes only when the platform state the operator is treating as real still matches the definitions closely enough that no unexplained differences remain. If drift exists, it must be detected and fixed *before* this journey begins, not discovered partway through. (See *Constraints*.)
 - The sealed successor credentials. They stay sealed during routine standup, including DR.
 
 ## Journey
@@ -50,7 +50,7 @@ The rebuild is **automated, with manual operator-validation checkpoints between 
 
 ### 1. Decide to rebuild and confirm preconditions
 
-The operator decides to rebuild — first build, DR, or scheduled drill — and confirms what they have in hand: a fresh pull of the definitions repo and root-level access to the target infrastructure (the live infra for first-build/DR, scratch infra for a drill). They confirm the definitions are not drifted from what was running. If drift is suspected, they stop and resolve it before starting the rebuild.
+The operator decides to rebuild — first build, DR, or scheduled drill — and confirms what they have in hand: a fresh pull of the definitions repo and root-level access to the target infrastructure (the live infra for first-build/DR, scratch infra for a drill). Before they kick anything off, they perform the required preflight drift check whenever prior platform state exists, using the live platform or the last known-good environment as the reference, and confirm the platform they intend to trust still matches the intended definitions closely enough to rebuild from them honestly. If the check fails because unexplained differences remain, they stop and resolve drift before starting the rebuild.
 
 What they perceive: nothing yet on the target infrastructure; a clean definitions repo on their workstation; the underlying provider UIs (cloud console, IPMI) showing the empty starting state.
 
@@ -64,21 +64,21 @@ What they perceive: log output begins streaming. The first phase is underway.
 
 Automation provisions the underlying foundations: cloud project / home-lab base, network plumbing including the connectivity between cloud and home-lab. On completion the automation **pauses** and prints a phase summary.
 
-The operator validates by checking the underlying provider's UIs (cloud console, home-lab IPMI) and running any verification commands the runbook calls for. When satisfied, they signal `continue`.
+The operator validates by checking the underlying provider's UIs (cloud console, home-lab IPMI) and the expected signals for this phase. Only when they are satisfied that the foundations really are in place do they signal `continue`.
 
 If validation fails, see *Edge Cases — Phase fails*.
 
 ### 4. Phase 2 — Core platform services
 
-Automation provisions compute, persistent storage, and the platform-provided identity service on top of the foundations. Pauses. Operator validates the same way — provider UIs plus verification commands (e.g. identity service is reachable and issuing tokens). Signals `continue`.
+Automation provisions compute, persistent storage, and the platform-provided identity service on top of the foundations. Pauses. The operator validates the same way — provider UIs plus the expected signs that compute, storage, and identity are really available (e.g. the identity service is reachable and issuing tokens) — then signals `continue`.
 
 ### 5. Phase 3 — Cross-cutting services
 
-Automation provisions backup and observability so they cover the platform itself before any tenant arrives. Pauses. Operator validates that backup is wired in and observability is collecting. Signals `continue`.
+Automation provisions backup and observability so they cover the platform itself before any tenant arrives. Pauses. The operator validates that backup is wired in and observability is collecting, then signals `continue`.
 
 ### 6. Phase 4 — Readiness verification and canary tenant
 
-The platform deploys a **known-good canary tenant** end-to-end — a tiny tenant whose only purpose is to prove the platform can host tenants — exercises it (it should run, be reachable, store and read back data, authenticate against the platform-provided identity service, be picked up by backup and observability), then tears it down.
+The platform deploys a **purpose-built canary tenant maintained alongside the platform definitions** end-to-end. It exists solely to prove the platform can host tenants without coupling readiness to any real tenant's lifecycle. The trade-off is that this is less representative than using a small real tenant, so it may miss tenant-specific workload quirks; it is preferred anyway because it keeps readiness verification deterministic, disposable, and independent of any real tenant's lifecycle. The canary is exercised (it should run, be reachable, store and read back data, authenticate against the platform-provided identity service, be picked up by backup and observability), then torn down.
 
 What the operator perceives: a clear pass/fail on the canary. The canary's success is the readiness signal — "ready to host tenants" is operationally identical to "did host a tenant just now."
 
@@ -92,10 +92,10 @@ The operator records how long the rebuild took. If it came in under the 1-hour K
 
 ```mermaid
 flowchart TD
-    Start([Trigger: first build / DR / drill]) --> Confirm[Confirm definitions are not drifted<br/>and root-level access is in hand]
+    Start([Trigger: first build / DR / drill]) --> Confirm[Run required preflight drift check<br/>when prior state exists and confirm<br/>root-level access is in hand]
     Confirm --> Kickoff[Run top-level rebuild from definitions]
     Kickoff --> P1[Phase 1: Foundations<br/>cloud + home-lab base, networking]
-    P1 --> V1{Validate via provider UIs<br/>+ verification commands}
+    P1 --> V1{Validate via provider UIs<br/>+ maintained checklist}
     V1 -->|Fails| Halt[Halt, root-cause,<br/>tear down everything,<br/>fix definition, restart]
     V1 -->|OK| P2[Phase 2: Core services<br/>compute, storage, identity]
     P2 --> V2{Validate}
@@ -103,7 +103,7 @@ flowchart TD
     V2 -->|OK| P3[Phase 3: Cross-cutting<br/>backup, observability]
     P3 --> V3{Validate}
     V3 -->|Fails| Halt
-    V3 -->|OK| Canary[Phase 4: Deploy canary tenant<br/>end-to-end, then tear down]
+    V3 -->|OK| Canary[Phase 4: Deploy purpose-built<br/>canary tenant, then tear down]
     Canary --> CanaryGreen{Canary green?}
     CanaryGreen -->|No| Halt
     CanaryGreen -->|Yes| Wallclock[Note wall-clock duration]
@@ -118,16 +118,18 @@ flowchart TD
 
 When the canary comes up green and is cleanly torn down, the operator walks away with:
 
-- A platform that is **ready to host tenants** — every platform-provided service has been exercised end-to-end by a real tenant deployment, not just by self-checks.
+- A platform that is **ready to host tenants** — every platform-provided service has been exercised end-to-end by a purpose-built tenant deployment, not just by self-checks.
 - **Confidence in reproducibility.** The rebuild ran from the definitions repo, with no manual snowflake configuration, and produced a working platform. The KPI is honestly met (or, if not, the gap is captured for follow-up rather than papered over).
 - A **clean handoff** to tenant restoration. Any previously-hosted tenants come back via their own restoration journey; the platform-side standup ends cleanly without entangling itself in tenant data.
-- For drills specifically: a renewed assurance that "we can rebuild this in an hour" is a real property, not a hope.
+- For drills specifically: a renewed assurance that "we can rebuild this in an hour" is a real property, not a hope, because the drill is run after every significant platform change and at least quarterly rather than whenever it feels convenient.
 
 ## Edge Cases & Failure Modes
 
 - **Phase fails mid-rebuild.** The automation hits an error during one of the phases. The operator halts, root-causes the failure, fixes the underlying issue (typically a definition that needs updating), **tears down everything that was provisioned so far**, and restarts the rebuild from the top. Partial state is itself a snowflake risk and is not trusted. This implies each phase must be reversible — at minimum, "delete everything" must be a viable rollback. (See *Constraints*.)
 
-- **Definitions are drifted.** Out of scope at the moment of rebuild. Drift is supposed to be prevented by the platform's enforcement of tracked changes and immutability, and detected/fixed *before* this journey starts. If drift somehow surfaces during the rebuild (e.g. canary fails because something was running that the definitions don't describe), the operator treats it as a definitions bug — fix the definition, tear down, restart.
+- **Preflight drift check fails.** The rebuild does not start. The operator treats this as a definitions integrity problem, reconciles the drift, and only re-enters this journey once the required preflight check passes.
+
+- **Definitions are drifted despite the preflight check.** Drift is supposed to be prevented by the platform's enforcement of tracked changes and immutability, and detected/fixed *before* this journey starts. If drift still surfaces during the rebuild (e.g. the canary fails because something expected by the definitions is missing or inconsistent), the operator treats it as a definitions bug — fix the definition, tear down, restart.
 
 - **1-hour KPI is missed.** The platform is still up and ready for tenants. The operator records the wall-clock and opens a GitHub issue to analyze why it took longer than it should have. The KPI is missed *for that rebuild*, but the platform doesn't get blocked from going back into service; KPI improvement is a follow-up concern, not part of this journey.
 
@@ -141,7 +143,7 @@ When the canary comes up green and is cleanly torn down, the operator walks away
 
 This UX must respect the following items from the parent capability — by name, so future readers can trace the lineage:
 
-- **KPI: 1-hour reproducibility.** This is the journey the KPI is measured against. The 1-hour budget is a *target*, not a hard fail — missing it does not stop the platform from going into service, but it does generate a tracked follow-up issue. The KPI cannot be honestly evaluated unless drills run this same flow on parallel infrastructure routinely.
+- **KPI: 1-hour reproducibility.** This is the journey the KPI is measured against. The 1-hour budget is a *target*, not a hard fail — missing it does not stop the platform from going into service, but it does generate a tracked follow-up issue. The KPI cannot be honestly evaluated unless drills run this same flow on parallel infrastructure after every significant platform change and at least quarterly.
 
 - **Operator-only operation.** No co-operators, no delegated administration, no shared driving of the rebuild. The sealed successor credentials are not used during routine standup, including DR. A successor uses them only after takeover, and from that point operates as "the operator" through this same UX.
 
@@ -153,9 +155,11 @@ This UX must respect the following items from the parent capability — by name,
 
 - **No specific availability or performance SLA.** The journey ends at "ready to host tenants" — what tenants experience after that is governed by the platform's normal availability characteristics, not by this UX.
 
-- **Tracked changes and immutability across all platform UXs.** Implied by edge-case (b): drift erodes confidence in reproducibility, so every UX that can introduce platform state must enforce tracked changes and immutability rather than allowing ad-hoc modification. This is a property the platform's definitions and operations must hold, not a step in this journey — but this UX is the one that *exposes* drift if it ever creeps in.
+- **Tracked changes and immutability across all platform UXs.** The required preflight drift check is only meaningful if every UX that can introduce platform state enforces tracked changes and immutability rather than allowing ad-hoc modification. This is a property the platform's definitions and operations must hold, not a step that invents drift policy on its own — but this UX is the one that refuses to proceed until that policy is verified.
 
 - **Each phase must be reversible.** Implied by the "phase fails → tear down everything and restart" edge-case rule. The platform's definitions must support a clean teardown of any partially-provisioned state. "Delete everything and start over" must be a viable, reliable option at every checkpoint.
+
+- **Default hosting target for the operator's capabilities.** Readiness cannot be declared from infrastructure self-checks alone; the platform has to prove it can actually host a tenant. That is why this UX requires a purpose-built canary tenant maintained with the platform definitions.
 
 ## Out of Scope
 
@@ -167,16 +171,10 @@ This UX must respect the following items from the parent capability — by name,
 
 - **Sealed-credential takeover by the successor.** The act of breaking the seal, asserting authority, and gaining access to the operator's context belongs in its own UX. This UX picks up *after* takeover, where the successor is operating as the operator.
 
-- **Drift detection and repair as a process.** Drift is treated here as a precondition that has either already been resolved or not. The mechanism that prevents and detects drift across the platform is a cross-cutting concern, not a step in this journey.
+- **The broader drift-management process.** This UX requires a preflight drift check before rebuild, but the wider machinery that continuously enforces tracked changes, detects drift between rebuilds, and maintains the last known-good reference is a cross-cutting concern, not the focus of this journey.
 
 - **Loss of root-level foundations** (cloud account itself, all home-lab access). These are assumed in place before the platform was deployed in the first place. Recovery from their loss is not part of the platform's capability.
 
 ## Open Questions
 
-- **What exactly is the canary tenant?** A purpose-built no-op tenant maintained alongside the platform definitions, or a small real tenant chosen for this role? The trade-off is between purity (no-op is purely a test) and realism (a real small tenant exercises more of the platform).
-
-- **How is drift detected as a precondition?** This UX assumes drift is caught and fixed before the rebuild starts, but the *mechanism* by which the operator gains that confidence is undefined here. Likely belongs in a sibling UX or a cross-cutting platform concern, but worth flagging.
-
-- **How often is the drill run?** The drill is described as periodic but not scheduled. Cadence affects how reliable the KPI claim actually is — quarterly? annually? after every significant platform change? Operator judgment for now; may want an explicit policy as the platform matures.
-
-- **What does "verification commands" mean concretely at each checkpoint?** This UX names them but does not enumerate them. They become a real artifact maintained alongside the definitions. Their definition belongs to the platform's tech design, not this UX, but the existence of a maintained verification checklist is load-bearing for the journey to work.
+_None at this time._
