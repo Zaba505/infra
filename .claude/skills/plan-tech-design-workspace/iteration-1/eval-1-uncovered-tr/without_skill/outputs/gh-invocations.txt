@@ -1,0 +1,87 @@
+# Intended `gh issue create` invocations.
+# NOT executed — written here per instructions.
+# Repo assumed: Zaba505/infra
+
+# ---------------------------------------------------------------------------
+# Gap issues — one per uncovered TR. These must be resolved (via `define-adr`)
+# before the tech design is complete.
+# ---------------------------------------------------------------------------
+
+gh issue create \
+  --title "ADR gap: TR-03 per-tenant observability for self-hosted-application-platform" \
+  --label "adr,capability:self-hosted-application-platform,tech-design-gap" \
+  --body "$(cat <<'EOF'
+**Capability:** self-hosted-application-platform
+**Uncovered TR:** TR-03 — Tenant-facing observability must be queryable per-tenant only.
+
+The composed tech-design.md flagged TR-03 as having no accepting ADR. A
+capability-scoped ADR is required before the tech design can be marked
+complete.
+
+The ADR should decide, at minimum:
+- Where tenant telemetry (logs, metrics, traces) is stored.
+- How a query is scoped so a tenant cannot see another tenant's data.
+- How the operator views cross-tenant aggregates without that view leaking
+  back into a tenant-facing query.
+
+Run `/define-adr` once research is in.
+EOF
+)"
+
+gh issue create \
+  --title "ADR gap: TR-06 lossless idempotent migrations for self-hosted-application-platform" \
+  --label "adr,capability:self-hosted-application-platform,tech-design-gap" \
+  --body "$(cat <<'EOF'
+**Capability:** self-hosted-application-platform
+**Uncovered TR:** TR-06 — Migrations must be lossless and idempotent.
+
+The composed tech-design.md flagged TR-06 as having no accepting ADR. A
+capability-scoped ADR is required before the tech design can be marked
+complete.
+
+The ADR should decide, at minimum:
+- How a migration is described (declarative vs. imperative, where it lives).
+- How idempotency is enforced at execution time.
+- How loss is detected before/after a migration runs.
+- How a partially-applied migration is rolled back or made safe.
+
+Run `/define-adr` once research is in.
+EOF
+)"
+
+gh issue create \
+  --title "ADR gap: TR-08 graceful degradation when a GCP region is unreachable" \
+  --label "adr,capability:self-hosted-application-platform,tech-design-gap" \
+  --body "$(cat <<'EOF'
+**Capability:** self-hosted-application-platform
+**Uncovered TR:** TR-08 — Platform must degrade gracefully when a GCP region
+becomes unreachable. Tenant workloads must continue serving (possibly with
+reduced functionality) when a GCP region is unreachable for up to 30 minutes.
+
+The composed tech-design.md flagged TR-08 as having no accepting ADR. The
+operator explicitly noted this gap when invoking the skill. A capability-scoped
+ADR is required before the tech design can be marked complete.
+
+The ADR should decide, at minimum:
+- The multi-region posture: active/active, active/passive, or single-region
+  with read-only fallback.
+- How per-tenant Firestore namespace data (ADR 0001) is reachable from a
+  surviving region within the 30-minute window.
+- How the Edge Ingress (Cloudflare → GCP, TR-07) fails over, and whether
+  failover is automatic or operator-initiated.
+- A concrete definition of "reduced functionality" — which platform services
+  must remain up, which may be served stale, and which may be unavailable.
+
+Interacts with: ADR 0001 (Tenant State Storage), TR-07 (edge ingress).
+
+Run `/define-adr` once research is in.
+EOF
+)"
+
+# ---------------------------------------------------------------------------
+# Component-design issues are intentionally NOT filed yet. The component
+# inventory in tech-design.md will shift once the three gap ADRs above are
+# decided (especially TR-08, which may add a region-failover component or
+# change the Tenant State Store and Edge Ingress designs). File component
+# issues only after the gaps close.
+# ---------------------------------------------------------------------------

@@ -1,0 +1,238 @@
+# Intended `gh issue create` invocations — NOT executed.
+# These will run only after the human explicitly approves the component list and gap list.
+# Per skill discipline: one issue per component, one issue per gap.
+
+# ---------------- Component issues ----------------
+
+gh issue create \
+  --title "story(component): tenant-registry — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/tenant-registry/`
+**Type:** service
+**Responsibility:** Owns tenant records and the CRUD surface over them.
+
+### Established by
+
+- [ADR-0001](../adrs/0001-tenant-state-storage.md) — Tenant state storage
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design` — one invocation per component. The doc format is type-specific (API service): endpoints, request/response shapes, pagination, PATCH semantics, idempotency, and error taxonomy alignment with `pkg/errorpb` will be designed there. The composed `tech-design.md` will be updated to link to the component design once written.
+
+Note: the operator suggested `GET /tenants`, `POST /tenants`, `GET /tenants/{id}`, `PATCH /tenants/{id}`, `DELETE /tenants/{id}` as a starting point. Treat as input to design, not as the final contract.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): contract-version-catalog — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/contract-version-catalog/`
+**Type:** service
+**Responsibility:** Tracks platform contract versions and the version each tenant is pinned to.
+
+### Established by
+
+- [ADR-0002](../adrs/0002-contract-versioning.md) — Contract versioning
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): tenant-eviction-exporter — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/tenant-eviction-exporter/`
+**Type:** service/job
+**Responsibility:** Produces the eviction export bundle when a tenant is evicted.
+
+### Established by
+
+- [ADR-0003](../adrs/0003-tenant-eviction-export.md) — Tenant eviction export
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`. Bundle format, retention, and pickup channel are open (see gap G4).
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): platform-bootstrap — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `cloud/platform-bootstrap/`
+**Type:** Terraform module
+**Responsibility:** Provisions platform-level dependencies (network, storage, identity) for stand-up-the-platform.
+
+### Established by
+
+- [ADR-0001](../adrs/0001-tenant-state-storage.md) (indirect — backing store for tenant-registry)
+- stand-up-the-platform UX
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`. Module inputs/outputs and lifecycle (`create_before_destroy`) will be specified there.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+# ---------------- Gap issues ----------------
+
+gh issue create \
+  --title "story(gap): tenant ID derivation — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+ADR-0001 says tenants are addressed by tenant ID, and shared ADR-0006 (resource identifier standard) defines an ID format, but neither specifies how a tenant ID is minted from the GitHub onboarding issue (auto-incremented? hash of capability name? operator chooses?). Without this, the tenant-registry component cannot be designed.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [ ] Amending ADR via `define-adr`
+- [x] Per-component spec via `define-component-design` (tenant-registry)
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): tenant-registry API contract — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+No ADR specifies the tenant-registry API contract: endpoints, request/response shapes, pagination, PATCH semantics, idempotency, error taxonomy. The operator suggested REST CRUD verbs (`GET/POST/PATCH/DELETE /tenants[/{id}]`) but these are starting points, not specifications.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [ ] Amending ADR via `define-adr`
+- [x] Per-component spec via `define-component-design` (tenant-registry)
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): contract-version pinning storage — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+ADR-0002 implies tenants carry a pinned contract version but doesn't say where it lives — on the tenant record (owned by tenant-registry) or in a separate store (owned by contract-version-catalog). Ownership must be settled before either component can be designed.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [ ] Amending ADR via `define-adr`
+- [x] Per-component spec via `define-component-design` (tenant-registry or contract-version-catalog)
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): eviction export bundle format and retention — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+ADR-0003 names an eviction export bundle but does not specify its format, retention period, or pickup channel for the evicted tenant.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [ ] Amending ADR via `define-adr`
+- [x] Per-component spec via `define-component-design` (tenant-eviction-exporter)
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): TR coverage re-verification — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+Re-verify at issue-filing time that every TR-NN in `tech-requirements.md` traces through an accepted ADR to a named component. Any TR without an ADR must be filed back to `plan-adrs`/`define-adr`; any TR truly abandoned must be removed via `define-technical-requirements`.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [x] Amending ADR via `define-adr` (only if an uncovered TR is found)
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"

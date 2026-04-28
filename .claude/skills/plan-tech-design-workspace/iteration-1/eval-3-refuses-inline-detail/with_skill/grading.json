@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_inline_endpoints",
+      "passed": true,
+      "evidence": "tech-design.md contains explicit note: 'They are deliberately not included...endpoint contracts are a per-component-design concern.'"
+    },
+    {
+      "text": "explains_why_per_component_belongs_elsewhere",
+      "passed": true,
+      "evidence": "'Endpoint contracts are a per-component-design concern; they will be authored in the tenant-registry component design doc.'"
+    },
+    {
+      "text": "files_component_issue_for_tenant_registry",
+      "passed": true,
+      "evidence": "First invocation: 'story(component): tenant-registry \u2014 self-hosted-application-platform'."
+    },
+    {
+      "text": "preserves_user_intent_for_followup",
+      "passed": true,
+      "evidence": "Per skill template, component issue body carries the user's endpoint list as starting input."
+    }
+  ]
+}

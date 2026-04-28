@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_compose",
+      "passed": false,
+      "evidence": "Baseline composed tech-design.md anyway with 'a prominent warning'."
+    },
+    {
+      "text": "lists_proposed_adrs",
+      "passed": true,
+      "evidence": "Baseline named the proposed ADRs in its warning."
+    },
+    {
+      "text": "routes_to_define_adr",
+      "passed": true,
+      "evidence": "Baseline noted the path to acceptance."
+    },
+    {
+      "text": "no_tech_design_written",
+      "passed": false,
+      "evidence": "Baseline wrote tech-design.md despite the gate."
+    },
+    {
+      "text": "no_issues_filed",
+      "passed": false,
+      "evidence": "Baseline wrote intended gh issue create invocations."
+    }
+  ]
+}

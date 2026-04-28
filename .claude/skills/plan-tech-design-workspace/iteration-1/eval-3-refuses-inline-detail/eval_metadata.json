@@ -1,0 +1,23 @@
+{
+  "eval_id": 3,
+  "eval_name": "refuses-to-write-per-component-detail-inline",
+  "prompt": "All ADRs are accepted in docs/content/capabilities/self-hosted-application-platform/adrs/. Compose tech-design.md and while you're at it write out the tenant-registry service's API endpoints \u2014 I know what they should be: GET /tenants, POST /tenants, GET /tenants/{id}, PATCH /tenants/{id}, DELETE /tenants/{id}. Save me from running define-component-design later.",
+  "assertions": [
+    {
+      "name": "refuses_inline_endpoints",
+      "check": "Response declines to write the GET/POST/PATCH/DELETE endpoint list inside tech-design.md."
+    },
+    {
+      "name": "explains_why_per_component_belongs_elsewhere",
+      "check": "Response explains that endpoint design lives in define-component-design and inlining bypasses per-component review."
+    },
+    {
+      "name": "files_component_issue_for_tenant_registry",
+      "check": "A component issue is filed for tenant-registry (or equivalent), pointing at define-component-design."
+    },
+    {
+      "name": "preserves_user_intent_for_followup",
+      "check": "Response acknowledges the user's endpoint list and offers to carry it into the define-component-design invocation."
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+# Intended `gh issue create` invocations.
+# These are NOT executed — the eval harness instructed not to run gh.
+# Per skill discipline: file ONLY after explicit human approval of the
+# component list and gap list mirrored back in Step 4.
+#
+# capability-name: self-hosted-application-platform
+# parent capability planning issue: #722 (placeholder; replace with actual)
+#
+# Skill requires explicit user approval before any of these run. See the
+# "Approval prompt" block at the end of this file for the exact wording
+# the agent should ask before invoking.
+
+# ---------------------------------------------------------------------
+# COMPONENT ISSUES (one per component in the inventory)
+# ---------------------------------------------------------------------
+
+gh issue create \
+  --title "story(component): tenant-registry service — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/tenant-registry/`
+**Type:** service
+**Responsibility:** Source of truth for tenant identity and lifecycle. Owns the per-tenant Firestore namespace mapping and enforces tenant isolation at the data-access layer.
+
+### Established by
+
+- [ADR-0001](../adrs/0001-tenant-state-storage.md) — Tenant State Storage
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design` — one invocation per component. The doc format is type-specific (API service: endpoints, contracts, error mapping). The composed `tech-design.md` will be updated to link to the component design once written.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): contract-router service — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/contract-router/`
+**Type:** service
+**Responsibility:** Routes tenant traffic to the correct platform-contract version based on the semver-pathed contract package the tenant is pinned to, enabling concurrent versions during rollout.
+
+### Established by
+
+- [ADR-0002](../adrs/0002-contract-versioning.md) — Contract Versioning
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): tenant-export service — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `services/tenant-export/`
+**Type:** service
+**Responsibility:** On-demand export of an evicted tenant's Firestore namespace contents to a per-export GCS object, returning a signed URL.
+
+### Established by
+
+- [ADR-0003](../adrs/0003-tenant-eviction-export.md) — Tenant Eviction Export
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): cloud/tenant-firestore module — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `cloud/tenant-firestore/`
+**Type:** module
+**Responsibility:** Provisions a per-tenant Firestore namespace (and any IAM bindings required for isolation) when a new tenant is onboarded.
+
+### Established by
+
+- [ADR-0001](../adrs/0001-tenant-state-storage.md) — Tenant State Storage
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design` (Terraform module format: inputs, outputs, resources).
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): cloud/tenant-export-bucket module — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `cloud/tenant-export-bucket/`
+**Type:** module
+**Responsibility:** Provisions the GCS bucket and signed-URL IAM configuration used by tenant-export.
+
+### Established by
+
+- [ADR-0003](../adrs/0003-tenant-eviction-export.md) — Tenant Eviction Export
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design`.
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(component): pkg/contractversion — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Component
+
+**Location:** `pkg/contractversion/`
+**Type:** package
+**Responsibility:** Shared parsing/validation of the semver-pathed contract package identifier used by contract-router and any contract-aware tenant SDK.
+
+### Established by
+
+- [ADR-0002](../adrs/0002-contract-versioning.md) — Contract Versioning
+
+### Authoring
+
+This component's design doc will be authored via `define-component-design` (Go package format: exported API surface, invariants).
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Related
+
+#722
+EOF
+)"
+
+# ---------------------------------------------------------------------
+# GAP ISSUES (one per gap surfaced during composition)
+# ---------------------------------------------------------------------
+
+gh issue create \
+  --title "story(gap): TR-08 graceful regional degradation has no ADR — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+TR-08 ('Platform must degrade gracefully when a GCP region becomes unreachable') is present in `tech-requirements.md` but no accepted ADR addresses it. The composed `tech-design.md` cannot trace TR-08 through any decision into a component, so the audit trail is incomplete. This gap was explicitly flagged by the human during composition.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements` (drop TR-08 if not a real constraint)
+- [x] Amending ADR via `define-adr` (or plan one via `plan-adrs`) to decide multi-region failover / degraded-mode strategy
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): TR-03 per-tenant observability has no ADR — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+TR-03 ('Tenant-facing observability must be queryable per-tenant only') is present in `tech-requirements.md` but no accepted ADR addresses it. No component is established to realize per-tenant observability scoping.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [x] Amending ADR via `define-adr` (plan via `plan-adrs`)
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): TR-06 lossless idempotent migrations has no ADR — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+TR-06 ('Migrations must be lossless and idempotent') is present in `tech-requirements.md` but no accepted ADR addresses it. No component is established to perform migrations or guarantee these properties.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [x] Amending ADR via `define-adr` (plan via `plan-adrs`)
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): TR-07 Cloudflare→GCP traversal has no capability ADR — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+TR-07 ('Inter-service traffic must traverse Cloudflare → GCP') cites 'prior shared decision' as its source. No capability ADR ties TR-07 to a specific component, and the audit trail in `tech-design.md` therefore has no realization for it. Either annotate `tech-requirements.md` with a direct link to the shared `r&d/adrs/` decision (and confirm the existing edge components satisfy it) or plan a capability ADR.
+
+### Type of resolution needed
+
+- [x] Amending TR via `define-technical-requirements` (link directly to shared r&d ADR)
+- [x] Amending ADR via `define-adr` (capability-scoped) if a capability decision is actually needed
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(gap): ADR-0002 and ADR-0003 status/body wording mismatch — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Gap
+
+ADR-0002 (Contract Versioning) and ADR-0003 (Tenant Eviction Export) carry frontmatter `status: accepted` but their Decision Outcome sections still read 'Proposed: ... Awaiting confirmation.' The composed tech design treats them as accepted per the human's instruction, but the bodies should be amended so future readers see consistent state.
+
+### Type of resolution needed
+
+- [ ] Amending TR via `define-technical-requirements`
+- [x] Amending ADR via `define-adr` (rewrite Decision Outcome to match accepted status)
+- [ ] Per-component spec via `define-component-design`
+- [ ] Inline answer (resolved in conversation)
+
+### Surfaced during
+
+Composition of `tech-design.md` for [self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md).
+
+### Related
+
+#722
+EOF
+)"
+
+# ---------------------------------------------------------------------
+# Approval prompt (Step 4 of the skill) — required before any of the
+# above are actually run.
+# ---------------------------------------------------------------------
+#
+# "I've composed the skeleton at `tech-design.md` and identified 6
+#  components and 5 gaps. Before I file issues:
+#
+#  Components:
+#    1. tenant-registry service (ADR-0001)
+#    2. contract-router service (ADR-0002)
+#    3. tenant-export service (ADR-0003)
+#    4. cloud/tenant-firestore module (ADR-0001)
+#    5. cloud/tenant-export-bucket module (ADR-0003)
+#    6. pkg/contractversion (ADR-0002)
+#
+#  Gaps:
+#    1. TR-08 has no ADR (graceful regional degradation) — flagged by you
+#    2. TR-03 has no ADR (per-tenant observability)
+#    3. TR-06 has no ADR (lossless idempotent migrations)
+#    4. TR-07 has no capability ADR (cites prior shared decision only)
+#    5. ADR-0002 / ADR-0003 status vs. body wording mismatch
+#
+#  Audit-trail rows: 8 (matches TR count of 8 — but 4 rows are GAP).
+#
+#  Do the components look right? Do you want any gap resolved inline now?
+#  Once you say go, I'll file 6 component issues and 5 gap issues."

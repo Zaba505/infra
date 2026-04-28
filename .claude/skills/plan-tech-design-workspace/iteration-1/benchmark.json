@@ -1,0 +1,101 @@
+{
+  "skill_name": "plan-tech-design",
+  "iteration": 1,
+  "configs": {
+    "with_skill": {
+      "pass_rate": 1.0,
+      "avg_tokens": 39653.75,
+      "avg_duration_ms": 107183.0
+    },
+    "without_skill": {
+      "pass_rate": 0.85,
+      "avg_tokens": 34418.75,
+      "avg_duration_ms": 74330.0
+    }
+  },
+  "delta": {
+    "pass_rate_pp": 15.000000000000002
+  },
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-proposed-adrs",
+      "configs": {
+        "with_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 27309,
+          "tokens": 27657
+        },
+        "without_skill": {
+          "passed": 2,
+          "total": 5,
+          "pass_rate": 0.4,
+          "duration_ms": 59464,
+          "tokens": 29144
+        }
+      }
+    },
+    {
+      "id": 1,
+      "name": "uncovered-tr",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 157265,
+          "tokens": 46459
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 71948,
+          "tokens": 34416
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "files-component-and-gap-issues",
+      "configs": {
+        "with_skill": {
+          "passed": 7,
+          "total": 7,
+          "pass_rate": 1.0,
+          "duration_ms": 132439,
+          "tokens": 47859
+        },
+        "without_skill": {
+          "passed": 7,
+          "total": 7,
+          "pass_rate": 1.0,
+          "duration_ms": 74256,
+          "tokens": 35332
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "refuses-inline-detail",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 111719,
+          "tokens": 36640
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 91652,
+          "tokens": 38783
+        }
+      }
+    }
+  ]
+}

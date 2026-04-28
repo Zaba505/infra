@@ -1,0 +1,27 @@
+{
+  "eval_id": 0,
+  "eval_name": "gate-refuses-proposed-adrs",
+  "prompt": "We have three ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/: 0001 (accepted), 0002 (proposed), 0003 (proposed). Compose tech-design.md.",
+  "assertions": [
+    {
+      "name": "refuses_to_compose",
+      "check": "Response declines to write tech-design.md."
+    },
+    {
+      "name": "lists_proposed_adrs",
+      "check": "Response specifically names ADR-0002 and ADR-0003 as the blocking proposed ADRs."
+    },
+    {
+      "name": "routes_to_define_adr",
+      "check": "Response tells the user to accept the proposed ADRs (via define-adr) before re-invoking."
+    },
+    {
+      "name": "no_tech_design_written",
+      "check": "No tech-design.md file is written under docs/content/capabilities/self-hosted-application-platform/."
+    },
+    {
+      "name": "no_issues_filed",
+      "check": "No `gh issue create` invocations are made."
+    }
+  ]
+}
