@@ -116,7 +116,9 @@ After filing, print the issue numbers/URLs back to the user as a manifest.
 
 ### Parent capability
 
-[{capability-name}](../docs/content/capabilities/{name}/_index.md)
+[{capability-name}]({capability-doc-relative-path})
+
+> Use the actual capability doc path here: `../docs/content/capabilities/{name}.md` if the capability is a flat file, or `../docs/content/capabilities/{name}/_index.md` if it has been promoted to page-bundle form. Don't hardcode `_index.md` — the link will 404 for flat capabilities.
 
 ### Authoring
 

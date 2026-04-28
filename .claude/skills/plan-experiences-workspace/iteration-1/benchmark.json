@@ -1,9 +1,6 @@
 {
   "metadata": {
     "skill_name": "plan-experiences",
-    "skill_path": "<path/to/skill>",
-    "executor_model": "<model-name>",
-    "analyzer_model": "<model-name>",
     "timestamp": "2026-04-28T05:05:29Z",
     "evals_run": [
       0,

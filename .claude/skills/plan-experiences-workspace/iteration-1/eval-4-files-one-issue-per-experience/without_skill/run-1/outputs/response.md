@@ -37,5 +37,5 @@ Per the instructions I did **not** invoke `gh issue create`. The exact commands 
 
 ## Files
 
-- Plan/response: `/home/carson/github.com/Zaba505/infra/.claude/skills/plan-experiences-workspace/iteration-1/eval-4-files-one-issue-per-experience/without_skill/outputs/response.md`
-- gh commands: `/home/carson/github.com/Zaba505/infra/.claude/skills/plan-experiences-workspace/iteration-1/eval-4-files-one-issue-per-experience/without_skill/outputs/gh-commands.txt`
+- Plan/response: `.claude/skills/plan-experiences-workspace/iteration-1/eval-4-files-one-issue-per-experience/without_skill/run-1/outputs/response.md`
+- gh commands: `.claude/skills/plan-experiences-workspace/iteration-1/eval-4-files-one-issue-per-experience/without_skill/run-1/outputs/gh-commands.txt`

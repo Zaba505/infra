@@ -1,6 +1,5 @@
 # Skill Benchmark: plan-experiences
 
-**Model**: <model-name>
 **Date**: 2026-04-28T05:05:29Z
 **Evals**: 0, 1, 2, 3, 4 (3 runs each per configuration)
 

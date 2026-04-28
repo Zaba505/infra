@@ -21,7 +21,7 @@
     {
       "id": 1,
       "name": "enumerates-before-defining",
-      "prompt": "The capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the user experiences. The doc is at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "prompt": "The capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the user experiences. The doc is at .claude/skills/plan-experiences/evals/fixtures/self-hosted-personal-media-storage.md.",
       "expected_output": "Should NOT immediately start drafting a UX or describing journey steps. Should first read the capability doc, then enumerate the discrete user journeys it implies as a list (verb-led titles + persona + one-line goal), each anchored to specific capability sections (Stakeholders / Triggers / Outputs / Success Criteria). Should ask the user to confirm the list before filing issues.",
       "assertions": [
         {"name": "produces_an_experience_list", "check": "Response contains a numbered or bulleted list of proposed user experiences (titles + persona + one-liners), not a single UX draft."},
@@ -35,7 +35,7 @@
     {
       "id": 2,
       "name": "rejects-bundled-experience",
-      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan a single user experience called 'user manages their content' that covers uploading, sharing, browsing, and deleting. Doc at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan a single user experience called 'user manages their content' that covers uploading, sharing, browsing, and deleting. Doc at .claude/skills/plan-experiences/evals/fixtures/self-hosted-personal-media-storage.md.",
       "expected_output": "Should push back on bundling. Should propose splitting into separate experiences (upload, share, browse, delete), explaining that bundling forces mismatched entry points and success states into one UX doc. Should ask which to tackle first or propose an order.",
       "assertions": [
         {"name": "refuses_the_bundle", "check": "Response declines to plan a single 'user manages their content' UX covering all four sub-journeys."},
@@ -47,7 +47,7 @@
     {
       "id": 3,
       "name": "flags-misplaced-cross-capability-journey",
-      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan an experience for the operator standing up the hosting platform from scratch. Doc at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan an experience for the operator standing up the hosting platform from scratch. Doc at .claude/skills/plan-experiences/evals/fixtures/self-hosted-personal-media-storage.md.",
       "expected_output": "Should recognize this journey belongs to the self-hosted-application-platform capability, not the media-storage capability. Should refuse to plan it as a media-storage-scoped experience and offer to either skip it or pause so the user can plan it under the platform capability.",
       "assertions": [
         {"name": "recognizes_misplaced_journey", "check": "Response identifies the journey as belonging to a different capability (self-hosted-application-platform or 'the platform capability')."},
@@ -58,7 +58,7 @@
     {
       "id": 4,
       "name": "files-one-issue-per-experience-after-approval",
-      "prompt": "Capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the experiences and file the issues — I trust your enumeration, just go.",
+      "prompt": "Capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the experiences and file the issues — I trust your enumeration, just go. The doc is at .claude/skills/plan-experiences/evals/fixtures/self-hosted-personal-media-storage.md.",
       "expected_output": "Should still mirror back the enumerated list before filing — 'just go' does not bypass the human-confirmation gate. Once the user signals approval (this prompt's 'I trust your enumeration, just go' counts as approval), should file one GitHub issue per experience via gh issue create, with bodies that reference the parent capability, name the persona, anchor to capability sections, and name define-user-experience as the next-step skill. Issue titles should follow the repo's `story(ux): ...` convention.",
       "assertions": [
         {"name": "produces_experience_list", "check": "Response enumerates the proposed experiences before filing."},
