@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_enumerate: Response declines to enumerate experiences because the gate is not satisfied.",
+      "passed": true,
+      "evidence": "'Stopping \u2014 I won't enumerate experiences yet.' and 'the gate must be satisfied first.'"
+    },
+    {
+      "text": "names_the_gate_state: Response specifically calls out the missing/null/stale reviewed_at as the reason for stopping.",
+      "passed": true,
+      "evidence": "'The frontmatter has no reviewed_at field at all' \u2014 explicitly cites missing reviewed_at as the gate."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at: Response tells the user to add or update reviewed_at in the capability doc's frontmatter (or offers to record a verbal confirmation).",
+      "passed": true,
+      "evidence": "Instructs user to add 'reviewed_at: 2026-04-28' to frontmatter, and offers to record verbal confirmation as alternative."
+    },
+    {
+      "text": "no_issues_filed: No `gh issue create` invocation occurs.",
+      "passed": true,
+      "evidence": "gh-commands.txt is empty; response states 'No issues were filed'."
+    },
+    {
+      "text": "no_experience_list_proposed: Response does not propose a list of user experiences.",
+      "passed": true,
+      "evidence": "Response contains no enumerated UX list; explicitly states 'no list of experiences was proposed'."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

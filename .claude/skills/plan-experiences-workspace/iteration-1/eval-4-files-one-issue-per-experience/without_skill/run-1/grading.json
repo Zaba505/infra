@@ -1,0 +1,45 @@
+{
+  "expectations": [
+    {
+      "text": "produces_experience_list: Response enumerates the proposed experiences before filing.",
+      "passed": true,
+      "evidence": "Response includes '## Enumerated experiences (12)' listing 12 experiences before describing what was filed."
+    },
+    {
+      "text": "files_one_issue_per_experience: Skill prints/invokes `gh issue create` once per enumerated experience.",
+      "passed": true,
+      "evidence": "gh-commands.txt contains 12 `gh issue create` commands corresponding to the 12 enumerated experiences."
+    },
+    {
+      "text": "issue_titles_match_repo_convention: Filed issue titles follow the `story(ux): ...` form.",
+      "passed": false,
+      "evidence": "Titles use `story(self-hosted-personal-media-storage): define UX \u2014 ...` rather than `story(ux): ...`."
+    },
+    {
+      "text": "issue_bodies_name_persona: Each filed issue body identifies the persona for that experience.",
+      "passed": false,
+      "evidence": "Bodies describe scope/inputs/outputs but do not have a dedicated persona statement; e.g. 'Upload a single file' body just says 'Authenticated user picks a file' without a labeled persona section. Several issues (e.g. 'view content shared with me') do not explicitly name persona."
+    },
+    {
+      "text": "issue_bodies_anchor_to_capability: Each filed issue body references at least one specific capability section.",
+      "passed": true,
+      "evidence": "Each body cites a Trigger or Business rule from the capability, e.g. '**Trigger covered:** \"A user uploads a file (single, manual upload).\"'"
+    },
+    {
+      "text": "issue_bodies_reference_define_user_experience: Each filed issue body names `define-user-experience` as the next-step skill.",
+      "passed": true,
+      "evidence": "Each body's 'Done when' references `define-user-experience`, e.g. 'UX doc authored via `define-user-experience` and human-reviewed.'"
+    },
+    {
+      "text": "no_ux_files_written: No UX markdown files are written under `user-experiences/`.",
+      "passed": true,
+      "evidence": "Outputs directory contains only response.md and gh-commands.txt; response explicitly says it did not invoke gh and only saved commands."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "total": 7,
+    "pass_rate": 0.7142857142857143
+  }
+}

@@ -1,0 +1,497 @@
+{
+  "metadata": {
+    "skill_name": "plan-experiences",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-04-28T05:05:29Z",
+    "evals_run": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 28.3,
+        "tokens": 27192,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses_to_enumerate: Response declines to enumerate experiences because the gate is not satisfied.",
+          "passed": true,
+          "evidence": "'Stopping \u2014 I won't enumerate experiences yet.' and 'the gate must be satisfied first.'"
+        },
+        {
+          "text": "names_the_gate_state: Response specifically calls out the missing/null/stale reviewed_at as the reason for stopping.",
+          "passed": true,
+          "evidence": "'The frontmatter has no reviewed_at field at all' \u2014 explicitly cites missing reviewed_at as the gate."
+        },
+        {
+          "text": "instructs_user_to_set_reviewed_at: Response tells the user to add or update reviewed_at in the capability doc's frontmatter (or offers to record a verbal confirmation).",
+          "passed": true,
+          "evidence": "Instructs user to add 'reviewed_at: 2026-04-28' to frontmatter, and offers to record verbal confirmation as alternative."
+        },
+        {
+          "text": "no_issues_filed: No `gh issue create` invocation occurs.",
+          "passed": true,
+          "evidence": "gh-commands.txt is empty; response states 'No issues were filed'."
+        },
+        {
+          "text": "no_experience_list_proposed: Response does not propose a list of user experiences.",
+          "passed": true,
+          "evidence": "Response contains no enumerated UX list; explicitly states 'no list of experiences was proposed'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 135.7,
+        "tokens": 37548,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "produces_an_experience_list: Response contains a numbered or bulleted list of proposed user experiences (titles + persona + one-liners), not a single UX draft.",
+          "passed": true,
+          "evidence": "Numbered list 1-11 of UXes under 'Proposed user experiences', each with bold title, persona, and one-liner."
+        },
+        {
+          "text": "each_item_names_a_persona: Each proposed experience identifies the persona (drawn from the capability's Stakeholders section).",
+          "passed": true,
+          "evidence": "Every item names persona in italics (e.g. *authorized user*, *operator*, *successor operator*) drawn from Stakeholders."
+        },
+        {
+          "text": "each_item_anchored_in_capability: Each proposed experience references the capability section that motivates it.",
+          "passed": true,
+          "evidence": "Each item has 'Anchored in:' clause citing Triggers, Outputs, Business Rules, Stakeholders, etc."
+        },
+        {
+          "text": "no_journey_steps_proposed: Response does not draft step-by-step journey content or describe UI for any experience.",
+          "passed": true,
+          "evidence": "Response is purely enumeration with one-line goals; explicitly states 'No journey steps, no UI'."
+        },
+        {
+          "text": "asks_for_user_approval_before_filing: Response explicitly asks the user to confirm/edit the list before issues are filed.",
+          "passed": true,
+          "evidence": "'Reply with: approve all / approve {numbers} / or any add / remove / rename / merge / split / reorder you want first.'"
+        },
+        {
+          "text": "no_premature_issue_filing: No actual `gh issue create` invocation occurs in this turn (printing them as proposed commands is OK).",
+          "passed": true,
+          "evidence": "Commands listed in gh-commands.txt; response notes 'not yet executed \u2014 awaiting your approval'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 56.5,
+        "tokens": 30664,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses_the_bundle: Response declines to plan a single 'user manages their content' UX covering all four sub-journeys.",
+          "passed": true,
+          "evidence": "\"However, I'm not going to file a single experience called 'user manages their content.' Let's split it.\""
+        },
+        {
+          "text": "proposes_split_into_multiple_experiences: Response proposes splitting into at least three separate experiences.",
+          "passed": true,
+          "evidence": "Proposes four experiences: Upload, Share, Browse/view, Delete."
+        },
+        {
+          "text": "explains_why_bundling_is_bad: Response explains that bundling forces mismatched entry points / success states into one doc, or otherwise that one persona+goal per UX is the right unit.",
+          "passed": true,
+          "evidence": "\"bundles ... produce UX docs with mismatched entry points, mismatched success states, and contradictory edge cases\" and \"Each of those has a different entry point and a different success state.\""
+        },
+        {
+          "text": "no_issues_filed_yet: No actual issues are filed in this turn.",
+          "passed": true,
+          "evidence": "gh-commands.txt: '# No gh issue create commands were executed.' and response says 'I have not filed any issues yet.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 44.7,
+        "tokens": 28746,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "recognizes_misplaced_journey: Response identifies the journey as belonging to a different capability (self-hosted-application-platform).",
+          "passed": true,
+          "evidence": "'That journey looks like it belongs to a different capability \u2014 self-hosted-application-platform, not self-hosted-personal-media-storage.'"
+        },
+        {
+          "text": "does_not_file_a_misplaced_issue: No issue is filed under the media-storage capability for this misplaced journey.",
+          "passed": true,
+          "evidence": "gh-commands.txt is empty/comment-only; response states 'No gh issue create invocations were run.'"
+        },
+        {
+          "text": "offers_skip_or_pause_choice: Response offers the user a choice: skip and continue, or pause to plan it under the correct capability.",
+          "passed": true,
+          "evidence": "'(a) Skip it and proceed with the media-storage list' vs '(b) Pause this skill and plan that journey under self-hosted-application-platform instead.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 133.9,
+        "tokens": 37364,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "produces_experience_list: Response enumerates the proposed experiences before filing.",
+          "passed": true,
+          "evidence": "Response has '## Experiences filed (10)' section enumerating all 10 experiences before the gh commands block."
+        },
+        {
+          "text": "files_one_issue_per_experience: Skill prints/invokes `gh issue create` once per enumerated experience.",
+          "passed": true,
+          "evidence": "gh-commands.txt contains exactly 10 `gh issue create` commands matching the 10 enumerated experiences."
+        },
+        {
+          "text": "issue_titles_match_repo_convention: Filed issue titles follow the `story(ux): ...` form.",
+          "passed": true,
+          "evidence": "All titles begin with `story(ux): ...`, e.g. 'story(ux): upload a photo or file \u2014 self-hosted-personal-media-storage'."
+        },
+        {
+          "text": "issue_bodies_name_persona: Each filed issue body identifies the persona for that experience.",
+          "passed": true,
+          "evidence": "Each body contains a '### Persona' section, e.g. 'Authorized user (operator, family member, or friend)' or 'Operator (Carson)'."
+        },
+        {
+          "text": "issue_bodies_anchor_to_capability: Each filed issue body references at least one specific capability section.",
+          "passed": true,
+          "evidence": "Each body's 'Anchored in the parent capability' section cites Stakeholders / Triggers / Outputs / Business Rules / Success Criteria."
+        },
+        {
+          "text": "issue_bodies_reference_define_user_experience: Each filed issue body names `define-user-experience` as the next-step skill.",
+          "passed": true,
+          "evidence": "Each body's '### Authoring' section says 'This UX will be authored via the `define-user-experience` skill'."
+        },
+        {
+          "text": "no_ux_files_written: No UX markdown files are written under `user-experiences/`.",
+          "passed": true,
+          "evidence": "Outputs directory contains only response.md and gh-commands.txt; no UX markdown files written under user-experiences/."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.2,
+        "passed": 1,
+        "failed": 4,
+        "total": 5,
+        "time_seconds": 87.7,
+        "tokens": 30927,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses_to_enumerate: Response declines to enumerate experiences because the gate is not satisfied.",
+          "passed": false,
+          "evidence": "Response proposes 11 enumerated UXes under 'Proposed User Experiences' without mentioning any gate."
+        },
+        {
+          "text": "names_the_gate_state: Response specifically calls out the missing/null/stale reviewed_at as the reason for stopping.",
+          "passed": false,
+          "evidence": "No mention of reviewed_at or any review-state gate anywhere in the response."
+        },
+        {
+          "text": "instructs_user_to_set_reviewed_at: Response tells the user to add or update reviewed_at in the capability doc's frontmatter (or offers to record a verbal confirmation).",
+          "passed": false,
+          "evidence": "Response never instructs the user to set reviewed_at; only asks operator to confirm the UX list."
+        },
+        {
+          "text": "no_issues_filed: No `gh issue create` invocation occurs.",
+          "passed": true,
+          "evidence": "Response says 'I have not run gh issue create'; gh-commands.txt contains the would-be commands but they were not executed."
+        },
+        {
+          "text": "no_experience_list_proposed: Response does not propose a list of user experiences.",
+          "passed": false,
+          "evidence": "Response proposes 11 numbered UXes (provision-a-user, upload-content-manually, ..., operator-succession-takeover)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 82.7,
+        "tokens": 28270,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "produces_an_experience_list: Response contains a numbered or bulleted list of proposed user experiences (titles + persona + one-liners), not a single UX draft.",
+          "passed": true,
+          "evidence": "Numbered list 1-11 under 'Enumeration' with bold titles and one-liner descriptions."
+        },
+        {
+          "text": "each_item_names_a_persona: Each proposed experience identifies the persona (drawn from the capability's Stakeholders section).",
+          "passed": true,
+          "evidence": "Each item identifies actor (e.g. 'A user', 'A content owner', 'A recipient', 'The operator', 'The designated successor')."
+        },
+        {
+          "text": "each_item_anchored_in_capability: Each proposed experience references the capability section that motivates it.",
+          "passed": true,
+          "evidence": "Each item cites parent capability sections in parentheses (Triggers, Business Rules, Outputs, Preconditions)."
+        },
+        {
+          "text": "no_journey_steps_proposed: Response does not draft step-by-step journey content or describe UI for any experience.",
+          "passed": true,
+          "evidence": "Items are one-liners; no step-by-step journey or UI description."
+        },
+        {
+          "text": "asks_for_user_approval_before_filing: Response explicitly asks the user to confirm/edit the list before issues are filed.",
+          "passed": true,
+          "evidence": "'These four questions should be confirmed with the human before filing the issues below.'"
+        },
+        {
+          "text": "no_premature_issue_filing: No actual `gh issue create` invocation occurs in this turn (printing them as proposed commands is OK).",
+          "passed": true,
+          "evidence": "gh-commands.txt header: '# NOT EXECUTED \u2014 these are the gh issue create commands that would be run'."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 4,
+        "failed": 0,
+        "total": 4,
+        "time_seconds": 63.7,
+        "tokens": 26991,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "refuses_the_bundle: Response declines to plan a single 'user manages their content' UX covering all four sub-journeys.",
+          "passed": true,
+          "evidence": "\"Concern: This bundles four distinct experiences\" and Recommendation is to plan four UXes instead of one bundled."
+        },
+        {
+          "text": "proposes_split_into_multiple_experiences: Response proposes splitting into at least three separate experiences.",
+          "passed": true,
+          "evidence": "Recommends four UXes: uploads, browses/exports, shares, deletes."
+        },
+        {
+          "text": "explains_why_bundling_is_bad: Response explains that bundling forces mismatched entry points / success states into one doc, or otherwise that one persona+goal per UX is the right unit.",
+          "passed": true,
+          "evidence": "\"bundles four end-to-end user journeys with different triggers, actors, inputs, success conditions, and risk profiles\" and \"Collapse distinct success criteria.\""
+        },
+        {
+          "text": "no_issues_filed_yet: No actual issues are filed in this turn.",
+          "passed": true,
+          "evidence": "gh-commands.txt: '# NOTE: These commands were NOT executed. They are printed for review.' and response: 'No issues have been filed. No gh commands have been executed.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.6666666666666666,
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "time_seconds": 65.7,
+        "tokens": 28459,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "recognizes_misplaced_journey: Response identifies the journey as belonging to a different capability (self-hosted-application-platform).",
+          "passed": true,
+          "evidence": "'That phrasing maps more cleanly to the sibling capability self-hosted-application-platform, which already owns a UX at ...stand-up-the-platform.md'"
+        },
+        {
+          "text": "does_not_file_a_misplaced_issue: No issue is filed under the media-storage capability for this misplaced journey.",
+          "passed": true,
+          "evidence": "No gh issue create executed (printed only); the printed command reframes the journey to an in-scope media-storage deploy UX rather than the misplaced platform stand-up."
+        },
+        {
+          "text": "offers_skip_or_pause_choice: Response offers the user a choice: skip and continue, or pause to plan it under the correct capability.",
+          "passed": false,
+          "evidence": "Response presents two interpretations and a confirmation checklist in the issue body, but does not explicitly offer the user a skip-vs-pause choice before proceeding \u2014 it proceeds with reframing and prints the command unilaterally."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.7142857142857143,
+        "passed": 5,
+        "failed": 2,
+        "total": 7,
+        "time_seconds": 106.1,
+        "tokens": 30559,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "produces_experience_list: Response enumerates the proposed experiences before filing.",
+          "passed": true,
+          "evidence": "Response includes '## Enumerated experiences (12)' listing 12 experiences before describing what was filed."
+        },
+        {
+          "text": "files_one_issue_per_experience: Skill prints/invokes `gh issue create` once per enumerated experience.",
+          "passed": true,
+          "evidence": "gh-commands.txt contains 12 `gh issue create` commands corresponding to the 12 enumerated experiences."
+        },
+        {
+          "text": "issue_titles_match_repo_convention: Filed issue titles follow the `story(ux): ...` form.",
+          "passed": false,
+          "evidence": "Titles use `story(self-hosted-personal-media-storage): define UX \u2014 ...` rather than `story(ux): ...`."
+        },
+        {
+          "text": "issue_bodies_name_persona: Each filed issue body identifies the persona for that experience.",
+          "passed": false,
+          "evidence": "Bodies describe scope/inputs/outputs but do not have a dedicated persona statement; e.g. 'Upload a single file' body just says 'Authenticated user picks a file' without a labeled persona section. Several issues (e.g. 'view content shared with me') do not explicitly name persona."
+        },
+        {
+          "text": "issue_bodies_anchor_to_capability: Each filed issue body references at least one specific capability section.",
+          "passed": true,
+          "evidence": "Each body cites a Trigger or Business rule from the capability, e.g. '**Trigger covered:** \"A user uploads a file (single, manual upload).\"'"
+        },
+        {
+          "text": "issue_bodies_reference_define_user_experience: Each filed issue body names `define-user-experience` as the next-step skill.",
+          "passed": true,
+          "evidence": "Each body's 'Done when' references `define-user-experience`, e.g. 'UX doc authored via `define-user-experience` and human-reviewed.'"
+        },
+        {
+          "text": "no_ux_files_written: No UX markdown files are written under `user-experiences/`.",
+          "passed": true,
+          "evidence": "Outputs directory contains only response.md and gh-commands.txt; response explicitly says it did not invoke gh and only saved commands."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 1.0,
+        "stddev": 0.0,
+        "min": 1.0,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 79.82,
+        "stddev": 51.1829,
+        "min": 28.3,
+        "max": 135.7
+      },
+      "tokens": {
+        "mean": 32302.8,
+        "stddev": 4862.7317,
+        "min": 27192,
+        "max": 37548
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.7162,
+        "stddev": 0.3279,
+        "min": 0.2,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 81.18,
+        "stddev": 17.3998,
+        "min": 63.7,
+        "max": 106.1
+      },
+      "tokens": {
+        "mean": 29041.2,
+        "stddev": 1658.0851,
+        "min": 26991,
+        "max": 30927
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.28",
+      "time_seconds": "-1.4",
+      "tokens": "+3262"
+    }
+  },
+  "notes": []
+}

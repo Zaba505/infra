@@ -1,0 +1,9 @@
+# No gh issue create commands were executed.
+#
+# The user proposed a single bundled experience ("user manages their content")
+# covering uploading, sharing, browsing, and deleting. Per the plan-experiences
+# skill, this is an explicit anti-pattern — bundles must be split, and issues
+# are filed only after the human approves a confirmed list.
+#
+# Awaiting human confirmation of the split before any `gh issue create`
+# commands are run.

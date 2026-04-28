@@ -1,0 +1,329 @@
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — upload a single file" --label enhancement --body "$(cat <<'EOF'
+Author the user experience doc for a single, manual file upload to the self-hosted personal media storage capability.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A user uploads a file (single, manual upload)."
+
+## Scope
+- Authenticated user picks a file and uploads it.
+- Source metadata (e.g. capture timestamp) is preserved.
+- Content lands as private-by-default, owned by the uploading user.
+
+## Inputs
+- Authenticated identity for the acting user.
+- File bytes + provided metadata.
+
+## Outputs
+- File durably stored and retrievable by its owner.
+
+## Out of scope
+- Bulk import (separate UX).
+- Automated device backup (separate UX).
+- Sharing (separate UX).
+
+## Done when
+- `define-user-experience` has produced the UX doc under the capability and a human has reviewed it.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — automated device backup" --label enhancement --body "$(cat <<'EOF'
+Author the UX for an automated, device-driven backup (e.g. phone camera-roll sync) into the capability.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A user's device performs an automated backup (e.g. phone camera roll sync)."
+
+## Scope
+- Device runs unattended, authenticates, and pushes new media on a schedule or on change.
+- Idempotency: re-running does not duplicate already-uploaded content.
+- Resumes across interruptions (network loss, device sleep).
+
+## Inputs
+- Long-lived authenticated identity bound to the device.
+- Set of files on the device + their metadata.
+
+## Outputs
+- All eligible new media is durably stored under the user's account, private by default.
+
+## Out of scope
+- One-shot manual upload (separate UX).
+- Bulk import from another provider (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — bulk import from existing provider" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a one-time bulk import (e.g. Google Photos takeout archive) into the capability.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A user performs a bulk import from an existing provider (e.g. a Google Photos takeout archive)."
+
+## Scope
+- User supplies a takeout-style archive; the system ingests it as that user's content.
+- Per-item metadata from the archive (timestamps, album/folder structure where meaningful) is preserved as faithfully as practical.
+- Long-running, resumable; user can see progress.
+
+## Inputs
+- Authenticated identity for the importing user.
+- The archive (file bytes + sidecar metadata).
+
+## Outputs
+- Imported media is durably stored, private by default, attributed to the importing user.
+
+## Out of scope
+- Ongoing automated backup (separate UX).
+- Cross-provider sync (out of scope for the capability entirely).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — browse, view, and organize own content" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a user viewing, downloading, and organizing their own stored content.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A user views, downloads, or organizes their own content."
+
+## Scope
+- Authenticated user lists their own media, opens individual items, downloads originals.
+- Light organizational primitives (e.g. albums/folders) sufficient for the user to find their stuff.
+- Private-by-default posture is visibly preserved (no accidental exposure to others).
+
+## Inputs
+- Authenticated identity for the acting user.
+
+## Outputs
+- The user can locate, view, and retrieve their own content.
+
+## Out of scope
+- Viewing content shared *with* the user (separate UX).
+- Sharing actions (separate UX).
+- Collaborative editing (out of scope for capability).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — share content with another user or group" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a content owner sharing one or more items with a specific user or with a shared group/album.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A content owner shares content with another user or a shared group."
+
+## Scope
+- Owner selects content and explicitly names recipients (1:1 or group/album).
+- Owner can revoke a share.
+- Recipients gain read access; nobody else (including the operator) does.
+
+## Inputs
+- Authenticated identity for the owner.
+- The selected content.
+- The recipient identity or shared-group identity.
+
+## Outputs
+- Named recipients can retrieve the shared content; non-recipients still cannot.
+
+## Out of scope
+- Public sharing (out of scope for the capability).
+- Viewing as a recipient (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — view content shared with me" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a recipient discovering and viewing content others have explicitly shared with them.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger context:** Counterpart to the share-content trigger; the affordance the named recipient uses.
+
+## Scope
+- Recipient sees a clear, distinct surface for "shared with me."
+- Recipient can view and download items they have access to.
+- Recipient cannot re-share (or, if they can, the rules are explicit) — defer the policy choice to the UX doc and flag it.
+
+## Inputs
+- Authenticated identity for the recipient.
+
+## Outputs
+- Recipient can retrieve content shared with them; loses access if the share is revoked.
+
+## Out of scope
+- Sharing actions (separate UX).
+- Browsing one's own content (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed; any open policy questions (e.g. re-sharing) are recorded.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — delete own content" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a user deleting their own content, including the 30-day retention window for accident recovery.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger covered:** "A user deletes their own content."
+**Business rule:** "30-day retention after deletion / departure."
+
+## Scope
+- User selects content and deletes it; it is removed from their view immediately.
+- Within the 30-day window the user can restore the content.
+- After 30 days the content is purged from the system (including off-site backup copies).
+- Active shares to the deleted content cease to resolve once it is removed from view.
+
+## Inputs
+- Authenticated identity for the acting user.
+
+## Outputs
+- Deleted content is hidden immediately and purged after the retention window.
+
+## Out of scope
+- Operator-initiated termination (separate UX).
+- User-initiated full account departure (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — pull on-demand archive of own content" --label enhancement --body "$(cat <<'EOF'
+Author the UX for any user pulling a complete on-demand archive of their own content without operator involvement, including how to schedule periodic pulls.
+
+**Capability:** self-hosted-personal-media-storage
+**Business rule covered:** "Operator succession" — exports as the durable longevity mechanism.
+
+## Scope
+- Authenticated user requests a full archive of their own content + metadata.
+- Archive format is portable enough that the user could move to another system.
+- User can schedule periodic pulls (e.g. monthly) so they have a recent local copy if the system goes down.
+- Available only while the system is healthy — surface this expectation in the UX.
+
+## Inputs
+- Authenticated identity for the acting user.
+
+## Outputs
+- A complete, portable archive of the user's content is delivered to them.
+
+## Out of scope
+- Operator-side disaster-recovery exports (operational, not a user UX).
+- Successor operator takeover (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — operator provisions or removes a user" --label enhancement --body "$(cat <<'EOF'
+Author the UX for the operator inviting/provisioning a new user and for removing an existing user from the closed user set.
+
+**Capability:** self-hosted-personal-media-storage
+**Business rules covered:** "Closed user set"; "30-day retention after deletion / departure."
+
+## Scope
+- Operator provisions a new account and shares an invitation with the chosen person.
+- Operator removes an existing user; user loses access immediately.
+- Removed user's data is retained for 30 days then purged, consistent with the deletion rule.
+- Operator never gains visibility into the user's content as part of provision/removal.
+
+## Inputs
+- Operator's authenticated identity.
+- Identity/contact for the new or departing user.
+
+## Outputs
+- New user can authenticate and start using the system; or removed user can no longer authenticate, and their data is on the 30-day purge clock.
+
+## Out of scope
+- Self-signup (out of scope for the capability).
+- Credential recovery (out of scope for the capability).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — operator terminates access on illegal-content evidence" --label enhancement --body "$(cat <<'EOF'
+Author the UX for the operator terminating a user's access on credible evidence of illegal-content storage, given the operator cannot directly inspect user content.
+
+**Capability:** self-hosted-personal-media-storage
+**Business rule covered:** "No illegal content."
+
+## Scope
+- Operator receives credible external evidence (the channel for that evidence is part of what the UX defines).
+- Operator terminates the user's access; the user's data enters the 30-day retention window.
+- Privacy posture is preserved: termination does not require the operator to read user content.
+- Audit trail of the action is retained at the operator level.
+
+## Inputs
+- Operator's authenticated identity.
+- The credible evidence record (whatever form the UX defines).
+- The target user's identity.
+
+## Outputs
+- The targeted user can no longer authenticate; their data is purged after 30 days.
+
+## Open questions to surface in the UX doc
+- Whose jurisdiction defines "illegal" (capability open question).
+- What counts as "credible evidence."
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed; open questions are recorded.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — successor operator takes over" --label enhancement --body "$(cat <<'EOF'
+Author the UX for the designated successor operator using sealed/escrowed credentials to take over running the system if the primary operator becomes unavailable.
+
+**Capability:** self-hosted-personal-media-storage
+**Business rule covered:** "Operator succession."
+
+## Scope
+- Successor unseals the escrowed credentials (e.g. password-manager handoff or physical envelope).
+- Successor follows the runbook to bring the system into a state they can operate.
+- The successor's access is to operate the system, not to read user content — privacy properties continue to hold.
+- Takeover is a discrete event, not ongoing shared administration.
+
+## Inputs
+- Sealed/escrowed primary-operator credentials.
+- The runbook.
+
+## Outputs
+- The system continues to run under the successor; users continue to be able to use it (and pull archives).
+
+## Out of scope
+- Routine multi-operator administration (explicitly excluded by the capability).
+- Recovering a user's content (explicitly excluded — lost credentials = lost data).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"
+
+gh issue create --title "story(self-hosted-personal-media-storage): define UX — user leaves the system" --label enhancement --body "$(cat <<'EOF'
+Author the UX for a user voluntarily departing the system, including their final on-demand export and the 30-day data-retention window before purge.
+
+**Capability:** self-hosted-personal-media-storage
+**Business rule covered:** "30-day retention after deletion / departure."
+
+## Scope
+- User indicates they are leaving (or operator removes them — link to that UX).
+- User is reminded to pull a final on-demand archive while the system is up.
+- Account is deactivated; data enters the 30-day retention window then is purged.
+- Active shares from the departing user cease to resolve once their content is purged.
+
+## Inputs
+- Authenticated identity for the departing user (or operator action removing them).
+
+## Outputs
+- The user no longer has access; their data is purged after 30 days.
+
+## Out of scope
+- Operator-initiated termination on illegal-content grounds (separate UX).
+- Selective per-item deletion (separate UX).
+
+## Done when
+- UX doc authored via `define-user-experience` and human-reviewed.
+EOF
+)"

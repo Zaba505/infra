@@ -1,0 +1,156 @@
+# NOT EXECUTED — these are the gh issue create commands that would be run
+# after the human confirms the UX list for self-hosted-personal-media-storage.
+# One issue per user experience; each issue becomes the input to `define-user-experience`.
+
+gh issue create \
+  --title "UX: Manual upload (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user manually uploading one or more files from a device.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "A user uploads a file (single, manual upload)."
+**Primary actor:** any authorized user
+**Expected outputs:** content is durably stored and retrievable by the uploader.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Automated device backup (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user's device performing automated background backup (e.g. phone camera roll sync).
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "automated backup (e.g. phone camera roll sync)."
+**Primary actor:** any authorized user (initiated once, runs continuously)
+**Expected outputs:** new media on the device lands in the system without per-file user action.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Bulk import from a prior provider (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user importing an existing archive (e.g. a Google Photos takeout) so they can stop paying their previous cloud provider.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "bulk import from an existing provider."
+**Supports outcomes:** cost avoidance, longevity.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Browse and view own content (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user navigating, viewing, and downloading their own media.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "A user views, downloads, or organizes their own content."
+**Expected outputs:** the user's content is retrievable by them.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Organize own content (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user organizing their own media (albums/folders/tags) — a precondition for sharing and for findability.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "organizes their own content"; Business Rules — shared groups / "family album" sharing primitive.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Share content with another user or group (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a content owner sharing content with a named recipient or shared group.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "A content owner shares content with another user or a shared group."
+**Constraints:** private by default; one-to-one or shared group; no public sharing; operator cannot see content without an explicit share.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Access content shared with me (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a recipient discovering, viewing, and downloading content others have shared with them.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Outputs & Deliverables — "shared content becomes retrievable by the explicitly named recipients."
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Delete own content (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user deleting their own content, including the 30-day retention safety net.
+
+**Capability:** self-hosted-personal-media-storage
+**Trigger source:** Triggers & Inputs — "A user deletes their own content."
+**Constraints:** Business Rules — 30-day retention after deletion.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Pull a personal archive export (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for a user pulling a complete on-demand export of their own content, without operator involvement, as the longevity safety net.
+
+**Capability:** self-hosted-personal-media-storage
+**Source:** Business Rules — operator succession mechanism (a). Available only while the system is healthy.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Operator provisions or removes a user (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the operator-only user experience for inviting a new user or removing an existing one.
+
+**Capability:** self-hosted-personal-media-storage
+**Source:** Business Rules — "closed user set"; Preconditions — "explicitly invited and provisioned by the operator."
+**Constraints:** removal triggers the 30-day retention sweep.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"
+
+gh issue create \
+  --title "UX: Successor operator takeover (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+Define the user experience for the designated successor using sealed/escrowed credentials to assume operation of the system when the primary operator is unavailable.
+
+**Capability:** self-hosted-personal-media-storage
+**Source:** Business Rules — operator succession mechanism (b).
+**Constraints:** successor's access is to operate the system, not to read user content; private-by-default and lost-credentials-= lost-data continue to hold.
+
+Author this UX with the `define-user-experience` skill.
+EOF
+)"

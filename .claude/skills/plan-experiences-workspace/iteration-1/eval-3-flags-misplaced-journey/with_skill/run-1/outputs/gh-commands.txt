@@ -1,0 +1,8 @@
+# No gh issue create commands were run for this request.
+#
+# Reason: the proposed journey ("operator standing up the hosting platform
+# from scratch") belongs to the self-hosted-application-platform capability,
+# not self-hosted-personal-media-storage. Per the plan-experiences skill's
+# "Flag-and-stop for misplaced journeys" discipline, cross-capability
+# journeys are out of scope and no issues are filed under the current
+# capability. The skill stops at "approved list" and no list was approved.

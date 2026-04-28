@@ -1,0 +1,30 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_the_bundle: Response declines to plan a single 'user manages their content' UX covering all four sub-journeys.",
+      "passed": true,
+      "evidence": "\"However, I'm not going to file a single experience called 'user manages their content.' Let's split it.\""
+    },
+    {
+      "text": "proposes_split_into_multiple_experiences: Response proposes splitting into at least three separate experiences.",
+      "passed": true,
+      "evidence": "Proposes four experiences: Upload, Share, Browse/view, Delete."
+    },
+    {
+      "text": "explains_why_bundling_is_bad: Response explains that bundling forces mismatched entry points / success states into one doc, or otherwise that one persona+goal per UX is the right unit.",
+      "passed": true,
+      "evidence": "\"bundles ... produce UX docs with mismatched entry points, mismatched success states, and contradictory edge cases\" and \"Each of those has a different entry point and a different success state.\""
+    },
+    {
+      "text": "no_issues_filed_yet: No actual issues are filed in this turn.",
+      "passed": true,
+      "evidence": "gh-commands.txt: '# No gh issue create commands were executed.' and response says 'I have not filed any issues yet.'"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  }
+}

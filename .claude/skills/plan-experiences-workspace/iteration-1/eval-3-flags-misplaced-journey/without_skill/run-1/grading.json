@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_misplaced_journey: Response identifies the journey as belonging to a different capability (self-hosted-application-platform).",
+      "passed": true,
+      "evidence": "'That phrasing maps more cleanly to the sibling capability self-hosted-application-platform, which already owns a UX at ...stand-up-the-platform.md'"
+    },
+    {
+      "text": "does_not_file_a_misplaced_issue: No issue is filed under the media-storage capability for this misplaced journey.",
+      "passed": true,
+      "evidence": "No gh issue create executed (printed only); the printed command reframes the journey to an in-scope media-storage deploy UX rather than the misplaced platform stand-up."
+    },
+    {
+      "text": "offers_skip_or_pause_choice: Response offers the user a choice: skip and continue, or pause to plan it under the correct capability.",
+      "passed": false,
+      "evidence": "Response presents two interpretations and a confirmation checklist in the issue body, but does not explicitly offer the user a skip-vs-pause choice before proceeding \u2014 it proceeds with reframing and prints the command unilaterally."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.6666666666666666
+  }
+}

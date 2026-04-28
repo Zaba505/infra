@@ -1,0 +1,25 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_misplaced_journey: Response identifies the journey as belonging to a different capability (self-hosted-application-platform).",
+      "passed": true,
+      "evidence": "'That journey looks like it belongs to a different capability \u2014 self-hosted-application-platform, not self-hosted-personal-media-storage.'"
+    },
+    {
+      "text": "does_not_file_a_misplaced_issue: No issue is filed under the media-storage capability for this misplaced journey.",
+      "passed": true,
+      "evidence": "gh-commands.txt is empty/comment-only; response states 'No gh issue create invocations were run.'"
+    },
+    {
+      "text": "offers_skip_or_pause_choice: Response offers the user a choice: skip and continue, or pause to plan it under the correct capability.",
+      "passed": true,
+      "evidence": "'(a) Skip it and proceed with the media-storage list' vs '(b) Pause this skill and plan that journey under self-hosted-application-platform instead.'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  }
+}

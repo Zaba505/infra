@@ -1,0 +1,99 @@
+# NOTE: These commands were NOT executed. They are printed for review.
+# Pick ONE of the option blocks below after confirming the split with the user.
+
+# ============================================================
+# Option A (recommended): four focused experiences
+# ============================================================
+
+gh issue create \
+  --title "Define UX: user uploads content (self-hosted-personal-media-storage)" \
+  --body "$(cat <<'EOF'
+Define the end-to-end user experience for an authorized user uploading their own content to the self-hosted personal media storage capability.
+
+Scope:
+- Single manual file upload
+- Automated device backup (e.g. phone camera-roll sync)
+- Bulk import from a prior provider (e.g. Google Photos takeout)
+
+Out of scope: sharing, browsing/export, deletion (separate UXes).
+
+Capability doc: docs/.../self-hosted-personal-media-storage.md
+Use the `define-user-experience` skill to author this UX.
+EOF
+)"
+
+gh issue create \
+  --title "Define UX: user browses and exports their content (self-hosted-personal-media-storage)" \
+  --body "$(cat <<'EOF'
+Define the end-to-end user experience for an authorized user viewing, downloading, and exporting their own content.
+
+Scope:
+- Browse / view individual items
+- Download a single item
+- Pull a complete on-demand archive of all of their content (the longevity / operator-succession export path)
+
+Out of scope: uploading, sharing, deletion (separate UXes).
+
+Capability doc: docs/.../self-hosted-personal-media-storage.md
+Use the `define-user-experience` skill to author this UX.
+EOF
+)"
+
+gh issue create \
+  --title "Define UX: user shares content with another user or group (self-hosted-personal-media-storage)" \
+  --body "$(cat <<'EOF'
+Define the end-to-end user experience for a content owner sharing content with another authorized user or a shared group.
+
+Scope:
+- One-to-one share with a named recipient
+- Share via a shared group / album
+- Recipient's view of shared content
+- Honor private-by-default; surface the affected-party stakeholder concern
+
+Out of scope: uploading, browsing/export, deletion (separate UXes); public sharing (out of scope for the capability).
+
+Capability doc: docs/.../self-hosted-personal-media-storage.md
+Use the `define-user-experience` skill to author this UX.
+EOF
+)"
+
+gh issue create \
+  --title "Define UX: user deletes their content (self-hosted-personal-media-storage)" \
+  --body "$(cat <<'EOF'
+Define the end-to-end user experience for an authorized user deleting their own content.
+
+Scope:
+- Delete a single item or batch
+- 30-day retention window for accident recovery
+- Final purge after retention elapses
+- Effect on previously-shared recipients
+
+Out of scope: uploading, browsing/export, sharing (separate UXes); user-departure data handling (may be a separate operator-facing experience).
+
+Capability doc: docs/.../self-hosted-personal-media-storage.md
+Use the `define-user-experience` skill to author this UX.
+EOF
+)"
+
+
+# ============================================================
+# Option C (only if the user insists on the bundled UX):
+# ============================================================
+
+gh issue create \
+  --title "Define UX: user manages their content (self-hosted-personal-media-storage)" \
+  --body "$(cat <<'EOF'
+Define the end-to-end user experience for an authorized user managing their own content end-to-end.
+
+Scope (bundled at user's request):
+- Uploading (manual, automated backup, bulk import)
+- Browsing / viewing / on-demand archive export
+- Sharing one-to-one and via shared groups
+- Deleting, with 30-day retention and final purge
+
+Note: this bundles four distinct journeys with different actors and success criteria. See plan-experiences output for the case for splitting; this issue is filed only if the bundled scope is confirmed.
+
+Capability doc: docs/.../self-hosted-personal-media-storage.md
+Use the `define-user-experience` skill to author this UX.
+EOF
+)"
