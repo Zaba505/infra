@@ -3,17 +3,17 @@
     {
       "text": "Refuses to slice / file issues",
       "passed": true,
-      "evidence": "intended_issues=0; response declines=True"
+      "evidence": "intended_issues=0; decline markers matched=['blocked', 'do not file']"
     },
     {
       "text": "Names blocking gap issue (#812 / tenant-id derivation)",
       "passed": true,
-      "evidence": "matches '#812' or 'tenant-id derivation'"
+      "evidence": "matched=['#812', 'tenant-id derivation']"
     },
     {
       "text": "Routes user to resolve the gap",
       "passed": true,
-      "evidence": "mentions one of the resolution routes"
+      "evidence": "resolution-route markers matched=['resolve #812', 'define-adr']"
     },
     {
       "text": "No issues filed",

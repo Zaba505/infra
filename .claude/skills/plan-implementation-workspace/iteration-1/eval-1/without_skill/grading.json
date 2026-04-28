@@ -3,17 +3,17 @@
     {
       "text": "Refuses to slice / file issues",
       "passed": true,
-      "evidence": "intended_issues=0"
+      "evidence": "intended_issues=0; decline markers matched=['stopping', 'cannot plan']"
     },
     {
       "text": "Names firestore-tenants as missing component design",
       "passed": true,
-      "evidence": "matches 'firestore-tenants'"
+      "evidence": "'firestore-tenants' present in response=True"
     },
     {
       "text": "Routes user to define-component-design",
       "passed": true,
-      "evidence": "matches 'define-component-design'"
+      "evidence": "'define-component-design' present in response=True"
     },
     {
       "text": "No issues filed",
