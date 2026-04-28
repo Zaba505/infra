@@ -1,0 +1,74 @@
+{
+  "skill_name": "plan-experiences",
+  "notes": [
+    "Modeled on plan-adrs/evals.json — same shape (gate / enumerate / bundle-rejection / misplaced / files-issues-after-approval), tailored to user experiences instead of ADRs.",
+    "Uses self-hosted-personal-media-storage as the fixture capability to keep tests independent of the platform capability whose UXes are already authored."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-refuses-unreviewed-capability",
+      "prompt": "Plan the user experiences for the self-hosted-personal-media-storage capability. The capability doc is at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "expected_output": "Should refuse to enumerate experiences because the capability doc has no `reviewed_at` field (or it is null/stale). Should tell the user to add reviewed_at: {today} to the frontmatter (or accept verbal confirmation). Should not produce an experience list and should not file any issues.",
+      "assertions": [
+        {"name": "refuses_to_enumerate", "check": "Response declines to enumerate experiences because the gate is not satisfied."},
+        {"name": "names_the_gate_state", "check": "Response specifically calls out the missing/null/stale reviewed_at as the reason for stopping."},
+        {"name": "instructs_user_to_set_reviewed_at", "check": "Response tells the user to add or update reviewed_at in the capability doc's frontmatter (or offers to record a verbal confirmation)."},
+        {"name": "no_issues_filed", "check": "No `gh issue create` invocation occurs."},
+        {"name": "no_experience_list_proposed", "check": "Response does not propose a list of user experiences."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "enumerates-before-defining",
+      "prompt": "The capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the user experiences. The doc is at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "expected_output": "Should NOT immediately start drafting a UX or describing journey steps. Should first read the capability doc, then enumerate the discrete user journeys it implies as a list (verb-led titles + persona + one-line goal), each anchored to specific capability sections (Stakeholders / Triggers / Outputs / Success Criteria). Should ask the user to confirm the list before filing issues.",
+      "assertions": [
+        {"name": "produces_an_experience_list", "check": "Response contains a numbered or bulleted list of proposed user experiences (titles + persona + one-liners), not a single UX draft."},
+        {"name": "each_item_names_a_persona", "check": "Each proposed experience identifies the persona (drawn from the capability's Stakeholders section)."},
+        {"name": "each_item_anchored_in_capability", "check": "Each proposed experience references the capability section (Stakeholders / Triggers / Outputs / Business Rules / Success Criteria) that motivates it."},
+        {"name": "no_journey_steps_proposed", "check": "Response does not draft step-by-step journey content or describe UI for any experience."},
+        {"name": "asks_for_user_approval_before_filing", "check": "Response explicitly asks the user to confirm/edit the list before issues are filed."},
+        {"name": "no_premature_issue_filing", "check": "No `gh issue create` invocation occurs in this turn."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rejects-bundled-experience",
+      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan a single user experience called 'user manages their content' that covers uploading, sharing, browsing, and deleting. Doc at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "expected_output": "Should push back on bundling. Should propose splitting into separate experiences (upload, share, browse, delete), explaining that bundling forces mismatched entry points and success states into one UX doc. Should ask which to tackle first or propose an order.",
+      "assertions": [
+        {"name": "refuses_the_bundle", "check": "Response declines to plan a single 'user manages their content' UX covering all four sub-journeys."},
+        {"name": "proposes_split_into_multiple_experiences", "check": "Response proposes splitting into at least three separate experiences (upload, share, browse, delete are the four expected)."},
+        {"name": "explains_why_bundling_is_bad", "check": "Response explains that bundling forces mismatched entry points / success states / journeys into one doc, or otherwise that one persona+goal per UX is the right unit."},
+        {"name": "no_issues_filed_yet", "check": "No issues are filed in this turn — the split proposal still needs user confirmation."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "flags-misplaced-cross-capability-journey",
+      "prompt": "For the self-hosted-personal-media-storage capability (reviewed_at: 2026-04-28, file unchanged since), plan an experience for the operator standing up the hosting platform from scratch. Doc at docs/content/capabilities/self-hosted-personal-media-storage.md.",
+      "expected_output": "Should recognize this journey belongs to the self-hosted-application-platform capability, not the media-storage capability. Should refuse to plan it as a media-storage-scoped experience and offer to either skip it or pause so the user can plan it under the platform capability.",
+      "assertions": [
+        {"name": "recognizes_misplaced_journey", "check": "Response identifies the journey as belonging to a different capability (self-hosted-application-platform or 'the platform capability')."},
+        {"name": "does_not_file_a_misplaced_issue", "check": "No issue is filed under the media-storage capability for this journey."},
+        {"name": "offers_skip_or_pause_choice", "check": "Response offers the user a choice: skip it and continue, or pause to plan it under the correct capability."}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "files-one-issue-per-experience-after-approval",
+      "prompt": "Capability doc for self-hosted-personal-media-storage is reviewed (reviewed_at: 2026-04-28, file unchanged since). Plan the experiences and file the issues — I trust your enumeration, just go.",
+      "expected_output": "Should still mirror back the enumerated list before filing — 'just go' does not bypass the human-confirmation gate. Once the user signals approval (this prompt's 'I trust your enumeration, just go' counts as approval), should file one GitHub issue per experience via gh issue create, with bodies that reference the parent capability, name the persona, anchor to capability sections, and name define-user-experience as the next-step skill. Issue titles should follow the repo's `story(ux): ...` convention.",
+      "assertions": [
+        {"name": "produces_experience_list", "check": "Response enumerates the proposed experiences before filing."},
+        {"name": "files_one_issue_per_experience", "check": "Skill invokes `gh issue create` once per enumerated experience."},
+        {"name": "issue_titles_match_repo_convention", "check": "Filed issue titles follow the `story(ux): ...` form."},
+        {"name": "issue_bodies_name_persona", "check": "Each filed issue body identifies the persona for that experience."},
+        {"name": "issue_bodies_anchor_to_capability", "check": "Each filed issue body references at least one specific capability section (Stakeholders / Triggers / Outputs / Business Rules / Success Criteria)."},
+        {"name": "issue_bodies_reference_define_user_experience", "check": "Each filed issue body names `define-user-experience` as the next-step skill that will author the UX."},
+        {"name": "no_ux_files_written", "check": "No UX markdown files are written under `user-experiences/` — issue filing is the only artifact at this stage."}
+      ]
+    }
+  ]
+}
