@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor here is a **capability owner** whose capability has been evicted — a *Primary actor (initiator)* from the parent capability's Stakeholders, on the way out. As elsewhere in this capability's UX docs, the role is treated as separate from the operator's even though today both hats are worn by the same person.
 
@@ -17,11 +17,11 @@ The actor here is a **capability owner** whose capability has been evicted — a
 - **Context they come from:** The parting is **amicable**. Eviction was triggered by a divergence the platform legitimately cannot meet — specialized hardware, regulatory constraints, an availability target stronger than the platform offers — *not* by a missed deadline in the `operator-initiated-tenant-update` flow. Negotiation over the eviction date has already happened upstream, before this UX begins. The capability owner accepts that they are leaving and has agreed to the date.
 - **What they care about here:** A clean exit. By the eviction date their capability is fully off the platform, their data is in their hands in a portable form they can verify, and nothing remains available for them to retrieve from the platform after the retention window ends. They are *not* asking the platform to help them figure out where to run next — that is their problem to solve.
 
-## Goal
+## Goal {#goal}
 
 > "By the time the platform is finished with my capability, I have my data, I know it's complete, and I have nothing left to chase down here."
 
-## Entry Point
+## Entry Point {#entry-point}
 
 The capability owner arrives at this experience because the operator has filed an **eviction issue** against the infra repo tagging them. The issue contains exactly:
 
@@ -31,7 +31,7 @@ The capability owner arrives at this experience because the operator has filed a
 
 That is all the issue carries. The capability owner's state of mind is "the date is set, I know where the export tool is, I have a window of time to get my data out and walk away cleanly."
 
-## Journey
+## Journey {#journey}
 
 The journey runs in three phases keyed off the eviction date: a pre-eviction window where the tenant is still live, the eviction date itself when compute and network resources go away, and a 30-day grace window where data is held in an export-only, read-only state before the tenant-accessible copy is removed.
 
@@ -91,7 +91,7 @@ flowchart TD
     Done --> RetentionEnds([30 days post-eviction:<br/>tenant-accessible copy removed])
 ```
 
-## Success
+## Success {#success}
 
 When the journey ends cleanly, the capability owner walks away with:
 
@@ -100,7 +100,7 @@ When the journey ends cleanly, the capability owner walks away with:
 - Nothing left to chase down on the platform. After the 30-day window the platform offers no tenant-accessible copy of their data. Any deeper residual backup copies, their retention duration, deletion behavior, and operator-access/privacy constraints are **TBD** and are not part of the 30-day guarantee in this document.
 - An amicable ending. The operator filed the issue, the platform held the data the agreed amount of time, and the capability owner left under their own power. The relationship is intact for whatever comes next.
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Capability owner asks for more time after the eviction date.** Hard wall. The negotiation over the eviction date happened upstream of this journey; once that date is set, it is the date. The 30-day post-eviction retention is the only post-date slack and it is fixed.
 - **Export takes longer than 30 days to actually run on a very large dataset.** Same hard wall — the capability owner had Phase A *plus* 30 days of Phase C to extract; if that is not enough, they had advance warning during eviction-date negotiation and should have raised it then. The platform does not extend the retention window for slow extracts.
@@ -110,7 +110,7 @@ When the journey ends cleanly, the capability owner walks away with:
 - **End users keep hitting the tenant after the eviction date.** They get whatever connection failure the underlying infra produces. The capability owner is responsible for having warned their end users; the platform does not present a "this tenant has been retired" page or otherwise communicate with end users — end users belong to the capability, and from the platform's seat, *the capability is the end user*.
 - **Capability owner wants to come back later** (re-onboard the same capability after the divergence is resolved). That is a *new* `host-a-capability` journey, not a continuation of this one. It is not blocked, but nothing about this UX preserves state to make it easier.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability — by name:
 
@@ -122,7 +122,7 @@ This UX must respect the following items from the parent capability — by name:
 - **KPI: 2-hr/week operator maintenance budget.** Implication: this journey must not require the operator to do bespoke per-tenant work. The export tool is generic and runs on demand; the operator's only routine touchpoints are filing the issue, posting the cutover comment, and closing the issue at the end. A tenant whose eviction would require custom export work is itself a sign the platform's export tooling has a gap that needs fixing — handled as a platform bug, not as an operator-effort overrun.
 - **KPI: 1-hour reproducibility.** Implication: the data formats produced by the export tool, and the way they relate to the platform's definitions, should be expressible as part of the platform itself, not as snowflake per-tenant logic. (Standing the platform up should not require remembering "and here is the special export path for tenant X.")
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **The eviction-decision journey itself.** *Why* the operator decided to evict, and the conversation that established the eviction date, happens before this UX. By the time this UX begins, the issue is filed, the date is set, and both parties have agreed.
 - **The fall-behind eviction path.** Eviction triggered by a missed extended date in `operator-initiated-tenant-update` is a different shape (less amicable, possibly compressed timelines). It enters a separate journey not covered here, even though the *mechanics* of getting data out via the export tool may overlap.

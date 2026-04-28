@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor here is **the operator** — the parent capability's *Owner / Accountable party* and sole administrator. There are no co-operators in this journey, and the sealed successor credentials are not in play during routine standup.
 
@@ -19,13 +19,13 @@ If a successor has taken over (because the primary operator is unavailable), the
 - **Context they come from:** Either there is no platform yet (first-ever build) or the platform is gone / being rebuilt in parallel. Either way, what they have in hand is the **definitions repo**, root-level access to the underlying infrastructure (cloud account, home-lab), and — for disaster recovery — backups of tenant data sitting somewhere reachable.
 - **What they care about here:** Confidence that the platform really is reproducible from its definitions. Speed matters too (the *Reproducibility* KPI is 1 hour) but takes second place — a fast rebuild that leaves the operator unsure whether anything was missed is worse than a slower one that finishes verifiably clean.
 
-## Goal
+## Goal {#goal}
 
 > "I want to rebuild the platform from nothing back to ready-to-host-tenants — confidently and verifiably, fast enough that the 1-hour KPI holds — so that total loss is recoverable, not catastrophic."
 
 Confidence beats speed when the two conflict. The operator is rebuilding the substrate that everything else of theirs depends on; a hurried rebuild that they don't trust is its own kind of failure.
 
-## Entry Point
+## Entry Point {#entry-point}
 
 Three triggers converge on this same flow:
 
@@ -44,7 +44,7 @@ What is **not** assumed at entry:
 - Definitions drift. Before any rebuild with prior platform state starts, the operator performs a required preflight drift check against the live platform or the last known-good environment. On a first-ever build, the check is vacuously clean because there is no prior platform state yet. The check passes only when the platform state the operator is treating as real still matches the definitions closely enough that no unexplained differences remain. If drift exists, it must be detected and fixed *before* this journey begins, not discovered partway through. (See *Constraints*.)
 - The sealed successor credentials. They stay sealed during routine standup, including DR.
 
-## Journey
+## Journey {#journey}
 
 The rebuild is **automated, with manual operator-validation checkpoints between phases**. The operator is on standby throughout — watching log output and system-level signals, ready to validate at each checkpoint, but not driving each step by hand.
 
@@ -114,7 +114,7 @@ flowchart TD
     Halt --> Kickoff
 ```
 
-## Success
+## Success {#success}
 
 When the canary comes up green and is cleanly torn down, the operator walks away with:
 
@@ -123,7 +123,7 @@ When the canary comes up green and is cleanly torn down, the operator walks away
 - A **clean handoff** to tenant restoration. Any previously-hosted tenants come back via their own restoration journey; the platform-side standup ends cleanly without entangling itself in tenant data.
 - For drills specifically: a renewed assurance that "we can rebuild this in an hour" is a real property, not a hope, because the drill is run after every significant platform change and at least quarterly rather than whenever it feels convenient.
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Phase fails mid-rebuild.** The automation hits an error during one of the phases. The operator halts, root-causes the failure, fixes the underlying issue (typically a definition that needs updating), **tears down everything that was provisioned so far**, and restarts the rebuild from the top. Partial state is itself a snowflake risk and is not trusted. This implies each phase must be reversible — at minimum, "delete everything" must be a viable rollback. (See *Constraints*.)
 
@@ -139,7 +139,7 @@ When the canary comes up green and is cleanly torn down, the operator walks away
 
 - **First build has no backups.** First-build and DR/drill produce the same platform-side outcome from this UX's perspective. Tenant data restore is out of scope here, so the absence of backups during a first build is simply a non-event for this journey.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability — by name, so future readers can trace the lineage:
 
@@ -161,7 +161,7 @@ This UX must respect the following items from the parent capability — by name,
 
 - **Default hosting target for the operator's capabilities.** Readiness cannot be declared from infrastructure self-checks alone; the platform has to prove it can actually host a tenant. That is why this UX requires a purpose-built canary tenant maintained with the platform definitions.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **Tenant data restoration.** Bringing previously-hosted tenants' data back into newly-provisioned tenants is a separate UX. This journey ends at "platform is ready to host tenants" — full stop.
 

@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor here is the **same capability owner** described in [Host a Capability](./host-a-capability.md). They are not a different role for this journey — they are mid-lifecycle, having already completed onboarding, and now coming back to deal with one specific concern: their pre-existing data.
 
@@ -17,13 +17,13 @@ The actor here is the **same capability owner** described in [Host a Capability]
 - **Context they come from:** Their capability has historical data living somewhere else — on a vendor (e.g. a hosted Plex provider), on a local install, on a previous self-hosted setup. End users are still on that old host. The capability owner is running the new tenant and the old host **concurrently** during this period; cutting end users over is *their* concern, deliberately separate from this UX.
 - **What they care about here:** Getting their existing data into the new tenant intact, so that when *they* decide to cut end users over, the new tenant is not a fresh-start regression. They want to do this with a defined, repeatable mechanism rather than ad-hoc — the operator's *2hr/week maintenance budget* depends on migrations not becoming bespoke projects.
 
-## Goal
+## Goal {#goal}
 
 > "I want my existing end-user data moved from my old host into my new tenant on the platform — using a migration process I wrote, run by the platform on my behalf — so that when I cut my users over (on my own schedule), the new tenant has everything they expect."
 
 This is a **one-shot** goal per migration: when the data has landed and the capability owner has validated it, the migration job is torn down. There is no ongoing sync.
 
-## Entry Point
+## Entry Point {#entry-point}
 
 The capability owner arrives at this experience **after** [Host a Capability](./host-a-capability.md) has fully completed for their tenant — onboarding issue closed, tenant live and empty. They have a parallel, still-running deployment of their capability on a prior host (vendor or self-managed), and they have written a **migration process** — a one-time job that reads from the prior host and writes into the new tenant via the new tenant's normal interfaces — packaged in the form the platform accepts (same packaging as any other capability component).
 
@@ -36,7 +36,7 @@ What they have in hand:
 
 State of mind: pragmatic. They know this is bespoke to *their* capability — the platform is providing a *runner* for a process *they* wrote, not a magic mover.
 
-## Journey
+## Journey {#journey}
 
 ### 1. Register old-host credentials with the platform secret management offering
 
@@ -122,7 +122,7 @@ flowchart TD
     Teardown --> Done((Data migrated;<br/>cutover is CO's concern))
 ```
 
-## Success
+## Success {#success}
 
 When the issue closes, the capability owner walks away with:
 
@@ -131,7 +131,7 @@ When the issue closes, the capability owner walks away with:
 - Confidence that when *they* decide to cut their end users over, the new tenant will not look like a regression.
 - A known, repeatable path if they ever need to migrate again (file another `migrate my data` issue and declare the process's re-run contract again).
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Migration job errors out partway, leaving partial data in the tenant.** *Experience-level handling:* the operator reports the error on the issue; the capability owner provides the plan (wipe-and-retry, resume, accept partial, abandon). The platform does not auto-clean — the data belongs to the capability owner and they decide what to do with it.
 - **Validation reveals data is wrong even though the job reported success.** Same as above — capability owner provides the plan. This is treated identically to a job-level failure from the journey's perspective.
@@ -142,7 +142,7 @@ When the issue closes, the capability owner walks away with:
 - **Another tenant is migrating at the same time.** *Experience-level handling:* no special branch. Concurrent migrations are part of the offering; the capability owner still files the same issue, waits through the same review, and observes only their own job.
 - **Capability owner wants to re-run the migration months later (e.g., to top up data accumulated on the old host since the first migration).** The *experience* is still: file a fresh `migrate my data` issue. The previous migration job is gone; the new one is a separate one-shot, and the capability owner must explicitly declare whether the process is safe against existing data or whether the destination must be wiped first.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability's Business Rules and Success Criteria — by name, so future readers can trace the lineage:
 
@@ -156,7 +156,7 @@ This UX must respect the following items from the parent capability's Business R
 - **No specific availability or performance SLA.** No SLA on migration completion either. Migrations take however long they take; the capability owner sees progress through observability and decides what to do about long-running jobs. Supporting concurrent migrations does **not** imply exclusive capacity or a completion-time guarantee for any one tenant's job.
 - **Operator succession.** The migration job's lifespan is bounded — it exists only between steps 4 and 8 of this journey. If the operator becomes unavailable mid-migration, the successor's takeover responsibility is to keep the *platform* running, not to finish in-flight migration jobs. A mid-migration tenant simply has a stalled job; the capability owner provides a plan when a successor (or recovered operator) is back.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **Cutting end users over from the old host to the new tenant.** This is a capability-owner concern, deliberately *outside* the platform's view. The capability owner runs old + new concurrently and cuts over on their own schedule using whatever mechanisms their capability provides for end users.
 - **Ongoing sync or replication between the old host and the new tenant.** This UX is one-shot. A capability that needs continuous sync is a different capability (and likely a different UX, if it ever exists).

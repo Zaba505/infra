@@ -8,7 +8,7 @@ weight: 10
 
 > **One-line definition:** Provide a reproducible, operator-controlled platform on which the operator's other capabilities run by default, so that no capability has to depend on a vendor-specific hosting solution to be delivered.
 
-## Purpose & Business Outcome
+## Purpose & Business Outcome {#purpose}
 What business outcome does this capability deliver? Why does it exist?
 
 This capability exists so that the operator's other capabilities (e.g. self-hosted personal media storage) have a well-defined, reproducible place to run that the operator controls end-to-end, instead of each capability independently choosing a vendor (e.g. a hosted Plex provider, a hosted Minecraft provider, a hosted Nextcloud provider). The outcomes it delivers, in order of importance:
@@ -20,14 +20,14 @@ This capability exists so that the operator's other capabilities (e.g. self-host
 
 When these outcomes conflict: tenant adoption beats reproducibility (a perfect platform with no tenants is a failure); reproducibility beats vendor independence (a platform that can't be rebuilt is worse than one that uses some vendor components); vendor independence beats minimizing operator effort.
 
-## Stakeholders
+## Stakeholders {#stakeholders}
 
 - **Owner / Accountable party:** The operator. Sole accountable party for the platform existing, running, and continuing to run.
 - **Primary actors (initiators):** Capability owners — currently the operator wearing a different hat — who bring a capability to the platform to be hosted, or change what an already-hosted capability needs.
 - **Secondary actors / consumers:** The tenant capabilities themselves, while running, consume platform services (compute, storage, network, identity, backup, observability).
 - **Affected parties (impacted but not directly involved):** End users of the tenant capabilities (e.g. family and friends using self-hosted personal media storage). They never interact with the platform directly, but a platform outage or data loss directly affects them.
 
-## Triggers & Inputs
+## Triggers & Inputs {#triggers}
 What initiates the capability, and what information must be available?
 
 - **Triggers:**
@@ -43,7 +43,7 @@ What initiates the capability, and what information must be available?
   - The operator has authorized the capability to run on the platform (no self-onboarding by tenants — the operator is the only person making this decision).
   - The capability accepts the platform's contract (see Business Rules).
 
-## Outputs & Deliverables
+## Outputs & Deliverables {#outputs}
 What does the capability produce? What changes in the world after it runs?
 
 - **Direct outputs:** For each tenant capability, the platform provides:
@@ -58,7 +58,7 @@ What does the capability produce? What changes in the world after it runs?
   - Investments in resiliency, backup, and observability accrue across all tenants instead of being repeated per capability.
   - The operator accumulates operational knowledge of one platform rather than fragmented knowledge of many vendor products.
 
-## Business Rules & Constraints
+## Business Rules & Constraints {#business-rules}
 
 - **Default hosting target.** All capabilities defined in this repo are expected to run on the platform unless explicitly exempted. A capability owner may choose to host elsewhere, but the platform is the default and the burden of justification is on opting out.
 - **Operator-only operation.** Only the operator operates the platform and has administrative access to it. There are no co-operators and no delegated administration. A designated successor (see *Operator succession*) holds sealed/escrowed emergency credentials but does not exercise them while the operator is active — there is no shared day-to-day administration and no routine successor access.
@@ -73,14 +73,14 @@ What does the capability produce? What changes in the world after it runs?
 - **Cost is secondary to convenience and resiliency.** Because there is one operator, added cost is acceptable when it buys meaningful convenience or resiliency. Cost should still be minimized where it does not cost convenience or resiliency.
 - **The capability evolves with its tenants.** When a tenant capability needs something the platform does not yet provide, the default response is to update this capability's definition (and the platform) rather than push the requirement back onto the tenant.
 
-## Success Criteria & KPIs
+## Success Criteria & KPIs {#success-criteria}
 
 - **Tenant adoption.** Every *implemented* capability defined in this repo runs on this platform. A capability is "implemented" when it is deployed and serving its intended users in production — distinct from "defined" (a capability doc exists) and "designed" (a technical design exists but nothing is running). Only implemented capabilities count toward this KPI; defined-or-designed-only capabilities are neutral, neither success nor failure. An implemented capability that runs elsewhere counts negatively against this KPI: either the platform did not meet the tenant's needs, or the tenant was never asked to use it.
 - **Reproducibility.** The platform can be stood up from its definitions in **at most 1 hour**, starting from no platform at all. This is the operational form of "reproducible" — if it takes longer than that, the platform is a snowflake regardless of how much of its config is in version control.
 - **Operator maintenance budget.** Routine operation of the platform takes **no more than 2 hours per week** of the operator's time. If maintenance regularly exceeds this, the platform is consuming more attention than it earns and must be simplified, not grown.
 - **Cost stays proportional to value.** Total operating cost remains within what the operator considers acceptable given the convenience and resiliency it delivers. There is no fixed dollar target; the test is whether the operator would still choose to run it knowing the bill.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **Hosting for anyone other than the operator's own capabilities.** The platform does not offer hosting to third parties, the public, or family/friends directly. Family and friends reach the platform only as end users of a tenant capability (e.g. via self-hosted personal media storage), never as platform users.
 - **Dictating the implementation.** "Homelab," "Kubernetes," and any specific stack are possible implementations of this capability, not part of its definition. The capability is satisfied by anything that meets its rules and KPIs.
