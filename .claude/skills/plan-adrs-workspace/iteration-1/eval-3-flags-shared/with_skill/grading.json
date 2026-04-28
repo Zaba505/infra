@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_cross_capability_scope",
+      "passed": true,
+      "evidence": "'That ADR is a shared decision, not a capability-scoped one \u2014 it touches both Cloudflare topology and inter-service identity.'"
+    },
+    {
+      "text": "directs_to_shared_adr_namespace",
+      "passed": true,
+      "evidence": "'Shared decisions like this belong in docs/content/r&d/adrs/ and go through a separate flow.'"
+    },
+    {
+      "text": "does_not_file_a_capability_scoped_issue",
+      "passed": true,
+      "evidence": "gh-invocations.txt is empty with explanation; no issues filed."
+    },
+    {
+      "text": "flags_premature_decision_or_offers_to_defer",
+      "passed": true,
+      "evidence": "Both: 'go with mTLS is the answer' (premature) AND offers to defer / pause."
+    }
+  ]
+}

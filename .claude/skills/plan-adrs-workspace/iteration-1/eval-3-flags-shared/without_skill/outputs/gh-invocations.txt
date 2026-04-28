@@ -1,0 +1,42 @@
+# Held pending user confirmation. See adr-plan.md for the two open questions.
+# Once confirmed, the intended invocations would be (assuming shared scope under r&d/adrs/):
+
+gh issue create \
+  --title "ADR: Service-to-service authentication for platform services" \
+  --label "adr,shared" \
+  --body "$(cat <<'EOF'
+## Context
+All platform services in this monorepo need a consistent way to authenticate to one another. Current topology: Internet -> Cloudflare (mTLS proxy + DDoS) -> Home Lab <-> GCP (WireGuard). Edge mTLS at Cloudflare authenticates external clients, not service-to-service traffic behind the edge.
+
+This is a shared cross-capability decision (not capability-scoped). Drives TR-01 (tenant isolation) and TR-07 (Cloudflare->GCP path) of the self-hosted-application-platform capability, and applies to any other capability's services.
+
+## Decision to make
+Choose the service-to-service auth mechanism. Options to evaluate:
+- Edge-only mTLS (Cloudflare<->origin) + network isolation (WireGuard) for intra-perimeter traffic
+- End-to-end workload mTLS (e.g., SPIFFE/SPIRE, cert-manager-issued workload certs, service mesh)
+- Edge mTLS + token-based intra-cluster auth (signed JWTs / GCP workload identity)
+
+User-proposed starting point: mTLS terminated at the Cloudflare edge with 30-day cert rotation. Note: edge termination alone does not authenticate services to each other; this needs reconciliation before the ADR is written.
+
+## Output
+A MADR 4.0.0 ADR under docs/content/r&d/adrs/ recording the chosen mechanism and rationale.
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Certificate issuance and rotation policy for platform services" \
+  --label "adr,shared" \
+  --body "$(cat <<'EOF'
+## Context
+Follows the service-to-service auth ADR. Once a mechanism is chosen, the platform needs a documented policy for issuing and rotating the certs (or tokens) it relies on.
+
+## Decision to make
+- Issuing authority (Cloudflare-managed origin certs, GCP Private CA, cert-manager + internal CA, SPIRE, etc.)
+- Rotation cadence (user-proposed: 30 days)
+- Revocation strategy
+- Bootstrap / first-issue flow
+
+## Output
+A MADR 4.0.0 ADR under docs/content/r&d/adrs/. May be folded into the auth-mechanism ADR if the mechanism choice fully implies the CA/rotation design.
+EOF
+)"

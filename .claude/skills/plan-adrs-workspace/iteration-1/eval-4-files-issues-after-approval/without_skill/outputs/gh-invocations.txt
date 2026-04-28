@@ -1,0 +1,117 @@
+# Intended `gh issue create` invocations — one per ADR for the
+# self-hosted-application-platform capability. NOT executed.
+# tech-requirements.md reviewed_at: 2026-04-26 (unchanged).
+
+gh issue create \
+  --title "ADR: Tenant isolation model (data + compute boundary) for self-hosted-application-platform" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the tenant isolation primitive at the compute layer and the data-layer scoping mechanism that prevents any tenant from reading another tenant's state, secrets, traffic, or telemetry.
+
+## Drives requirements
+- TR-01: Tenants must be isolated such that no tenant can read another's state
+- TR-03 (partial): per-tenant observability data scope inherits from this boundary
+
+## Out of scope
+- Specific observability stack (see separate ADR)
+- Update strategy (see separate ADR)
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Platform contract versioning and concurrent-version support" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the platform-contract versioning scheme and the runtime mechanism that allows multiple contract versions to operate concurrently during a bounded migration window.
+
+## Drives requirements
+- TR-02: Operators must be able to roll out a platform-contract change without breaking existing tenants
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Per-tenant observability pipeline and query scoping" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the metrics/logs/traces stack and the query-time scoping mechanism that guarantees a tenant can only read telemetry for their own workloads.
+
+## Drives requirements
+- TR-03: Tenant-facing observability data must be queryable per-tenant within their data scope only
+- TR-01 (partial): cross-tenant telemetry inaccessibility
+
+## Depends on
+- ADR: Tenant isolation model
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Zero-downtime tenant update strategy" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the update mechanism for online tenant workloads and the readiness/health contract tenants must implement so operator-initiated updates produce no end-user-visible downtime.
+
+## Drives requirements
+- TR-04: Operator-initiated tenant updates must complete without tenant-perceived downtime for online workloads
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant data export format and eviction export-window mechanics" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the portable export format, the delivery channel, and the lifecycle of the export window (trigger, duration, retention after eviction) by which an evicted tenant retrieves all their data.
+
+## Drives requirements
+- TR-05: A tenant evicted from the platform must be able to take their data with them
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant data import / migration ingestion mechanism" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Choose the import API shape, idempotency-key/fingerprint scheme, and integrity-verification approach that lets new tenants migrate pre-existing data with no silent loss and no duplication on retry.
+
+## Drives requirements
+- TR-06: New tenants must be able to migrate existing data into the platform without loss or corruption
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Network topology conformance for platform and tenant traffic" \
+  --label "adr,capability/self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## ADR scope
+Codify how platform-internal and tenant-bound traffic is routed through the Cloudflare → GCP path (with WireGuard back to home lab), including the enforcement point that rejects non-conforming paths and the egress controls.
+
+## Drives requirements
+- TR-07: All inter-service communication must traverse the Cloudflare → GCP path
+
+## Source
+docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"

@@ -1,0 +1,3 @@
+No gh issue create invocations were made.
+
+Reason: The proposed ADR is a shared/cross-capability decision (inter-service authentication via mTLS terminated at the Cloudflare edge), and the user already supplied the chosen option ("let's go with mTLS ... cert rotation every 30 days"). The plan-adrs skill enumerates capability-scoped decisions to be made; it does not file shared-ADR issues and does not record chosen options. The decision was flagged and the skill stopped per its "Flag-and-stop for shared decisions" rule. No issues should be filed under this skill for this request.

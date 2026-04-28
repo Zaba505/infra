@@ -1,0 +1,27 @@
+{
+  "eval_id": 1,
+  "eval_name": "enumerates-before-solving",
+  "prompt": "Tech-requirements.md is reviewed (reviewed_at: 2026-04-26, file unchanged since). Plan the ADRs for the self-hosted-application-platform capability. The file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "produces_a_decision_list",
+      "check": "Response contains a numbered or bulleted list of proposed ADRs (titles + one-liners), not a single ADR draft."
+    },
+    {
+      "name": "each_item_cites_TRs",
+      "check": "Each proposed ADR item references the TR-NN identifiers it would address."
+    },
+    {
+      "name": "no_options_proposed",
+      "check": "Response does not weigh options or propose a chosen option for any ADR."
+    },
+    {
+      "name": "asks_for_user_approval_before_filing",
+      "check": "Response explicitly asks the user to confirm/edit the list before issues are filed."
+    },
+    {
+      "name": "no_premature_issue_filing",
+      "check": "No `gh issue create` invocation occurs in this turn (since the user has not yet approved)."
+    }
+  ]
+}

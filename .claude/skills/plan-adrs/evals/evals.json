@@ -1,0 +1,73 @@
+{
+  "skill_name": "plan-adrs",
+  "notes": [
+    "Seeded from define-tech-design evals cases #3, #4, #5, #6 — the four that exercise Stage-2 enumeration / gate / bundle-rejection / shared-decision behavior.",
+    "Added case #4 (waits-for-approval-before-filing-issues) to cover the new behavior that's specific to this split skill: filing one GitHub issue per approved ADR via gh issue create, but only after the human approves the list."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-refuses-unreviewed-tech-requirements",
+      "prompt": "Tech-requirements.md exists for the self-hosted-application-platform capability at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md. Plan the ADRs.",
+      "expected_output": "Should refuse to enumerate ADRs because reviewed_at is null. Should tell the user to review tech-requirements.md and set reviewed_at to today's ISO date. Should not produce any ADR list and should not file any issues.",
+      "assertions": [
+        {"name": "refuses_to_enumerate", "check": "Response declines to enumerate ADRs / decisions because the gate is not satisfied."},
+        {"name": "names_the_gate_state", "check": "Response specifically calls out the reviewed_at value (null or stale) as the reason for stopping."},
+        {"name": "instructs_user_to_set_reviewed_at", "check": "Response tells the user to set reviewed_at to today's ISO date in tech-requirements.md."},
+        {"name": "no_issues_filed", "check": "No `gh issue create` invocation occurs (no issues created)."},
+        {"name": "no_decision_list_proposed", "check": "Response does not propose a list of ADRs / decisions."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "enumerates-before-solving",
+      "prompt": "Tech-requirements.md is reviewed (reviewed_at: 2026-04-26, file unchanged since). Plan the ADRs for the self-hosted-application-platform capability. The file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+      "expected_output": "Should NOT immediately start drafting an ADR or proposing options. Should first read tech-requirements.md, then enumerate the discrete decisions the requirements force as a list (titles + one-liners), each tied to specific TR-NNs. Should ask the user to confirm the list before filing issues.",
+      "assertions": [
+        {"name": "produces_a_decision_list", "check": "Response contains a numbered or bulleted list of proposed ADRs (titles + one-liners), not a single ADR draft."},
+        {"name": "each_item_cites_TRs", "check": "Each proposed ADR item references the TR-NN identifiers it would address."},
+        {"name": "no_options_proposed", "check": "Response does not weigh options or propose a chosen option for any ADR."},
+        {"name": "asks_for_user_approval_before_filing", "check": "Response explicitly asks the user to confirm/edit the list before issues are filed."},
+        {"name": "no_premature_issue_filing", "check": "No `gh issue create` invocation occurs in this turn (since the user has not yet approved)."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rejects-bundled-adr",
+      "prompt": "For the self-hosted-application-platform capability, plan a single ADR called 'Tenant data architecture' that covers where tenant state lives, how it's partitioned, how it's accessed, and how it's backed up. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+      "expected_output": "Should push back on bundling. Should propose splitting into separate ADRs (storage location, partitioning, access pattern, backup strategy), explaining that bundling dilutes rationale and prevents superseding one decision without revisiting all of them. Should ask which to tackle first or propose an order.",
+      "assertions": [
+        {"name": "refuses_the_bundle", "check": "Response declines to plan a single 'Tenant data architecture' ADR covering all four sub-decisions."},
+        {"name": "proposes_split_into_multiple_ADRs", "check": "Response proposes splitting into at least three separate ADRs (storage, partitioning, access, backup are the four expected)."},
+        {"name": "explains_why_bundling_is_bad", "check": "Response explains that bundling dilutes rationale and/or prevents superseding sub-decisions independently."},
+        {"name": "no_issues_filed_yet", "check": "No issues are filed in this turn — the split proposal still needs user confirmation."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "flags-shared-cross-capability-decision",
+      "prompt": "For the self-hosted-application-platform capability, plan an ADR for how all platform services authenticate to each other — let's go with mTLS terminated at the Cloudflare edge with cert rotation every 30 days. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+      "expected_output": "Should recognize this is a cross-capability decision (touches Cloudflare topology and identity, affects every capability). Should refuse to plan it as a capability-scoped ADR and instead surface that it belongs in docs/content/r&d/adrs/ as a shared ADR (a separate flow). Should also note that 'go with mTLS' is the answer (a Stage-3 / define-adr concern, not enumeration).",
+      "assertions": [
+        {"name": "recognizes_cross_capability_scope", "check": "Response identifies the decision as cross-capability / shared, not capability-scoped."},
+        {"name": "directs_to_shared_adr_namespace", "check": "Response says the shared ADR belongs in docs/content/r&d/adrs/ (and that this skill does not handle it)."},
+        {"name": "does_not_file_a_capability_scoped_issue", "check": "No capability-scoped ADR issue is filed for this shared decision."},
+        {"name": "flags_premature_decision_or_offers_to_defer", "check": "Response either notes that 'go with mTLS' is choosing the answer (define-adr's job, not this skill's) OR offers to defer the shared ADR and proceed with the rest of the capability-scoped list."}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "files-one-issue-per-adr-after-approval",
+      "prompt": "Tech-requirements.md is reviewed for self-hosted-application-platform (reviewed_at: 2026-04-26, file unchanged since). Plan the ADRs and file the issues — I trust your enumeration, just go.",
+      "expected_output": "Should still mirror back the enumerated list before filing — 'just go' does not bypass the human-confirmation gate. Once the user signals approval (this prompt's 'I trust your enumeration, just go' counts as approval), should file one GitHub issue per ADR via gh issue create, with bodies that reference the parent capability, the TR-NNs addressed, and that name define-adr as the next-step skill. Issues should be titled with the repo's `story(adr): ...` convention.",
+      "assertions": [
+        {"name": "produces_decision_list", "check": "Response enumerates the proposed ADRs before filing."},
+        {"name": "files_one_issue_per_ADR", "check": "Skill invokes `gh issue create` once per enumerated ADR."},
+        {"name": "issue_titles_match_repo_convention", "check": "Filed issue titles follow the `story(adr): ...` form."},
+        {"name": "issue_bodies_cite_TR_NNs", "check": "Each filed issue body references the specific TR-NN identifiers the ADR will address."},
+        {"name": "issue_bodies_reference_define_adr", "check": "Each filed issue body names `define-adr` as the next-step skill that will author the ADR."},
+        {"name": "no_adr_files_written", "check": "No ADR markdown files are written under `adrs/` — issue filing is the only artifact at this stage."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "produces_decision_list",
+      "passed": true,
+      "evidence": "Enumerated 8 ADRs with TR-NN ties before producing the manifest."
+    },
+    {
+      "text": "files_one_issue_per_ADR",
+      "passed": true,
+      "evidence": "gh-invocations.txt contains 8 `gh issue create` invocations, one per ADR."
+    },
+    {
+      "text": "issue_titles_match_repo_convention",
+      "passed": true,
+      "evidence": "Titles use 'story(adr): {title} \u2014 self-hosted-application-platform' matching repo convention."
+    },
+    {
+      "text": "issue_bodies_cite_TR_NNs",
+      "passed": true,
+      "evidence": "Each body's '### Technical requirements addressed' section lists the specific TR-NNs."
+    },
+    {
+      "text": "issue_bodies_reference_define_adr",
+      "passed": true,
+      "evidence": "Each body's '### Authoring' section names define-adr as the next-step skill (per skill template)."
+    },
+    {
+      "text": "no_adr_files_written",
+      "passed": true,
+      "evidence": "Outputs only contains response.md and gh-invocations.txt \u2014 no .md ADR files under adrs/."
+    }
+  ]
+}

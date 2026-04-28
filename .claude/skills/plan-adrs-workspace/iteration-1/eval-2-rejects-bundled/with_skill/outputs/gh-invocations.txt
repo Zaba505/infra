@@ -1,0 +1,101 @@
+# Pending — DO NOT RUN until the user approves the split.
+# These are the four `gh issue create` invocations the skill would issue
+# once the user confirms the four-ADR split.
+
+gh issue create --title "story(adr): Tenant state storage location — self-hosted-application-platform" --body "$(cat <<'EOF'
+### Decision
+
+Where does tenant state physically live? Options to be evaluated by `define-adr` include (non-exhaustive) a single shared datastore with tenant-scoped rows, one logical database per tenant within a shared cluster, one cluster/project per tenant, or a hybrid. The choice must preserve strict cross-tenant isolation while allowing operator-initiated updates to roll out without tenant-perceived downtime.
+
+### Technical requirements addressed
+
+- [TR-01](../tech-requirements.md#tr-01-tenants-must-be-isolated-such-that-no-tenant-can-read-anothers-state) — tenant isolation at data layer
+- [TR-04](../tech-requirements.md#tr-04-operator-initiated-tenant-updates-must-complete-without-tenant-perceived-downtime-for-online-workloads) — no-downtime operator updates
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create --title "story(adr): Tenant state partitioning scheme — self-hosted-application-platform" --body "$(cat <<'EOF'
+### Decision
+
+Within whatever storage location is chosen, how is tenant state partitioned and identified? This covers the tenant identifier shape used inside the store, the partitioning unit (row prefix, schema, namespace, database), and the boundary that observability and export tooling will key off of.
+
+### Technical requirements addressed
+
+- [TR-01](../tech-requirements.md#tr-01-tenants-must-be-isolated-such-that-no-tenant-can-read-anothers-state) — isolation enforcement at the partition boundary
+- [TR-03](../tech-requirements.md#tr-03-tenant-facing-observability-data-must-be-queryable-per-tenant-within-their-data-scope-only) — per-tenant observability scoping
+- [TR-05](../tech-requirements.md#tr-05-a-tenant-evicted-from-the-platform-must-be-able-to-take-their-data-with-them) — per-tenant export boundary
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create --title "story(adr): Tenant state access pattern — self-hosted-application-platform" --body "$(cat <<'EOF'
+### Decision
+
+How do platform services read and write tenant state? Options to be evaluated include direct datastore access from each service vs. a dedicated tenant-data service fronting the store; platform-wide credentials with tenant-scoped queries vs. per-tenant credentials; and how the access path interacts with the Cloudflare → GCP topology and the multi-version platform contract.
+
+### Technical requirements addressed
+
+- [TR-01](../tech-requirements.md#tr-01-tenants-must-be-isolated-such-that-no-tenant-can-read-anothers-state) — isolation at the access layer
+- [TR-02](../tech-requirements.md#tr-02-operators-must-be-able-to-roll-out-a-platform-contract-change-without-breaking-existing-tenants) — concurrent contract versions accessing state
+- [TR-07](../tech-requirements.md#tr-07-all-inter-service-communication-must-traverse-the-cloudflare--gcp-path) — network topology constraint
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create --title "story(adr): Tenant state backup and export approach — self-hosted-application-platform" --body "$(cat <<'EOF'
+### Decision
+
+How is tenant state backed up for operational recovery, and how is it exported when a tenant is evicted or migrating in? Open questions include whether one mechanism covers both backup and export or whether they are separate; backup cadence and retention; export format and integrity verification; and idempotency for migrate-in.
+
+### Technical requirements addressed
+
+- [TR-05](../tech-requirements.md#tr-05-a-tenant-evicted-from-the-platform-must-be-able-to-take-their-data-with-them) — eviction export
+- [TR-06](../tech-requirements.md#tr-06-new-tenants-must-be-able-to-migrate-existing-data-into-the-platform-without-loss-or-corruption) — lossless idempotent import
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"

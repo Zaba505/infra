@@ -1,0 +1,31 @@
+{
+  "eval_id": 4,
+  "eval_name": "files-one-issue-per-adr-after-approval",
+  "prompt": "Tech-requirements.md is reviewed for self-hosted-application-platform (reviewed_at: 2026-04-26, file unchanged since). Plan the ADRs and file the issues \u2014 I trust your enumeration, just go.",
+  "assertions": [
+    {
+      "name": "produces_decision_list",
+      "check": "Response enumerates the proposed ADRs before filing."
+    },
+    {
+      "name": "files_one_issue_per_ADR",
+      "check": "Skill invokes `gh issue create` once per enumerated ADR."
+    },
+    {
+      "name": "issue_titles_match_repo_convention",
+      "check": "Filed issue titles follow the `story(adr): ...` form."
+    },
+    {
+      "name": "issue_bodies_cite_TR_NNs",
+      "check": "Each filed issue body references the specific TR-NN identifiers the ADR will address."
+    },
+    {
+      "name": "issue_bodies_reference_define_adr",
+      "check": "Each filed issue body names `define-adr` as the next-step skill that will author the ADR."
+    },
+    {
+      "name": "no_adr_files_written",
+      "check": "No ADR markdown files are written under `adrs/` \u2014 issue filing is the only artifact at this stage."
+    }
+  ]
+}

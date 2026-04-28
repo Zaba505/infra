@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_enumerate",
+      "passed": true,
+      "evidence": "response.md refuses at the gate; only response.md in outputs (no plan, no invocations)."
+    },
+    {
+      "text": "names_the_gate_state",
+      "passed": true,
+      "evidence": "Refusal explicitly cites reviewed_at: null."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": true,
+      "evidence": "Tells user to set reviewed_at to today's ISO date."
+    },
+    {
+      "text": "no_issues_filed",
+      "passed": true,
+      "evidence": "No gh-invocations.txt produced."
+    },
+    {
+      "text": "no_decision_list_proposed",
+      "passed": true,
+      "evidence": "Outputs contains only response.md \u2014 no ADR list."
+    }
+  ]
+}

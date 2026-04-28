@@ -1,0 +1,23 @@
+{
+  "eval_id": 3,
+  "eval_name": "flags-shared-cross-capability-decision",
+  "prompt": "For the self-hosted-application-platform capability, plan an ADR for how all platform services authenticate to each other \u2014 let's go with mTLS terminated at the Cloudflare edge with cert rotation every 30 days. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "recognizes_cross_capability_scope",
+      "check": "Response identifies the decision as cross-capability / shared, not capability-scoped."
+    },
+    {
+      "name": "directs_to_shared_adr_namespace",
+      "check": "Response says the shared ADR belongs in docs/content/r&d/adrs/ (and that this skill does not handle it)."
+    },
+    {
+      "name": "does_not_file_a_capability_scoped_issue",
+      "check": "No capability-scoped ADR issue is filed for this shared decision."
+    },
+    {
+      "name": "flags_premature_decision_or_offers_to_defer",
+      "check": "Response either notes that 'go with mTLS' is choosing the answer (define-adr's job, not this skill's) OR offers to defer the shared ADR and proceed with the rest of the capability-scoped list."
+    }
+  ]
+}

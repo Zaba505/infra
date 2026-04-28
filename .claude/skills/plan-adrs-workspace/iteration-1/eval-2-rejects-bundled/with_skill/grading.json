@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_the_bundle",
+      "passed": true,
+      "evidence": "Response title literally 'Pushback: I won't file a single bundled ADR.'"
+    },
+    {
+      "text": "proposes_split_into_multiple_ADRs",
+      "passed": true,
+      "evidence": "Proposed split into exactly 4 ADRs (storage, partitioning, access, backup/export)."
+    },
+    {
+      "text": "explains_why_bundling_is_bad",
+      "passed": true,
+      "evidence": "Three concrete problems listed: rationale dilution, unsupersedeable, hidden dependencies."
+    },
+    {
+      "text": "no_issues_filed_yet",
+      "passed": true,
+      "evidence": "'no issues are filed until you approve the list'; gh-invocations.txt held pending."
+    }
+  ]
+}

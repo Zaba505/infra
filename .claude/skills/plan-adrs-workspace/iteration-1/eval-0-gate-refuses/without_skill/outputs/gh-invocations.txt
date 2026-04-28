@@ -1,0 +1,130 @@
+# Intended `gh issue create` invocations — one per planned ADR.
+# Not executed; written here per task instructions.
+# Repo assumed: Zaba505/infra. Adjust --repo / --label as needed.
+
+gh issue create \
+  --title "ADR: Tenant workload isolation boundary (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for the tenant workload isolation boundary.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-01, TR-03 (compute half), TR-04 (update isolation)
+
+**Decision question:** What is the unit of isolation for a tenant's compute and in-memory state, and what mechanism enforces that no tenant can read another's runtime state?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+**Out of scope:** storage isolation (separate ADR), network isolation (separate ADR).
+
+Use `define-adr` to author. Output goes under the capability's `adrs/` directory in MADR 4.0.0 format.
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant data storage and isolation model (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for the tenant data storage and isolation model.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-01 (data half), TR-05 (export feasibility), TR-06 (import feasibility)
+
+**Decision question:** How is tenant persistent data stored such that it is (a) inaccessible across tenants, (b) exportable as a portable archive, and (c) importable idempotently with integrity verification?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant network isolation and ingress model (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for tenant network isolation and ingress.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-01 (network half), TR-07 (path conformance)
+
+**Decision question:** How are tenants reachable externally and isolated from each other on the network, while conforming to the existing Cloudflare → GCP → WireGuard → home lab path?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+**Note:** the topology itself is a prior shared decision; this ADR decides how multiple tenants share it.
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Platform contract versioning and concurrent-version support (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for platform contract versioning.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-02
+
+**Decision question:** How is the platform contract versioned, and what mechanism lets the platform run two contract versions concurrently for the migration window?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Zero-downtime tenant update strategy (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for zero-downtime tenant updates.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-04
+
+**Decision question:** What rollout strategy (rolling, blue/green, surge) does the platform use when an operator-initiated update touches a tenant serving online traffic, such that end users observe no downtime?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+**Depends on:** isolation-boundary ADR, ingress ADR.
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Per-tenant observability scoping (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for per-tenant observability scoping.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-03
+
+**Decision question:** Where do tenant metrics/logs/traces land, and what enforces that a tenant query can only see its own scope?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant data export format and integrity contract (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for the tenant data export format and integrity contract.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-05
+
+**Decision question:** What is the on-disk format, transport, and integrity guarantee (checksums, manifest) of a tenant export, and what is the bounded export window?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+**Depends on:** storage-model ADR.
+EOF
+)"
+
+gh issue create \
+  --title "ADR: Tenant data import idempotency and integrity verification (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the ADR for tenant data import idempotency and integrity.
+
+**Capability:** self-hosted-application-platform
+**Drives:** TR-06
+
+**Decision question:** What import protocol does the platform expose, and how does it guarantee idempotency on retry and detect silent loss/corruption?
+
+**Source:** docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+**Depends on:** storage-model ADR.
+EOF
+)"

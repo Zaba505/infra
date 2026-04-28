@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "produces_a_decision_list",
+      "passed": true,
+      "evidence": "Baseline enumerated 8 ADRs in adr-plan.md."
+    },
+    {
+      "text": "each_item_cites_TRs",
+      "passed": true,
+      "evidence": "Each ADR ties to TR-NNs."
+    },
+    {
+      "text": "no_options_proposed",
+      "passed": true,
+      "evidence": "Baseline didn't lock in tech choices."
+    },
+    {
+      "text": "asks_for_user_approval_before_filing",
+      "passed": true,
+      "evidence": "Baseline also proposes a list and indicates issues would be filed pending confirmation (skill descriptions visible in baseline context likely informed this)."
+    },
+    {
+      "text": "no_premature_issue_filing",
+      "passed": true,
+      "evidence": "Per task: invocations written to file, not run."
+    }
+  ]
+}

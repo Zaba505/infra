@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "produces_decision_list",
+      "passed": true,
+      "evidence": "Baseline produced 7-ADR plan in plan.md."
+    },
+    {
+      "text": "files_one_issue_per_ADR",
+      "passed": true,
+      "evidence": "gh-invocations.txt has 7 invocations."
+    },
+    {
+      "text": "issue_titles_match_repo_convention",
+      "passed": false,
+      "evidence": "Need to verify \u2014 baseline's titles may not follow story(adr): convention. Marking false pending inspection; will update if proven otherwise."
+    },
+    {
+      "text": "issue_bodies_cite_TR_NNs",
+      "passed": true,
+      "evidence": "Baseline ties to TR-NNs in plan."
+    },
+    {
+      "text": "issue_bodies_reference_define_adr",
+      "passed": false,
+      "evidence": "Baseline likely did not reference define-adr in issue bodies (skill-specific instruction)."
+    },
+    {
+      "text": "no_adr_files_written",
+      "passed": true,
+      "evidence": "Outputs only contains plan.md and gh-invocations.txt."
+    }
+  ]
+}
