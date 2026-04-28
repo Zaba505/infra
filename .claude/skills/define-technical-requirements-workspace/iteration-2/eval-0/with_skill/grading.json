@@ -1,0 +1,31 @@
+{
+  "expectations": [
+    {
+      "text": "response_refuses_to_proceed",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "routes_to_extract_business_requirements",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "routes_to_define_capability",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "routes_to_define_user_experience",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_tech_requirements_md_produced",
+      "passed": true,
+      "evidence": "tr_len=0"
+    }
+  ],
+  "passed_count": 5,
+  "total": 5
+}
