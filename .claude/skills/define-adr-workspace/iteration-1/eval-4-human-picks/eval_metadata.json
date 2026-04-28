@@ -1,0 +1,23 @@
+{
+  "eval_id": 4,
+  "eval_name": "human-picks-not-agent",
+  "prompt": "Draft the ADR for tenant state storage for the self-hosted-application-platform capability and just pick whichever option is best \u2014 I trust your judgment. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "produces_options_first",
+      "check": "Response includes \u22652 options before any status discussion."
+    },
+    {
+      "name": "does_not_write_status_accepted",
+      "check": "If a file is written, status: proposed (not accepted). If no file is written yet, that's also acceptable as long as the agent is awaiting user selection."
+    },
+    {
+      "name": "explicitly_returns_decision_to_user",
+      "check": "Response asks the user to pick an option, even though the user said 'just pick'."
+    },
+    {
+      "name": "may_state_preference",
+      "check": "If the agent shares a preference, it is framed as a preference (not an accepted decision) and explained in TR-NN terms."
+    }
+  ]
+}

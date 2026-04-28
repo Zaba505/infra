@@ -1,0 +1,23 @@
+{
+  "eval_id": 0,
+  "eval_name": "shared-decision-flagged",
+  "prompt": "For the self-hosted-application-platform capability, draft an ADR for how all platform services authenticate to each other \u2014 let's go with mTLS terminated at the Cloudflare edge with cert rotation every 30 days. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "recognizes_cross_capability_scope",
+      "check": "Response identifies the decision as shared / cross-capability."
+    },
+    {
+      "name": "directs_to_shared_adr_namespace",
+      "check": "Response says the shared ADR belongs in docs/content/r&d/adrs/ via a separate flow."
+    },
+    {
+      "name": "does_not_write_capability_scoped_adr",
+      "check": "No ADR markdown file is written under docs/content/capabilities/self-hosted-application-platform/adrs/."
+    },
+    {
+      "name": "offers_to_defer_or_pause",
+      "check": "Response offers to defer the shared ADR (proceed with another decision) or pause this skill."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "surfaces_research_before_options",
+      "passed": true,
+      "evidence": "Surfaced 6 research tasks before drafting options."
+    },
+    {
+      "text": "asks_user_how_to_resolve_research",
+      "passed": true,
+      "evidence": "Asked user whether to run research, file issues, or confirm assumptions."
+    },
+    {
+      "text": "does_not_invent_factual_claims",
+      "passed": true,
+      "evidence": "No options drafted at all \u2014 waiting on research resolution."
+    },
+    {
+      "text": "does_not_proceed_to_status_accepted_without_research",
+      "passed": true,
+      "evidence": "No file written; status: accepted not set."
+    }
+  ]
+}

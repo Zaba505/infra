@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "proposes_at_least_two_options",
+      "passed": true,
+      "evidence": "Four options proposed."
+    },
+    {
+      "text": "each_option_cites_TRs",
+      "passed": true,
+      "evidence": "Each option ties to TR-NNs."
+    },
+    {
+      "text": "no_humus_in_options",
+      "passed": true,
+      "evidence": "Baseline also avoids humus and assumes house pattern."
+    },
+    {
+      "text": "honors_chi_bedrock_pattern",
+      "passed": true,
+      "evidence": "Baseline Option 1 explicitly mirrors services/machine/."
+    },
+    {
+      "text": "no_unilateral_selection",
+      "passed": true,
+      "evidence": "Baseline also held selection \u2014 'for your selection before drafting the full MADR'."
+    }
+  ]
+}

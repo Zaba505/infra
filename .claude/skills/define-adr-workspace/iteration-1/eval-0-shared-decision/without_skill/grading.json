@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_cross_capability_scope",
+      "passed": true,
+      "evidence": "Baseline flagged it as cross-cutting."
+    },
+    {
+      "text": "directs_to_shared_adr_namespace",
+      "passed": true,
+      "evidence": "Baseline noted it 'likely belongs under docs/content/r&d/adrs/'."
+    },
+    {
+      "text": "does_not_write_capability_scoped_adr",
+      "passed": false,
+      "evidence": "Baseline DREW the file 0008-platform-inter-service-authentication.md under capability adrs/ anyway."
+    },
+    {
+      "text": "offers_to_defer_or_pause",
+      "passed": true,
+      "evidence": "Baseline noted the routing question."
+    }
+  ]
+}

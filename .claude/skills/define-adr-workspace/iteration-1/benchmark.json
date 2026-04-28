@@ -1,0 +1,121 @@
+{
+  "skill_name": "define-adr",
+  "iteration": 1,
+  "configs": {
+    "with_skill": {
+      "pass_rate": 1.0,
+      "avg_tokens": 33834.6,
+      "avg_duration_ms": 70802.2
+    },
+    "without_skill": {
+      "pass_rate": 0.85,
+      "avg_tokens": 34969.2,
+      "avg_duration_ms": 98699.6
+    }
+  },
+  "delta": {
+    "pass_rate_pp": 15.000000000000002
+  },
+  "evals": [
+    {
+      "id": 0,
+      "name": "shared-decision",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 41255,
+          "tokens": 26755
+        },
+        "without_skill": {
+          "passed": 3,
+          "total": 4,
+          "pass_rate": 0.75,
+          "duration_ms": 104086,
+          "tokens": 38244
+        }
+      }
+    },
+    {
+      "id": 1,
+      "name": "house-patterns",
+      "configs": {
+        "with_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 92579,
+          "tokens": 39719
+        },
+        "without_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 55049,
+          "tokens": 26531
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "research-surfaced",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 64895,
+          "tokens": 34128
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 156140,
+          "tokens": 39947
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "gate-refuses",
+      "configs": {
+        "with_skill": {
+          "passed": 3,
+          "total": 3,
+          "pass_rate": 1.0,
+          "duration_ms": 24173,
+          "tokens": 29560
+        },
+        "without_skill": {
+          "passed": 3,
+          "total": 3,
+          "pass_rate": 1.0,
+          "duration_ms": 43123,
+          "tokens": 31323
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "human-picks",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 131109,
+          "tokens": 39011
+        },
+        "without_skill": {
+          "passed": 2,
+          "total": 4,
+          "pass_rate": 0.5,
+          "duration_ms": 135100,
+          "tokens": 38801
+        }
+      }
+    }
+  ]
+}

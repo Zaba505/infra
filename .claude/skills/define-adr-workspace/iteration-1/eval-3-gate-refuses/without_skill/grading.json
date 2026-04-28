@@ -1,0 +1,19 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_due_to_gate",
+      "passed": true,
+      "evidence": "Baseline also refused at the gate (skill descriptions in available_skills leak this discipline)."
+    },
+    {
+      "text": "names_reviewed_at_state",
+      "passed": true,
+      "evidence": "Baseline cited reviewed_at: null."
+    },
+    {
+      "text": "no_adr_file_written",
+      "passed": true,
+      "evidence": "outputs/ contains only response.md."
+    }
+  ]
+}
