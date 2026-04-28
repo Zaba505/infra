@@ -1,0 +1,32 @@
+{
+  "expectations": [
+    {
+      "text": "Refuses to inline a per-task development plan",
+      "passed": false,
+      "evidence": "refusal markers matched=none"
+    },
+    {
+      "text": "Explains why per-task plans belong to Step 12",
+      "passed": true,
+      "evidence": "explanation markers matched=['step 12']"
+    },
+    {
+      "text": "Still files implementation issues (incl. the schema task)",
+      "passed": true,
+      "evidence": "intended_issues=13; 'schema' in any title=True"
+    },
+    {
+      "text": "Acknowledges user intent and offers Step-12 follow-up path",
+      "passed": true,
+      "evidence": "follow-up markers matched=['schema task']"
+    },
+    {
+      "text": "Response does not contain a per-task plan body for the schema task",
+      "passed": false,
+      "evidence": "per-task-plan-body markers matched=['files to create', 'exact migration command', 'definition of done']"
+    }
+  ],
+  "passed": 3,
+  "total": 5,
+  "pass_rate": 0.6
+}

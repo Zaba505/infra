@@ -1,0 +1,47 @@
+{
+  "expectations": [
+    {
+      "text": "Lists multiple tasks per component (not one-per-component)",
+      "passed": true,
+      "evidence": "intended_issues=11 (threshold>=7)"
+    },
+    {
+      "text": "Tasks are PR-sized (5 < count < 25)",
+      "passed": true,
+      "evidence": "intended_issues=11"
+    },
+    {
+      "text": "Identifies prerequisite/dependency relationships",
+      "passed": true,
+      "evidence": "dependency markers matched=['prerequisite', 'depends on', 'prereq']"
+    },
+    {
+      "text": "Mirrors back the task list before filing",
+      "passed": true,
+      "evidence": "mirror markers matched=['before i file', 'mirror', 'do the slices look right', 'say go']"
+    },
+    {
+      "text": "Filed issues use story(impl): title convention",
+      "passed": true,
+      "evidence": "story(impl) titles=11 of 11"
+    },
+    {
+      "text": "Issue bodies link parent capability + design sources",
+      "passed": true,
+      "evidence": "bodies reference components/=True, adrs/=True"
+    },
+    {
+      "text": "Issue bodies reference Step 12 / per-task development flow",
+      "passed": true,
+      "evidence": "bodies reference 'step 12' or 'per-task'=True"
+    },
+    {
+      "text": "No per-task plan inline (no file lists, migration commands, etc.)",
+      "passed": true,
+      "evidence": "per-task-plan markers matched in response=none"
+    }
+  ],
+  "passed": 8,
+  "total": 8,
+  "pass_rate": 1.0
+}

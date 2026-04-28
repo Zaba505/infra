@@ -1,0 +1,27 @@
+{
+  "expectations": [
+    {
+      "text": "Refuses to slice / file issues",
+      "passed": true,
+      "evidence": "intended_issues=0; decline markers matched=['stopping', 'cannot plan']"
+    },
+    {
+      "text": "Names firestore-tenants as missing component design",
+      "passed": true,
+      "evidence": "'firestore-tenants' present in response=True"
+    },
+    {
+      "text": "Routes user to define-component-design",
+      "passed": true,
+      "evidence": "'define-component-design' present in response=True"
+    },
+    {
+      "text": "No issues filed",
+      "passed": true,
+      "evidence": "intended_issues=0"
+    }
+  ],
+  "passed": 4,
+  "total": 4,
+  "pass_rate": 1.0
+}

@@ -1,0 +1,27 @@
+{
+  "expectations": [
+    {
+      "text": "Refuses to slice / file issues",
+      "passed": true,
+      "evidence": "intended_issues=0; decline markers matched=['stopping', 'cannot plan']"
+    },
+    {
+      "text": "Names blocking gap issue (#812 / tenant-id derivation)",
+      "passed": true,
+      "evidence": "matched=['#812', 'tenant-id derivation']"
+    },
+    {
+      "text": "Routes user to resolve the gap",
+      "passed": true,
+      "evidence": "resolution-route markers matched=['resolve #812', 'close #812', 'define-component-design', 'amending adr', 'define-adr', 'define-technical-requirements']"
+    },
+    {
+      "text": "No issues filed",
+      "passed": true,
+      "evidence": "intended_issues=0"
+    }
+  ],
+  "passed": 4,
+  "total": 4,
+  "pass_rate": 1.0
+}

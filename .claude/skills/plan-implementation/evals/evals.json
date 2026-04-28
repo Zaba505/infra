@@ -1,0 +1,62 @@
+{
+  "skill_name": "plan-implementation",
+  "notes": [
+    "Mirrors the shape of plan-tech-design's evals: gate-refusal cases, gap-detection, the happy path, and a discipline boundary case (refusing to write per-task plans inline).",
+    "Fixtures under evals/fixtures/ should be staged at docs/content/capabilities/self-hosted-personal-media-storage/ before running each eval. capability-complete is used by evals 0, 2, 3. capability-missing-component-design is used by eval 1.",
+    "gh-issue state for evals 0 and 1 is asserted in the prompt itself (the eval cannot rely on real GitHub state); the model is expected to act on the stated issue list."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-refuses-open-gap-issues",
+      "prompt": "Plan implementation for self-hosted-personal-media-storage. tech-design.md is composed and reviewed_at is current, but there's still an open `story(gap): tenant-id derivation — self-hosted-personal-media-storage` issue.",
+      "expected_output": "Should refuse to slice tasks because not every gap is resolved. Should specifically name the open gap issue and route the user back to resolve it (per-component spec, amending ADR, or define-technical-requirements). Should not write any artifact and should not file any issues.",
+      "assertions": [
+        {"name": "refuses_to_slice", "check": "Response declines to enumerate or slice implementation tasks."},
+        {"name": "names_blocking_gap", "check": "Response specifically references the open `story(gap): tenant-id derivation` issue (or its number) as the blocker."},
+        {"name": "routes_to_resolve_gap", "check": "Response tells the user to resolve the gap (via per-component spec, amending ADR, or define-technical-requirements) before re-invoking."},
+        {"name": "no_issues_filed", "check": "No `gh issue create` invocations are made."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "gate-refuses-missing-component-design",
+      "prompt": "Plan implementation for self-hosted-personal-media-storage. tech-design.md lists four components in the inventory: tenant-registry, photo-store, share-service, firestore-tenants. Design docs exist under components/ for the first three but not for firestore-tenants. There's an open `story(component): firestore-tenants` issue.",
+      "expected_output": "Should refuse to slice tasks because not every component has a design doc. Should specifically name `firestore-tenants` (and the open component issue) as the blocker and route the user to run `define-component-design` against it before re-invoking. Should not write any artifact and should not file any issues.",
+      "assertions": [
+        {"name": "refuses_to_slice", "check": "Response declines to enumerate or slice implementation tasks."},
+        {"name": "names_missing_component_design", "check": "Response specifically calls out `firestore-tenants` as having no component design doc."},
+        {"name": "routes_to_define_component_design", "check": "Response tells the user to run `define-component-design` against the open component issue before re-invoking."},
+        {"name": "no_issues_filed", "check": "No `gh issue create` invocations are made."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "happy-path-files-task-issues",
+      "prompt": "Plan implementation for self-hosted-personal-media-storage. tech-design.md is reviewed and current, no open gap issues, every component in the inventory has a design doc on disk under components/. Walk the component designs, slice the work, mirror the list back, and once I approve, file the issues — go.",
+      "expected_output": "Should walk each component design, list candidate tasks per component, order by hard dependency, mirror back the list with verb-led titles + components touched + acceptance criteria + design source, ask for explicit approval, and only after approval file one `story(impl):` issue per task. Issue bodies must reference the parent capability, the component design(s), the source ADR(s)/TR(s), and Step 12 as the next-step authoring flow. No per-task plan content (no file lists, no test code) should appear in tech-design.md or in this skill's output.",
+      "assertions": [
+        {"name": "lists_tasks_per_component", "check": "Response enumerates discrete tasks anchored in the component design docs (not just one task per component)."},
+        {"name": "tasks_are_pr_sized", "check": "Tasks are scoped as single-PR units of work — not 'build the whole service' and not micro-chores like renaming a single field."},
+        {"name": "orders_by_dependency", "check": "Response identifies prerequisite relationships between tasks (e.g. schema before endpoint) and surfaces the order."},
+        {"name": "mirrors_back_before_filing", "check": "Response presents the proposed task list to the user and asks for explicit approval before any `gh issue create` invocation."},
+        {"name": "files_one_issue_per_task", "check": "After approval, one `gh issue create` invocation per task with title `story(impl): {task} — {capability-name}` (or close-to-this convention)."},
+        {"name": "issue_bodies_link_design_sources", "check": "Each filed issue body links the parent capability, the component design doc(s), the ADR(s) the task realizes, and the TR(s) it serves."},
+        {"name": "issue_bodies_reference_step_12", "check": "Each filed issue body names Step 12 / the per-task development flow as the next-step authoring skill."},
+        {"name": "no_per_task_plan_inline", "check": "Response does NOT inline a per-task plan (no file-edit lists, no test code, no shell command sequences) — that work is deferred to Step 12."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "refuses-to-write-per-task-plan-inline",
+      "prompt": "Plan implementation for self-hosted-personal-media-storage. While you're slicing, also write out the full per-task plan for the schema task — files to touch, tests to write, the exact migration command. Save me from running Step 12 later.",
+      "expected_output": "Should refuse to inline a per-task development plan. Should explain that per-task plans are Step 12's job and that inlining bypasses per-task review. Should still mirror back the sliced task list (gate permitting) and file `story(impl):` issues; should offer to feed the user's intent into the Step 12 invocation against the schema task.",
+      "assertions": [
+        {"name": "refuses_inline_per_task_plan", "check": "Response declines to write file lists, tests, or migration commands inside this skill's output."},
+        {"name": "explains_why_step_12_owns_plan", "check": "Response explains that per-task development plans live in Step 12 and inlining them bypasses per-task review."},
+        {"name": "still_files_schema_task_issue", "check": "A `story(impl):` issue is filed for the schema task (assuming user approval), pointing at Step 12 for the per-task plan."},
+        {"name": "preserves_user_intent_for_followup", "check": "Response acknowledges the user's specifics and offers to carry them into the Step 12 invocation as input."}
+      ]
+    }
+  ]
+}

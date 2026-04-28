@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "skill_name": "plan-implementation",
+    "skill_path": ".claude/skills/plan-implementation",
+    "executor_model": "claude-opus-4-7",
+    "analyzer_model": "claude-opus-4-7",
+    "timestamp": "2026-04-28T18:03:42Z",
+    "evals_run": [
+      "gate-refuses-open-gap-issues",
+      "gate-refuses-missing-component-design",
+      "happy-path-files-task-issues",
+      "refuses-inline-per-task-plan"
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "eval_name": "gate-refuses-open-gap-issues",
+      "configuration": "with_skill",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 1.0,
+      "duration_seconds": 25.4,
+      "total_tokens": 27489
+    },
+    {
+      "eval_id": 0,
+      "eval_name": "gate-refuses-open-gap-issues",
+      "configuration": "without_skill",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 1.0,
+      "duration_seconds": 48.0,
+      "total_tokens": 27793
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "gate-refuses-missing-component-design",
+      "configuration": "with_skill",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 1.0,
+      "duration_seconds": 44.5,
+      "total_tokens": 30817
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "gate-refuses-missing-component-design",
+      "configuration": "without_skill",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 1.0,
+      "duration_seconds": 58.3,
+      "total_tokens": 33790
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "happy-path-files-task-issues",
+      "configuration": "with_skill",
+      "passed": 8,
+      "total": 8,
+      "pass_rate": 1.0,
+      "duration_seconds": 177.5,
+      "total_tokens": 48977
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "happy-path-files-task-issues",
+      "configuration": "without_skill",
+      "passed": 8,
+      "total": 8,
+      "pass_rate": 1.0,
+      "duration_seconds": 141.2,
+      "total_tokens": 44915
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "refuses-inline-per-task-plan",
+      "configuration": "with_skill",
+      "passed": 4,
+      "total": 5,
+      "pass_rate": 0.8,
+      "duration_seconds": 132.2,
+      "total_tokens": 44793
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "refuses-inline-per-task-plan",
+      "configuration": "without_skill",
+      "passed": 3,
+      "total": 5,
+      "pass_rate": 0.6,
+      "duration_seconds": 133.0,
+      "total_tokens": 37046
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": 0.9524,
+      "passed": 20,
+      "total": 21,
+      "avg_duration_seconds": 94.9,
+      "avg_total_tokens": 38019
+    },
+    "without_skill": {
+      "pass_rate": 0.9048,
+      "passed": 19,
+      "total": 21,
+      "avg_duration_seconds": 95.1,
+      "avg_total_tokens": 35886
+    },
+    "delta": {
+      "pass_rate": "+0.0476",
+      "passed": "+1",
+      "avg_duration_seconds": "-0.2",
+      "avg_total_tokens": "+2133"
+    }
+  },
+  "notes": [
+    "Single-run-per-cell layout (runs_per_configuration=1); aggregate stddev/min/max are not computed.",
+    "Evals 0, 1, 2 were non-discriminating: the without_skill agent independently arrived at the same behavior. The discriminating eval is eval-3 (the Step 11/12 boundary), where with_skill held the line and without_skill complied with the user's per-task-plan request.",
+    "Eval-3 with_skill carries one known grader false positive on the 'no per-task plan body' assertion: the response uses the phrase 'exact migration command' while refuting it ('Firestore is schemaless — there is no migration command in the SQL sense'). The keyword check cannot distinguish refutation from compliance; this is encoded explicitly in the relevant grading.json evidence string.",
+    "Cost: with_skill spent ~6% more tokens than baseline on average; no skill-loading time penalty observed.",
+    "See benchmark.md for the human-readable summary and analyst observations."
+  ]
+}
