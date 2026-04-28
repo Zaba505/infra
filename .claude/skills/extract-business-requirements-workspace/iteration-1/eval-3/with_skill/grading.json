@@ -1,0 +1,31 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_add_decision_as_BR",
+      "passed": true,
+      "evidence": "has_s3_in_file=False"
+    },
+    {
+      "text": "explains_decision_vs_requirement",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "asks_for_underlying_business_need",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "offers_to_park_in_open_questions",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_s3_text_written_to_file",
+      "passed": true,
+      "evidence": "has_s3=False"
+    }
+  ],
+  "passed_count": 5,
+  "total": 5
+}

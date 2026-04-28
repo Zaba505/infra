@@ -1,0 +1,31 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_add_postgres_as_TR",
+      "passed": true,
+      "evidence": "in_file=False"
+    },
+    {
+      "text": "explains_decision_vs_requirement",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "asks_for_underlying_requirement",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "offers_to_park_in_open_questions",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_postgres_TR_written_to_file",
+      "passed": true,
+      "evidence": "in_file=False"
+    }
+  ],
+  "passed_count": 5,
+  "total": 5
+}

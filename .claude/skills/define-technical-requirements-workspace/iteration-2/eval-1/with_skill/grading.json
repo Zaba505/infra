@@ -1,0 +1,26 @@
+{
+  "expectations": [
+    {
+      "text": "response_refuses_to_proceed",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "explains_review_gate",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at_on_BRs",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_tech_requirements_md_produced",
+      "passed": true,
+      "evidence": "tr_len=0"
+    }
+  ],
+  "passed_count": 4,
+  "total": 4
+}

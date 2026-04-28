@@ -1,0 +1,31 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_add_TR_as_BR",
+      "passed": true,
+      "evidence": "tr_text=True"
+    },
+    {
+      "text": "explains_BR_vs_TR_distinction",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "asks_for_underlying_business_need",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "offers_to_park_in_open_questions",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_tr_text_written_to_file",
+      "passed": false,
+      "evidence": "has_tr_text=True"
+    }
+  ],
+  "passed_count": 4,
+  "total": 5
+}

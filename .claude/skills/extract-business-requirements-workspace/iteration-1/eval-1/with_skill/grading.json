@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "produces_business_requirements_md",
+      "passed": true,
+      "evidence": "len=57061"
+    },
+    {
+      "text": "frontmatter_has_reviewed_at_null",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "has_multiple_BR_entries",
+      "passed": true,
+      "evidence": "BR count=54"
+    },
+    {
+      "text": "each_BR_has_source_link",
+      "passed": true,
+      "evidence": "sources=54 br=54"
+    },
+    {
+      "text": "uses_hugo_ref_shortcode",
+      "passed": true,
+      "evidence": "refs=113 br=54"
+    },
+    {
+      "text": "no_technical_cadences_in_BRs",
+      "passed": false,
+      "evidence": "cadences=['durable storage']"
+    },
+    {
+      "text": "no_technology_choices_in_BRs",
+      "passed": false,
+      "evidence": "techs=['Wireguard']"
+    },
+    {
+      "text": "no_tr_drafted",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "no_adr_drafted",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "mentions_define_tech_requirements_gate",
+      "passed": true,
+      "evidence": "match"
+    }
+  ],
+  "passed_count": 9,
+  "total": 11
+}

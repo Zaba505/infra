@@ -1,0 +1,26 @@
+{
+  "expectations": [
+    {
+      "text": "response_refuses_to_proceed",
+      "passed": true,
+      "evidence": "I can't extract business requirements yet \u2014 the skill's preconditions aren't met.\n\nThis skill (`extract-business-requirements`) is **Step 5** of the capability development lifecycle. It only works onc"
+    },
+    {
+      "text": "routes_to_define_capability",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "routes_to_define_user_experience",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_business_requirements_md_produced",
+      "passed": true,
+      "evidence": "br len=0"
+    }
+  ],
+  "passed_count": 4,
+  "total": 4
+}

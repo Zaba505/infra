@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eval Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" integrity="sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT" crossorigin="anonymous"></script>
+  <style>
+    :root {
+      --bg: #faf9f5;
+      --surface: #ffffff;
+      --border: #e8e6dc;
+      --text: #141413;
+      --text-muted: #b0aea5;
+      --accent: #d97757;
+      --accent-hover: #c4613f;
+      --green: #788c5d;
+      --green-bg: #eef2e8;
+      --red: #c44;
+      --red-bg: #fceaea;
+      --header-bg: #141413;
+      --header-text: #faf9f5;
+      --radius: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- Header ---- */
+    .header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    .header .instructions {
+      font-size: 0.8rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+    }
+    .header .progress {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      text-align: right;
+    }
+
+    /* ---- Main content ---- */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* ---- Sections ---- */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      flex-shrink: 0;
+    }
+    .section-header {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .section-body {
+      padding: 1rem;
+    }
+
+    /* ---- Config badge ---- */
+    .config-badge {
+      display: inline-block;
+      padding: 0.2rem 0.625rem;
+      border-radius: 9999px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-left: 0.75rem;
+      vertical-align: middle;
+    }
+    .config-badge.config-primary {
+      background: rgba(33, 150, 243, 0.12);
+      color: #1976d2;
+    }
+    .config-badge.config-baseline {
+      background: rgba(255, 193, 7, 0.15);
+      color: #f57f17;
+    }
+
+    /* ---- Prompt ---- */
+    .prompt-text {
+      white-space: pre-wrap;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    /* ---- Outputs ---- */
+    .output-file {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .output-file + .output-file {
+      margin-top: 1rem;
+    }
+    .output-file-header {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .output-file-header .dl-btn {
+      font-size: 0.7rem;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .output-file-header .dl-btn:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+    .output-file-content {
+      padding: 0.75rem;
+      overflow-x: auto;
+    }
+    .output-file-content pre {
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: 'SF Mono', SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+    }
+    .output-file-content img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+    .output-file-content iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+    }
+    .output-file-content table {
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+      width: 100%;
+    }
+    .output-file-content table td,
+    .output-file-content table th {
+      border: 1px solid var(--border);
+      padding: 0.375rem 0.5rem;
+      text-align: left;
+    }
+    .output-file-content table th {
+      background: var(--bg);
+      font-weight: 600;
+    }
+    .output-file-content .download-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .output-file-content .download-link:hover {
+      background: var(--border);
+    }
+    .empty-state {
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ---- Feedback ---- */
+    .prev-feedback {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.625rem 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .prev-feedback-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.25rem;
+      color: var(--text-muted);
+    }
+    .feedback-textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.5;
+      resize: vertical;
+      color: var(--text);
+    }
+    .feedback-textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .feedback-status {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      min-height: 1.1em;
+    }
+
+    /* ---- Grades (collapsible) ---- */
+    .grades-toggle {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .grades-toggle:hover {
+      color: var(--accent);
+    }
+    .grades-toggle .arrow {
+      margin-right: 0.5rem;
+      transition: transform 0.15s;
+      font-size: 0.75rem;
+    }
+    .grades-toggle .arrow.open {
+      transform: rotate(90deg);
+    }
+    .grades-content {
+      display: none;
+      margin-top: 0.75rem;
+    }
+    .grades-content.open {
+      display: block;
+    }
+    .grades-summary {
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .grade-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .grade-pass { background: var(--green-bg); color: var(--green); }
+    .grade-fail { background: var(--red-bg); color: var(--red); }
+    .assertion-list {
+      list-style: none;
+    }
+    .assertion-item {
+      padding: 0.625rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8125rem;
+    }
+    .assertion-item:last-child { border-bottom: none; }
+    .assertion-status {
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .assertion-status.pass { color: var(--green); }
+    .assertion-status.fail { color: var(--red); }
+    .assertion-evidence {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      padding-left: 1.5rem;
+    }
+
+    /* ---- View tabs ---- */
+    .view-tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .view-tab {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .view-tab:hover { color: var(--text); }
+    .view-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .view-panel { display: none; }
+    .view-panel.active { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+
+    /* ---- Benchmark view ---- */
+    .benchmark-view {
+      padding: 1.5rem 2rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .benchmark-table {
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.8125rem;
+      width: 100%;
+      margin-bottom: 1.5rem;
+    }
+    .benchmark-table th, .benchmark-table td {
+      padding: 0.625rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    .benchmark-table th {
+      font-family: 'Poppins', sans-serif;
+      background: var(--header-bg);
+      color: var(--header-text);
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .benchmark-table tr:hover { background: var(--bg); }
+    .benchmark-table tr.benchmark-row-with { background: rgba(33, 150, 243, 0.06); }
+    .benchmark-table tr.benchmark-row-without { background: rgba(255, 193, 7, 0.06); }
+    .benchmark-table tr.benchmark-row-with:hover { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-without:hover { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-table tr.benchmark-row-avg { font-weight: 600; border-top: 2px solid var(--border); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-with { background: rgba(33, 150, 243, 0.12); }
+    .benchmark-table tr.benchmark-row-avg.benchmark-row-without { background: rgba(255, 193, 7, 0.12); }
+    .benchmark-delta-positive { color: var(--green); font-weight: 600; }
+    .benchmark-delta-negative { color: var(--red); font-weight: 600; }
+    .benchmark-notes {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+    .benchmark-notes h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.875rem;
+      margin-bottom: 0.75rem;
+    }
+    .benchmark-notes ul {
+      list-style: disc;
+      padding-left: 1.25rem;
+    }
+    .benchmark-notes li {
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.375rem;
+    }
+    .benchmark-empty {
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      padding: 3rem;
+    }
+
+    /* ---- Navigation ---- */
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+      transition: all 0.15s;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .done-btn {
+      font-family: 'Poppins', sans-serif;
+      padding: 0.5rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .done-btn:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+    .done-btn.ready {
+      border: none;
+      background: var(--accent);
+      color: white;
+      font-weight: 600;
+    }
+    .done-btn.ready:hover {
+      background: var(--accent-hover);
+    }
+    /* ---- Done overlay ---- */
+    .done-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .done-overlay.visible {
+      display: flex;
+    }
+    .done-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 2rem 3rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+    }
+    .done-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .done-card p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .done-card .btn-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    .done-card button {
+      padding: 0.5rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    .done-card button:hover {
+      background: var(--bg);
+    }
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      z-index: 200;
+    }
+    .toast.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" style="height:100vh; display:flex; flex-direction:column;">
+    <div class="header">
+      <div>
+        <h1>Eval Review: <span id="skill-name"></span></h1>
+        <div class="instructions">Review each output and leave feedback below. Navigate with arrow keys or buttons. When done, copy feedback and paste into Claude Code.</div>
+      </div>
+      <div class="progress" id="progress"></div>
+    </div>
+
+    <!-- View tabs (only shown when benchmark data exists) -->
+    <div class="view-tabs" id="view-tabs" style="display:none;">
+      <button class="view-tab active" onclick="switchView('outputs')">Outputs</button>
+      <button class="view-tab" onclick="switchView('benchmark')">Benchmark</button>
+    </div>
+
+    <!-- Outputs panel (qualitative review) -->
+    <div class="view-panel active" id="panel-outputs">
+    <div class="main">
+      <!-- Prompt -->
+      <div class="section">
+        <div class="section-header">Prompt <span class="config-badge" id="config-badge" style="display:none;"></span></div>
+        <div class="section-body">
+          <div class="prompt-text" id="prompt-text"></div>
+        </div>
+      </div>
+
+      <!-- Outputs -->
+      <div class="section">
+        <div class="section-header">Output</div>
+        <div class="section-body" id="outputs-body">
+          <div class="empty-state">No output files found</div>
+        </div>
+      </div>
+
+      <!-- Previous Output (collapsible) -->
+      <div class="section" id="prev-outputs-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="togglePrevOutputs()">
+            <span class="arrow" id="prev-outputs-arrow">&#9654;</span>
+            Previous Output
+          </div>
+        </div>
+        <div class="grades-content" id="prev-outputs-content"></div>
+      </div>
+
+      <!-- Grades (collapsible) -->
+      <div class="section" id="grades-section" style="display:none;">
+        <div class="section-header">
+          <div class="grades-toggle" onclick="toggleGrades()">
+            <span class="arrow" id="grades-arrow">&#9654;</span>
+            Formal Grades
+          </div>
+        </div>
+        <div class="grades-content" id="grades-content"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="section">
+        <div class="section-header">Your Feedback</div>
+        <div class="section-body">
+          <textarea
+            class="feedback-textarea"
+            id="feedback"
+            placeholder="What do you think of this output? Any issues, suggestions, or things that look great?"
+          ></textarea>
+          <div class="feedback-status" id="feedback-status"></div>
+          <div class="prev-feedback" id="prev-feedback" style="display:none;">
+            <div class="prev-feedback-label">Previous feedback</div>
+            <div id="prev-feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav" id="outputs-nav">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">&#8592; Previous</button>
+      <button class="done-btn" id="done-btn" onclick="showDoneDialog()">Submit All Reviews</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next &#8594;</button>
+    </div>
+    </div><!-- end panel-outputs -->
+
+    <!-- Benchmark panel (quantitative stats) -->
+    <div class="view-panel" id="panel-benchmark">
+      <div class="benchmark-view" id="benchmark-content">
+        <div class="benchmark-empty">No benchmark data available. Run a benchmark to see quantitative results here.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Done overlay -->
+  <div class="done-overlay" id="done-overlay">
+    <div class="done-card">
+      <h2>Review Complete</h2>
+      <p>Your feedback has been saved. Go back to your Claude Code session and tell Claude you're done reviewing.</p>
+      <div class="btn-row">
+        <button onclick="closeDoneDialog()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Embedded data (injected by generate_review.py) ----
+    const EMBEDDED_DATA = {"skill_name": "extract-business-requirements", "runs": [{"id": "eval-0-with_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "response.md", "type": "text", "content": "I can't extract business requirements yet \u2014 the skill's preconditions aren't met.\n\nThis skill (`extract-business-requirements`) is **Step 5** of the capability development lifecycle. It only works once the upstream artifacts exist, because every BR has to link back \u2014 via Hugo `ref` shortcodes \u2014 to a specific source in the capability doc or a UX doc. Without those sources, any \"requirements\" I produce would be invented rather than extracted, and the downstream chain (BR \u2192 TR \u2192 ADR \u2192 component) would have nothing to stand on.\n\nSpecifically, the skill requires:\n\n1. A capability page bundle at `docs/content/capabilities/shared-file-vault/_index.md` \u2014 read end-to-end for stakeholders, business rules, success criteria, out-of-scope.\n2. At least one UX doc under `docs/content/capabilities/shared-file-vault/user-experiences/` \u2014 because BRs must serve all the user journeys, not just the one in your head.\n\nNeither exists yet for \"shared file vault.\" I have to refuse to proceed; the skill is explicit that \"business requirements derived from missing inputs are business requirements with missing reasons.\"\n\n## What to do instead\n\nRun the upstream skills first, in order:\n\n1. **`define-capability`** \u2014 I'll guide you through scoping the shared-file-vault capability: what the business does, stakeholders, business rules, success criteria, what's explicitly out of scope. This produces `docs/content/capabilities/shared-file-vault/_index.md`.\n2. **`define-user-experience`** \u2014 for each meaningful user journey in the vault (e.g. \"share a file with another tenant\", \"revoke access\", \"audit who has accessed what\", \"recover a deleted file\" \u2014 whatever you actually want). One UX doc per journey under `user-experiences/`.\n3. **Then come back here** and I'll extract `business-requirements.md` against the real, written sources, with every BR carrying a `ref`-linked citation.\n\nI know it feels like extra ceremony when you \"already know what you want\" \u2014 but the value of this pipeline is exactly that the BRs are auditable derivations from written intent, not transcribed from a conversation that no one can review later. The capability and UX docs are also where you'll surface stakeholders, edge cases, and out-of-scope decisions you probably haven't fully thought through yet; skipping them tends to produce BRs that quietly bake in unstated assumptions.\n\nWant to start with `define-capability` for shared-file-vault now? If so, tell me the one-paragraph pitch \u2014 what the vault is for, who uses it, and what problem it solves \u2014 and I'll drive the rest of the elicitation from there.\n"}], "grading": {"expectations": [{"text": "response_refuses_to_proceed", "passed": true, "evidence": "I can't extract business requirements yet \u2014 the skill's preconditions aren't met.\n\nThis skill (`extract-business-requirements`) is **Step 5** of the capability development lifecycle. It only works onc"}, {"text": "routes_to_define_capability", "passed": true, "evidence": "match"}, {"text": "routes_to_define_user_experience", "passed": true, "evidence": "match"}, {"text": "no_business_requirements_md_produced", "passed": true, "evidence": "br len=0"}], "passed_count": 4, "total": 4}}, {"id": "eval-0-without_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "response.md", "type": "text", "content": "# Extracting Business Requirements: Shared File Vault\n\nHappy to help \u2014 but let's pump the brakes for a second. Business requirements get extracted *from* a defined capability and its user experiences. Since you mentioned \"we haven't written the capability doc yet,\" what we actually have right now is what's in your head. That's fine as a starting point, but I want to be honest about the order of operations so we don't end up with requirements that drift later.\n\nI see two reasonable paths. Tell me which you want:\n\n**Path A \u2014 Quick & dirty (recommended for \"let's just go\"):**\nYou answer the elicitation questions below, I synthesize a `business-requirements.md` directly from your answers. We skip the formal capability doc for now and circle back to write it later from the requirements (reverse-engineered). Faster, but the audit trail back to \"the capability says X\" will be weaker.\n\n**Path B \u2014 Proper order:**\nWe do a lightweight capability sketch first (15 min of Q&A), then I extract BRs from that sketch with proper traceability links. Slower but the BRs trace cleanly to the capability + UXes, which matches how the rest of the repo's docs are structured.\n\n---\n\n## Elicitation questions (applies to either path)\n\nTo extract business requirements I need to understand the *business intent*, not the technical shape. Please answer in your own words \u2014 bullets are fine.\n\n### 1. Purpose & value\n- In one sentence, what is the shared file vault *for*?\n- What problem does its absence cause today? Who feels that pain?\n- If we shipped this and it worked perfectly, what would change for the business / household / users?\n\n### 2. Actors & ownership\n- Who uses it? (you only? family? guests? services / automation?)\n- Who *owns* the data inside it? (single owner, per-file owner, shared pool?)\n- Who can grant access to whom?\n\n### 3. The \"shared\" part\n- Shared between *whom*, exactly? People? Devices? Services? All three?\n- Is sharing default-on (everything visible to all members) or default-off (explicit grants per file/folder)?\n- Are there sharing scopes (read-only, read-write, time-bound links, public links)?\n\n### 4. The \"vault\" part\n- What does \"vault\" imply to you here? (encryption-at-rest? versioning? immutability? audit log? recovery from deletion?)\n- Are there files that should be *more* protected than others (sensitivity tiers)?\n- Retention: do files live forever, or is there a lifecycle (auto-expire, archive, hard-delete)?\n\n### 5. Content & scale\n- What kinds of files? (docs, photos, video, secrets/credentials, backups, mixed?)\n- Rough volume \u2014 KBs, GBs, TBs?\n- Largest single file you'd realistically put in?\n- Read-heavy or write-heavy?\n\n### 6. Access shape\n- From where do people access it? (browser, mobile, CLI, mounted filesystem, API?)\n- Online-only, or offline/sync expected?\n- LAN-only, or accessible from the internet via your Cloudflare-fronted setup?\n\n### 7. Trust & safety\n- What's the worst-case scenario you want to prevent? (data loss? unauthorized access? ransomware? accidental deletion? leak of a shared link?)\n- Any compliance/regulatory considerations, or is this purely personal?\n- Do you need an audit trail of who-accessed-what-when?\n\n### 8. Boundaries (what it is NOT)\n- What are you explicitly *not* trying to build here? (e.g., \"not a Dropbox competitor,\" \"not a backup system,\" \"not a media library\")\n- What's out of scope for v1?\n\n### 9. Success criteria\n- How will you know it's working? (concrete, measurable: \"I stop using X,\" \"family stops emailing PDFs around,\" \"I can find any tax doc in <30s\")\n- What would make you call this a failure?\n\n### 10. Non-functional gut-checks\n- Availability expectation? (best-effort? \"I'd be annoyed if it's down for an hour\"? \"must survive home internet outage\"?)\n- Recovery expectation if a disk dies? (acceptable to lose last 24h? zero data loss?)\n- Anyone else depending on it being up, or just you?\n\n---\n\n## What I'll produce once you answer\n\nA `business-requirements.md` with entries shaped like:\n\n```\nBR-01: The vault SHALL allow <actor> to <do thing> so that <business value>.\n  Source: <capability section / UX step / your answer to Q#>\n  Acceptance: <observable condition>\n```\n\nEach requirement will be:\n- Phrased in business language (no tech choices)\n- Traceable back to one of your answers (or to the capability doc, if we go Path B)\n- Testable (someone could check whether it's met)\n- Scoped to *what* and *why*, never *how*\n\nReply with **Path A** or **Path B**, then take a swing at the questions \u2014 answer what's obvious, mark `?` on what you haven't thought through, and we'll iterate on the gaps together.\n"}], "grading": {"expectations": [{"text": "response_refuses_to_proceed", "passed": true, "evidence": "# Extracting Business Requirements: Shared File Vault\n\nHappy to help \u2014 but let's pump the brakes for a second. Business requirements get extracted *from* a defined capability and its user experiences."}, {"text": "routes_to_define_capability", "passed": true, "evidence": "# Extracting Business Requirements: Shared File Vault\n\nHappy to help \u2014 but let's pump the brakes for a second. Business "}, {"text": "routes_to_define_user_experience", "passed": true, "evidence": "match"}, {"text": "no_business_requirements_md_produced", "passed": true, "evidence": "br len=0"}], "passed_count": 4, "total": 4}}, {"id": "eval-1-with_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "business-requirements.md", "type": "text", "content": "---\ntitle: \"Business Requirements\"\ndescription: >\n    Business requirements extracted from the Self-Hosted Application Platform capability and its user experiences. Each requirement links back to its source. Technical requirements and decisions belong in tech-requirements.md and ADRs, not here.\ntype: docs\nreviewed_at: null\n---\n\n> **Living document.** This is regenerated from the capability and UX docs on demand. Numbering is append-only \u2014 once a BR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). Technical requirements cite BR-NN, so renumbering would silently break provenance.\n\n> **Review gate.** Set `reviewed_at:` in the frontmatter to today's ISO date once you have read and edited this document. The `define-technical-requirements` skill will refuse to extract TRs until `reviewed_at` is newer than the file's last modification.\n\n**Parent capability:** [Self-Hosted Application Platform]({{< ref \"_index.md\" >}})\n\n## How to read this\n\nEach requirement is **forced** by the capability or a user experience \u2014 it states, in business or user-outcome terms, what the system must guarantee. Decisions about the *technical translation* (cadences, durability levels, protocols) belong in `tech-requirements.md`. Decisions about *how* (which database, which library, which provider) belong in `adrs/`. If something in this list reads like a technical constraint or a chosen solution rather than a business demand, flag it for review.\n\n## Requirements\n\n### BR-01: The platform must be the default hosting target for the operator's capabilities\n**Source:** [Capability \u00a7Purpose & Business Outcome]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}})\n\n**Requirement:** Any capability the operator defines must be able to run on this platform by default, so that \"where does this run?\" is a solved question per capability rather than re-litigated each time. A capability hosted elsewhere counts as a failure of the platform to meet that capability's needs (or a failure to ask).\n\n**Why this is a requirement, not a TR or decision:** The capability's first stated outcome explicitly demands a default hosting answer; the *Tenant adoption* KPI converts that demand into a measurable success criterion that counts elsewhere-hosted implemented capabilities negatively. It is a business-level promise about the platform's role, not a technical translation.\n\n### BR-02: The platform must be rebuildable from its definitions\n**Source:** [Capability \u00a7Purpose & Business Outcome]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Success Criteria & KPIs]({{< ref \"_index.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Goal]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** A total loss of the platform must not be a permanent loss. The operator must be able to rebuild the platform from nothing back to a state ready to host tenants, working only from the definitions repo and root-level access to the underlying infrastructure. Bespoke per-rebuild snowflake configuration is not acceptable as a substitute.\n\n**Why this is a requirement, not a TR or decision:** The capability frames reproducibility as a primary outcome and the *Reproducibility* KPI ties the property to a measurable, auditable rebuild. The 1-hour budget is the TR translation of \"fast enough\"; the BR underneath is the existence of a clean, definitions-only rebuild path at all.\n\n### BR-03: The platform must remain independent of any single hosting vendor\n**Source:** [Capability \u00a7Purpose & Business Outcome]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}})\n\n**Requirement:** The operator must not be locked into any single vendor's product roadmap, pricing, or terms for the things their capabilities depend on. The platform may use vendor components, but the operator must retain control over configuration, data, and the ability to leave any one vendor.\n\n**Why this is a requirement, not a TR or decision:** The capability lists vendor independence as an explicit outcome and clarifies the meaning of \"self-hosted\" as operator-controlled end-to-end rather than fully on operator-owned hardware. It is an autonomy demand on the system, not a chosen technology stack.\n\n### BR-04: Only the operator may administer the platform\n**Source:** [Capability \u00a7Stakeholders]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Constraints Inherited]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Constraints Inherited]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** Administrative access to the platform must be confined to the operator. There are no co-operators, no delegated administration, no self-service onboarding by tenants, and no day-to-day operator role for the designated successor. Capability owners and end users must not be granted any administrative surface on the platform.\n\n**Why this is a requirement, not a TR or decision:** The capability states this as a hard rule and every UX inherits it by name. It is a governance boundary on the system, not a technical access-control choice.\n\n### BR-05: A designated successor must be able to take over the platform if the primary operator becomes unavailable\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}})\n\n**Requirement:** The platform must support a designated successor operator who holds sealed/escrowed credentials and a runbook sufficient to keep the platform running if the primary operator becomes unavailable. Successor takeover is a discrete event triggered by unavailability \u2014 it must not be a routine shared-administration mode.\n\n**Why this is a requirement, not a TR or decision:** The capability's *Operator succession* rule explicitly demands this as a continuity property of the platform. The mechanism (password manager handoff, physical envelope, etc.) is a decision; the requirement underneath is that succession is supported at all.\n\n### BR-06: Each tenant's users must be able to retrieve their own content while the platform is healthy, without operator involvement\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Constraints Inherited]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** While the platform is healthy, the platform must offer on-demand exportable archives of each tenant's data such that the tenant's users can pull their content without operator assistance. This is the user-data complement to operator succession: even if no successor takes over, previously-pulled exports survive.\n\n**Why this is a requirement, not a TR or decision:** The capability's *Operator succession* rule names on-demand exportable archives as a required mechanism, and the eviction UX consumes the same mechanism. It is a user-data continuity demand, framed in user-outcome terms \u2014 what is *exported* and *how* are translations.\n\n### BR-07: A tenant must be hostable only after the operator has authorized it\n**Source:** [Capability \u00a7Triggers & Inputs]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}})\n\n**Requirement:** No capability may begin running on the platform without an explicit authorization decision by the operator. There must be no self-onboarding path. Acceptance of the platform's contract is implicit in the tech-design submission the operator reviews and approves.\n\n**Why this is a requirement, not a TR or decision:** The capability lists this as a precondition and an explicit business rule; the host-a-capability UX is structured around it. It is a control demand on the system, not a workflow tooling choice.\n\n### BR-08: Tenants must declare their resource needs and accept the platform's contract up front\n**Source:** [Capability \u00a7Triggers & Inputs]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}})\n\n**Requirement:** To be hosted, a tenant must arrive in the form the platform accepts, with its resource needs (compute, storage, network reachability, availability expectations) declared, and must accept the platform's contract \u2014 including the platform's availability characteristics. Tenants needing stronger guarantees than the platform offers must host elsewhere.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies this as a business rule; multiple UXs inherit it. The form-of-packaging and what counts as a \"declaration\" are translations; the BR is that the contract exists and is accepted before hosting.\n\n### BR-09: The platform contract must be evergreen \u2014 changes are communicated ahead of time and tenants are migrated, not surprised\n**Source:** [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Goal]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Constraints Inherited]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** When the platform changes a term of its contract \u2014 retiring an offering, changing a packaging form, altering availability characteristics \u2014 the operator must communicate the change to every affected tenant ahead of time, provide a migration path where applicable, and migrate tenants onto the new contract before retiring the old one. Tenants must never have a contract change sprung on them mid-lifecycle.\n\n**Why this is a requirement, not a TR or decision:** The host-a-capability UX names the contract as evergreen; the platform-contract-change-rollout UX is the operationalization of that promise. The umbrella-issue mechanic, the cadence of status updates, and the deadline-picking algorithm are translations; the BR is the no-surprise migration property.\n\n### BR-10: The platform may decline or evict tenants whose accommodation would break the platform's reproducibility or maintenance budget\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: operator-initiated-tenant-update \u00a7Constraints Inherited]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Constraints Inherited]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** The platform must be allowed to decline a new tenant or evict an existing tenant when continued accommodation would either push routine operation sustainably above twice the operator-maintenance-budget KPI or break the reproducibility KPI (e.g. by requiring snowflake configuration that cannot be captured as definitions). Either condition alone is sufficient grounds.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies the eviction threshold as a business rule that ties directly to its KPIs; multiple UXs reference it. It is a business-level boundary on what the platform must absorb, not a technical limit.\n\n### BR-11: When a tenant has fallen behind what the platform supports, the default response is to bring the tenant current rather than evict\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: operator-initiated-tenant-update \u00a7Goal]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}}) \u00b7 [UX: operator-initiated-tenant-update \u00a7Constraints Inherited]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}})\n\n**Requirement:** When the divergence between a tenant and the platform is merely that the tenant's components have aged out of platform support, the operator must work with the capability owner to bring the tenant current. Eviction in this case is reserved for the missed-final-date branch, not invoked at the first sign of fall-behind.\n\n**Why this is a requirement, not a TR or decision:** The capability explicitly carves fall-behind out of the eviction default, and the operator-initiated-tenant-update UX is the operationalization of that carve-out. It is a business commitment about the operator/tenant relationship.\n\n### BR-12: When a tenant needs something the platform does not yet provide, the default response is to evolve the platform\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: migrate-existing-data \u00a7Constraints Inherited]({{< ref \"user-experiences/migrate-existing-data.md\" >}})\n\n**Requirement:** When a tenant capability needs an offering the platform does not yet provide, the default response must be to consider expanding the platform's definitions to support that need rather than refusing the tenant \u2014 bounded by the reproducibility and maintenance-budget KPIs. The platform is not obligated to grow without bound, but it must not reflexively push needs back onto tenants.\n\n**Why this is a requirement, not a TR or decision:** The capability states this as a business rule; the host-a-capability \"new offering needed\" branch and the existence of the migration-process offering both operationalize it. It is a posture commitment about how the platform evolves.\n\n### BR-13: The platform must provide compute, persistent storage, and network reachability to each tenant\n**Source:** [Capability \u00a7Outputs & Deliverables]({{< ref \"_index.md\" >}})\n\n**Requirement:** For each hosted tenant, the platform must provide a place for the tenant's application to run, durable storage for the tenant's data, and both internal (between tenants) and external (reachable by the tenant's end users) network reachability.\n\n**Why this is a requirement, not a TR or decision:** The capability lists these as direct outputs the platform delivers to every tenant. They are business-level commitments about what hosting *means* on this platform; the form (containers, VMs, block vs. object storage) is a translation.\n\n### BR-14: The platform must offer an identity and authentication service for tenants whose end users need to authenticate\n**Source:** [Capability \u00a7Outputs & Deliverables]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Triggers & Inputs]({{< ref \"_index.md\" >}})\n\n**Requirement:** The platform must provide an identity and authentication service for tenant end users. Tenants may opt to bring their own identity instead, and that decision must be declared as part of the tenant's contract acceptance.\n\n**Why this is a requirement, not a TR or decision:** The capability lists identity/authentication as a direct output and as an input that must be declared at onboarding. It is a stated platform offering, not a chosen technology.\n\n### BR-15: The platform-provided identity service must be capable of honoring \"lost credentials cannot be recovered\"\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: host-a-capability \u00a7Constraints Inherited]({{< ref \"user-experiences/host-a-capability.md\" >}})\n\n**Requirement:** Any identity implementation the platform offers to tenants must be capable of honoring a Signal-style \"lost credentials cannot be recovered\" property, because at least one tenant capability requires it. An identity option that cannot honor this property is not eligible to be the platform-provided identity service.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies this as a business rule and points to the specific tenant that demands it. It is a property the identity offering must hold, framed in user-outcome terms \u2014 *which* identity software is a decision.\n\n### BR-16: The platform must back up tenant data and provide disaster recovery to a standard the platform defines\n**Source:** [Capability \u00a7Outputs & Deliverables]({{< ref \"_index.md\" >}})\n\n**Requirement:** For each hosted tenant, the platform must back up the tenant's data and provide a disaster-recovery path for it. The platform is responsible for defining and meeting that standard; the standard itself is part of the platform's contract.\n\n**Why this is a requirement, not a TR or decision:** The capability lists backup and DR as a direct output and as an investment that accrues across all tenants. The specific RPO/RTO and storage choices are translations; the BR is that the platform commits to the function.\n\n### BR-17: The platform must provide observability sufficient for the operator to tell whether each tenant is up and healthy\n**Source:** [Capability \u00a7Outputs & Deliverables]({{< ref \"_index.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Constraints Inherited]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** The platform must produce observability for each tenant that lets the operator determine whether the tenant is up and healthy without the tenant having to instrument that itself.\n\n**Why this is a requirement, not a TR or decision:** The capability lists observability as a direct output and frames it as the operator's view; the tenant-facing-observability UX inherits that framing. The signal bundle and tooling are translations; the BR is that the operator-side view exists.\n\n### BR-18: Capability owners must have tenant-scoped observability of their own capability's health, including pull access and push alerts\n**Source:** [UX: tenant-facing-observability \u00a7Goal]({{< ref \"user-experiences/tenant-facing-observability.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Journey]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** Each capability owner of a live tenant must be able to (a) pull a current view of their own tenant's health on demand, scoped strictly to their tenant, and (b) receive push alerts when a signal they care about crosses a threshold they have set. They must learn about unhealth without depending on their end users to report it.\n\n**Why this is a requirement, not a TR or decision:** The tenant-facing-observability UX makes both arrival modes load-bearing for the capability owner's experience. The view software, alert delivery channel, and signal bundle composition are translations; the BR is the dual-mode capability-owner-facing observability surface.\n\n### BR-19: A capability owner must not be able to see another tenant's observability data\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Journey]({{< ref \"user-experiences/tenant-facing-observability.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Constraints Inherited]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** When a capability owner accesses the platform's observability surface, they must be confined to their own tenant's data for the entire session. Cross-tenant visibility must remain exclusive to the operator. There must be no mode-switch that lets a capability owner widen their scope.\n\n**Why this is a requirement, not a TR or decision:** The operator-only-operation rule and the tenant-facing-observability UX together force this isolation as a tenant-trust property. It is a confidentiality demand framed in business terms \u2014 the multi-tenancy model \u2014 not an authentication scheme.\n\n### BR-20: Capability owners must be able to self-serve their own alert thresholds\n**Source:** [UX: tenant-facing-observability \u00a7Journey]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** A capability owner must be able to adjust the thresholds that fire alerts for their own tenant without operator involvement. This is the one self-service surface the platform exposes to capability owners; everything else still goes through the operator.\n\n**Why this is a requirement, not a TR or decision:** The tenant-facing-observability UX explicitly justifies this as the one carve-out from the otherwise issue-driven engagement model, and frames it as a business-level need (capability owners need to iterate on noise without operator round-trips). The UI for setting thresholds is a translation.\n\n### BR-21: When email alerting is degraded for a tenant, the platform must surface that degradation in the tenant view\n**Source:** [UX: tenant-facing-observability \u00a7Journey]({{< ref \"user-experiences/tenant-facing-observability.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Edge Cases]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** If the platform knows alert delivery is failing for a tenant, the tenant-scoped observability view must indicate that alerting is degraded, so capability owners do not mistakenly treat email silence as evidence of health. The pull view is the source of truth; email alerts are a best-effort acceleration path.\n\n**Why this is a requirement, not a TR or decision:** The tenant-facing-observability UX explicitly establishes the trust contract between pull view and push alerts. It is a user-trust demand on the system; how degradation is detected and rendered is a translation.\n\n### BR-22: Capability owners must engage the platform exclusively through GitHub issues, with distinct issue types per workflow\n**Source:** [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: migrate-existing-data \u00a7Journey]({{< ref \"user-experiences/migrate-existing-data.md\" >}}) \u00b7 [UX: operator-initiated-tenant-update \u00a7Journey]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Entry Point]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** GitHub issues against the infra repo must be the only channel by which capability owners and the operator coordinate platform work \u2014 onboarding, modifications, migrations, contract changes, platform-update requests, and eviction. The issue type must be distinct per workflow (`onboard my capability`, `modify my capability`, `migrate my data`, `platform update required`, `platform contract change`, eviction issue) so that the operator's review scope and the journey shape are unambiguous to all parties.\n\n**Why this is a requirement, not a TR or decision:** Every UX is structured around this engagement model and the distinctness of issue type is load-bearing in each. It is a business-level contract about how the operator and capability owners interact; the choice of GitHub Issues *as the platform* would be an ADR-level decision were the platform itself ever changed, but the requirement that distinct, persistent issue threads carry the work is what the UXs force.\n\n### BR-23: Onboarding a tenant must use only the platform's existing definitions \u2014 no per-tenant snowflake configuration\n**Source:** [UX: host-a-capability \u00a7Constraints Inherited]({{< ref \"user-experiences/host-a-capability.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** Provisioning a new tenant during onboarding must run against the platform's definitions; the operator must not hand-roll bespoke configuration to make a particular tenant fit. If onboarding requires bespoke manual config that cannot be captured as definitions, that is a platform-level reproducibility failure to be fixed at the platform level rather than absorbed silently.\n\n**Why this is a requirement, not a TR or decision:** The host-a-capability UX traces this directly to the *Reproducibility* KPI inherited from the capability, and the stand-up-the-platform UX reinforces that \"delete everything and start over\" must always work. It is a business-level commitment about what hosting *costs* the platform's reproducibility property.\n\n### BR-24: The platform must offer a one-shot migration-process runner for capability-owner-supplied data migrations\n**Source:** [UX: migrate-existing-data \u00a7Goal]({{< ref \"user-experiences/migrate-existing-data.md\" >}}) \u00b7 [UX: migrate-existing-data \u00a7Journey]({{< ref \"user-experiences/migrate-existing-data.md\" >}}) \u00b7 [UX: migrate-existing-data \u00a7Constraints Inherited]({{< ref \"user-experiences/migrate-existing-data.md\" >}})\n\n**Requirement:** The platform must offer a generic facility for running a one-shot migration job that a capability owner has packaged and handed off \u2014 reading from a prior host, writing into the capability owner's already-provisioned tenant. The migration job's lifecycle must be: provision when approved, run, observable while running, torn down on completion. The platform runs what it is given; logic correctness belongs to the capability owner.\n\n**Why this is a requirement, not a TR or decision:** The migrate-existing-data UX is the operationalization of \"the capability evolves with its tenants\" for the migration use case. The packaging form, scheduler, and runner technology are translations; the BR is that this offering exists and follows the one-shot lifecycle.\n\n### BR-25: The platform must offer secret management to which capability owners can register credentials their workloads need\n**Source:** [UX: migrate-existing-data \u00a7Journey]({{< ref \"user-experiences/migrate-existing-data.md\" >}})\n\n**Requirement:** The platform must provide a secret-management offering through which capability owners can register credentials (e.g. credentials a migration process needs to read from an old host), referenced by name from packaged artifacts so the secrets themselves never appear in issue threads or artifacts.\n\n**Why this is a requirement, not a TR or decision:** The migrate-existing-data UX makes this an explicit precondition step that must exist before issue filing. It is a stated platform offering with a confidentiality-shaped business demand; the choice of secret-management product is a decision.\n\n### BR-26: A migration job's peak temporary footprint must be bounded relative to the destination tenant's steady-state footprint\n**Source:** [UX: migrate-existing-data \u00a7Journey]({{< ref \"user-experiences/migrate-existing-data.md\" >}})\n\n**Requirement:** The platform must enforce, during migration review, that the migration job's peak temporary compute and storage footprint stays within a bounded multiple of the destination tenant's steady-state footprint. Migrations whose declared spike exceeds that bound must be rejected as written and split, reduced, or preceded by a tenant resize.\n\n**Why this is a requirement, not a TR or decision:** The UX states the bound (currently 2x) as the business rule the operator enforces during migration review. The exact multiple is the TR translation; the BR is the existence of a declared, enforced cap on migration footprint relative to the tenant.\n\n### BR-27: The platform must provide on-demand data export for every tenant, regardless of data shape\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Journey]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Edge Cases]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** Export tooling must be a core platform feature available for every kind of data the platform hosts, present from the moment a tenant is live (not assembled at eviction). The capability owner must be able to invoke it at any time the platform is healthy and receive an archive they can download immediately.\n\n**Why this is a requirement, not a TR or decision:** The capability ties this to *Operator succession*, and the eviction UX makes it a hard property: an export-tooling gap is a platform bug, not an excuse for a slow exit. The format and packaging are translations; the BR is universal export availability.\n\n### BR-28: Each export must include checksum/hash and total size produced by the platform\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Journey]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** Whenever the platform produces an export archive for a capability owner, it must publish alongside it a checksum/hash and total size in bytes. This is the ceiling of integrity verification the platform commits to; the capability owner is responsible for semantic validation beyond that.\n\n**Why this is a requirement, not a TR or decision:** The eviction UX makes this the contract that bounds platform vs. capability-owner responsibility for \"is this export complete.\" The hash algorithm choice is a decision; the BR is the existence of platform-verified bytes-level integrity.\n\n### BR-29: After eviction, the platform must keep tenant-accessible data available for a fixed retention window with no slip\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Journey]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Edge Cases]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** From the eviction date, the platform must hold the evicted tenant's data in an export-only, read-only state for a fixed retention window (currently 30 days), during which the export tool continues to work. After that window, no tenant-accessible copy of the data must remain. The window must not be extended for slow extracts or for the capability owner asking for more time.\n\n**Why this is a requirement, not a TR or decision:** The eviction UX establishes both the existence of the window and its hard-wall property. The exact 30-day number is the TR translation; the BR is the existence of a fixed, no-slip retention window with a defined end-state.\n\n### BR-30: When a platform-side defect prevents a clean export, the eviction retention countdown must pause until a clean export is achievable\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Edge Cases]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** If a failure to produce a complete, valid export is rooted in the platform's export tooling or its data hosting (not in the capability owner's own validation), the platform must pause that tenant's removal-of-tenant-accessible-data countdown until the platform-side defect is resolved and a clean export has been produced. Capability-owner-rooted failures must not pause the countdown.\n\n**Why this is a requirement, not a TR or decision:** The eviction UX explicitly carves this out as the one exception to the otherwise-hard retention wall. It is a fairness commitment about how the platform's defects affect the tenant's exit rights.\n\n### BR-31: After eviction, compute and network must be torn down on the eviction date, and tenant data must transition to read-only\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Journey]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** On the eviction date, the platform must deprovision the evicted tenant's compute, network, and other live-serving resources, and transition the tenant's data to an export-only, read-only state in which no further writes (by anyone, including the capability owner) can occur. The eviction issue must carry the cutover confirmation.\n\n**Why this is a requirement, not a TR or decision:** The eviction UX makes the cutover and the read-only freeze load-bearing for the rest of the journey (the data the capability owner extracts in Phase C is the *final* dataset). It is a state-transition demand framed in user-experience terms.\n\n### BR-32: The platform must operate within the operator's weekly maintenance budget\n**Source:** [Capability \u00a7Success Criteria & KPIs]({{< ref \"_index.md\" >}})\n\n**Requirement:** Routine operation of the platform \u2014 across all hosted tenants and all routine UXs \u2014 must stay within a defined weekly budget of the operator's time (currently no more than 2 hours per week). Sustained over-budget operation is a signal that the platform must be simplified rather than grown, and is the operational basis for the eviction threshold rule.\n\n**Why this is a requirement, not a TR or decision:** The capability defines this as a KPI and explicitly ties the eviction threshold to it. The number is the TR/KPI translation; the BR is that there is a budget at all and that the platform must live inside it.\n\n### BR-33: The platform's cost must remain proportional to the convenience and resiliency it delivers\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Success Criteria & KPIs]({{< ref \"_index.md\" >}})\n\n**Requirement:** Total operating cost must remain within what the operator considers acceptable given the convenience and resiliency the platform delivers. There is no fixed dollar target, but cost must be minimized where doing so does not cost convenience or resiliency, and added cost is acceptable only when it buys meaningful convenience or resiliency.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies the cost-secondary-to-convenience-and-resiliency tiebreaker and the proportionality KPI. It is a value-judgment property of the platform's spending, not a technical budget constraint.\n\n### BR-34: End users of tenant capabilities must not have any direct interface with the platform\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [Capability \u00a7Stakeholders]({{< ref \"_index.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Constraints Inherited]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}}) \u00b7 [UX: tenant-facing-observability \u00a7Constraints Inherited]({{< ref \"user-experiences/tenant-facing-observability.md\" >}})\n\n**Requirement:** The platform must have no notion of \"end users\" of itself. End users reach the tenant capability, not the platform. The platform must not communicate with end users (e.g. no platform-side eviction notice page, no platform-side status page for end users) and must not surface administrative or observability surfaces to them.\n\n**Why this is a requirement, not a TR or decision:** The capability defines the platform's actors as not including end users, and multiple UXs reinforce that boundary. It is a scope boundary on the system, not a UX choice.\n\n### BR-35: The platform may span public and private infrastructure\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** The platform must be permitted to comprise both operator-controlled public-cloud components and operator-owned private infrastructure. \"Self-hosted\" must mean operator-controlled end-to-end, including configuration, data, and the ability to leave a vendor \u2014 not exclusively operator-owned hardware.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies this rule and the standup UX explicitly crosses cloud and home-lab boundaries during foundation provisioning. It is a scope demand on the platform's allowed shape.\n\n### BR-36: Connectivity between public and private parts of the platform must itself be part of the foundation\n**Source:** [UX: stand-up-the-platform \u00a7Journey]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** Where the platform spans cloud and home-lab, the connectivity between them must be provisioned as part of the platform's foundation during standup, not bolted on afterward. A reproducible rebuild must produce a working cross-environment platform without manual cross-environment wiring.\n\n**Why this is a requirement, not a TR or decision:** The standup UX makes this load-bearing for Phase 1 success. The transport (Wireguard, VPN, peering) is a decision; the BR is that connectivity is foundational.\n\n### BR-37: Standup must verify readiness end-to-end with a purpose-built canary tenant before declaring the platform ready\n**Source:** [UX: stand-up-the-platform \u00a7Journey]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Edge Cases]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** A platform standup must not be declared ready on the basis of infrastructure self-checks alone. A purpose-built canary tenant maintained alongside the platform definitions must be deployed, exercised end-to-end (run, reachability, storage read/write, identity authentication, backup pickup, observability pickup), and torn down. Until that canary is green, the platform must not be marked ready, regardless of time pressure.\n\n**Why this is a requirement, not a TR or decision:** The standup UX makes the canary load-bearing for the readiness signal and explicitly forbids bending this rule under time pressure. The canary's contents and tooling are decisions; the BR is the existence of a green-canary readiness gate.\n\n### BR-38: Standup must run in phases with operator validation checkpoints between them\n**Source:** [UX: stand-up-the-platform \u00a7Journey]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** Platform standup must proceed in distinct automated phases (foundations, core services, cross-cutting services, canary), pausing between phases for the operator to validate that the previous phase really succeeded. The operator must signal `continue` before the next phase runs.\n\n**Why this is a requirement, not a TR or decision:** The standup UX makes the phased validation pattern load-bearing for the \"confidence beats speed\" tiebreaker the operator brings to the journey. The number and naming of phases are translations; the BR is that automation is interleaved with operator validation, not all-or-nothing.\n\n### BR-39: A failed phase during standup must be recoverable only via tear-down-and-restart\n**Source:** [UX: stand-up-the-platform \u00a7Edge Cases]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** When a standup phase fails validation, the operator must tear down everything provisioned so far and restart the rebuild from the top after fixing the underlying definition. Partial state must not be trusted as a starting point for resumption. Each phase must therefore support a clean teardown of its partial output.\n\n**Why this is a requirement, not a TR or decision:** The standup UX explicitly justifies this in terms of the parent capability's reproducibility-beats-effort tiebreaker. The teardown mechanism is a decision; the BR is the no-resume-from-partial-state property.\n\n### BR-40: Drift of platform state from definitions must be detected and resolved before any rebuild begins\n**Source:** [UX: stand-up-the-platform \u00a7Entry Point]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Journey]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** Whenever prior platform state exists, a preflight drift check against the live platform or last known-good environment must pass before any rebuild begins. Drift must not be discovered partway through a rebuild. The continuous machinery that prevents drift between rebuilds \u2014 tracked changes and immutability \u2014 must be enforced by every UX that can introduce platform state.\n\n**Why this is a requirement, not a TR or decision:** The standup UX refuses to start without this check and ties it to the integrity of every other UX. The change-tracking mechanism is a decision; the BR is the drift-free-before-rebuild guarantee and the cross-UX immutability discipline.\n\n### BR-41: Platform-rebuild capability must be drilled regularly to prove the reproducibility KPI is real\n**Source:** [UX: stand-up-the-platform \u00a7Entry Point]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** The operator must rebuild the platform in parallel on scratch infrastructure after every significant platform change and at least quarterly, using the same flow as a real rebuild. The reproducibility KPI must not be a hope inferred from version control; it must be a property re-proved by drill on a bounded cadence.\n\n**Why this is a requirement, not a TR or decision:** The standup UX makes this part of how the *Reproducibility* KPI is honestly evaluated. The frequency words (\"every significant change\", \"quarterly\") are scoping language; the BR is the drill-as-proof discipline.\n\n### BR-42: A successor operator who has taken over must be able to run the standup flow identically\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Persona]({{< ref \"user-experiences/stand-up-the-platform.md\" >}}) \u00b7 [UX: stand-up-the-platform \u00a7Constraints Inherited]({{< ref \"user-experiences/stand-up-the-platform.md\" >}})\n\n**Requirement:** Once a successor has taken over and gained the operator's context, the rebuild flow must work identically for them as for the primary operator. The standup UX must not depend on operator-specific state outside what the sealed credentials and the definitions repo provide.\n\n**Why this is a requirement, not a TR or decision:** The capability's *Operator succession* rule and the standup UX persona section make this load-bearing for continuity. The seal mechanism is a decision; the BR is the convergence of successor and primary on the same standup flow.\n\n### BR-43: Operator skill development must not influence buy-vs-build trade-offs at the capability level\n**Source:** [Capability \u00a7Business Rules & Constraints]({{< ref \"_index.md\" >}})\n\n**Requirement:** The operator may personally learn from building and running the platform, but skill development must not be a stated outcome of this capability and must not influence buy-vs-build decisions. Those decisions must be judged on convenience, resiliency, and cost only.\n\n**Why this is a requirement, not a TR or decision:** The capability codifies this as a hard rule precisely to keep the platform from being shaped by curiosity. It is a decision-discipline boundary, not a technical or implementation constraint.\n\n### BR-44: Modifications to a live tenant must not require re-acceptance of the platform contract\n**Source:** [UX: host-a-capability \u00a7Journey]({{< ref \"user-experiences/host-a-capability.md\" >}})\n\n**Requirement:** When a capability owner files a `modify my capability` issue, the operator's review must cover only the delta requested; the capability owner must not be required to re-accept the platform's contract on each modification. Any change to the platform's contract itself must come through the platform-contract-change rollout, not through modify reviews.\n\n**Why this is a requirement, not a TR or decision:** The host-a-capability UX explicitly establishes the evergreen-contract promise on the change-later loop, and the contract-change UX inherits the same boundary. It is a relationship commitment, not a workflow tooling choice.\n\n### BR-45: A platform-contract-change rollout must run both old and new contract forms concurrently during the rollout window, except for full removals\n**Source:** [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Edge Cases]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** When the platform changes a contract term and a replacement offering exists, the platform must serve both the old and the new form concurrently during the rollout window, so tenants can migrate at their own pace within the deadline. A full offering removal (no replacement) is the carve-out: it is all-or-nothing at the deadline.\n\n**Why this is a requirement, not a TR or decision:** The contract-change UX makes concurrent old/new the operationalization of the no-surprises promise. The mechanics of running both are a decision; the BR is the side-by-side property and its narrowly-defined exception.\n\n### BR-46: A platform-contract-change deadline must give every affected tenant at least two full status-update cycles before cutoff\n**Source:** [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** Because contract-change rollouts have no externally-imposed deadline to inherit, the operator must pick a deadline that gives every affected tenant at least two full status-update cycles before cutoff: one to acknowledge and start, one to finish or surface blockers in time to respond.\n\n**Why this is a requirement, not a TR or decision:** The contract-change UX makes this the floor on operator-chosen deadlines. The exact cadence is a decision; the BR is the minimum tenant-reaction-window built into any contract-change deadline.\n\n### BR-47: A contract-change rollout must publish status updates on a regular operator-chosen cadence in the umbrella thread\n**Source:** [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** Throughout a contract-change rollout, the operator must post status updates on a regular schedule (sized to the rollout's overall timeline) in the umbrella issue thread. The current snapshot must live in the umbrella issue body so a reader landing cold sees the latest state; each scheduled update must also be posted as a comment so the rollout history remains visible. Updates must include how many tenants remain on the old form, how many have migrated, which `modify` issues are open, and how much time remains.\n\n**Why this is a requirement, not a TR or decision:** The contract-change UX establishes status updates as how every party sees rollout progress without chasing it. The cadence is a decision; the BR is the standing visibility commitment and its required content.\n\n### BR-48: Acknowledgment of a contract-change umbrella issue must be required from every affected capability owner, with non-acknowledgment treated as non-engagement\n**Source:** [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Edge Cases]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** Each capability owner tagged on a contract-change umbrella issue must acknowledge in-thread. Silence in a multi-tenant umbrella is ambiguous and must not be treated as tacit consent; if no acknowledgment arrives by the deadline, the missing acknowledgment must be treated as non-engagement and that tenant must enter the laggard branch (separate eviction issue) like any other unmigrated tenant.\n\n**Why this is a requirement, not a TR or decision:** The contract-change UX makes explicit acknowledgment load-bearing for distinguishing engagement from drift. It is a relationship commitment about how silence is interpreted in multi-tenant rollouts.\n\n### BR-49: A contract-change deadline must not be negotiable per-tenant; only global extensions are allowed\n**Source:** [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Edge Cases]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** During a contract-change rollout, the deadline must apply uniformly to all affected tenants. Per-tenant extensions must not be granted. The operator may push the deadline globally if the migration guideline turns out to be insufficient mid-rollout, and the new global deadline must then be announced in the umbrella thread under the same hard-deadline rule.\n\n**Why this is a requirement, not a TR or decision:** The contract-change UX names this as the property that keeps a deadline a deadline. It is a fairness-and-coordination commitment, not a tooling constraint.\n\n### BR-50: A platform-update-required issue must inherit its deadline from the external forcing event and must use a distinct issue type\n**Source:** [UX: operator-initiated-tenant-update \u00a7Entry Point]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}}) \u00b7 [UX: operator-initiated-tenant-update \u00a7Journey]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}})\n\n**Requirement:** When a platform-level dependency event (vendor sunset, CVE, EOL) forces a tenant update, the operator must file a `platform update required` issue per affected tenant whose deadline is inherited from the external event and whose external reason is recorded on the issue. The distinct issue type must signal to the capability owner that this is a required update, not an externally-driven optional cleanup or routine modify.\n\n**Why this is a requirement, not a TR or decision:** The operator-initiated-tenant-update UX makes the inherited deadline and the distinct type load-bearing for the journey's interpretation. The CVE/EOL feed source is operational detail; the BR is the inherited-deadline contract and the typed-signal property.\n\n### BR-51: Slack negotiation on a platform-update-required deadline must be bounded by the safe slack the external pressure allows\n**Source:** [UX: operator-initiated-tenant-update \u00a7Journey]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}})\n\n**Requirement:** When a capability owner cannot ship within the inherited deadline, the operator and capability owner must negotiate an extended delivery date only to the extent the external pressure leaves safe slack. If no safe slack exists (e.g. an actively-exploited CVE), the original deadline must stand. The agreed date must be recorded on the issue.\n\n**Why this is a requirement, not a TR or decision:** The operator-initiated-tenant-update UX establishes safe-slack-bounded extension as the way \"we work with you, we don't evict for fall-behind\" is honored without breaking the underlying external constraint. The negotiation form is a decision; the BR is the bound on extension.\n\n### BR-52: A missed operative delivery date on a platform-update-required issue must trigger eviction via a separate, linked eviction issue\n**Source:** [UX: operator-initiated-tenant-update \u00a7Journey]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}}) \u00b7 [UX: platform-contract-change-rollout \u00a7Journey]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n\n**Requirement:** When a tenant misses the operative delivery date \u2014 either an inherited deadline or an agreed extension \u2014 the operator must open a separate eviction issue linking back to the originating issue, and close the original as superseded by eviction. The same shape applies to laggards in a contract-change rollout. Eviction must always live in its own issue, not as a state on the originating issue.\n\n**Why this is a requirement, not a TR or decision:** Both the operator-initiated-tenant-update and platform-contract-change-rollout UXs prescribe the same separate-and-linked structure for eviction. It is a record-keeping and journey-boundary commitment about how state transitions between updates and eviction.\n\n### BR-53: When a platform-update request reveals a need the platform does not yet offer, the update must be paused and resumed via the new-offering branch\n**Source:** [UX: operator-initiated-tenant-update \u00a7Edge Cases]({{< ref \"user-experiences/operator-initiated-tenant-update.md\" >}})\n\n**Requirement:** If shipping a platform-update-required change requires a capability the platform does not yet offer, the platform-update issue must remain open while the new-offering branch (per host-a-capability) is exercised, then the update must resume at the modify inner-loop step. The update must not be force-closed because the platform was not yet ready.\n\n**Why this is a requirement, not a TR or decision:** The operator-initiated-tenant-update UX explicitly handles this as a join with host-a-capability's new-offering branch, in service of \"the capability evolves with its tenants.\" It is a workflow-continuity commitment, not a tooling choice.\n\n### BR-54: An evicted capability owner must walk away with no obligations and no tenant-accessible copy of their data left on the platform after the retention window\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Goal]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}}) \u00b7 [UX: move-off-the-platform-after-eviction \u00a7Success]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md\" >}})\n\n**Requirement:** By the time the eviction journey ends, the capability owner must have a clean exit: validated data in their hands, a clear paper trail on the eviction issue, and nothing left to chase down on the platform. After the retention window, the platform must offer no tenant-accessible copy of their data, regardless of whether the capability owner ever closed the loop. The relationship must remain amicable enough to support a future `host-a-capability` re-onboarding if the divergence later resolves.\n\n**Why this is a requirement, not a TR or decision:** The eviction UX makes the clean-exit property load-bearing for the journey's success and explicitly preserves the right to come back. It is a user-outcome demand; the deeper backup-tier policy is open (see Open Questions).\n\n## Open Questions\n\nThings the user volunteered as TRs or decisions during extraction (parked for the next stage), or constraints the capability/UX docs don't yet make explicit.\n\n- **Explicit anchors on capability and UX section headings.** The capability doc and UX docs currently rely on Hugo's slugify-from-heading-text for section anchors. Per skill guidance, section deep-links require explicit `{#anchor-id}` annotations on the target headings. Source links in this document point at section names by description but anchor only at the page level until explicit anchors are added to the source headings. This should be resolved in the source docs before downstream skills cite specific BR sections.\n- **Numeric thresholds belong with TRs/KPIs, not here.** Several BRs (BR-26 migration footprint cap, BR-29 retention window, BR-32 maintenance budget, BR-46 status-update cycles) deliberately leave the numbers (`2x`, `30 days`, `2 hr/week`, `at least two cycles`) as KPI/TR-stage translations. The numeric values currently live in the capability doc and UX docs; `define-technical-requirements` should pick them up from there.\n- **Deeper backup-tier policy after the 30-day retention window.** The eviction UX itself parks this as an open question: retention duration, deletion behavior, and operator-access/privacy constraints for any deeper backup-tier copies after tenant-accessible data is removed are still TBD. This is a BR-shaped gap that the capability or eviction UX needs to fill before BR-29/BR-54 can be considered complete.\n- **No formal tenant-facing pending-update view exists today.** The operator-initiated-tenant-update UX notes that capability owners receive their first official signal of a forced update only when the per-tenant issue is filed. If an earlier deprecation/pending-update signal is added later, it would extend BR-18 (tenant-facing observability) rather than this UX. Parked for tenant-facing-observability evolution.\n- **Backup standard.** BR-16 says the platform must back up tenant data \"to a standard the platform defines\" \u2014 but the standard itself is not defined in the capability doc. This is a gap for a future capability-doc revision; BR-16's TR translation will need that standard to be measurable.\n- **Specific signal bundle for tenant-facing observability.** BR-18 names the platform-standard health bundle (availability, latency, error rate, resource saturation, restart/deployment events) as listed in the tenant-facing-observability UX, but the bundle's exact contents and any platform-default thresholds are translation territory for `define-technical-requirements`.\n- **Migration-process offering's concurrency model.** The migrate-existing-data UX promises concurrent migrations across tenants but does not bound capacity. Capacity sizing and queueing belong with TRs/ADRs.\n- **Drift detection mechanism.** BR-40 demands that drift be detected and resolved before rebuild and that tracked-changes/immutability be enforced cross-UX, but the mechanism (what counts as the \"last known-good environment\", how drift is computed, where the policy is enforced) is open and is a TR/ADR concern.\n"}, {"name": "response.md", "type": "text", "content": "I've extracted the business requirements for the Self-Hosted Application Platform capability to `docs/content/capabilities/self-hosted-application-platform/business-requirements.md`.\n\n## Summary\n\n- **54 BRs added** (BR-01 through BR-54), all from a fresh extraction (no prior `business-requirements.md` to preserve).\n- **0 BRs preserved** (none existed) and **0 BRs flagged** (no stale source links since this is the first extraction).\n- Sources span the parent capability doc and all seven UX docs (`host-a-capability`, `migrate-existing-data`, `move-off-the-platform-after-eviction`, `operator-initiated-tenant-update`, `platform-contract-change-rollout`, `stand-up-the-platform`, `tenant-facing-observability`).\n- `reviewed_at` is set to `null` on the new doc.\n\n## Open questions parked for the next stage\n\n- **Explicit anchor IDs are missing on the capability and UX section headings.** Source links currently resolve at the page level; deep links into specific sections will require `{#anchor-id}` annotations on the target headings before `define-technical-requirements` cites BRs by section. Worth fixing in the source docs.\n- **Numeric thresholds** (2x migration footprint, 30-day retention, 2-hr/week budget, two status-update cycles) are deliberately left in BR text as descriptions; the numbers belong in TRs/KPIs and the capability doc already carries them.\n- **Deeper backup-tier policy after the 30-day retention** is still TBD per the eviction UX itself \u2014 this is a BR-shaped gap to fill in the capability or UX before BR-29/BR-54 are complete.\n- **Backup standard** (BR-16) \u2014 the capability says the platform defines a standard but does not state it.\n- **Tenant-facing pending-update view, signal bundle composition, migration concurrency model, drift detection mechanism** \u2014 all parked for TR/ADR.\n\n## Next steps\n\n**Review and edit `business-requirements.md` before we proceed.** When you're done, set `reviewed_at:` in the frontmatter to today's ISO date (or tell me to do it on your behalf and I'll record your verbal confirmation). The next skill \u2014 `define-technical-requirements` \u2014 won't extract TRs until that's set.\n\nI skipped the rendered-page validation step (`hugo server` preview) per the harness instruction to do so. The `ref` shortcodes are page-level only (no section anchors), which means a Hugo build should resolve them cleanly even without explicit `{#}` anchors on the source headings \u2014 but please re-run the validation locally before promoting.\n"}], "grading": {"expectations": [{"text": "produces_business_requirements_md", "passed": true, "evidence": "len=57061"}, {"text": "frontmatter_has_reviewed_at_null", "passed": true, "evidence": "match"}, {"text": "has_multiple_BR_entries", "passed": true, "evidence": "BR count=54"}, {"text": "each_BR_has_source_link", "passed": true, "evidence": "sources=54 br=54"}, {"text": "uses_hugo_ref_shortcode", "passed": true, "evidence": "refs=113 br=54"}, {"text": "no_technical_cadences_in_BRs", "passed": false, "evidence": "cadences=['durable storage']"}, {"text": "no_technology_choices_in_BRs", "passed": false, "evidence": "techs=['Wireguard']"}, {"text": "no_tr_drafted", "passed": true, "evidence": "ok"}, {"text": "no_adr_drafted", "passed": true, "evidence": "ok"}, {"text": "instructs_user_to_set_reviewed_at", "passed": true, "evidence": "match"}, {"text": "mentions_define_tech_requirements_gate", "passed": true, "evidence": "match"}], "passed_count": 9, "total": 11}}, {"id": "eval-1-without_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "business-requirements.md", "type": "text", "content": "# Business Requirements \u2014 Self-Hosted Application Platform\n\nThis document extracts the business-level requirements implied by the [Self-Hosted Application Platform](../../../../../../docs/content/capabilities/self-hosted-application-platform/_index.md) capability and its user experiences. Each requirement is sourced \u2014 meaning every BR-NN below points back to a specific section of the capability doc or a UX doc, so the lineage stays traceable.\n\nRequirements are stated at the business level \u2014 *what* the platform must do or guarantee, not *how*. Technical requirements (TRs) and architectural decisions (ADRs) follow from these in downstream documents.\n\nSources referenced:\n\n- `_index.md` \u2014 the capability doc (purpose, stakeholders, triggers, outputs, business rules, KPIs, out-of-scope).\n- `user-experiences/host-a-capability.md` (UX-1)\n- `user-experiences/migrate-existing-data.md` (UX-2)\n- `user-experiences/move-off-the-platform-after-eviction.md` (UX-3)\n- `user-experiences/operator-initiated-tenant-update.md` (UX-4)\n- `user-experiences/platform-contract-change-rollout.md` (UX-5)\n- `user-experiences/stand-up-the-platform.md` (UX-6)\n- `user-experiences/tenant-facing-observability.md` (UX-7)\n\n---\n\n## A. Hosting Offerings (what the platform must provide to tenants)\n\n**BR-01. The platform shall provide compute on which a tenant capability can run.**\nSource: `_index.md` \u00a7 Outputs & Deliverables (\"Compute \u2014 a place for the application to run\").\n\n**BR-02. The platform shall provide persistent, durable storage for tenant data.**\nSource: `_index.md` \u00a7 Outputs & Deliverables (\"Persistent storage\").\n\n**BR-03. The platform shall provide network reachability \u2014 both internal (between tenants) and external (reachable by a tenant's end users).**\nSource: `_index.md` \u00a7 Outputs & Deliverables (\"Network reachability\").\n\n**BR-04. The platform shall offer an identity & authentication service for tenant end users.**\nSource: `_index.md` \u00a7 Outputs & Deliverables; \u00a7 Business Rules (\"Identity service honors tenant credential-recovery rules\").\n\n**BR-05. Any platform-provided identity option shall be capable of honoring a \"lost credentials cannot be recovered\" property (Signal-style).**\nSource: `_index.md` \u00a7 Business Rules \u2014 *Identity service honors tenant credential-recovery rules*.\n\n**BR-06. Tenants shall be permitted to opt out of platform-provided identity and bring their own.**\nSource: `_index.md` \u00a7 Outputs & Deliverables; \u00a7 Triggers & Inputs (\"either use of the platform-provided identity service, or a declared decision to bring their own\").\n\n**BR-07. The platform shall provide backup and disaster recovery for tenant data, to a standard the platform defines.**\nSource: `_index.md` \u00a7 Outputs & Deliverables (\"Backup and disaster recovery\").\n\n**BR-08. The platform shall provide observability sufficient for the operator to know whether each tenant is up and healthy without the tenant having to instrument that itself.**\nSource: `_index.md` \u00a7 Outputs & Deliverables (\"Observability\").\n\n**BR-09. The platform shall provide a secret-management offering that tenants can register secrets with by name.**\nSource: UX-2 \u00a7 Step 1 (\"registers any credentials their migration process needs \u2026 with the platform's secret-management offering\").\n\n**BR-10. The platform shall provide a one-shot job runner (\"migration-process offering\") capable of running tenant-supplied migration processes with the platform's standard observability.**\nSource: UX-2 \u00a7 Constraints Inherited (*\"a platform-provided one-shot-job runner with the platform's standard observability\"*); \u00a7 Step 4.\n\n**BR-11. The platform shall provide an export tool, available at all times for every tenant, that produces a downloadable archive of the tenant's data plus checksum/hash and total size in bytes.**\nSource: UX-3 \u00a7 Phase A Step 3, \u00a7 Edge Cases (\"Export tooling does not exist for this tenant's data shape \u2026 cannot happen by design \u2014 export tooling is a core platform feature\").\n\n---\n\n## B. Engagement Surface (how capability owners interact with the platform)\n\n**BR-12. The only channel for a capability owner to engage the platform shall be GitHub issues against the infra repo. There shall be no self-service portal and no other front door.**\nSource: UX-1 \u00a7 Step 1; `_index.md` \u00a7 Out of Scope (\"Multi-operator administration, role delegation, or self-service onboarding\").\n\n**BR-13. The platform shall support distinct issue types for distinct engagement modes, at minimum:**\n- `onboard my capability` (UX-1)\n- `modify my capability` (UX-1 step 8)\n- `migrate my data` (UX-2)\n- `platform update required` (UX-4) \u2014 operator-initiated\n- `platform contract change` (UX-5) \u2014 operator-initiated, umbrella\n- *eviction issue* (UX-3, UX-4 step 5, UX-5 step 4) \u2014 operator-initiated\n\nThe distinction between issue types must be meaningful to capability owners because the operator's review scope and the lifecycle differ per type.\nSource: UX-1 \u00a7 Step 8; UX-2 \u00a7 Step 2; UX-4 \u00a7 Step 1; UX-5 \u00a7 Step 1.\n\n**BR-14. There shall be no formal response-time SLA on issues in either direction (operator \u2192 capability owner or capability owner \u2192 operator).**\nSource: UX-1 \u00a7 Step 1 (\"There is no response-time guarantee \u2014 this is personal-scale, async by default\"); UX-4 \u00a7 Edge Cases.\n\n**BR-15. The platform's contract with tenants shall be evergreen: capability owners shall not be required to re-accept the contract on each modification.**\nSource: UX-1 \u00a7 Step 8 (\"The platform contract is evergreen \u2014 the capability owner does not re-accept it on each modification\").\n\n**BR-16. Contract acceptance shall be implicit in the tenant's tech-design submission (which declares resource needs, identity choice, packaging form, and availability expectations); there shall be no separate explicit contract-acceptance gate.**\nSource: UX-1 \u00a7 Step 3a; \u00a7 Constraints Inherited.\n\n---\n\n## C. Onboarding a Tenant (UX-1)\n\n**BR-17. The platform shall accept tenants only after operator approval; no self-onboarding by tenants is permitted.**\nSource: `_index.md` \u00a7 Triggers & Inputs (\"The operator has authorized the capability to run on the platform\").\n\n**BR-18. The operator's onboarding review scope shall be narrow: (a) does each platform-hosted component align with an existing platform offering, and (b) are any components requesting a new platform offering.**\nSource: UX-1 \u00a7 Step 2.\n\n**BR-19. The platform shall support three onboarding outcomes: approved-as-is, new-offering-needed (waited on with no timeline guarantee), or declined-host-elsewhere.**\nSource: UX-1 \u00a7 Step 3.\n\n**BR-20. The default response to a tenant needing something the platform does not yet provide shall be to consider expanding the platform, not to refuse the tenant.**\nSource: `_index.md` \u00a7 Business Rules (\"The capability evolves with its tenants\"); UX-1 \u00a7 Constraints Inherited.\n\n**BR-21. A new-offering request shall be declinable when the resulting ongoing scope cannot be kept reproducible within the *Reproducibility* KPI or operated within the *Operator maintenance budget* KPI, even if the offering is technically buildable.**\nSource: UX-1 \u00a7 Step 3c; \u00a7 Constraints Inherited.\n\n**BR-22. Tenants shall hand off their components as packaged artifacts in the form the platform accepts; they shall not hand over raw source for the operator to package.**\nSource: UX-1 \u00a7 Step 4.\n\n**BR-23. The platform shall require the capability owner to validate the deployed tenant via a test before the onboarding issue closes; the platform does not prescribe a test plan.**\nSource: UX-1 \u00a7 Step 6.\n\n**BR-24. Modify-request reviews shall cover only the delta, not a full re-evaluation of the tenant.**\nSource: UX-1 \u00a7 Step 8.\n\n---\n\n## D. Migrating Existing Data (UX-2)\n\n**BR-25. The platform shall support migrating a capability owner's pre-existing data into a newly-provisioned tenant by running a tenant-supplied, one-shot migration process; the platform provides the runner, not the migration logic.**\nSource: UX-2 \u00a7 Persona, \u00a7 Goal, \u00a7 Out of Scope (\"Writing or debugging the capability owner's migration process\").\n\n**BR-26. Each migration job shall have its peak temporary footprint capped at no more than 2x the destination tenant's steady-state compute and storage footprint; the operator shall reject migration requests that would exceed this cap.**\nSource: UX-2 \u00a7 Step 3.\n\n**BR-27. Migration processes shall be packaged in the same form the platform accepts for any tenant component; the contract shall not relax for migration.**\nSource: UX-2 \u00a7 Constraints Inherited.\n\n**BR-28. Each migration request shall declare its re-run contract \u2014 whether the process is safe against an already-populated destination or requires a wiped/empty destination per run.**\nSource: UX-2 \u00a7 Step 2.\n\n**BR-29. Migration jobs shall be observable to the capability owner through the platform's standard observability surface.**\nSource: UX-2 \u00a7 Step 5.\n\n**BR-30. The platform shall support concurrent migrations across different tenants without offering exclusive capacity or a completion-time guarantee to any one tenant.**\nSource: UX-2 \u00a7 Step 4; \u00a7 Constraints Inherited.\n\n**BR-31. The platform shall not auto-clean partial migration state; recovery decisions (wipe-and-retry, resume, accept partial, abandon) shall be the capability owner's to make.**\nSource: UX-2 \u00a7 Step 7b, \u00a7 Edge Cases.\n\n**BR-32. A migration job shall be torn down on completion; re-running later shall require a fresh `migrate my data` issue.**\nSource: UX-2 \u00a7 Step 8.\n\n---\n\n## E. Moving Off After Eviction (UX-3)\n\n**BR-33. Eviction shall be operator-initiated only and shall be communicated to the capability owner via an eviction issue containing the eviction date, the reason, and a link to the export tooling.**\nSource: UX-3 \u00a7 Entry Point.\n\n**BR-34. The platform shall guarantee a 30-day post-eviction retention window during which the capability owner can continue to pull exports from a frozen, read-only snapshot.**\nSource: UX-3 \u00a7 Phase B Step 5, \u00a7 Phase C Step 7.\n\n**BR-35. After 30 days post-eviction, the platform shall stop offering any tenant-accessible copy of the evicted tenant's data, regardless of whether the capability owner closed the loop.**\nSource: UX-3 \u00a7 Phase C Step 7.\n\n**BR-36. The 30-day clock shall be hard except where the failure is shown to be in the platform's export tooling or data hosting; in that case the operator shall pause the retention-window countdown until a clean export can be produced.**\nSource: UX-3 \u00a7 Edge Cases.\n\n**BR-37. Validation of export completeness and correctness shall be the capability owner's responsibility, not the platform's; the platform's verification surface stops at checksum/hash and total size.**\nSource: UX-3 \u00a7 Phase A Step 3.\n\n**BR-38. The platform shall not communicate with the tenant's end users at any point in the eviction journey; notification of end users shall be the capability owner's responsibility.**\nSource: UX-3 \u00a7 Phase A Step 2; \u00a7 Constraints Inherited.\n\n---\n\n## F. Operator-Initiated Tenant Update (UX-4)\n\n**BR-39. When a platform-level dependency event (vendor sunset, CVE, EOL) forces an update, the operator shall file one `platform update required` issue per affected tenant, naming the falling-behind component, the replacement, the requested update shape, and the deadline with its external reason.**\nSource: UX-4 \u00a7 Step 1.\n\n**BR-40. The default response to a tenant fall-behind shall be working *with* the capability owner to bring the tenant current, not eviction.**\nSource: `_index.md` \u00a7 Business Rules (\"Eviction is allowed when needs and capabilities diverge\"); UX-4 \u00a7 Persona, \u00a7 Constraints Inherited.\n\n**BR-41. The operator shall be permitted to negotiate an extended delivery date with the capability owner only to the extent the external pressure leaves safe slack; if no safe slack exists, the inherited deadline stands.**\nSource: UX-4 \u00a7 Step 4.\n\n**BR-42. A missed operative delivery date (inherited or extended) shall be the operational signal that the eviction-threshold rule has been crossed; the operator shall then open a separate eviction issue linking back to the update issue.**\nSource: UX-4 \u00a7 Step 5.\n\n**BR-43. Concurrent forcing events affecting the same tenant shall be tracked on separate `platform update required` issues, cross-linked where remediation overlaps.**\nSource: UX-4 \u00a7 Step 1; \u00a7 Edge Cases.\n\n---\n\n## G. Platform-Contract-Change Rollout (UX-5)\n\n**BR-44. When the operator proactively changes a contract term, the change shall be communicated ahead of time via a single umbrella `platform contract change` issue tagging every affected capability owner.**\nSource: UX-5 \u00a7 Step 1; `_index.md` \u00a7 Business Rules (the evergreen-contract promise).\n\n**BR-45. The umbrella issue shall contain at minimum: what is changing, what it is changing to (or that it is being removed), the migration guideline if applicable, the hard deadline, the reason for the change, and the operator's chosen status-update cadence.**\nSource: UX-5 \u00a7 Step 1.\n\n**BR-46. The deadline on a contract-change rollout shall be chosen to give every affected tenant at least two full status-update cycles before cutoff (one to acknowledge and start, one to finish or surface blockers).**\nSource: UX-5 \u00a7 Step 1.\n\n**BR-47. Capability owners shall be required to acknowledge contract-change umbrella issues in-thread; silence shall be treated as non-engagement and ultimately as failure to migrate.**\nSource: UX-5 \u00a7 Step 2; \u00a7 Edge Cases.\n\n**BR-48. The deadline shall not be negotiable per-tenant; it shall apply uniformly. Global extensions are permitted only when the migration guideline or replacement itself must change for the remaining tenants.**\nSource: UX-5 \u00a7 Step 2; \u00a7 Edge Cases.\n\n**BR-49. During a contract-change rollout window the platform shall serve both the old and the new form of the contract concurrently, except for full offering removals where no concurrency is possible.**\nSource: UX-5 \u00a7 Step 3.\n\n**BR-50. The operator shall post status updates on a regular schedule in the umbrella thread, sized to the rollout's overall timeline; the current snapshot shall live in the issue body and each scheduled update shall also be posted as a thread comment.**\nSource: UX-5 \u00a7 Step 3.\n\n**BR-51. On the deadline, the old form shall be removed from the platform and a separate eviction issue shall be opened per laggard tenant linking back to the umbrella.**\nSource: UX-5 \u00a7 Step 4.\n\n**BR-52. Any replacement offering required by a contract change shall be implemented and running on the platform *before* the umbrella issue is filed; building it is a precondition, not a step in the rollout.**\nSource: UX-5 \u00a7 Entry Point; \u00a7 Out of Scope.\n\n---\n\n## H. Standing Up / Rebuilding the Platform (UX-6)\n\n**BR-53. The platform shall be rebuildable from its definitions repo with no manual snowflake configuration required.**\nSource: `_index.md` \u00a7 Purpose & Business Outcome (Reproducibility); UX-6 \u00a7 Goal, \u00a7 Success.\n\n**BR-54. The same rebuild flow shall serve first-ever build, disaster recovery, and reproducibility drills.**\nSource: UX-6 \u00a7 Entry Point.\n\n**BR-55. The operator shall run a reproducibility drill on parallel scratch infrastructure after every significant platform change and at least quarterly, identical in flow to the real rebuild.**\nSource: UX-6 \u00a7 Entry Point; \u00a7 Constraints Inherited.\n\n**BR-56. Before any rebuild that involves prior platform state, the operator shall run a preflight drift check against the live platform or the last known-good environment; the rebuild shall not proceed until unexplained drift is resolved.**\nSource: UX-6 \u00a7 Entry Point; \u00a7 Step 1.\n\n**BR-57. The rebuild shall be automated end-to-end with manual operator-validation checkpoints between phases (foundations \u2192 core services \u2192 cross-cutting services \u2192 readiness verification).**\nSource: UX-6 \u00a7 Journey overview, \u00a7 Steps 3\u20136.\n\n**BR-58. Each rebuild phase shall be reversible \u2014 a clean teardown of any partially-provisioned state shall always be a viable, reliable option at every checkpoint.**\nSource: UX-6 \u00a7 Edge Cases (\"Phase fails mid-rebuild\"); \u00a7 Constraints Inherited.\n\n**BR-59. Readiness shall be declared only after a purpose-built canary tenant maintained alongside the platform definitions has been deployed end-to-end, exercised, and torn down successfully.**\nSource: UX-6 \u00a7 Step 6; \u00a7 Constraints Inherited.\n\n**BR-60. If the canary fails, the platform shall not be marked ready for tenants regardless of how green prior phases looked.**\nSource: UX-6 \u00a7 Edge Cases.\n\n**BR-61. A rebuild that exceeds the 1-hour KPI shall not block the platform from going into service, but shall result in a tracked GitHub issue capturing the cause for follow-up.**\nSource: UX-6 \u00a7 Step 7; \u00a7 Edge Cases.\n\n---\n\n## I. Tenant-Facing Observability (UX-7)\n\n**BR-62. Each capability owner shall have a tenant-scoped observability view with a working login, provisioned automatically as part of `onboard my capability`; access shall not be a separately-requested add-on.**\nSource: UX-7 \u00a7 Entry Point; \u00a7 Step 1.\n\n**BR-63. Capability owners shall not be able to see other tenants' data; only the operator shall have cross-tenant visibility.**\nSource: UX-7 \u00a7 Step 2; \u00a7 Constraints Inherited.\n\n**BR-64. The platform shall expose a standard health bundle for every tenant: availability, latency, error rate, resource saturation, and restart / deployment events.**\nSource: UX-7 \u00a7 Step 1.\n\n**BR-65. The platform shall send email alerts to the capability owner when their tuned thresholds are crossed; alerts shall name the signal and the capability.**\nSource: UX-7 \u00a7 Step 4.\n\n**BR-66. Capability owners shall be able to self-serve their alert thresholds inside the observability offering; this is the only self-service surface the platform exposes.**\nSource: UX-7 \u00a7 Step 3.\n\n**BR-67. The pull view shall be authoritative for current health; email shall be a best-effort acceleration nudge. When email delivery is degraded for a tenant, the tenant view shall surface that fact.**\nSource: UX-7 \u00a7 Step 1, \u00a7 Step 3, \u00a7 Edge Cases.\n\n**BR-68. Requests to expand the signal bundle or add non-email alert channels shall be handled via `modify my capability`, not via this UX.**\nSource: UX-7 \u00a7 Step 1, \u00a7 Out of Scope.\n\n**BR-69. End users of tenant capabilities shall not receive any observability access from the platform.**\nSource: UX-7 \u00a7 Constraints Inherited; `_index.md` \u00a7 Business Rules (\"No direct end-user access to the platform\").\n\n---\n\n## J. Operator Model & Succession\n\n**BR-70. Only the operator shall operate the platform and have administrative access; no co-operators and no delegated administration shall exist.**\nSource: `_index.md` \u00a7 Business Rules (\"Operator-only operation\").\n\n**BR-71. The platform shall designate a successor operator who holds sealed/escrowed credentials and a runbook sufficient to keep the platform running if the primary operator becomes unavailable.**\nSource: `_index.md` \u00a7 Business Rules (\"Operator succession\").\n\n**BR-72. Successor credentials shall not be used for routine operation; takeover shall be a discrete event triggered by operator unavailability.**\nSource: `_index.md` \u00a7 Business Rules (\"Operator succession\"); UX-6 \u00a7 Persona.\n\n**BR-73. The platform shall provide on-demand exportable archives so each tenant's users can retrieve their own content without operator involvement *while the platform is healthy*; users are expected to pull these proactively and may schedule periodic pulls.**\nSource: `_index.md` \u00a7 Business Rules (\"Operator succession\").\n\n**BR-74. The export mechanism that powers operator-succession archives shall be the same export tool used by the eviction journey (UX-3).**\nSource: UX-3 \u00a7 Constraints Inherited.\n\n---\n\n## K. Eviction Threshold (cross-cutting)\n\n**BR-75. A tenant shall be evicted when accommodating it would either push routine operation sustainably above 2x the *Operator maintenance budget* KPI, or break the *Reproducibility* KPI by requiring snowflake configuration that cannot be captured as definitions. Either condition alone is sufficient.**\nSource: `_index.md` \u00a7 Business Rules (\"Eviction threshold\").\n\n**BR-76. The eviction threshold shall apply across all triggers (UX-1 \u00a7 Edge Cases, UX-4 step 5, UX-5 step 4) \u2014 the threshold is the single rule, the triggering events differ.**\nSource: `_index.md` \u00a7 Business Rules; UX-4 \u00a7 Constraints Inherited; UX-5 \u00a7 Constraints Inherited.\n\n---\n\n## L. KPIs (Success Criteria)\n\n**BR-77. KPI \u2014 Tenant adoption.** Every *implemented* capability defined in this repo shall run on this platform. An implemented capability hosted elsewhere shall count negatively against this KPI. A capability owner who explicitly gives up on onboarding because the operator stayed silent too long shall be counted as a lost tenant on the issue itself.\nSource: `_index.md` \u00a7 Success Criteria; UX-1 \u00a7 Edge Cases, \u00a7 Constraints Inherited.\n\n**BR-78. KPI \u2014 Reproducibility.** The platform shall be standable from its definitions in **at most 1 hour**, starting from no platform at all.\nSource: `_index.md` \u00a7 Success Criteria.\n\n**BR-79. KPI \u2014 Operator maintenance budget.** Routine operation shall take **no more than 2 hours per week** of the operator's time. If maintenance regularly exceeds this, the platform must be simplified, not grown.\nSource: `_index.md` \u00a7 Success Criteria.\n\n**BR-80. KPI \u2014 Cost stays proportional to value.** Total operating cost shall remain within what the operator considers acceptable given delivered convenience and resiliency. There is no fixed dollar target; the test is whether the operator would still choose to run it knowing the bill.\nSource: `_index.md` \u00a7 Success Criteria.\n\n---\n\n## M. Scope Boundaries (what the platform shall NOT do)\n\n**BR-81. The platform shall not host capabilities for anyone other than the operator's own capabilities \u2014 no third parties, no public, no family/friends as direct platform users.**\nSource: `_index.md` \u00a7 Out of Scope.\n\n**BR-82. The platform shall not commit to any specific availability or performance SLA. Tenants needing stronger guarantees shall host elsewhere.**\nSource: `_index.md` \u00a7 Out of Scope; \u00a7 Business Rules; UX-1 \u00a7 Constraints Inherited.\n\n**BR-83. The platform shall not prescribe its own implementation (homelab, Kubernetes, or any specific stack). The capability is satisfied by anything that meets its rules and KPIs.**\nSource: `_index.md` \u00a7 Out of Scope.\n\n**BR-84. The platform shall not provide multi-operator administration, role delegation, or self-service onboarding.**\nSource: `_index.md` \u00a7 Out of Scope.\n\n**BR-85. The platform shall not write, debug, or shepherd tenant migration processes; it provides only the runner.**\nSource: UX-2 \u00a7 Out of Scope.\n\n**BR-86. The platform shall not offer rollback after eviction; the capability owner runs the old host concurrently during migration and \"rollback\" simply means not cutting over.**\nSource: UX-2 \u00a7 Out of Scope; UX-3 \u00a7 Out of Scope.\n\n**BR-87. The platform shall not restore tenant data as part of platform standup; tenant data restoration is a separate UX that begins where UX-6 ends.**\nSource: UX-6 \u00a7 Out of Scope.\n\n**BR-88. The platform shall not provide end-user-facing observability or status pages; that is a tenant concern.**\nSource: UX-7 \u00a7 Out of Scope; `_index.md` \u00a7 Out of Scope (\"End-user-facing features of tenant capabilities\").\n\n---\n\n## N. Cross-Cutting Properties\n\n**BR-89. The platform may span public and private infrastructure. \"Self-hosted\" means the operator controls the platform end-to-end, not that every component runs on hardware the operator owns.**\nSource: `_index.md` \u00a7 Business Rules.\n\n**BR-90. Cost shall be secondary to convenience and resiliency in trade-offs. Added cost is acceptable when it buys meaningful convenience or resiliency; cost shall still be minimized where it does not cost convenience or resiliency.**\nSource: `_index.md` \u00a7 Business Rules.\n\n**BR-91. Operator skill development shall not influence buy-vs-build trade-offs. Trade-offs are judged on convenience, resiliency, and cost only.**\nSource: `_index.md` \u00a7 Business Rules.\n\n**BR-92. Where outcomes conflict, the established tiebreaker order is: tenant adoption > reproducibility > vendor independence > minimizing operator effort.**\nSource: `_index.md` \u00a7 Purpose & Business Outcome.\n\n**BR-93. Every UX that can introduce platform state shall enforce tracked changes and immutability rather than allowing ad-hoc modification (so the preflight drift check in UX-6 is meaningful).**\nSource: UX-6 \u00a7 Constraints Inherited.\n\n---\n\n## Open Questions (carried forward from source docs)\n\n- **OQ-1.** What is the authoritative policy for deeper backup-tier copies after the 30-day post-eviction retention window ends \u2014 retention duration, deletion behavior, and operator-access/privacy constraints?\n  Source: UX-3 \u00a7 Open Questions.\n\nAll other source documents currently report \"_None at this time._\" under Open Questions.\n"}, {"name": "response.md", "type": "text", "content": "# Business Requirements Extracted \u2014 Self-Hosted Application Platform\n\nI read the parent capability doc and all seven user-experience docs under `docs/content/capabilities/self-hosted-application-platform/` and produced a sourced business-requirements document at:\n\n- `business-requirements.md` (this folder)\n\n## What's in it\n\n93 numbered business requirements (BR-01 through BR-93), each citing the specific section of either the capability doc or one of the UX docs it derives from. Requirements are organized into 14 sections:\n\n- **A. Hosting Offerings** (BR-01\u2013BR-11) \u2014 compute, storage, network, identity, backup, observability, secret management, migration runner, export tool.\n- **B. Engagement Surface** (BR-12\u2013BR-16) \u2014 GitHub-issues-only, distinct issue types, no SLA, evergreen contract, implicit acceptance via tech design.\n- **C. Onboarding a Tenant** (BR-17\u2013BR-24) \u2014 operator-only approval, narrow review scope, three outcomes, packaged-artifact handoff.\n- **D. Migrating Existing Data** (BR-25\u2013BR-32) \u2014 tenant-supplied process, 2x footprint cap, declared re-run contract, no auto-clean, one-shot lifecycle.\n- **E. Moving Off After Eviction** (BR-33\u2013BR-38) \u2014 operator-initiated, 30-day retention, hard wall except for platform-side export bugs, capability-owner-owned validation.\n- **F. Operator-Initiated Tenant Update** (BR-39\u2013BR-43) \u2014 one issue per affected tenant, work-with-don't-evict default, slack-bounded extensions.\n- **G. Platform-Contract-Change Rollout** (BR-44\u2013BR-52) \u2014 single umbrella issue, mandatory acknowledgment, two-cycles-of-slack rule, concurrent old/new during rollout, replacement-must-pre-exist.\n- **H. Standing Up the Platform** (BR-53\u2013BR-61) \u2014 definitions-only rebuild, drill cadence, preflight drift check, phased automation with checkpoints, reversible phases, canary readiness gate.\n- **I. Tenant-Facing Observability** (BR-62\u2013BR-69) \u2014 automatic provisioning, tenant-scoped, standard health bundle, self-serve thresholds (the only self-service surface), pull-view-authoritative.\n- **J. Operator Model & Succession** (BR-70\u2013BR-74) \u2014 operator-only operation, sealed successor credentials, on-demand archives, shared export tool with eviction.\n- **K. Eviction Threshold** (BR-75\u2013BR-76) \u2014 single cross-cutting rule (2x maintenance budget OR breaks reproducibility).\n- **L. KPIs** (BR-77\u2013BR-80) \u2014 tenant adoption, 1-hour reproducibility, 2-hr/wk maintenance, cost-proportional-to-value.\n- **M. Scope Boundaries** (BR-81\u2013BR-88) \u2014 explicit \"shall not\" clauses pulled from the various Out-of-Scope sections.\n- **N. Cross-Cutting Properties** (BR-89\u2013BR-93) \u2014 public+private infra allowed, cost tiebreaker, skill-development excluded from trade-offs, outcome priority order, tracked-changes-and-immutability requirement.\n\n## Open Questions surfaced\n\nThe capability and UX docs all say \"None at this time\" for open questions *except* UX-3, which still has one open question about the deep backup-tier retention/deletion policy beyond the 30-day tenant-accessible window. Carried forward as **OQ-1** at the end of the document.\n\n## Notes on traceability\n\nEvery BR cites a source \u2014 usually the specific section heading and quoted phrase. UX docs are referenced as UX-1 through UX-7 with a legend at the top of the document. Nothing in the document was added without a source; nothing was inferred beyond what the docs already commit to.\n\n## What was NOT done\n\n- No technical requirements (those belong in a follow-up `tech-requirements.md`).\n- No architectural decisions or option weighing.\n- Nothing under `docs/` was modified.\n\nOutput saved at `/home/carson/github.com/Zaba505/infra/.claude/skills/extract-business-requirements-workspace/iteration-1/eval-1/without_skill/outputs/`.\n"}], "grading": {"expectations": [{"text": "produces_business_requirements_md", "passed": true, "evidence": "len=24779"}, {"text": "frontmatter_has_reviewed_at_null", "passed": false, "evidence": "# Business Requirements \u2014 Self-Hosted Application Platform\n\nThis document extracts the business-level requirements implied by the [Self-Hosted Application Platform](../../../../../../docs/content/capa"}, {"text": "has_multiple_BR_entries", "passed": false, "evidence": "BR count=0"}, {"text": "each_BR_has_source_link", "passed": false, "evidence": "sources=0 br=0"}, {"text": "uses_hugo_ref_shortcode", "passed": true, "evidence": "refs=0 br=0"}, {"text": "no_technical_cadences_in_BRs", "passed": false, "evidence": "cadences=['durable storage']"}, {"text": "no_technology_choices_in_BRs", "passed": true, "evidence": "techs=[]"}, {"text": "no_tr_drafted", "passed": true, "evidence": "ok"}, {"text": "no_adr_drafted", "passed": true, "evidence": "ok"}, {"text": "instructs_user_to_set_reviewed_at", "passed": false, "evidence": "# Business Requirements Extracted \u2014 Self-Hosted Application Platform\n\nI read the parent capability doc and all seven user-experience docs under `docs/content/capabilities/self-hosted-application-platf"}, {"text": "mentions_define_tech_requirements_gate", "passed": false, "evidence": "match"}], "passed_count": 5, "total": 11}}, {"id": "eval-2-with_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "response.md", "type": "text", "content": "That proposed BR-06 is a TR, not a BR \u2014 so I haven't added it.\n\n\"The system must checkpoint upload progress every 10 seconds to durable storage\" is the technical translation: it names the mechanism (checkpoint to durable storage) and the cadence (every 10 seconds). Both belong in `define-technical-requirements`, derived from a BR \u2014 not in `business-requirements.md`.\n\nThe BR underneath is closer to something like:\n\n> **BR-06: Uploads must survive a connection drop without losing user-perceived progress**\n> A user whose connection drops mid-upload must be able to resume the upload without re-sending data they have already successfully transferred, and without the system telling them their prior progress was lost.\n\nBut before I add that, I need a source. Two questions:\n\n1. **Where in the capability or a UX is \"uploads\" actually demanded?** I re-read `_index.md` and the five UX docs implied by BR-01\u2013BR-05 (`platform-contract-change-rollout`, `tenant-facing-observability`, `operator-initiated-tenant-update`, `move-off-the-platform-after-eviction`) and don't see an upload flow that forces a resumability requirement. The only export-shaped UX is the eviction one (BR-05), and that's a one-shot data export, not an interactive upload. Is there a UX I'm missing \u2014 e.g. a tenant-onboarding or workload-deploy UX where the user uploads artifacts? If so, please point me to it (or run `define-user-experience` to add it) so the BR has provenance.\n2. **Whose upload?** \"Uploads\" could mean tenant operators uploading workload images/artifacts to the platform, or end-users of a tenant's app uploading data through it (which would be the tenant's concern, not the platform's). The capability scope matters \u2014 the platform may not own the second case at all.\n\nOnce we agree on the source, I'll add the BR. In the meantime I'm capturing the user-supplied number as an open question for the TR stage:\n\n> - Consider a 10-second checkpoint cadence to durable storage as the TR derived from the (yet-to-be-sourced) upload-resumability BR \u2014 surfaced during BR-06 discussion; defer to TR stage.\n\n**No file changes made.** The existing `business-requirements.md` (BR-01 through BR-05, `reviewed_at: 2026-04-20`) is unchanged, so its review state is preserved. Once you confirm the source for the upload requirement, I'll re-extract \u2014 which will null out `reviewed_at` and you'll need to re-review before `define-technical-requirements` will run.\n\n(Skipped Hugo render validation since no file changes were made.)\n"}], "grading": {"expectations": [{"text": "refuses_to_add_TR_as_BR", "passed": true, "evidence": "tr_text=False"}, {"text": "explains_BR_vs_TR_distinction", "passed": true, "evidence": "match"}, {"text": "asks_for_underlying_business_need", "passed": true, "evidence": "match"}, {"text": "offers_to_park_in_open_questions", "passed": true, "evidence": "match"}, {"text": "no_tr_text_written_to_file", "passed": true, "evidence": "has_tr_text=False"}], "passed_count": 5, "total": 5}}, {"id": "eval-2-without_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "business-requirements.md", "type": "text", "content": "---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capability.\ntype: docs\nreviewed_at: 2026-04-20\n---\n\n**Parent capability:** [self-hosted-application-platform](_index.md)\n\n## Requirements\n\n### BR-01: No tenant can ever observe another tenant's state\n**Source:** [Capability \u00a7Business Rules](_index.md#business-rules)\n**Requirement:** A tenant must never be able to read, infer, or otherwise observe another tenant's data, secrets, traffic, or telemetry \u2014 under normal operation or any degraded mode the platform supports.\n**Why this is a requirement, not a TR or decision:** The capability lists tenant isolation as an invariant; it is a business demand on the platform, independent of any technical mechanism that enforces it.\n\n### BR-02: Existing tenants must keep working when the platform contract evolves\n**Source:** [UX: platform-contract-change-rollout](user-experiences/platform-contract-change-rollout.md)\n**Requirement:** When the platform publishes a new contract version, every tenant currently operating against the previous contract must continue to operate, without operator intervention, until they choose to migrate.\n**Why this is a requirement, not a TR or decision:** The UX flow demands graceful contract evolution as the user-perceived outcome; the technical means (versioning scheme, compatibility windows) is a TR/ADR question.\n\n### BR-03: A tenant must be able to query observability data for their own workloads\n**Source:** [UX: tenant-facing-observability \u00a7Journey](user-experiences/tenant-facing-observability.md)\n**Requirement:** Tenants must be able to inspect metrics, logs, and traces for the workloads they own, and only those \u2014 without operator help and without exposure to other tenants' observability data.\n**Why this is a requirement, not a TR or decision:** Both the capability isolation invariant and the UX journey demand this as a tenant-facing outcome.\n\n### BR-04: Operator-initiated tenant updates must be invisible to the tenant's end users\n**Source:** [UX: operator-initiated-tenant-update \u00a7Success](user-experiences/operator-initiated-tenant-update.md)\n**Requirement:** When an operator updates a tenant's configuration, version, or capability, online traffic served by that tenant must not experience end-user-visible downtime.\n**Why this is a requirement, not a TR or decision:** UX success criteria define the absence of user-visible downtime as the outcome; the technical translation (rolling deploys, draining, etc.) is a TR/ADR question.\n\n### BR-05: An evicted tenant must be able to leave with all of their data\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Edge Cases](user-experiences/move-off-the-platform-after-eviction.md#a-section-that-no-longer-exists)\n**Requirement:** A tenant who has been evicted from the platform must still be able to retrieve all of their data in a portable form within a defined export window \u2014 without operator assistance.\n**Why this is a requirement, not a TR or decision:** The UX explicitly includes the eviction edge case; portability is a business commitment to the tenant, independent of how the export is implemented.\n\n### BR-06: Uploads must be resumable after a connection drop\n**Source:** User request (no linked capability or UX section provided).\n**Requirement:** The system must checkpoint upload progress every 10 seconds to durable storage so uploads can resume after a connection drop.\n**Why this is a requirement, not a TR or decision:** *Note: as written, this requirement embeds a specific technical mechanism (checkpointing every 10 seconds to durable storage). The business outcome is \"uploads survive connection drops and can resume\"; the 10-second checkpoint cadence and the choice of durable storage are technical means and would normally belong in a TR or ADR. Recorded here verbatim per request \u2014 recommend revisiting during TR extraction to separate the business outcome from the implementation mechanism.*\n\n## Open Questions\n\n- Whether tenant data export (BR-05) should be on-demand or continuously-available \u2014 surfaced during extraction from the move-off UX; defer to TR stage.\n- Whether contract versioning (BR-02) is bounded by a maximum compatibility window \u2014 surfaced but not yet decided in the UX.\n- BR-06 as stated mixes a business outcome (resumable uploads) with a technical mechanism (10-second checkpoints to durable storage); confirm whether the cadence and storage choice are true business constraints or should be deferred to TR/ADR.\n- BR-06 has no linked source in the capability or any UX \u2014 confirm which UX (or new capability section) it derives from before the document is considered review-ready.\n"}, {"name": "response.md", "type": "text", "content": "Added BR-06 to `business-requirements.md` for the self-hosted-application-platform capability.\n\nA few things to flag for your review:\n\n1. **BR-06 mixes outcome with mechanism.** As written, \"checkpoint upload progress every 10 seconds to durable storage\" is a technical mechanism, not a pure business outcome. The business need is \"uploads survive a connection drop and can be resumed.\" The cadence (10 seconds) and the storage choice (durable storage) are implementation details that normally belong in a technical requirement or an ADR. I recorded BR-06 verbatim per your request, but I added a note in the \"Why this is a requirement\" section and an entry under Open Questions so this gets revisited at the TR stage.\n\n2. **No source link.** Every other BR points back to a section of the capability doc or a specific UX. BR-06 has no such anchor \u2014 I marked the source as \"User request (no linked capability or UX provided)\" and added an Open Question to confirm which UX it derives from. If there is an existing UX (e.g. a tenant-upload journey) it should be linked; if not, that UX likely needs to be defined before BR-06 is review-ready.\n\n3. **Scope check.** \"Uploads\" isn't a concept that appears in BR-01 through BR-05 or in the surrounding requirements. Worth confirming this belongs to the self-hosted-application-platform capability rather than a separate capability (e.g. a tenant-data-ingestion or artifact-upload capability).\n\nThe file was saved to the requested output path; nothing under `docs/` was modified.\n"}], "grading": {"expectations": [{"text": "refuses_to_add_TR_as_BR", "passed": true, "evidence": "tr_text=True"}, {"text": "explains_BR_vs_TR_distinction", "passed": true, "evidence": "match"}, {"text": "asks_for_underlying_business_need", "passed": true, "evidence": "match"}, {"text": "offers_to_park_in_open_questions", "passed": true, "evidence": "match"}, {"text": "no_tr_text_written_to_file", "passed": false, "evidence": "has_tr_text=True"}], "passed_count": 4, "total": 5}}, {"id": "eval-3-with_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "response.md", "type": "text", "content": "\"Use S3 multipart upload for resumable tenant data uploads\" is a Stage-2 decision, not a business requirement, so I haven't added it to `business-requirements.md` as written. S3 multipart is one of several options (chunked HTTP with range resume, tus protocol, GCS resumable uploads, a custom segmented protocol over our own object store, etc.) that could all satisfy the same underlying need. Picking among them belongs in an ADR, authored via `plan-adrs` / `define-adr` once we have TRs that force the decision.\n\nThe BR underneath is closer to something like:\n\n> **BR-06: Tenant data uploads must be resumable across connection drops without re-sending completed segments.**\n\nBut I don't want to add even that until we tie it to a real source. A couple of questions before I extract anything:\n\n1. **What in the capability or a UX forces this?** I scanned the current `business-requirements.md` (BR-01 through BR-05) and none of the cited UXes \u2014 `platform-contract-change-rollout`, `tenant-facing-observability`, `operator-initiated-tenant-update`, `move-off-the-platform-after-eviction` \u2014 describe a tenant *uploading* data into the platform. Is there a UX I'm missing (e.g. a \"tenant onboarding data import\" or \"bulk tenant data ingest\" journey)? If not, this likely needs a new UX defined first via `define-user-experience`, since BRs derived from missing inputs have missing reasons.\n2. **Is the underlying demand really \"resumable\", or is it \"uploads of size X must complete reliably over flaky connectivity\"?** Those produce different downstream TRs. Quoting the source UX text would let me phrase the BR precisely.\n\nIn the meantime, I've parked the following as **open questions** (not committed to the file yet, pending your direction on #1):\n\n- Consider S3 multipart upload (or equivalent resumable-upload protocol) for tenant data uploads \u2014 defer to ADR stage once a BR demands resumability.\n- Confirm whether a tenant-data-upload UX exists; if not, define one before extracting an upload-related BR.\n\n**Nothing was written to `business-requirements.md`.** Existing BR-01..BR-05 and `reviewed_at: 2026-04-20` are unchanged.\n\nHow would you like to proceed?\n- (a) Point me at the UX that demands resumable uploads and I'll extract a properly-sourced BR-06.\n- (b) Kick off `define-user-experience` to define the missing tenant-upload UX first.\n- (c) You assert this demand exists at the capability level \u2014 in which case I'd ask you to add a business rule to the capability `_index.md` so BR-06 has a real source link.\n\nNote: Hugo render validation was skipped per the eval instructions. In a real run I'd `cd docs && hugo server` and visually confirm the page renders and all `ref` shortcodes resolve.\n"}], "grading": {"expectations": [{"text": "refuses_to_add_decision_as_BR", "passed": true, "evidence": "has_s3_in_file=False"}, {"text": "explains_decision_vs_requirement", "passed": true, "evidence": "match"}, {"text": "asks_for_underlying_business_need", "passed": true, "evidence": "match"}, {"text": "offers_to_park_in_open_questions", "passed": true, "evidence": "match"}, {"text": "no_s3_text_written_to_file", "passed": true, "evidence": "has_s3=False"}], "passed_count": 5, "total": 5}}, {"id": "eval-3-without_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "response.md", "type": "text", "content": "I didn't add BR-06 as requested \u2014 the proposed text reads as a technical decision, not a business requirement, and adding it would break the pattern the existing BRs follow.\n\n## Why I pushed back\n\n\"Use S3 multipart upload for resumable tenant data uploads\" specifies:\n\n- **A technology** (S3 multipart upload) \u2014 a specific AWS API.\n- **A mechanism** (multipart upload chunks).\n\nCompare to the existing BRs in the file:\n\n- BR-01 \u2014 \"no tenant can ever observe another tenant's state\" (tenant-facing invariant)\n- BR-02 \u2014 \"existing tenants must keep working when the platform contract evolves\" (tenant-facing outcome)\n- BR-03 \u2014 \"a tenant must be able to query observability data for their own workloads\" (tenant-facing capability)\n- BR-04 \u2014 \"operator-initiated tenant updates must be invisible to the tenant's end users\" (tenant-facing outcome)\n- BR-05 \u2014 \"an evicted tenant must be able to leave with all of their data\" (tenant-facing commitment)\n\nEach is a *what the tenant experiences / what the platform owes the tenant*, deliberately silent on *how*. Each \"Why this is a requirement, not a TR or decision\" note explicitly defers implementation choices (versioning scheme, rolling deploys, export mechanism) to TR/ADR stages.\n\n\"Use S3 multipart upload\" is the kind of statement those notes warn against \u2014 it picks the implementation up front.\n\n## Two ways forward\n\n**Option A \u2014 re-frame as a business requirement.** The underlying tenant need is probably something like:\n\n> **BR-06: Tenants must be able to upload large data sets without losing progress on transient failure**\n> **Source:** (which UX or capability section is driving this? \u2014 I need a link)\n> **Requirement:** A tenant uploading data to the platform must be able to resume an interrupted upload without re-transmitting bytes already accepted, up to a defined object-size ceiling.\n> **Why this is a requirement, not a TR or decision:** Resumability is a tenant-perceived outcome; the transport mechanism (S3 multipart, tus, chunked HTTP, etc.) is a TR/ADR question.\n\nIf you confirm the source UX/section and the framing, I'll add this version.\n\n**Option B \u2014 record it where it belongs.** \"Use S3 multipart upload\" is an architectural decision. It belongs in an ADR (with options weighed: S3 multipart vs. tus vs. chunked PUT vs. pre-signed resumable URLs) under the capability's `decisions/` directory, traced back to a TR like \"TR-NN: support resumable uploads of objects up to N GB\", which in turn traces back to the BR in Option A.\n\n## What I'd like from you\n\n1. Which UX or capability section motivates resumable uploads? (BRs require a `Source:` link \u2014 there's no such UX listed in the current file.)\n2. Confirm Option A wording (or supply your own tenant-outcome framing) and I'll add BR-06.\n3. Separately, do you want me to file an ADR-planning issue for the multipart-vs-alternatives decision?\n\nI have **not** modified `business-requirements.md`.\n"}], "grading": {"expectations": [{"text": "refuses_to_add_decision_as_BR", "passed": true, "evidence": "has_s3_in_file=False"}, {"text": "explains_decision_vs_requirement", "passed": true, "evidence": "match"}, {"text": "asks_for_underlying_business_need", "passed": true, "evidence": "match"}, {"text": "offers_to_park_in_open_questions", "passed": false, "evidence": "match"}, {"text": "no_s3_text_written_to_file", "passed": true, "evidence": "has_s3=False"}], "passed_count": 4, "total": 5}}, {"id": "eval-4-with_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "business-requirements.md", "type": "text", "content": "---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capability.\ntype: docs\nreviewed_at: null\n---\n\n> **Living document.** This is regenerated from the capability and UX docs on demand. Numbering is append-only \u2014 once a BR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). Technical requirements cite BR-NN, so renumbering would silently break provenance.\n\n> **Review gate.** Set `reviewed_at:` in the frontmatter to today's ISO date once you have read and edited this document. The `define-technical-requirements` skill will refuse to extract TRs until `reviewed_at` is newer than the file's last modification.\n\n**Parent capability:** [self-hosted-application-platform]({{< ref \"_index.md\" >}})\n\n## How to read this\n\nEach requirement is **forced** by the capability or a user experience \u2014 it states, in business or user-outcome terms, what the system must guarantee. Decisions about the *technical translation* (cadences, durability levels, protocols) belong in `tech-requirements.md`. Decisions about *how* (which database, which library, which provider) belong in `adrs/`. If something in this list reads like a technical constraint or a chosen solution rather than a business demand, flag it for review.\n\n## Requirements\n\n### BR-01: No tenant can ever observe another tenant's state\n**Source:** [Capability \u00a7Business Rules]({{< ref \"_index.md#business-rules\" >}})\n**Requirement:** A tenant must never be able to read, infer, or otherwise observe another tenant's data, secrets, traffic, or telemetry \u2014 under normal operation or any degraded mode the platform supports.\n**Why this is a requirement, not a TR or decision:** The capability lists tenant isolation as an invariant; it is a business demand on the platform, independent of any technical mechanism that enforces it.\n\n### BR-02: Existing tenants must keep working when the platform contract evolves\n**Source:** [UX: platform-contract-change-rollout]({{< ref \"user-experiences/platform-contract-change-rollout.md\" >}})\n**Requirement:** When the platform publishes a new contract version, every tenant currently operating against the previous contract must continue to operate, without operator intervention, until they choose to migrate.\n**Why this is a requirement, not a TR or decision:** The UX flow demands graceful contract evolution as the user-perceived outcome; the technical means (versioning scheme, compatibility windows) is a TR/ADR question.\n\n### BR-03: A tenant must be able to query observability data for their own workloads\n**Source:** [UX: tenant-facing-observability \u00a7Journey]({{< ref \"user-experiences/tenant-facing-observability.md#journey\" >}})\n**Requirement:** Tenants must be able to inspect metrics, logs, and traces for the workloads they own, and only those \u2014 without operator help and without exposure to other tenants' observability data.\n**Why this is a requirement, not a TR or decision:** Both the capability isolation invariant and the UX journey demand this as a tenant-facing outcome.\n\n### BR-04: Operator-initiated tenant updates must be invisible to the tenant's end users\n**Source:** [UX: operator-initiated-tenant-update \u00a7Success]({{< ref \"user-experiences/operator-initiated-tenant-update.md#success\" >}})\n**Requirement:** When an operator updates a tenant's configuration, version, or capability, online traffic served by that tenant must not experience end-user-visible downtime.\n**Why this is a requirement, not a TR or decision:** UX success criteria define the absence of user-visible downtime as the outcome; the technical translation (rolling deploys, draining, etc.) is a TR/ADR question.\n\n### BR-05: An evicted tenant must be able to leave with all of their data\n> \u26a0\ufe0f source no longer resolves \u2014 human review\n\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Edge Cases]({{< ref \"user-experiences/move-off-the-platform-after-eviction.md#a-section-that-no-longer-exists\" >}})\n**Requirement:** A tenant who has been evicted from the platform must still be able to retrieve all of their data in a portable form within a defined export window \u2014 without operator assistance.\n**Why this is a requirement, not a TR or decision:** The UX explicitly includes the eviction edge case; portability is a business commitment to the tenant, independent of how the export is implemented.\n\n## Open Questions\n\nThings the user volunteered as TRs or decisions during extraction (parked for the next stage), or constraints the capability/UX docs don't yet make explicit.\n\n- Whether tenant data export (BR-05) should be on-demand or continuously-available \u2014 surfaced during extraction from the move-off UX; defer to TR stage.\n- Whether contract versioning (BR-02) is bounded by a maximum compatibility window \u2014 surfaced but not yet decided in the UX.\n- BR-05's source anchor (`#a-section-that-no-longer-exists`) no longer resolves in `user-experiences/move-off-the-platform-after-eviction.md`. The likely current section is `## Edge Cases & Failure Modes`, but the source needs a human re-source decision (and an explicit `{#anchor}` on the target heading) before the link is restored.\n"}, {"name": "response.md", "type": "text", "content": "I re-extracted `docs/content/capabilities/self-hosted-application-platform/business-requirements.md`.\n\n**Summary of changes**\n- **Preserved:** BR-01, BR-02, BR-03, BR-04 \u2014 text and source links unchanged. Numbering preserved (append-only).\n- **Flagged:** BR-05's source link `user-experiences/move-off-the-platform-after-eviction.md#a-section-that-no-longer-exists` no longer resolves (the section was renamed). Per the skill, I did **not** rewrite or delete the link \u2014 I added the `> \u26a0\ufe0f source no longer resolves \u2014 human review` marker above the BR and left the broken `ref` in place so the Hugo build will fail loudly until you decide how to re-source it. The likely current section is `## Edge Cases & Failure Modes` (line 103 of that UX doc), but it has no explicit `{#anchor}` yet, so re-sourcing also requires adding an anchor to the target heading.\n- **Added:** no new BRs this pass \u2014 nothing in the capability or UX docs surfaced a forced requirement that wasn't already captured.\n- **Open Questions:** the two existing entries (BR-05 export modality, BR-02 compatibility window) are carried forward, plus a new note tracking the BR-05 stale-source decision.\n\n**`reviewed_at` was nulled** because the file's contents changed (the warning marker on BR-05 and the new open question). You'll need to review and reset it to today's ISO date before `define-technical-requirements` will run.\n\n**What I need from you**\n1. Review the file \u2014 especially BR-05's flag.\n2. Decide whether to re-source BR-05 to `## Edge Cases & Failure Modes` (and add `{#edge-cases}` to that heading in the UX doc), pick a different section, or leave the flag for later.\n3. Set `reviewed_at:` in the frontmatter to today's ISO date once you're satisfied (or tell me to record your verbal confirmation).\n\n**Hugo render validation skipped** \u2014 I did not run `cd docs && hugo server` in this session, so I have not visually confirmed the page renders. The broken `ref` on BR-05 will, by design, fail the Hugo build until it's resolved; that's expected and is the mechanism keeping the stale source visible.\n"}], "grading": {"expectations": [{"text": "preserves_BR_01_through_05", "passed": true, "evidence": "headings=['01', '02', '03', '04', '05']"}, {"text": "no_renumbering", "passed": true, "evidence": "first5=['01', '02', '03', '04', '05']"}, {"text": "stale_link_flagged_not_deleted", "passed": true, "evidence": "warn=True br05=True"}, {"text": "new_BRs_appended_starting_at_BR_06", "passed": true, "evidence": "new=[]"}, {"text": "reviewed_at_nulled_or_flagged", "passed": true, "evidence": "frontmatter_head=---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capabilit"}, {"text": "mentions_git_diff_or_living_doc", "passed": true, "evidence": "match"}], "passed_count": 6, "total": 6}}, {"id": "eval-4-without_skill", "prompt": "(No prompt found)", "eval_id": null, "outputs": [{"name": "business-requirements.md", "type": "text", "content": "---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capability.\ntype: docs\nreviewed_at: 2026-04-28\n---\n\n**Parent capability:** [self-hosted-application-platform](_index.md)\n\n## Requirements\n\n### BR-01: No tenant can ever observe another tenant's state\n**Source:** [Capability \u00a7Business Rules](_index.md#business-rules)\n**Requirement:** A tenant must never be able to read, infer, or otherwise observe another tenant's data, secrets, traffic, or telemetry \u2014 under normal operation or any degraded mode the platform supports.\n**Why this is a requirement, not a TR or decision:** The capability lists tenant isolation as an invariant; it is a business demand on the platform, independent of any technical mechanism that enforces it.\n\n### BR-02: Existing tenants must keep working when the platform contract evolves\n**Source:** [UX: platform-contract-change-rollout](user-experiences/platform-contract-change-rollout.md)\n**Requirement:** When the platform publishes a new contract version, every tenant currently operating against the previous contract must continue to operate, without operator intervention, until they choose to migrate.\n**Why this is a requirement, not a TR or decision:** The UX flow demands graceful contract evolution as the user-perceived outcome; the technical means (versioning scheme, compatibility windows) is a TR/ADR question.\n\n### BR-03: A tenant must be able to query observability data for their own workloads\n**Source:** [UX: tenant-facing-observability \u00a7Journey](user-experiences/tenant-facing-observability.md#journey)\n**Requirement:** Tenants must be able to inspect metrics, logs, and traces for the workloads they own, and only those \u2014 without operator help and without exposure to other tenants' observability data.\n**Why this is a requirement, not a TR or decision:** Both the capability isolation invariant and the UX journey demand this as a tenant-facing outcome.\n\n### BR-04: Operator-initiated tenant updates must be invisible to the tenant's end users\n**Source:** [UX: operator-initiated-tenant-update \u00a7Success](user-experiences/operator-initiated-tenant-update.md#success)\n**Requirement:** When an operator updates a tenant's configuration, version, or capability, online traffic served by that tenant must not experience end-user-visible downtime.\n**Why this is a requirement, not a TR or decision:** UX success criteria define the absence of user-visible downtime as the outcome; the technical translation (rolling deploys, draining, etc.) is a TR/ADR question.\n\n### BR-05: An evicted tenant must be able to leave with all of their data\n**Source:** [UX: move-off-the-platform-after-eviction \u00a7Edge Cases & Failure Modes](user-experiences/move-off-the-platform-after-eviction.md#edge-cases--failure-modes)\n**Requirement:** A tenant who has been evicted from the platform must still be able to retrieve all of their data in a portable form within a defined export window \u2014 without operator assistance.\n**Why this is a requirement, not a TR or decision:** The UX explicitly includes the eviction edge case; portability is a business commitment to the tenant, independent of how the export is implemented.\n\n## Open Questions\n\n- Whether tenant data export (BR-05) should be on-demand or continuously-available \u2014 surfaced during extraction from the move-off UX; defer to TR stage.\n- Whether contract versioning (BR-02) is bounded by a maximum compatibility window \u2014 surfaced but not yet decided in the UX.\n"}, {"name": "response.md", "type": "text", "content": "Re-extracted `business-requirements.md` for the self-hosted-application-platform capability.\n\n**What changed vs. the existing file:**\n\n- **BR-05 source link fixed.** The previous link pointed to `move-off-the-platform-after-eviction.md#a-section-that-no-longer-exists`, which no longer resolves in the current UX doc. The corresponding section in the live UX is now `## Edge Cases & Failure Modes`, so the link is updated to `move-off-the-platform-after-eviction.md#edge-cases--failure-modes` and the source label is updated to `\u00a7Edge Cases & Failure Modes` to match the section title verbatim.\n- **`reviewed_at` bumped** from `2026-04-20` to `2026-04-28` to reflect this re-extraction.\n- **Anchors made explicit** on BR-03 (`#journey`) and BR-04 (`#success`). The previous file used `\u00a7Journey` / `\u00a7Success` in the link text but did not include the anchor fragment in the URL itself; per the cross-linking convention (section links require explicit anchors), they now do.\n\n**No requirements were added or removed.** BR-01 through BR-05 are unchanged in substance; the capability's Business Rules and the five UX docs still imply exactly the same business requirements they did on 2026-04-20. The two open questions are also unchanged.\n\n**Verification done:**\n\n- All five source links resolve against the current docs:\n  - `_index.md#business-rules` -> exists (Business Rules & Constraints).\n  - `platform-contract-change-rollout.md` -> exists.\n  - `tenant-facing-observability.md#journey` -> exists.\n  - `operator-initiated-tenant-update.md#success` -> exists.\n  - `move-off-the-platform-after-eviction.md#edge-cases--failure-modes` -> exists.\n\nThe file is ready for human review before the next stage (technical requirements).\n"}], "grading": {"expectations": [{"text": "preserves_BR_01_through_05", "passed": true, "evidence": "headings=['01', '02', '03', '04', '05']"}, {"text": "no_renumbering", "passed": true, "evidence": "first5=['01', '02', '03', '04', '05']"}, {"text": "stale_link_flagged_not_deleted", "passed": false, "evidence": "warn=False br05=True"}, {"text": "new_BRs_appended_starting_at_BR_06", "passed": true, "evidence": "new=[]"}, {"text": "reviewed_at_nulled_or_flagged", "passed": false, "evidence": "frontmatter_head=---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capabilit"}, {"text": "mentions_git_diff_or_living_doc", "passed": true, "evidence": "match"}], "passed_count": 4, "total": 6}}], "previous_feedback": {}, "previous_outputs": {}, "benchmark": {"skill_name": "extract-business-requirements", "iteration": 1, "configurations": [{"name": "with_skill", "configuration": "with_skill", "pass_rate": {"mean": 0.9636363636363636, "stddev": 0.07272727272727271}, "duration_seconds": {"mean": 109.90140000000001, "stddev": 123.72709179577447}, "total_tokens": {"mean": 42925, "stddev": 26445.59880963182}, "per_eval": [{"eval_id": 0, "passed": 4, "total": 4, "pass_rate": 1.0, "duration_seconds": 32.583, "total_tokens": 26182}, {"eval_id": 1, "passed": 9, "total": 11, "pass_rate": 0.8181818181818182, "duration_seconds": 354.403, "total_tokens": 95207}, {"eval_id": 2, "passed": 5, "total": 5, "pass_rate": 1.0, "duration_seconds": 37.75, "total_tokens": 27811}, {"eval_id": 3, "passed": 5, "total": 5, "pass_rate": 1.0, "duration_seconds": 39.348, "total_tokens": 27912}, {"eval_id": 4, "passed": 6, "total": 6, "pass_rate": 1.0, "duration_seconds": 85.423, "total_tokens": 37513}]}, {"name": "without_skill (baseline)", "configuration": "without_skill", "pass_rate": {"mean": 0.7442424242424243, "stddev": 0.179762111959765}, "duration_seconds": {"mean": 81.6908, "stddev": 64.1124906781822}, "total_tokens": {"mean": 36117.6, "stddev": 21660.820996444247}, "per_eval": [{"eval_id": 0, "passed": 4, "total": 4, "pass_rate": 1.0, "duration_seconds": 50.529, "total_tokens": 21647}, {"eval_id": 1, "passed": 5, "total": 11, "pass_rate": 0.45454545454545453, "duration_seconds": 208.666, "total_tokens": 78572}, {"eval_id": 2, "passed": 4, "total": 5, "pass_rate": 0.8, "duration_seconds": 47.959, "total_tokens": 23873}, {"eval_id": 3, "passed": 4, "total": 5, "pass_rate": 0.8, "duration_seconds": 36.625, "total_tokens": 22753}, {"eval_id": 4, "passed": 4, "total": 6, "pass_rate": 0.6666666666666666, "duration_seconds": 64.675, "total_tokens": 33743}]}]}};
+
+    // ---- State ----
+    let feedbackMap = {};  // run_id -> feedback text
+    let currentIndex = 0;
+    let visitedRuns = new Set();
+
+    // ---- Init ----
+    async function init() {
+      // Load saved feedback from server — but only if this isn't a fresh
+      // iteration (indicated by previous_feedback being present). When
+      // previous feedback exists, the feedback.json on disk is stale from
+      // the prior iteration and should not pre-fill the textareas.
+      const hasPrevious = Object.keys(EMBEDDED_DATA.previous_feedback || {}).length > 0
+        || Object.keys(EMBEDDED_DATA.previous_outputs || {}).length > 0;
+      if (!hasPrevious) {
+        try {
+          const resp = await fetch("/api/feedback");
+          const data = await resp.json();
+          if (data.reviews) {
+            for (const r of data.reviews) feedbackMap[r.run_id] = r.feedback;
+          }
+        } catch { /* first run, no feedback yet */ }
+      }
+
+      document.getElementById("skill-name").textContent = EMBEDDED_DATA.skill_name;
+      showRun(0);
+
+      // Wire up feedback auto-save
+      const textarea = document.getElementById("feedback");
+      let saveTimeout = null;
+      textarea.addEventListener("input", () => {
+        clearTimeout(saveTimeout);
+        document.getElementById("feedback-status").textContent = "";
+        saveTimeout = setTimeout(() => saveCurrentFeedback(), 800);
+      });
+    }
+
+    // ---- Navigation ----
+    function navigate(delta) {
+      const newIndex = currentIndex + delta;
+      if (newIndex >= 0 && newIndex < EMBEDDED_DATA.runs.length) {
+        saveCurrentFeedback();
+        showRun(newIndex);
+      }
+    }
+
+    function updateNavButtons() {
+      document.getElementById("prev-btn").disabled = currentIndex === 0;
+      document.getElementById("next-btn").disabled =
+        currentIndex === EMBEDDED_DATA.runs.length - 1;
+    }
+
+    // ---- Show a run ----
+    function showRun(index) {
+      currentIndex = index;
+      const run = EMBEDDED_DATA.runs[index];
+
+      // Progress
+      document.getElementById("progress").textContent =
+        `${index + 1} of ${EMBEDDED_DATA.runs.length}`;
+
+      // Prompt
+      document.getElementById("prompt-text").textContent = run.prompt;
+
+      // Config badge
+      const badge = document.getElementById("config-badge");
+      const configMatch = run.id.match(/(with_skill|without_skill|new_skill|old_skill)/);
+      if (configMatch) {
+        const config = configMatch[1];
+        const isBaseline = config === "without_skill" || config === "old_skill";
+        badge.textContent = config.replace(/_/g, " ");
+        badge.className = "config-badge " + (isBaseline ? "config-baseline" : "config-primary");
+        badge.style.display = "inline-block";
+      } else {
+        badge.style.display = "none";
+      }
+
+      // Outputs
+      renderOutputs(run);
+
+      // Previous outputs
+      renderPrevOutputs(run);
+
+      // Grades
+      renderGrades(run);
+
+      // Previous feedback
+      const prevFb = (EMBEDDED_DATA.previous_feedback || {})[run.id];
+      const prevEl = document.getElementById("prev-feedback");
+      if (prevFb) {
+        document.getElementById("prev-feedback-text").textContent = prevFb;
+        prevEl.style.display = "block";
+      } else {
+        prevEl.style.display = "none";
+      }
+
+      // Feedback
+      document.getElementById("feedback").value = feedbackMap[run.id] || "";
+      document.getElementById("feedback-status").textContent = "";
+
+      updateNavButtons();
+
+      // Track visited runs and promote done button when all visited
+      visitedRuns.add(index);
+      const doneBtn = document.getElementById("done-btn");
+      if (visitedRuns.size >= EMBEDDED_DATA.runs.length) {
+        doneBtn.classList.add("ready");
+      }
+
+      // Scroll main content to top
+      document.querySelector(".main").scrollTop = 0;
+    }
+
+    // ---- Render outputs ----
+    function renderOutputs(run) {
+      const container = document.getElementById("outputs-body");
+      container.innerHTML = "";
+
+      const outputs = run.outputs || [];
+      if (outputs.length === 0) {
+        container.innerHTML = '<div class="empty-state">No output files</div>';
+        return;
+      }
+
+      for (const file of outputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        // Always show file header with download link
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const content = document.createElement("div");
+        content.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          content.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          content.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          content.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(content, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          content.appendChild(a);
+        } else if (file.type === "error") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          pre.style.color = "var(--red)";
+          content.appendChild(pre);
+        }
+
+        fileDiv.appendChild(content);
+        container.appendChild(fileDiv);
+      }
+    }
+
+    // ---- XLSX rendering via SheetJS ----
+    function renderXlsx(container, b64Data) {
+      try {
+        const raw = Uint8Array.from(atob(b64Data), c => c.charCodeAt(0));
+        const wb = XLSX.read(raw, { type: "array" });
+
+        for (let i = 0; i < wb.SheetNames.length; i++) {
+          const sheetName = wb.SheetNames[i];
+          const ws = wb.Sheets[sheetName];
+
+          if (wb.SheetNames.length > 1) {
+            const sheetLabel = document.createElement("div");
+            sheetLabel.style.cssText =
+              "font-weight:600; font-size:0.8rem; color:#b0aea5; margin-top:0.5rem; margin-bottom:0.25rem;";
+            sheetLabel.textContent = "Sheet: " + sheetName;
+            container.appendChild(sheetLabel);
+          }
+
+          const htmlStr = XLSX.utils.sheet_to_html(ws, { editable: false });
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = htmlStr;
+          container.appendChild(wrapper);
+        }
+      } catch (err) {
+        container.textContent = "Error rendering spreadsheet: " + err.message;
+      }
+    }
+
+    // ---- Grades ----
+    function renderGrades(run) {
+      const section = document.getElementById("grades-section");
+      const content = document.getElementById("grades-content");
+
+      if (!run.grading) {
+        section.style.display = "none";
+        return;
+      }
+
+      const grading = run.grading;
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("grades-arrow").classList.remove("open");
+
+      const summary = grading.summary || {};
+      const expectations = grading.expectations || [];
+
+      let html = '<div style="padding: 1rem;">';
+
+      // Summary line
+      const passRate = summary.pass_rate != null
+        ? Math.round(summary.pass_rate * 100) + "%"
+        : "?";
+      const badgeClass = summary.pass_rate >= 0.8 ? "grade-pass" : summary.pass_rate >= 0.5 ? "" : "grade-fail";
+      html += '<div class="grades-summary">';
+      html += '<span class="grade-badge ' + badgeClass + '">' + passRate + '</span>';
+      html += '<span>' + (summary.passed || 0) + ' passed, ' + (summary.failed || 0) + ' failed of ' + (summary.total || 0) + '</span>';
+      html += '</div>';
+
+      // Assertions list
+      html += '<ul class="assertion-list">';
+      for (const exp of expectations) {
+        const statusClass = exp.passed ? "pass" : "fail";
+        const statusIcon = exp.passed ? "\u2713" : "\u2717";
+        html += '<li class="assertion-item">';
+        html += '<span class="assertion-status ' + statusClass + '">' + statusIcon + '</span>';
+        html += '<span>' + escapeHtml(exp.text) + '</span>';
+        if (exp.evidence) {
+          html += '<div class="assertion-evidence">' + escapeHtml(exp.evidence) + '</div>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+
+      html += '</div>';
+      content.innerHTML = html;
+    }
+
+    function toggleGrades() {
+      const content = document.getElementById("grades-content");
+      const arrow = document.getElementById("grades-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Previous outputs (collapsible) ----
+    function renderPrevOutputs(run) {
+      const section = document.getElementById("prev-outputs-section");
+      const content = document.getElementById("prev-outputs-content");
+      const prevOutputs = (EMBEDDED_DATA.previous_outputs || {})[run.id];
+
+      if (!prevOutputs || prevOutputs.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "block";
+      // Reset to collapsed
+      content.classList.remove("open");
+      document.getElementById("prev-outputs-arrow").classList.remove("open");
+
+      // Render the files into the content area
+      content.innerHTML = "";
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "1rem";
+
+      for (const file of prevOutputs) {
+        const fileDiv = document.createElement("div");
+        fileDiv.className = "output-file";
+
+        const header = document.createElement("div");
+        header.className = "output-file-header";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = file.name;
+        header.appendChild(nameSpan);
+        const dlBtn = document.createElement("a");
+        dlBtn.className = "dl-btn";
+        dlBtn.textContent = "Download";
+        dlBtn.download = file.name;
+        dlBtn.href = getDownloadUri(file);
+        header.appendChild(dlBtn);
+        fileDiv.appendChild(header);
+
+        const fc = document.createElement("div");
+        fc.className = "output-file-content";
+
+        if (file.type === "text") {
+          const pre = document.createElement("pre");
+          pre.textContent = file.content;
+          fc.appendChild(pre);
+        } else if (file.type === "image") {
+          const img = document.createElement("img");
+          img.src = file.data_uri;
+          img.alt = file.name;
+          fc.appendChild(img);
+        } else if (file.type === "pdf") {
+          const iframe = document.createElement("iframe");
+          iframe.src = file.data_uri;
+          fc.appendChild(iframe);
+        } else if (file.type === "xlsx") {
+          renderXlsx(fc, file.data_b64);
+        } else if (file.type === "binary") {
+          const a = document.createElement("a");
+          a.className = "download-link";
+          a.href = file.data_uri;
+          a.download = file.name;
+          a.textContent = "Download " + file.name;
+          fc.appendChild(a);
+        }
+
+        fileDiv.appendChild(fc);
+        wrapper.appendChild(fileDiv);
+      }
+
+      content.appendChild(wrapper);
+    }
+
+    function togglePrevOutputs() {
+      const content = document.getElementById("prev-outputs-content");
+      const arrow = document.getElementById("prev-outputs-arrow");
+      content.classList.toggle("open");
+      arrow.classList.toggle("open");
+    }
+
+    // ---- Feedback (saved to server -> feedback.json) ----
+    function saveCurrentFeedback() {
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // Build reviews array from map
+      const reviews = [];
+      for (const [run_id, feedback] of Object.entries(feedbackMap)) {
+        if (feedback.trim()) {
+          reviews.push({ run_id, feedback, timestamp: new Date().toISOString() });
+        }
+      }
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviews, status: "in_progress" }),
+      }).then(() => {
+        document.getElementById("feedback-status").textContent = "Saved";
+      }).catch(() => {
+        // Static mode or server unavailable — no-op on auto-save,
+        // feedback will be downloaded on final submit
+        document.getElementById("feedback-status").textContent = "Will download on submit";
+      });
+    }
+
+    // ---- Done ----
+    function showDoneDialog() {
+      // Save current textarea to feedbackMap (but don't POST yet)
+      const run = EMBEDDED_DATA.runs[currentIndex];
+      const text = document.getElementById("feedback").value;
+      if (text.trim() === "") {
+        delete feedbackMap[run.id];
+      } else {
+        feedbackMap[run.id] = text;
+      }
+
+      // POST once with status: complete — include ALL runs so the model
+      // can distinguish "no feedback" (looks good) from "not reviewed"
+      const reviews = [];
+      const ts = new Date().toISOString();
+      for (const r of EMBEDDED_DATA.runs) {
+        reviews.push({ run_id: r.id, feedback: feedbackMap[r.id] || "", timestamp: ts });
+      }
+      const payload = JSON.stringify({ reviews, status: "complete" }, null, 2);
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      }).then(() => {
+        document.getElementById("done-overlay").classList.add("visible");
+      }).catch(() => {
+        // Server not available (static mode) — download as file
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "feedback.json";
+        a.click();
+        URL.revokeObjectURL(url);
+        document.getElementById("done-overlay").classList.add("visible");
+      });
+    }
+
+    function closeDoneDialog() {
+      // Reset status back to in_progress
+      saveCurrentFeedback();
+      document.getElementById("done-overlay").classList.remove("visible");
+    }
+
+    // ---- Toast ----
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("visible");
+      setTimeout(() => toast.classList.remove("visible"), 2000);
+    }
+
+    // ---- Keyboard nav ----
+    document.addEventListener("keydown", (e) => {
+      // Don't capture when typing in textarea
+      if (e.target.tagName === "TEXTAREA") return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        navigate(-1);
+      } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        navigate(1);
+      }
+    });
+
+    // ---- Util ----
+    function getDownloadUri(file) {
+      if (file.data_uri) return file.data_uri;
+      if (file.data_b64) return "data:application/octet-stream;base64," + file.data_b64;
+      if (file.type === "text") return "data:text/plain;charset=utf-8," + encodeURIComponent(file.content);
+      return "#";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ---- View switching ----
+    function switchView(view) {
+      document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchView('${view}')"]`).classList.add("active");
+      document.getElementById("panel-" + view).classList.add("active");
+    }
+
+    // ---- Benchmark rendering ----
+    function renderBenchmark() {
+      const data = EMBEDDED_DATA.benchmark;
+      if (!data) return;
+
+      // Show the tabs
+      document.getElementById("view-tabs").style.display = "flex";
+
+      const container = document.getElementById("benchmark-content");
+      const summary = data.run_summary || {};
+      const metadata = data.metadata || {};
+      const notes = data.notes || [];
+
+      let html = "";
+
+      // Header
+      html += "<h2 style='font-family: Poppins, sans-serif; margin-bottom: 0.5rem;'>Benchmark Results</h2>";
+      html += "<p style='color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.25rem;'>";
+      if (metadata.skill_name) html += "<strong>" + escapeHtml(metadata.skill_name) + "</strong> &mdash; ";
+      if (metadata.timestamp) html += metadata.timestamp + " &mdash; ";
+      if (metadata.evals_run) html += "Evals: " + metadata.evals_run.join(", ") + " &mdash; ";
+      html += (metadata.runs_per_configuration || "?") + " runs per configuration";
+      html += "</p>";
+
+      // Summary table
+      html += '<table class="benchmark-table">';
+
+      function fmtStat(stat, pct) {
+        if (!stat) return "—";
+        const suffix = pct ? "%" : "";
+        const m = pct ? (stat.mean * 100).toFixed(0) : stat.mean.toFixed(1);
+        const s = pct ? (stat.stddev * 100).toFixed(0) : stat.stddev.toFixed(1);
+        return m + suffix + " ± " + s + suffix;
+      }
+
+      function deltaClass(val) {
+        if (!val) return "";
+        const n = parseFloat(val);
+        if (n > 0) return "benchmark-delta-positive";
+        if (n < 0) return "benchmark-delta-negative";
+        return "";
+      }
+
+      // Discover config names dynamically (everything except "delta")
+      const configs = Object.keys(summary).filter(k => k !== "delta");
+      const configA = configs[0] || "config_a";
+      const configB = configs[1] || "config_b";
+      const labelA = configA.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const labelB = configB.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const a = summary[configA] || {};
+      const b = summary[configB] || {};
+      const delta = summary.delta || {};
+
+      html += "<thead><tr><th>Metric</th><th>" + escapeHtml(labelA) + "</th><th>" + escapeHtml(labelB) + "</th><th>Delta</th></tr></thead>";
+      html += "<tbody>";
+
+      html += "<tr><td><strong>Pass Rate</strong></td>";
+      html += "<td>" + fmtStat(a.pass_rate, true) + "</td>";
+      html += "<td>" + fmtStat(b.pass_rate, true) + "</td>";
+      html += '<td class="' + deltaClass(delta.pass_rate) + '">' + (delta.pass_rate || "—") + "</td></tr>";
+
+      // Time (only show row if data exists)
+      if (a.time_seconds || b.time_seconds) {
+        html += "<tr><td><strong>Time (s)</strong></td>";
+        html += "<td>" + fmtStat(a.time_seconds, false) + "</td>";
+        html += "<td>" + fmtStat(b.time_seconds, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.time_seconds) + '">' + (delta.time_seconds ? delta.time_seconds + "s" : "—") + "</td></tr>";
+      }
+
+      // Tokens (only show row if data exists)
+      if (a.tokens || b.tokens) {
+        html += "<tr><td><strong>Tokens</strong></td>";
+        html += "<td>" + fmtStat(a.tokens, false) + "</td>";
+        html += "<td>" + fmtStat(b.tokens, false) + "</td>";
+        html += '<td class="' + deltaClass(delta.tokens) + '">' + (delta.tokens || "—") + "</td></tr>";
+      }
+
+      html += "</tbody></table>";
+
+      // Per-eval breakdown (if runs data available)
+      const runs = data.runs || [];
+      if (runs.length > 0) {
+        const evalIds = [...new Set(runs.map(r => r.eval_id))].sort((a, b) => a - b);
+
+        html += "<h3 style='font-family: Poppins, sans-serif; margin-bottom: 0.75rem;'>Per-Eval Breakdown</h3>";
+
+        const hasTime = runs.some(r => r.result && r.result.time_seconds != null);
+        const hasErrors = runs.some(r => r.result && r.result.errors > 0);
+
+        for (const evalId of evalIds) {
+          const evalRuns = runs.filter(r => r.eval_id === evalId);
+          const evalName = evalRuns[0] && evalRuns[0].eval_name ? evalRuns[0].eval_name : "Eval " + evalId;
+
+          html += "<h4 style='font-family: Poppins, sans-serif; margin: 1rem 0 0.5rem; color: var(--text);'>" + escapeHtml(evalName) + "</h4>";
+          html += '<table class="benchmark-table">';
+          html += "<thead><tr><th>Config</th><th>Run</th><th>Pass Rate</th>";
+          if (hasTime) html += "<th>Time (s)</th>";
+          if (hasErrors) html += "<th>Crashes During Execution</th>";
+          html += "</tr></thead>";
+          html += "<tbody>";
+
+          // Group by config and render with average rows
+          const configGroups = [...new Set(evalRuns.map(r => r.configuration))];
+          for (let ci = 0; ci < configGroups.length; ci++) {
+            const config = configGroups[ci];
+            const configRuns = evalRuns.filter(r => r.configuration === config);
+            if (configRuns.length === 0) continue;
+
+            const rowClass = ci === 0 ? "benchmark-row-with" : "benchmark-row-without";
+            const configLabel = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+
+            for (const run of configRuns) {
+              const r = run.result || {};
+              const prClass = r.pass_rate >= 0.8 ? "benchmark-delta-positive" : r.pass_rate < 0.5 ? "benchmark-delta-negative" : "";
+              html += '<tr class="' + rowClass + '">';
+              html += "<td>" + configLabel + "</td>";
+              html += "<td>" + run.run_number + "</td>";
+              html += '<td class="' + prClass + '">' + ((r.pass_rate || 0) * 100).toFixed(0) + "% (" + (r.passed || 0) + "/" + (r.total || 0) + ")</td>";
+              if (hasTime) html += "<td>" + (r.time_seconds != null ? r.time_seconds.toFixed(1) : "—") + "</td>";
+              if (hasErrors) html += "<td>" + (r.errors || 0) + "</td>";
+              html += "</tr>";
+            }
+
+            // Average row
+            const rates = configRuns.map(r => (r.result || {}).pass_rate || 0);
+            const avgRate = rates.reduce((a, b) => a + b, 0) / rates.length;
+            const avgPrClass = avgRate >= 0.8 ? "benchmark-delta-positive" : avgRate < 0.5 ? "benchmark-delta-negative" : "";
+            html += '<tr class="benchmark-row-avg ' + rowClass + '">';
+            html += "<td>" + configLabel + "</td>";
+            html += "<td>Avg</td>";
+            html += '<td class="' + avgPrClass + '">' + (avgRate * 100).toFixed(0) + "%</td>";
+            if (hasTime) {
+              const times = configRuns.map(r => (r.result || {}).time_seconds).filter(t => t != null);
+              html += "<td>" + (times.length ? (times.reduce((a, b) => a + b, 0) / times.length).toFixed(1) : "—") + "</td>";
+            }
+            if (hasErrors) html += "<td></td>";
+            html += "</tr>";
+          }
+          html += "</tbody></table>";
+
+          // Per-assertion detail for this eval
+          const runsWithExpectations = {};
+          for (const config of configGroups) {
+            runsWithExpectations[config] = evalRuns.filter(r => r.configuration === config && r.expectations && r.expectations.length > 0);
+          }
+          const hasAnyExpectations = Object.values(runsWithExpectations).some(runs => runs.length > 0);
+          if (hasAnyExpectations) {
+            // Collect all unique assertion texts across all configs
+            const allAssertions = [];
+            const seen = new Set();
+            for (const config of configGroups) {
+              for (const run of runsWithExpectations[config]) {
+                for (const exp of (run.expectations || [])) {
+                  if (!seen.has(exp.text)) {
+                    seen.add(exp.text);
+                    allAssertions.push(exp.text);
+                  }
+                }
+              }
+            }
+
+            html += '<table class="benchmark-table" style="margin-top: 0.5rem;">';
+            html += "<thead><tr><th>Assertion</th>";
+            for (const config of configGroups) {
+              const label = config.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+              html += "<th>" + escapeHtml(label) + "</th>";
+            }
+            html += "</tr></thead><tbody>";
+
+            for (const assertionText of allAssertions) {
+              html += "<tr><td>" + escapeHtml(assertionText) + "</td>";
+
+              for (const config of configGroups) {
+                html += "<td>";
+                for (const run of runsWithExpectations[config]) {
+                  const exp = (run.expectations || []).find(e => e.text === assertionText);
+                  if (exp) {
+                    const cls = exp.passed ? "benchmark-delta-positive" : "benchmark-delta-negative";
+                    const icon = exp.passed ? "\u2713" : "\u2717";
+                    html += '<span class="' + cls + '" title="Run ' + run.run_number + ': ' + escapeHtml(exp.evidence || "") + '">' + icon + "</span> ";
+                  } else {
+                    html += "— ";
+                  }
+                }
+                html += "</td>";
+              }
+              html += "</tr>";
+            }
+            html += "</tbody></table>";
+          }
+        }
+      }
+
+      // Notes
+      if (notes.length > 0) {
+        html += '<div class="benchmark-notes">';
+        html += "<h3>Analysis Notes</h3>";
+        html += "<ul>";
+        for (const note of notes) {
+          html += "<li>" + escapeHtml(note) + "</li>";
+        }
+        html += "</ul></div>";
+      }
+
+      container.innerHTML = html;
+    }
+
+    // ---- Start ----
+    init();
+    renderBenchmark();
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "expectations": [
+    {
+      "text": "preserves_TR_01_through_07",
+      "passed": true,
+      "evidence": "first10=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10']"
+    },
+    {
+      "text": "no_renumbering",
+      "passed": true,
+      "evidence": "first7=['01', '02', '03', '04', '05', '06', '07']"
+    },
+    {
+      "text": "stale_link_flagged_not_deleted",
+      "passed": true,
+      "evidence": "warn=True"
+    },
+    {
+      "text": "new_TRs_appended_starting_at_TR_08",
+      "passed": true,
+      "evidence": "new_count=23"
+    },
+    {
+      "text": "reviewed_at_nulled_or_flagged",
+      "passed": false,
+      "evidence": "match"
+    },
+    {
+      "text": "mentions_git_diff_or_living_doc",
+      "passed": true,
+      "evidence": "match"
+    }
+  ],
+  "passed_count": 5,
+  "total": 6
+}
