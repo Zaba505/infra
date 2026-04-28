@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_enumerate: Response declines to enumerate experiences because the gate is not satisfied.",
+      "passed": false,
+      "evidence": "Response proposes 11 enumerated UXes under 'Proposed User Experiences' without mentioning any gate."
+    },
+    {
+      "text": "names_the_gate_state: Response specifically calls out the missing/null/stale reviewed_at as the reason for stopping.",
+      "passed": false,
+      "evidence": "No mention of reviewed_at or any review-state gate anywhere in the response."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at: Response tells the user to add or update reviewed_at in the capability doc's frontmatter (or offers to record a verbal confirmation).",
+      "passed": false,
+      "evidence": "Response never instructs the user to set reviewed_at; only asks operator to confirm the UX list."
+    },
+    {
+      "text": "no_issues_filed: No `gh issue create` invocation occurs.",
+      "passed": true,
+      "evidence": "Response says 'I have not run gh issue create'; gh-commands.txt contains the would-be commands but they were not executed."
+    },
+    {
+      "text": "no_experience_list_proposed: Response does not propose a list of user experiences.",
+      "passed": false,
+      "evidence": "Response proposes 11 numbered UXes (provision-a-user, upload-content-manually, ..., operator-succession-takeover)."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  }
+}

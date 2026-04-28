@@ -1,0 +1,45 @@
+{
+  "expectations": [
+    {
+      "text": "produces_experience_list: Response enumerates the proposed experiences before filing.",
+      "passed": true,
+      "evidence": "Response has '## Experiences filed (10)' section enumerating all 10 experiences before the gh commands block."
+    },
+    {
+      "text": "files_one_issue_per_experience: Skill prints/invokes `gh issue create` once per enumerated experience.",
+      "passed": true,
+      "evidence": "gh-commands.txt contains exactly 10 `gh issue create` commands matching the 10 enumerated experiences."
+    },
+    {
+      "text": "issue_titles_match_repo_convention: Filed issue titles follow the `story(ux): ...` form.",
+      "passed": true,
+      "evidence": "All titles begin with `story(ux): ...`, e.g. 'story(ux): upload a photo or file \u2014 self-hosted-personal-media-storage'."
+    },
+    {
+      "text": "issue_bodies_name_persona: Each filed issue body identifies the persona for that experience.",
+      "passed": true,
+      "evidence": "Each body contains a '### Persona' section, e.g. 'Authorized user (operator, family member, or friend)' or 'Operator (Carson)'."
+    },
+    {
+      "text": "issue_bodies_anchor_to_capability: Each filed issue body references at least one specific capability section.",
+      "passed": true,
+      "evidence": "Each body's 'Anchored in the parent capability' section cites Stakeholders / Triggers / Outputs / Business Rules / Success Criteria."
+    },
+    {
+      "text": "issue_bodies_reference_define_user_experience: Each filed issue body names `define-user-experience` as the next-step skill.",
+      "passed": true,
+      "evidence": "Each body's '### Authoring' section says 'This UX will be authored via the `define-user-experience` skill'."
+    },
+    {
+      "text": "no_ux_files_written: No UX markdown files are written under `user-experiences/`.",
+      "passed": true,
+      "evidence": "Outputs directory contains only response.md and gh-commands.txt; no UX markdown files written under user-experiences/."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  }
+}

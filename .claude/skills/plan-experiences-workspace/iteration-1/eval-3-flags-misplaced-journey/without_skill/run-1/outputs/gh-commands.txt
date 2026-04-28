@@ -1,0 +1,51 @@
+# Printed only — NOT executed.
+# One issue for the planned UX under self-hosted-personal-media-storage.
+
+gh issue create \
+  --title "UX: Operator deploys the media-storage service for the first time (self-hosted-personal-media-storage)" \
+  --label "user-experience,capability:self-hosted-personal-media-storage" \
+  --body "$(cat <<'EOF'
+## Context
+
+Capability: `self-hosted-personal-media-storage`
+Source: `.claude/skills/plan-experiences/evals/fixtures/self-hosted-personal-media-storage.md` (reviewed_at: 2026-04-28)
+
+## Scope concern — confirm before authoring
+
+The originating request asked for "the operator standing up the hosting platform from scratch." That phrasing overlaps with the sibling capability `self-hosted-application-platform`, which already owns a `stand-up-the-platform` UX. The fixture for *this* capability marks "general-purpose self-hosted application hosting" as out of scope.
+
+This issue reframes the journey as **deploying the media-storage service itself for the first time** — which is in scope. Before authoring, please confirm:
+
+- [ ] The intent is the media-storage service deploy (not the general application platform).
+- [ ] If the media-storage service is built on top of `self-hosted-application-platform`, this UX *consumes* that capability's stand-up UX rather than duplicating it.
+- [ ] Otherwise, close this issue and direct the work to `self-hosted-application-platform`'s existing UX.
+
+## Proposed UX
+
+**Title:** Operator deploys the media-storage service for the first time
+
+**Primary actor:** Operator (sole accountable party)
+
+**Trigger:** Operator decides to start running the capability; nothing is deployed yet.
+
+**Goal state:** A running, reachable media-storage service exists; operator holds working admin credentials; successor credentials are sealed and escrowed; a runbook exists; the operator is ready to invite the first user.
+
+**Key business rules in play:**
+- Closed user set — deploy ends with only the operator having access.
+- Private by default — operator cannot read user content post-deploy.
+- Operator succession — successor credentials produced, sealed, not used routinely.
+- Lost credentials = lost data — flow surfaces this trade-off to the operator.
+
+**Out of scope for this UX:**
+- Inviting/provisioning end users.
+- Routine operation, upgrades, capacity expansion.
+- Off-site backup configuration.
+- General-purpose application hosting (separate capability).
+
+**Success signal:** Operator authenticates; privacy posture is verifiable; successor handoff is sealed; runbook exists.
+
+## Next step
+
+Author this UX via the `define-user-experience` skill once the scope concern above is resolved.
+EOF
+)"

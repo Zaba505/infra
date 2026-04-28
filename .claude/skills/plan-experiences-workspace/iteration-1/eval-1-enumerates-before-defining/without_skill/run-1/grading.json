@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "text": "produces_an_experience_list: Response contains a numbered or bulleted list of proposed user experiences (titles + persona + one-liners), not a single UX draft.",
+      "passed": true,
+      "evidence": "Numbered list 1-11 under 'Enumeration' with bold titles and one-liner descriptions."
+    },
+    {
+      "text": "each_item_names_a_persona: Each proposed experience identifies the persona (drawn from the capability's Stakeholders section).",
+      "passed": true,
+      "evidence": "Each item identifies actor (e.g. 'A user', 'A content owner', 'A recipient', 'The operator', 'The designated successor')."
+    },
+    {
+      "text": "each_item_anchored_in_capability: Each proposed experience references the capability section that motivates it.",
+      "passed": true,
+      "evidence": "Each item cites parent capability sections in parentheses (Triggers, Business Rules, Outputs, Preconditions)."
+    },
+    {
+      "text": "no_journey_steps_proposed: Response does not draft step-by-step journey content or describe UI for any experience.",
+      "passed": true,
+      "evidence": "Items are one-liners; no step-by-step journey or UI description."
+    },
+    {
+      "text": "asks_for_user_approval_before_filing: Response explicitly asks the user to confirm/edit the list before issues are filed.",
+      "passed": true,
+      "evidence": "'These four questions should be confirmed with the human before filing the issues below.'"
+    },
+    {
+      "text": "no_premature_issue_filing: No actual `gh issue create` invocation occurs in this turn (printing them as proposed commands is OK).",
+      "passed": true,
+      "evidence": "gh-commands.txt header: '# NOT EXECUTED \u2014 these are the gh issue create commands that would be run'."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  }
+}

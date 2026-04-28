@@ -1,0 +1,300 @@
+gh issue create --title "story(ux): upload a photo or file — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want to upload a single photo or file to the system so that my content is durably stored under my own control instead of on a commercial cloud provider.
+
+### Persona
+
+Authorized user (operator, family member, or friend) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actors (any authorized user uploading their own content).
+- **Triggers / Inputs:** "A user uploads a file (single, manual upload)"; required inputs include authenticated identity, file bytes, and source metadata.
+- **Outputs / Deliverables:** "The user's content is durably stored and retrievable by them."
+- **Business Rules:** Private by default (uploaded content is private to its owner).
+- **Success Criteria:** Zero data loss; supports active-user adoption.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/upload-a-photo-or-file.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): back up a device automatically — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want my device (e.g. phone camera roll) to back up to the system automatically so that new media I capture is preserved without me having to remember to upload it.
+
+### Persona
+
+Authorized user (operator, family member, or friend) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actors (any authorized user whose device performs the backup).
+- **Triggers / Inputs:** "A user's device performs an automated backup (e.g. phone camera roll sync)."
+- **Outputs / Deliverables:** Durable storage of the user's content.
+- **Business Rules:** Private by default; no per-user storage quotas (so unattended sync is not capped).
+- **Success Criteria:** Zero data loss; growth/non-attrition of active users.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/back-up-a-device-automatically.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): bulk import from an existing provider — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want to bulk-import my media from an existing commercial cloud provider (e.g. a Google Photos takeout archive) so that I can migrate off that provider and consolidate my archive on the self-hosted system.
+
+### Persona
+
+Authorized user (operator, family member, or friend) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actors initiating the import.
+- **Triggers / Inputs:** "A user performs a bulk import from an existing provider (e.g. a Google Photos takeout archive)"; required inputs include authenticated identity and the archive bytes plus provided metadata.
+- **Outputs / Deliverables:** Durable storage of imported content; downstream effect "stop paying a commercial provider for the same content."
+- **Business Rules:** Private by default; no per-user storage quotas.
+- **Success Criteria:** Active-user adoption (migration is the moment a provisioned user becomes active); zero data loss.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/bulk-import-from-an-existing-provider.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): browse and view own content — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want to browse, view, download, and organize my own stored content so that the system functions as my primary place to revisit my personal media.
+
+### Persona
+
+Authorized user (operator, family member, or friend) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actors viewing/organizing their own content.
+- **Triggers / Inputs:** "A user views, downloads, or organizes their own content."
+- **Outputs / Deliverables:** "The user's content is durably stored and retrievable by them."
+- **Business Rules:** Private by default (the user only sees their own content unless explicitly shared with them).
+- **Success Criteria:** Active-user count (browsing is the canonical sign of active use).
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/browse-and-view-own-content.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): share content with another user or group — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As a content owner, I want to share a piece of my content with another authorized user or a shared group (e.g. a "family album") so that the people I choose can see it while everyone else — including the operator — cannot.
+
+### Persona
+
+Authorized user acting as content owner — from Stakeholders / Primary actors. Recipients are Secondary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actor (content owner sharing); secondary actors (named recipients); affected parties (subjects depicted in shared media).
+- **Triggers / Inputs:** "A content owner shares content with another user or a shared group"; recipient identity required.
+- **Outputs / Deliverables:** "Shared content becomes retrievable by the explicitly named recipients."
+- **Business Rules:** Private by default (sharing is the only way content becomes visible to another user); closed user set (recipients must be provisioned users); no public sharing (out of scope).
+- **Success Criteria:** Active-user count (sharing drives mutual usage among the operator's circle).
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/share-content-with-another-user-or-group.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): delete own content — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want to delete content I own so that it is removed from my view immediately and purged from the system after the retention window, with a grace period in case I deleted it by accident.
+
+### Persona
+
+Authorized user (content owner) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actor (the content owner deleting).
+- **Triggers / Inputs:** "A user deletes their own content."
+- **Outputs / Deliverables:** "Content the user deleted is removed from their view immediately and purged from the system after the retention window."
+- **Business Rules:** 30-day retention after deletion (the window exists for accident recovery; after it elapses, the data is gone).
+- **Success Criteria:** Zero data loss — only user-initiated deletion is acceptable as a path to data loss.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/delete-own-content.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): pull an on-demand archive of own content — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As an authorized user, I want to pull a complete on-demand archive of my own content (without operator involvement) so that my data survives even if the system later becomes unavailable and no successor takes over.
+
+### Persona
+
+Authorized user (operator, family member, or friend) — from Stakeholders / Primary actors.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Primary actor (the user exporting their own content).
+- **Triggers / Inputs:** Implicit trigger from Operator Succession rule: every user can pull an export at will while the system is healthy; users are expected to pull these proactively and may schedule periodic pulls.
+- **Outputs / Deliverables:** A user-controlled archive of their content existing outside the system.
+- **Business Rules:** Operator succession (mechanism (a) — user-pulled exports preserve user data even if no successor takes over); lost credentials = lost data (so exports are the user's only safety net once locked out).
+- **Success Criteria:** Longevity outcome (#2 in Purpose); zero data loss across long horizons.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/pull-on-demand-archive-of-own-content.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): provision a new user — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As the operator, I want to invite and provision a new authorized user (a family member or friend) so that the closed user set grows on my terms and the new user can begin storing their own content.
+
+### Persona
+
+Operator (Carson) — from Stakeholders / Owner & Accountable party.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Owner / Accountable party (only the operator can add users).
+- **Triggers / Inputs:** Preconditions: "The user has been explicitly invited and provisioned by the operator (the user set is closed; no self-signup)."
+- **Outputs / Deliverables:** A new authorized identity capable of acting as a primary actor for all other journeys.
+- **Business Rules:** Closed user set; private by default; lost credentials = lost data (the new user must understand the credential posture at provisioning time).
+- **Success Criteria:** Growth/non-attrition of active users.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/provision-a-new-user.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): remove a user from the system — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As the operator, I want to remove an authorized user from the system (because they are leaving voluntarily, or because credible evidence of an illegal-content violation forced termination) so that the user set stays closed and their data is handled per the retention window.
+
+### Persona
+
+Operator (Carson) — from Stakeholders / Owner & Accountable party.
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Owner / Accountable party (only the operator can remove users).
+- **Triggers / Inputs:** Implicit from Business Rules — closed user set membership change; no-illegal-content termination event.
+- **Outputs / Deliverables:** The user's access ends; their content enters the 30-day retention window and is then purged.
+- **Business Rules:** Closed user set; no illegal content (operator may terminate access on credible evidence); 30-day retention after departure; private by default (operator removes access without ever inspecting the user's content).
+- **Success Criteria:** Zero data loss for *other* users (the removal must not disturb anyone else's content); active-user count integrity.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/remove-a-user-from-the-system.md`.
+
+### Related
+
+#722
+EOF
+)"
+gh issue create --title "story(ux): take over as successor operator — self-hosted-personal-media-storage" --body "$(cat <<'EOF'
+### Experience
+
+As the designated successor operator, I want to take over running the system using sealed/escrowed credentials and the runbook so that the system continues to operate when the primary operator becomes unavailable — without ever gaining the ability to read user content.
+
+### Persona
+
+Successor operator (a designated party who, on takeover, becomes the operator) — from Stakeholders / Owner & Accountable party (Operator Succession sub-clause).
+
+### Anchored in the parent capability
+
+- **Stakeholders:** Owner / Accountable party (succession path).
+- **Triggers / Inputs:** "Takeover is a discrete event triggered by operator unavailability"; sealed credentials and runbook are the inputs.
+- **Outputs / Deliverables:** Continuity of the running system; the successor's access is to operate the system, not to read user content.
+- **Business Rules:** Operator succession (mechanism (b)); private by default and lost credentials = lost data continue to hold across the transition.
+- **Success Criteria:** Longevity outcome (#2); zero data loss across the takeover.
+
+### Parent capability
+
+[self-hosted-personal-media-storage](../docs/content/capabilities/self-hosted-personal-media-storage/_index.md)
+
+### Authoring
+
+This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/self-hosted-personal-media-storage/user-experiences/take-over-as-successor-operator.md`.
+
+### Related
+
+#722
+EOF
+)"
