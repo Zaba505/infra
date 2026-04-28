@@ -10,7 +10,7 @@ reviewed_at: null
 
 > **Review gate.** Set `reviewed_at:` in the frontmatter to today's ISO date once you have read and edited this document. The `plan-adrs` skill will refuse to enumerate decisions until `reviewed_at` is newer than the file's last modification.
 
-**Parent capability:** [{{capability_name}}](_index.md)
+**Parent capability:** [{{capability_name}}]({{< ref "_index.md" >}})
 
 ## How to read this
 
@@ -24,7 +24,13 @@ Each requirement is **forced** by the capability or a user experience — it con
 Each requirement should follow this shape:
 
 ### TR-01: {short imperative phrase}
-**Source:** [Capability §Section](_index.md#section) · [UX: name §Section](user-experiences/name.md#section)
+**Source:** [Capability §Section]({{< ref "_index.md#section-anchor" >}}) · [UX: name §Section]({{< ref "user-experiences/name.md#section-anchor" >}})
+
+<!--
+Cross-links MUST use Hugo's `ref` shortcode — never raw paths like `(_index.md)` or `../foo.md`.
+Section deep-links require an explicit anchor on the target heading (e.g. `## Business Rules {#business-rules}`).
+Hugo's build will fail on broken `ref`s; raw paths break silently when content is reorganized.
+-->
 **Requirement:** {one paragraph describing the constraint in technical-but-implementation-neutral terms}
 **Why this is a requirement, not a decision:** {what makes it forced rather than chosen — usually a citation to the source's intent}
 

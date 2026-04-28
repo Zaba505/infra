@@ -23,7 +23,7 @@ Status lifecycle: proposed → accepted → (later) superseded
 The plan-tech-design skill refuses to compose tech-design.md until every ADR is accepted (or superseded with the superseder accepted).
 -->
 
-**Parent capability:** [{{capability_name}}](../_index.md)
+**Parent capability:** [{{capability_name}}]({{< ref "../_index.md" >}})
 **Addresses requirements:** {{tr_citations}}  <!-- e.g. TR-03, TR-07 -->
 
 ## Context and Problem Statement

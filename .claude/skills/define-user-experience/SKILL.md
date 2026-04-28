@@ -103,12 +103,20 @@ The UX doc filename should be kebab-case and verb-led — `upload-photo.md`, `sh
 
 ### Cross-linking
 
-In the UX doc, set the `Parent capability:` link to `../_index.md` (or the absolute Hugo path). In the parent capability's `_index.md`, optionally add a `## User Experiences` section listing the children — but only if the user wants it; Docsy will surface them in the sidebar regardless.
+In the UX doc, set the `Parent capability:` link using Hugo's `ref` shortcode — `[{{capability_name}}]({{< ref "../_index.md" >}})`. **Never use raw paths** (`(../_index.md)`, `(/capabilities/{name}/)`); Hugo's build will fail loudly on a broken `ref`, while raw paths break silently when content is reorganized.
+
+If a link targets a specific section on a page, the target heading must carry an explicit anchor — e.g. `## Business Rules {#business-rules}` — and the link uses that anchor: `{{< ref "../_index.md#business-rules" >}}`. Do not rely on Hugo's slugified-from-heading-text default; rewording a heading breaks every implicit anchor pointing at it.
+
+In the parent capability's `_index.md`, optionally add a `## User Experiences` section listing the children — but only if the user wants it; Docsy will surface them in the sidebar regardless.
 
 After producing the doc, briefly tell the user:
 - Where it was saved
 - Which sections still have open questions
 - That this is one of likely several UX docs for the capability — what other journeys did the capability imply that aren't covered yet?
+
+## Validate the rendered page
+
+After saving the UX doc, run `cd docs && hugo server` and open the page in a browser to confirm it renders correctly — including the parent-capability `ref` link and the Mermaid flow diagram. A clean build is necessary but not sufficient: pages can build with no errors yet render broken (missing/incorrect front-matter `type`, unresolved `ref` shortcode, malformed Mermaid). The doc is not done until the rendered page has been visually validated. If you cannot run the preview in this session, say so explicitly to the user rather than reporting the doc as done.
 
 ## Output format
 

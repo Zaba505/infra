@@ -177,6 +177,10 @@ After filing, tell the user explicitly:
 - **Don't paper over gaps.** Prose is not a substitute for a missing decision or a missing spec. Surface, don't smooth.
 - **The audit trail is non-negotiable.** Every TR appears in the table; every ADR with `status: accepted` is realized in some component. If you cannot make these true, return to `plan-adrs` / `define-adr`.
 
+## Validate the rendered page
+
+After saving `tech-design.md` (and before filing component/gap issues), run `cd docs && hugo server` and open the page in a browser to confirm it renders correctly — every `ref` link to TRs, ADRs, and UXs must resolve, the component Mermaid diagram must render, and the audit-trail table must format cleanly. A clean build is necessary but not sufficient; pages can build with no errors yet render broken (missing/incorrect front-matter `type`, unresolved `ref` shortcode, malformed Mermaid). The doc is not done until the rendered page has been visually validated. If you cannot run the preview in this session, say so explicitly to the user rather than reporting the doc as done.
+
 ## Output format
 
 `tech-design.md` is plain markdown with Hugo/Docsy frontmatter. Mermaid renders natively in Docsy. Component-inventory and audit-trail tables use standard markdown tables. No code fences around the whole document.

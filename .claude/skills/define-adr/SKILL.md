@@ -124,6 +124,10 @@ Options that depart from these patterns are allowed but require explicit ADR-lev
 - **Two options is the floor, not the goal.** If three or four are real, draft three or four. Don't force a straw option in to hit a count — but if you are tempted to write only one option, the decision is probably not yet ADR-worthy.
 - **The human picks.** Even when the answer feels obvious, mirror back and ask. Decisions made by the human against an honest option set are robust; decisions made by the agent are brittle.
 
+## Validate the rendered page
+
+After saving the ADR file (and any new `adrs/_index.md`), run `cd docs && hugo server` and open the ADR page in a browser to confirm it renders correctly — the `ref` link to the parent capability must resolve, the ADR must appear in the `adrs/` section list, and any embedded Mermaid must render. A clean build is necessary but not sufficient; pages can build with no errors yet render broken (missing/incorrect front-matter `type` or `status`, unresolved `ref` shortcode, malformed Mermaid). The doc is not done until the rendered page has been visually validated. If you cannot run the preview in this session, say so explicitly to the user rather than reporting the doc as done.
+
 ## Output format
 
 One MADR 4.0.0 markdown file from `assets/template.md`, with Hugo/Docsy frontmatter intact. No code fences around the whole document. Mermaid is allowed inside the body if a diagram clarifies an option.

@@ -7,8 +7,8 @@ type: docs
 
 > **Composed document.** Synthesizes accepted ADRs in `adrs/` and the requirements in `tech-requirements.md`. For *why* a decision was made, follow the ADR link. This doc covers *what* the system looks like once the decisions are realized.
 
-**Parent capability:** [{{capability_name}}](_index.md)
-**Inputs:** [Technical Requirements](tech-requirements.md) · [ADRs](adrs/_index.md) · [User Experiences](user-experiences/_index.md)
+**Parent capability:** [{{capability_name}}]({{< ref "_index.md" >}})
+**Inputs:** [Technical Requirements]({{< ref "tech-requirements.md" >}}) · [ADRs]({{< ref "adrs/_index.md" >}}) · [User Experiences]({{< ref "user-experiences/_index.md" >}})
 
 ## Overview
 
@@ -35,7 +35,7 @@ Example entry:
 
 #### tenant-registry service
 **Location:** `services/tenant-registry/`
-**Established by:** [ADR-0002: Tenant state ownership](adrs/0002-tenant-state-ownership.md)
+**Established by:** [ADR-0002: Tenant state ownership]({{< ref "adrs/0002-tenant-state-ownership.md" >}})
 **Responsibility:** Source of truth for tenant identity and lifecycle state. Owns the tenants table.
 -->
 

@@ -68,11 +68,14 @@ Requirements are identified `TR-01`, `TR-02`, … and **numbers are append-only 
 
 ## Source links
 
-Every TR must link back. Use Hugo-relative paths:
-- Capability section: `[Capability §Business Rules](_index.md#business-rules)`
-- UX page or section: `[UX: upload-photo §Edge Cases](user-experiences/upload-photo.md#edge-cases)`
-- Prior shared ADR: `[ADR-0006](/r&d/adrs/0006-resource-identifier-standard/)`
-- Repo pattern from CLAUDE.md: `[CLAUDE.md §Critical Go Patterns](/CLAUDE.md)` (or just cite inline)
+Every TR must link back. **Use Hugo's `ref` shortcode for every internal link — never raw paths.** Hugo will fail the build on a broken `ref`; raw paths break silently when content is reorganized.
+
+- Capability section: `[Capability §Business Rules]({{< ref "_index.md#business-rules" >}})`
+- UX page or section: `[UX: upload-photo §Edge Cases]({{< ref "user-experiences/upload-photo.md#edge-cases" >}})`
+- Prior shared ADR: `[ADR-0006]({{< ref "/r&d/adrs/0006-resource-identifier-standard" >}})`
+- Repo pattern from CLAUDE.md: cite inline (CLAUDE.md is not Hugo content; do not link with `ref`).
+
+**Section deep-links require an explicit anchor on the target heading.** Add `{#anchor-id}` to the heading you are linking to (e.g. `## Business Rules {#business-rules}`) before linking — Hugo's default slugify-from-heading-text breaks every implicit anchor as soon as a heading is reworded. If you cite a section that has no explicit anchor yet, pause the extraction and either add the anchor in the source doc or capture the missing-annotation as an open question.
 
 If a requirement has multiple sources, list them all. Multi-sourced requirements are usually the most important ones — they are the ones that show up from more than one direction.
 
@@ -113,6 +116,10 @@ After producing the doc, tell the user:
 - How many TRs were added/preserved/flagged
 - Which open questions are parked for the ADR stage
 - That `plan-adrs` is gated on `reviewed_at` and won't run until they set it
+
+## Validate the rendered page
+
+After saving (or re-extracting) `tech-requirements.md`, run `cd docs && hugo server` and open the page in a browser to confirm it renders correctly — every TR's `ref` source link must resolve, and any flagged stale-source markers must be visible. A clean build is necessary but not sufficient; pages can build clean while rendering broken (missing/incorrect front-matter `type`, unresolved `ref` shortcode, broken section anchor). The doc is not done until the rendered page has been visually validated. If you cannot run the preview in this session, say so explicitly to the user rather than reporting the doc as done.
 
 ## Output format
 

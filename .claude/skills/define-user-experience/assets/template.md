@@ -7,7 +7,7 @@ type: docs
 
 > **One-line definition:** {{one_liner}}
 
-**Parent capability:** [{{capability_name}}]({{capability_link}})
+**Parent capability:** [{{capability_name}}]({{< ref "../_index.md" >}})
 
 ## Persona
 Who is having this experience? Pick one of the actors named in the parent capability's Stakeholders section, and describe them in the context of *this* journey.
