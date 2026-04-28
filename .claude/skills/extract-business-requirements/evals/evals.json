@@ -1,0 +1,80 @@
+{
+  "skill_name": "extract-business-requirements",
+  "notes": [
+    "Mirrors the structure of define-technical-requirements/evals/evals.json. The BR layer sits between UX docs and TRs; these cases exercise the boundary between BR and TR (case 2), BR and decision (case 3), missing-inputs refusal (case 0), happy-path extraction (case 1), and re-extraction numbering preservation (case 4).",
+    "Test-design note: the re-extraction fixture (fixtures/business-requirements-br05.md) uses naive frontmatter — it does not describe the skill's own rules — so the baseline (no-skill) run cannot leak skill behavior."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "missing-inputs-refuses",
+      "prompt": "Help me extract the business requirements for a new 'shared file vault' capability. We haven't written the capability doc yet but I know what I want — let's just go.",
+      "expected_output": "Should refuse to proceed and route the user to define-capability (and then define-user-experience) first. Should not produce a business-requirements.md without those inputs.",
+      "assertions": [
+        {"name": "response_refuses_to_proceed", "check": "Response declines to extract business requirements until prerequisites exist."},
+        {"name": "routes_to_define_capability", "check": "Response mentions running `define-capability` first."},
+        {"name": "routes_to_define_user_experience", "check": "Response mentions `define-user-experience` as a needed input."},
+        {"name": "no_business_requirements_md_produced", "check": "outputs/ does not contain a business-requirements.md (or any populated requirements document)."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "extracts-not-translates",
+      "prompt": "Extract the business requirements for the self-hosted-application-platform capability. The capability and its user experiences are already documented under docs/content/capabilities/self-hosted-application-platform/.",
+      "expected_output": "Should produce ONLY business-requirements.md after reading the capability and all UX docs. Each BR should link back to a specific section via Hugo `ref` shortcode. BRs must be in business/user-outcome terms (no technical cadences, no protocols, no products). Must NOT propose TRs, must NOT propose ADRs, must NOT skip ahead. Should end by telling the user to set reviewed_at and explain that define-technical-requirements is gated on it.",
+      "assertions": [
+        {"name": "produces_business_requirements_md", "check": "outputs/ contains a file named business-requirements.md."},
+        {"name": "frontmatter_has_reviewed_at_null", "check": "Produced file's frontmatter contains `reviewed_at: null`."},
+        {"name": "has_multiple_BR_entries", "check": "Produced file has at least 4 BR-NN headings (BR-01..BR-04+)."},
+        {"name": "each_BR_has_source_link", "check": "Every BR-NN section includes a `**Source:**` line with at least one link."},
+        {"name": "uses_hugo_ref_shortcode", "check": "Source links use Hugo `{{< ref ... >}}` shortcode rather than raw paths like `(_index.md)` or `(../foo.md)`."},
+        {"name": "no_technical_cadences_in_BRs", "check": "BR text does not contain technical cadences/thresholds (e.g. 'every N seconds', 'within Nms', 'checkpoint', 'durable storage') as the requirement itself; those would be TRs."},
+        {"name": "no_technology_choices_in_BRs", "check": "BR text does not name specific technologies, products, protocols (Postgres, Redis, gRPC, mTLS, S3, Kafka, etc.) as the requirement itself."},
+        {"name": "no_tr_drafted", "check": "Response does not draft, list, or propose technical requirements."},
+        {"name": "no_adr_drafted", "check": "Response does not draft, list, or propose ADR options."},
+        {"name": "instructs_user_to_set_reviewed_at", "check": "Response tells user to set `reviewed_at` to today's date before proceeding."},
+        {"name": "mentions_define_tech_requirements_gate", "check": "Response mentions that define-technical-requirements (or the next stage) won't run until reviewed_at is set."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "tr-disguised-as-br",
+      "prompt": "For the self-hosted-application-platform capability business requirements, add: BR-06: the system must checkpoint upload progress every 10 seconds to durable storage so uploads can resume after a connection drop. The business-requirements.md file is at docs/content/capabilities/self-hosted-application-platform/business-requirements.md.",
+      "expected_output": "Should refuse to add this as a BR. Should explain that the cadence + storage framing is a technical requirement (TR), not a BR. Should ask what the underlying business/user demand is (e.g. 'uploads must survive intermittent connectivity without losing user-perceived progress') and offer to capture 'consider 10s checkpoint cadence to durable storage' as an open question for the TR stage.",
+      "assertions": [
+        {"name": "refuses_to_add_TR_as_BR", "check": "Response declines to add the cadence/durable-storage statement as a numbered BR."},
+        {"name": "explains_BR_vs_TR_distinction", "check": "Response explains the distinction between a business requirement (business/user-outcome demand) and a technical requirement (the technical translation)."},
+        {"name": "asks_for_underlying_business_need", "check": "Response asks the user for, or proposes, the underlying business/user-outcome demand (resumable uploads, no perceived progress loss, etc.)."},
+        {"name": "offers_to_park_in_open_questions", "check": "Response offers to capture the technical phrasing in Open Questions (or equivalent) parked for the TR stage."},
+        {"name": "no_tr_text_written_to_file", "check": "If business-requirements.md was modified, it does NOT contain a BR with cadence-or-durable-storage text as the requirement."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "decision-disguised-as-br",
+      "prompt": "For the self-hosted-application-platform capability business requirements, add: BR-06: use S3 multipart upload for resumable tenant data uploads. The business-requirements.md file is at docs/content/capabilities/self-hosted-application-platform/business-requirements.md.",
+      "expected_output": "Should refuse to add this as a BR. Should explain that 'use S3 multipart' is a decision (one of several options), not a BR. Should ask what the underlying business demand is (resumability after connection drop) and offer to capture 'consider S3 multipart upload' as an open question for the ADR stage.",
+      "assertions": [
+        {"name": "refuses_to_add_decision_as_BR", "check": "Response declines to add 'use S3 multipart...' as a numbered BR."},
+        {"name": "explains_decision_vs_requirement", "check": "Response explains the distinction between a decision (chosen from options) and a business requirement (forced by capability/UX)."},
+        {"name": "asks_for_underlying_business_need", "check": "Response asks the user for, or proposes, the underlying BR — e.g. resumable uploads after connection drop without re-sending completed segments."},
+        {"name": "offers_to_park_in_open_questions", "check": "Response offers to capture 'consider S3 multipart upload' (or equivalent) in Open Questions for the ADR stage."},
+        {"name": "no_s3_text_written_to_file", "check": "If business-requirements.md was modified, it does NOT contain a BR with S3 (or equivalent technology choice) as the requirement text."}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "re-extraction-preserves-br-numbers",
+      "prompt": "Re-extract business-requirements.md for the self-hosted-application-platform capability. The existing file has BR-01 through BR-05 with reviewed_at: 2026-04-20. The file is at docs/content/capabilities/self-hosted-application-platform/business-requirements.md and one of the existing UX-sourced BRs has a source link that no longer resolves (the source UX section was renamed).",
+      "expected_output": "Should preserve BR-01 through BR-05 numbering. Any BR whose source link no longer resolves should be flagged with a ⚠️ marker, NOT deleted or renumbered. New requirements (if any) should be appended starting at BR-06+. Should null out reviewed_at or surface that it must be re-set before define-technical-requirements unlocks. Should mention git diff is the review surface.",
+      "assertions": [
+        {"name": "preserves_BR_01_through_05", "check": "Resulting business-requirements.md still has headings BR-01 through BR-05 (numbering not changed)."},
+        {"name": "no_renumbering", "check": "No existing BR was renumbered to a different identifier."},
+        {"name": "stale_link_flagged_not_deleted", "check": "The BR whose source no longer resolves is marked with a ⚠️ flag (or equivalent 'source no longer resolves' marker) and is NOT deleted."},
+        {"name": "new_BRs_appended_starting_at_BR_06", "check": "Any newly-discovered BR uses identifier BR-06 or higher (not reusing earlier numbers)."},
+        {"name": "reviewed_at_nulled_or_flagged", "check": "Either `reviewed_at` is set back to null in the resulting file, or the response explicitly tells the user it must be re-set before define-technical-requirements proceeds."},
+        {"name": "mentions_git_diff_or_living_doc", "check": "Response mentions that this is a living doc / git diff is the review surface (or equivalent framing)."}
+      ]
+    }
+  ]
+}

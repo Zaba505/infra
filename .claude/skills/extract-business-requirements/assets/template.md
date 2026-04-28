@@ -1,0 +1,48 @@
+---
+title: "Business Requirements"
+description: >
+    Business requirements extracted from the {{capability_name}} capability and its user experiences. Each requirement links back to its source. Technical requirements and decisions belong in tech-requirements.md and ADRs, not here.
+type: docs
+reviewed_at: null
+---
+
+> **Living document.** This is regenerated from the capability and UX docs on demand. Numbering is append-only — once a BR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). Technical requirements cite BR-NN, so renumbering would silently break provenance.
+
+> **Review gate.** Set `reviewed_at:` in the frontmatter to today's ISO date once you have read and edited this document. The `define-technical-requirements` skill will refuse to extract TRs until `reviewed_at` is newer than the file's last modification.
+
+**Parent capability:** [{{capability_name}}]({{< ref "_index.md" >}})
+
+## How to read this
+
+Each requirement is **forced** by the capability or a user experience — it states, in business or user-outcome terms, what the system must guarantee. Decisions about the *technical translation* (cadences, durability levels, protocols) belong in `tech-requirements.md`. Decisions about *how* (which database, which library, which provider) belong in `adrs/`. If something in this list reads like a technical constraint or a chosen solution rather than a business demand, flag it for review.
+
+## Requirements
+
+{{requirements}}
+
+<!--
+Each requirement should follow this shape:
+
+### BR-01: {short imperative phrase}
+**Source:** [Capability §Section]({{< ref "_index.md#section-anchor" >}}) · [UX: name §Section]({{< ref "user-experiences/name.md#section-anchor" >}})
+
+<!--
+Cross-links MUST use Hugo's `ref` shortcode — never raw paths like `(_index.md)` or `../foo.md`.
+Section deep-links require an explicit anchor on the target heading (e.g. `## Business Rules {#business-rules}`).
+Hugo's build will fail on broken `ref`s; raw paths break silently when content is reorganized.
+-->
+**Requirement:** {one paragraph describing the business or user-outcome demand on the system, in non-technical terms}
+**Why this is a requirement, not a TR or decision:** {what makes it forced rather than chosen, and what makes it a business-level demand rather than a technical translation — usually a citation to the source's intent}
+
+For requirements whose source no longer resolves after re-extraction, prepend:
+> ⚠️ source no longer resolves — human review
+
+For removed requirements, keep the heading and add:
+> 🗑️ removed on {date} — see git history. Number is reserved and will not be reused.
+-->
+
+## Open Questions
+
+Things the user volunteered as TRs or decisions during extraction (parked for the next stage), or constraints the capability/UX docs don't yet make explicit.
+
+{{open_questions}}
