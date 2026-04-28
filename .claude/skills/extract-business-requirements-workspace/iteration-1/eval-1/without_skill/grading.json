@@ -1,0 +1,61 @@
+{
+  "expectations": [
+    {
+      "text": "produces_business_requirements_md",
+      "passed": true,
+      "evidence": "len=24779"
+    },
+    {
+      "text": "frontmatter_has_reviewed_at_null",
+      "passed": false,
+      "evidence": "# Business Requirements \u2014 Self-Hosted Application Platform\n\nThis document extracts the business-level requirements implied by the [Self-Hosted Application Platform](../../../../../../docs/content/capa"
+    },
+    {
+      "text": "has_multiple_BR_entries",
+      "passed": false,
+      "evidence": "BR count=0"
+    },
+    {
+      "text": "each_BR_has_source_link",
+      "passed": false,
+      "evidence": "sources=0 br=0"
+    },
+    {
+      "text": "uses_hugo_ref_shortcode",
+      "passed": true,
+      "evidence": "refs=0 br=0"
+    },
+    {
+      "text": "no_technical_cadences_in_BRs",
+      "passed": false,
+      "evidence": "cadences=['durable storage']"
+    },
+    {
+      "text": "no_technology_choices_in_BRs",
+      "passed": true,
+      "evidence": "techs=[]"
+    },
+    {
+      "text": "no_tr_drafted",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "no_adr_drafted",
+      "passed": true,
+      "evidence": "ok"
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": false,
+      "evidence": "# Business Requirements Extracted \u2014 Self-Hosted Application Platform\n\nI read the parent capability doc and all seven user-experience docs under `docs/content/capabilities/self-hosted-application-platf"
+    },
+    {
+      "text": "mentions_define_tech_requirements_gate",
+      "passed": false,
+      "evidence": "match"
+    }
+  ],
+  "passed_count": 5,
+  "total": 11
+}

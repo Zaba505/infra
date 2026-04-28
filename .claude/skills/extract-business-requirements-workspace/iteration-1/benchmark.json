@@ -1,0 +1,122 @@
+{
+  "skill_name": "extract-business-requirements",
+  "iteration": 1,
+  "configurations": [
+    {
+      "name": "with_skill",
+      "configuration": "with_skill",
+      "pass_rate": {
+        "mean": 0.9636363636363636,
+        "stddev": 0.07272727272727271
+      },
+      "duration_seconds": {
+        "mean": 109.90140000000001,
+        "stddev": 123.72709179577447
+      },
+      "total_tokens": {
+        "mean": 42925,
+        "stddev": 26445.59880963182
+      },
+      "per_eval": [
+        {
+          "eval_id": 0,
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_seconds": 32.583,
+          "total_tokens": 26182
+        },
+        {
+          "eval_id": 1,
+          "passed": 9,
+          "total": 11,
+          "pass_rate": 0.8181818181818182,
+          "duration_seconds": 354.403,
+          "total_tokens": 95207
+        },
+        {
+          "eval_id": 2,
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_seconds": 37.75,
+          "total_tokens": 27811
+        },
+        {
+          "eval_id": 3,
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_seconds": 39.348,
+          "total_tokens": 27912
+        },
+        {
+          "eval_id": 4,
+          "passed": 6,
+          "total": 6,
+          "pass_rate": 1.0,
+          "duration_seconds": 85.423,
+          "total_tokens": 37513
+        }
+      ]
+    },
+    {
+      "name": "without_skill (baseline)",
+      "configuration": "without_skill",
+      "pass_rate": {
+        "mean": 0.7442424242424243,
+        "stddev": 0.179762111959765
+      },
+      "duration_seconds": {
+        "mean": 81.6908,
+        "stddev": 64.1124906781822
+      },
+      "total_tokens": {
+        "mean": 36117.6,
+        "stddev": 21660.820996444247
+      },
+      "per_eval": [
+        {
+          "eval_id": 0,
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_seconds": 50.529,
+          "total_tokens": 21647
+        },
+        {
+          "eval_id": 1,
+          "passed": 5,
+          "total": 11,
+          "pass_rate": 0.45454545454545453,
+          "duration_seconds": 208.666,
+          "total_tokens": 78572
+        },
+        {
+          "eval_id": 2,
+          "passed": 4,
+          "total": 5,
+          "pass_rate": 0.8,
+          "duration_seconds": 47.959,
+          "total_tokens": 23873
+        },
+        {
+          "eval_id": 3,
+          "passed": 4,
+          "total": 5,
+          "pass_rate": 0.8,
+          "duration_seconds": 36.625,
+          "total_tokens": 22753
+        },
+        {
+          "eval_id": 4,
+          "passed": 4,
+          "total": 6,
+          "pass_rate": 0.6666666666666666,
+          "duration_seconds": 64.675,
+          "total_tokens": 33743
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "expectations": [
+    {
+      "text": "preserves_BR_01_through_05",
+      "passed": true,
+      "evidence": "headings=['01', '02', '03', '04', '05']"
+    },
+    {
+      "text": "no_renumbering",
+      "passed": true,
+      "evidence": "first5=['01', '02', '03', '04', '05']"
+    },
+    {
+      "text": "stale_link_flagged_not_deleted",
+      "passed": true,
+      "evidence": "warn=True br05=True"
+    },
+    {
+      "text": "new_BRs_appended_starting_at_BR_06",
+      "passed": true,
+      "evidence": "new=[]"
+    },
+    {
+      "text": "reviewed_at_nulled_or_flagged",
+      "passed": true,
+      "evidence": "frontmatter_head=---\ntitle: \"Business Requirements\"\ndescription: Business requirements for the self-hosted-application-platform capabilit"
+    },
+    {
+      "text": "mentions_git_diff_or_living_doc",
+      "passed": true,
+      "evidence": "match"
+    }
+  ],
+  "passed_count": 6,
+  "total": 6
+}

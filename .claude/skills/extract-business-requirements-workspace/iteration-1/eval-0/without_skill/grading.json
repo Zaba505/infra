@@ -1,0 +1,26 @@
+{
+  "expectations": [
+    {
+      "text": "response_refuses_to_proceed",
+      "passed": true,
+      "evidence": "# Extracting Business Requirements: Shared File Vault\n\nHappy to help \u2014 but let's pump the brakes for a second. Business requirements get extracted *from* a defined capability and its user experiences."
+    },
+    {
+      "text": "routes_to_define_capability",
+      "passed": true,
+      "evidence": "# Extracting Business Requirements: Shared File Vault\n\nHappy to help \u2014 but let's pump the brakes for a second. Business "
+    },
+    {
+      "text": "routes_to_define_user_experience",
+      "passed": true,
+      "evidence": "match"
+    },
+    {
+      "text": "no_business_requirements_md_produced",
+      "passed": true,
+      "evidence": "br len=0"
+    }
+  ],
+  "passed_count": 4,
+  "total": 4
+}
