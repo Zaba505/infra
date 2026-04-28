@@ -1,0 +1,23 @@
+{
+  "eval_id": 0,
+  "eval_name": "missing-inputs-refuses",
+  "prompt": "Help me extract the technical requirements for a new 'shared file vault' capability. We haven't written the capability doc yet but I know what I want \u2014 let's just go.",
+  "assertions": [
+    {
+      "name": "response_refuses_to_proceed",
+      "check": "Response declines to extract requirements until prerequisites exist."
+    },
+    {
+      "name": "routes_to_define_capability",
+      "check": "Response mentions running `define-capability` first."
+    },
+    {
+      "name": "routes_to_define_user_experience",
+      "check": "Response mentions `define-user-experience` as a needed input."
+    },
+    {
+      "name": "no_tech_requirements_md_produced",
+      "check": "outputs/ does not contain a tech-requirements.md (or any populated requirements document)."
+    }
+  ]
+}

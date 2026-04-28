@@ -1,0 +1,31 @@
+{
+  "eval_id": 3,
+  "eval_name": "re-extraction-preserves-tr-numbers",
+  "prompt": "Re-extract tech-requirements.md for the self-hosted-application-platform capability. The existing file has TR-01 through TR-07 with reviewed_at: 2026-04-20. The file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md and one of the existing UX-sourced TRs has a source link that no longer resolves (the source UX section was renamed).",
+  "assertions": [
+    {
+      "name": "preserves_TR_01_through_07",
+      "check": "Resulting tech-requirements.md still has headings TR-01 through TR-07 (numbering not changed)."
+    },
+    {
+      "name": "no_renumbering",
+      "check": "No existing TR was renumbered to a different identifier."
+    },
+    {
+      "name": "stale_link_flagged_not_deleted",
+      "check": "The TR whose source no longer resolves is marked with a \u26a0\ufe0f flag (or equivalent 'source no longer resolves' marker) and is NOT deleted."
+    },
+    {
+      "name": "new_TRs_appended_starting_at_TR_08",
+      "check": "Any newly-discovered TR uses identifier TR-08 or higher (not reusing earlier numbers)."
+    },
+    {
+      "name": "reviewed_at_nulled_or_flagged",
+      "check": "Either `reviewed_at` is set back to null in the resulting file, or the response explicitly tells the user it must be re-set before plan-adrs proceeds."
+    },
+    {
+      "name": "mentions_git_diff_or_living_doc",
+      "check": "Response mentions that this is a living doc / git diff is the review surface (or equivalent framing)."
+    }
+  ]
+}

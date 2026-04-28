@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "response_refuses_to_proceed",
+      "passed": true,
+      "evidence": "Response title is 'Can't extract tech requirements yet \u2014 the capability doc doesn't exist'."
+    },
+    {
+      "text": "routes_to_define_capability",
+      "passed": true,
+      "evidence": "Step 1 of suggested order: Run define-capability for shared file vault."
+    },
+    {
+      "text": "routes_to_define_user_experience",
+      "passed": true,
+      "evidence": "Step 2: Run define-user-experience for at least one journey."
+    },
+    {
+      "text": "no_tech_requirements_md_produced",
+      "passed": true,
+      "evidence": "outputs/ contains only response.md."
+    }
+  ]
+}

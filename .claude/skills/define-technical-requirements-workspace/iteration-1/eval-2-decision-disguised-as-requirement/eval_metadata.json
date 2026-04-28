@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "decision-disguised-as-requirement",
+  "prompt": "For the self-hosted-application-platform capability tech requirements, add: TR-04: use Postgres for tenant metadata storage with logical replication for cross-region failover. The tech-requirements.md file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "refuses_to_add_postgres_as_TR",
+      "check": "Response declines to add 'use Postgres ...' as a numbered TR."
+    },
+    {
+      "name": "explains_decision_vs_requirement",
+      "check": "Response explains the distinction between a decision (chosen from options) and a requirement (forced by capability/UX)."
+    },
+    {
+      "name": "asks_for_underlying_requirement",
+      "check": "Response asks the user for the underlying constraint (or proposes one) \u2014 e.g. queryable by tenant ID with strong consistency, survives single-region failure, etc."
+    },
+    {
+      "name": "offers_to_park_in_open_questions",
+      "check": "Response offers to capture 'consider Postgres + logical replication' (or equivalent) in Open Questions for the ADR stage."
+    },
+    {
+      "name": "no_postgres_TR_written_to_file",
+      "check": "If tech-requirements.md was modified, it does NOT contain a TR with 'use Postgres' (or equivalent technology choice) as the requirement text."
+    }
+  ]
+}

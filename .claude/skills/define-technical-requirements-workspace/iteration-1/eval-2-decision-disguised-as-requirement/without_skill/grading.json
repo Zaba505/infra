@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_add_postgres_as_TR",
+      "passed": false,
+      "evidence": "Added the requirement as TR-08 (after noting TR-04 was taken)."
+    },
+    {
+      "text": "explains_decision_vs_requirement",
+      "passed": true,
+      "evidence": "Caveat #2 in baseline summary: 'Decision disguised as a requirement' \u2014 explained but still added it."
+    },
+    {
+      "text": "asks_for_underlying_requirement",
+      "passed": false,
+      "evidence": "Did not ask the user for the underlying requirement; appended verbatim."
+    },
+    {
+      "text": "offers_to_park_in_open_questions",
+      "passed": false,
+      "evidence": "Did not offer to park in Open Questions."
+    },
+    {
+      "text": "no_postgres_TR_written_to_file",
+      "passed": false,
+      "evidence": "Modified tech-requirements.md to add TR-08 with the Postgres choice."
+    }
+  ]
+}
