@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_cross_capability_scope",
+      "passed": true,
+      "evidence": "Response identifies the decision as shared cross-capability."
+    },
+    {
+      "text": "directs_to_shared_adr_namespace",
+      "passed": true,
+      "evidence": "Routes to docs/content/r&d/adrs/."
+    },
+    {
+      "text": "does_not_write_capability_scoped_adr",
+      "passed": true,
+      "evidence": "outputs/ contains only response.md \u2014 no ADR file."
+    },
+    {
+      "text": "offers_to_defer_or_pause",
+      "passed": true,
+      "evidence": "Response offers defer/pause options."
+    }
+  ]
+}

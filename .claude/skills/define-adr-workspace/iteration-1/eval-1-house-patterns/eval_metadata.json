@@ -1,0 +1,27 @@
+{
+  "eval_id": 1,
+  "eval_name": "respects-house-patterns",
+  "prompt": "We're drafting the ADR for how the tenant-control-plane service exposes its API for the self-hosted-application-platform capability. List options and then I'll pick one. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "proposes_at_least_two_options",
+      "check": "Response includes \u22652 considered options for the tenant-control-plane API."
+    },
+    {
+      "name": "each_option_cites_TRs",
+      "check": "Each option's pros/cons reference specific TR-NN identifiers."
+    },
+    {
+      "name": "no_humus_in_options",
+      "check": "Options do not invent humus framework usage (rest.Run, rpc.Producer/Handler, embedded config.yaml). If humus is mentioned, it is explicitly to note that CLAUDE.md says it is not used."
+    },
+    {
+      "name": "honors_chi_bedrock_pattern",
+      "check": "At least one option explicitly fits the chi/bedrock/protobuf/errorpb shape, or the rationale acknowledges these as house-pattern constraints."
+    },
+    {
+      "name": "no_unilateral_selection",
+      "check": "Skill does not write status: accepted on its own \u2014 either ends with `status: proposed` and asks the human to pick, OR writes no file and asks the human to pick first."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "preserves_TR_01_through_07",
+      "passed": true,
+      "evidence": "Output retains TR-01..TR-07 (verified by reading file)."
+    },
+    {
+      "text": "no_renumbering",
+      "passed": true,
+      "evidence": "TR-01..TR-07 unchanged in identifier."
+    },
+    {
+      "text": "stale_link_flagged_not_deleted",
+      "passed": true,
+      "evidence": "Agent reported flagging TR-06 with '\u26a0\ufe0f source no longer resolves' rather than deleting/rewriting."
+    },
+    {
+      "text": "new_TRs_appended_starting_at_TR_08",
+      "passed": true,
+      "evidence": "Appended TR-08..TR-13 for newly-surfaced constraints."
+    },
+    {
+      "text": "reviewed_at_nulled_or_flagged",
+      "passed": true,
+      "evidence": "Frontmatter shows reviewed_at: null."
+    },
+    {
+      "text": "mentions_git_diff_or_living_doc",
+      "passed": true,
+      "evidence": "Skill body and template both surface the living-doc framing; agent followed it."
+    }
+  ]
+}

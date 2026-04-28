@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "produces_options_first",
+      "passed": true,
+      "evidence": "Baseline drafted MADR with multiple options."
+    },
+    {
+      "text": "does_not_write_status_accepted",
+      "passed": false,
+      "evidence": "Baseline wrote status: 'accepted' and selected Option A unilaterally \u2014 exactly the failure mode this skill prevents."
+    },
+    {
+      "text": "explicitly_returns_decision_to_user",
+      "passed": false,
+      "evidence": "Baseline did not return decision to user; it picked."
+    },
+    {
+      "text": "may_state_preference",
+      "passed": true,
+      "evidence": "Baseline gave a clear rationale for the chosen option (just framed as the chosen option, not a preference)."
+    }
+  ]
+}

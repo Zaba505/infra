@@ -1,0 +1,23 @@
+{
+  "eval_id": 1,
+  "eval_name": "detects-uncovered-tr",
+  "prompt": "All ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/ are accepted. tech-requirements.md has TR-01 through TR-08. Compose tech-design.md. (Note: TR-08 is 'graceful degradation when a GCP region is unreachable' and no ADR addresses it.)",
+  "assertions": [
+    {
+      "name": "detects_TR_08_uncovered",
+      "check": "Response specifically calls out TR-08 as having no ADR addressing it."
+    },
+    {
+      "name": "does_not_paper_over_gap",
+      "check": "Response does not invent a story / component / mechanism to satisfy TR-08 in tech-design.md prose."
+    },
+    {
+      "name": "routes_to_amend_adrs_or_trs",
+      "check": "Response proposes either filing/amending an ADR for TR-08 (via plan-adrs / define-adr) or removing TR-08 from tech-requirements.md if the constraint is no longer real."
+    },
+    {
+      "name": "no_premature_completion",
+      "check": "Skill does not declare tech-design.md complete or proceed to file component issues against an incomplete design."
+    }
+  ]
+}

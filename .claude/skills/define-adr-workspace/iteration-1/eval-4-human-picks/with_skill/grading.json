@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "produces_options_first",
+      "passed": true,
+      "evidence": "Response includes 3 options (Cloud SQL per-tenant, shared Firestore, project-per-tenant)."
+    },
+    {
+      "text": "does_not_write_status_accepted",
+      "passed": true,
+      "evidence": "ADR file has status: 'proposed' (verified); Decision Outcome has '{{pending \u2014 human selection required}}'."
+    },
+    {
+      "text": "explicitly_returns_decision_to_user",
+      "passed": true,
+      "evidence": "Stated preference for Option A but asked user to pick \u2014 refused to set status: accepted."
+    },
+    {
+      "text": "may_state_preference",
+      "passed": true,
+      "evidence": "Stated Option A as preference, framed as preference not selection, explained in TR-NN terms."
+    }
+  ]
+}

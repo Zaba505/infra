@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "recognizes_cross_capability_scope",
+      "passed": true,
+      "evidence": "Baseline also identified shared scope."
+    },
+    {
+      "text": "directs_to_shared_adr_namespace",
+      "passed": true,
+      "evidence": "Baseline routed to docs/content/r&d/adrs/."
+    },
+    {
+      "text": "does_not_file_a_capability_scoped_issue",
+      "passed": true,
+      "evidence": "Baseline did not file capability-scoped; planned shared ADRs but pending confirmation."
+    },
+    {
+      "text": "flags_premature_decision_or_offers_to_defer",
+      "passed": true,
+      "evidence": "Baseline asked user to confirm the auth model rather than locking in mTLS."
+    }
+  ]
+}

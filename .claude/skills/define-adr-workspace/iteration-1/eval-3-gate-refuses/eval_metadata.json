@@ -1,0 +1,19 @@
+{
+  "eval_id": 3,
+  "eval_name": "gate-refuses-unreviewed-tech-requirements",
+  "prompt": "Draft the ADR for tenant state storage for the self-hosted-application-platform capability. tech-requirements.md exists at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "refuses_due_to_gate",
+      "check": "Response declines to draft the ADR because the review gate is not satisfied."
+    },
+    {
+      "name": "names_reviewed_at_state",
+      "check": "Response calls out reviewed_at: null (or stale) as the reason for stopping."
+    },
+    {
+      "name": "no_adr_file_written",
+      "check": "No ADR markdown file is written under adrs/."
+    }
+  ]
+}

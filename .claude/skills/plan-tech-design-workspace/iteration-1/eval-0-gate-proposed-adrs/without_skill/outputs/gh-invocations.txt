@@ -1,0 +1,41 @@
+# Intended `gh issue create` invocations (NOT executed per instructions).
+# These would be filed once ADR-0002 and ADR-0003 are accepted and ADRs for TR-03/TR-06 exist.
+
+# One issue per component (for define-component-design):
+
+gh issue create \
+  --title "design: Tenant State Store component (self-hosted-application-platform)" \
+  --body "Author the component design for the per-tenant Firestore namespace store. Backed by ADR-0001. Satisfies TR-01, TR-04."
+
+gh issue create \
+  --title "design: Contract Registry & Router component (self-hosted-application-platform)" \
+  --body "Author the component design for the multi-version contract registry/router. Backed by ADR-0002 (proposed). Satisfies TR-02. Blocked until ADR-0002 is accepted."
+
+gh issue create \
+  --title "design: Tenant Update Orchestrator component (self-hosted-application-platform)" \
+  --body "Author the component design for operator-initiated no-downtime tenant updates. Backed by ADR-0001, ADR-0002 (proposed). Satisfies TR-04, TR-02."
+
+gh issue create \
+  --title "design: Tenant Export Service component (self-hosted-application-platform)" \
+  --body "Author the component design for on-demand export to GCS signed URL. Backed by ADR-0003 (proposed). Satisfies TR-05. Blocked until ADR-0003 is accepted."
+
+gh issue create \
+  --title "design: Network Path Conformance component (self-hosted-application-platform)" \
+  --body "Author the component design ensuring all traffic traverses Cloudflare -> GCP -> WireGuard. Satisfies TR-07."
+
+# One issue per surfaced gap:
+
+gh issue create \
+  --title "gap: ADR needed for tenant-scoped observability (TR-03)" \
+  --body "TR-03 has no ADR. Decide how per-tenant scoping of metrics/logs/traces is enforced (e.g. log buckets, label-based scoping, query gateway). Use plan-adrs / define-adr."
+
+gh issue create \
+  --title "gap: ADR needed for tenant data import (TR-06)" \
+  --body "TR-06 has no ADR. Decide the import mechanism for new-tenant data migration (resumable upload + import job, signed-credential direct writes, staged-bucket + validator pipeline). Use plan-adrs / define-adr."
+
+# Gate note:
+# ADR-0002 and ADR-0003 are currently in `proposed` status. Per the typical
+# plan-tech-design gate, the tech-design should not be finalized until all
+# referenced ADRs are accepted. The tech-design.md was composed with explicit
+# warnings, but issue creation should wait until ADRs are accepted to avoid
+# churn.

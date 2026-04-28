@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_add_postgres_as_TR",
+      "passed": true,
+      "evidence": "Response opens 'I'm going to push back on adding this as written' and never writes the TR."
+    },
+    {
+      "text": "explains_decision_vs_requirement",
+      "passed": true,
+      "evidence": "Explicit: 'Use Postgres ... is a decision, not a technical requirement. It picks a specific technology out of several options.'"
+    },
+    {
+      "text": "asks_for_underlying_requirement",
+      "passed": true,
+      "evidence": "'The requirement underneath your decision is probably something like: Tenant metadata must be queryable by tenant ID with strong consistency...'"
+    },
+    {
+      "text": "offers_to_park_in_open_questions",
+      "passed": true,
+      "evidence": "'I'm parking it as an open question for the ADR stage' \u2014 explicit open question text included."
+    },
+    {
+      "text": "no_postgres_TR_written_to_file",
+      "passed": true,
+      "evidence": "tech-requirements.md was not modified (response only)."
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "detects_TR_08_uncovered",
+      "passed": true,
+      "evidence": "Audit trail row: 'TR-08 | **GAP \u2014 no ADR** | \u2014 (the gap you flagged)'."
+    },
+    {
+      "text": "does_not_paper_over_gap",
+      "passed": true,
+      "evidence": "Response: 'I did not invent a story for it; the audit trail row is GAP \u2014 no ADR.'"
+    },
+    {
+      "text": "routes_to_amend_adrs_or_trs",
+      "passed": true,
+      "evidence": "Two paths offered: plan an ADR via plan-adrs/define-adr OR drop/amend via define-technical-requirements."
+    },
+    {
+      "text": "no_premature_completion",
+      "passed": true,
+      "evidence": "Skeleton tech-design.md saved as DRAFT with explicit gap rows; user asked to approve before issues filed."
+    }
+  ]
+}

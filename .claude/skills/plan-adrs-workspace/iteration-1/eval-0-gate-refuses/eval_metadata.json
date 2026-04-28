@@ -1,0 +1,27 @@
+{
+  "eval_id": 0,
+  "eval_name": "gate-refuses-unreviewed-tech-requirements",
+  "prompt": "Tech-requirements.md exists for the self-hosted-application-platform capability at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md. Plan the ADRs.",
+  "assertions": [
+    {
+      "name": "refuses_to_enumerate",
+      "check": "Response declines to enumerate ADRs / decisions because the gate is not satisfied."
+    },
+    {
+      "name": "names_the_gate_state",
+      "check": "Response specifically calls out the reviewed_at value (null or stale) as the reason for stopping."
+    },
+    {
+      "name": "instructs_user_to_set_reviewed_at",
+      "check": "Response tells the user to set reviewed_at to today's ISO date in tech-requirements.md."
+    },
+    {
+      "name": "no_issues_filed",
+      "check": "No `gh issue create` invocation occurs (no issues created)."
+    },
+    {
+      "name": "no_decision_list_proposed",
+      "check": "Response does not propose a list of ADRs / decisions."
+    }
+  ]
+}

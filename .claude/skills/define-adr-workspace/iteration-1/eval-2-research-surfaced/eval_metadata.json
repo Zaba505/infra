@@ -1,0 +1,23 @@
+{
+  "eval_id": 2,
+  "eval_name": "research-surfaced-before-options",
+  "prompt": "Draft the ADR for tenant state storage for the self-hosted-application-platform capability. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "surfaces_research_before_options",
+      "check": "Response identifies specific research tasks needed (current-state facts, external/technology facts, cost/quota facts, or shared-ADR compatibility) before drafting options."
+    },
+    {
+      "name": "asks_user_how_to_resolve_research",
+      "check": "Response asks the user whether to run the research now, file follow-up issues, or confirm assumptions inline."
+    },
+    {
+      "name": "does_not_invent_factual_claims",
+      "check": "If options are drafted at all, factual claims (e.g. logical-replication failover times, GCP quotas, existing cloud/ provisioning) are either sourced or explicitly marked as assumptions to verify."
+    },
+    {
+      "name": "does_not_proceed_to_status_accepted_without_research",
+      "check": "Skill does not write a `status: accepted` ADR while research is unresolved."
+    }
+  ]
+}

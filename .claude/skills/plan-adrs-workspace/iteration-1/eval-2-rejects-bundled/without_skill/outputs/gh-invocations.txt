@@ -1,0 +1,90 @@
+# PROPOSED gh issue create invocations for the split ADR plan.
+# NOT EXECUTED. Awaiting user confirmation of the four-ADR split.
+# Capability: self-hosted-application-platform
+# Source TRs: docs/content/capabilities/self-hosted-application-platform/tech-requirements.md
+
+# --- Issue 1: Tenant state storage system ---
+gh issue create \
+  --title "ADR: Tenant state storage system (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose the datastore(s) that hold tenant state for the self-hosted-application-platform capability.
+
+## Forcing technical requirements
+- TR-01: Tenants must be isolated such that no tenant can read another's state.
+- TR-07: All inter-service communication must traverse the Cloudflare -> GCP path.
+
+## Out of scope (separate ADRs)
+- Partitioning model (logical vs. physical isolation)
+- Access control / query scoping
+- Backup, export, and import
+
+## Definition of done
+A MADR 4.0.0 ADR under docs/content/capabilities/self-hosted-application-platform/adrs/ with status, context, considered options, decision, and consequences.
+EOF
+)"
+
+# --- Issue 2: Tenant data partitioning model ---
+gh issue create \
+  --title "ADR: Tenant data partitioning model (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose how tenant data is partitioned within the chosen storage system: shared-store-with-tenant-id, database-per-tenant, project-per-tenant, or hybrid.
+
+## Forcing technical requirements
+- TR-01: Tenants must be isolated such that no tenant can read another's state.
+- TR-03: Tenant-facing observability data must be queryable per-tenant within their data scope only.
+
+## Depends on
+- ADR: Tenant state storage system
+
+## Out of scope
+- Choice of storage system itself
+- Access control mechanism
+- Backup/export/import
+EOF
+)"
+
+# --- Issue 3: Tenant data access control ---
+gh issue create \
+  --title "ADR: Tenant data access control (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose how tenant identity is established at the data layer and how every query is scoped to that tenant (IAM-per-tenant, row-level security, signed scope claims, gateway-enforced filters, etc.).
+
+## Forcing technical requirements
+- TR-01: Tenants must be isolated such that no tenant can read another's state.
+- TR-03: Tenant-facing observability data must be queryable per-tenant within their data scope only.
+
+## Depends on
+- ADR: Tenant state storage system
+- ADR: Tenant data partitioning model
+
+## Out of scope
+- Storage system, partitioning, backup/export/import.
+EOF
+)"
+
+# --- Issue 4: Tenant data backup, export, and import ---
+gh issue create \
+  --title "ADR: Tenant data backup, export, and import (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose backup cadence, retention, and restore SLO; the eviction-export mechanism that lets a tenant take their data with them; and the idempotent import mechanism for new tenants.
+
+## Forcing technical requirements
+- TR-05: A tenant evicted from the platform must be able to take their data with them.
+- TR-06: New tenants must be able to migrate existing data into the platform without loss or corruption.
+
+## Depends on
+- ADR: Tenant state storage system
+- ADR: Tenant data partitioning model
+
+## Out of scope
+- Storage system, partitioning, access control.
+EOF
+)"

@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+# One `gh issue create` invocation per planned ADR for the
+# self-hosted-application-platform capability. TR-07 is excluded
+# because it is already a prior shared decision (Cloudflare -> GCP topology).
+
+gh issue create \
+  --title "story(adr): tenant isolation boundary — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+What mechanism enforces tenant isolation across the data, compute, and telemetry layers such that no tenant can observe or access another tenant's state, secrets, traffic, or telemetry under normal or degraded operation? The decision establishes the isolation primitive (e.g. per-tenant project, namespace, logical partition with policy enforcement) on which every other tenant-scoped decision depends.
+
+### Technical requirements addressed
+
+- [TR-01](../tech-requirements.md#tr-01-tenants-must-be-isolated-such-that-no-tenant-can-read-anothers-state) — tenant isolation
+- [TR-03](../tech-requirements.md#tr-03-tenant-facing-observability-data-must-be-queryable-per-tenant-within-their-data-scope-only) — per-tenant observability scope
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): tenant state storage location — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+Where does tenant state live such that the isolation boundary holds, online updates can complete without tenant-perceived downtime, and an evicted tenant's data can be exported in a portable format within a bounded window? The decision picks the storage substrate (or substrates) and the per-tenant addressing within it.
+
+### Technical requirements addressed
+
+- [TR-01](../tech-requirements.md#tr-01-tenants-must-be-isolated-such-that-no-tenant-can-read-anothers-state) — tenant isolation
+- [TR-04](../tech-requirements.md#tr-04-operator-initiated-tenant-updates-must-complete-without-tenant-perceived-downtime-for-online-workloads) — no-downtime updates
+- [TR-05](../tech-requirements.md#tr-05-a-tenant-evicted-from-the-platform-must-be-able-to-take-their-data-with-them) — exportability
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): tenant identifier scheme — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+What is the tenant identifier scheme used to scope per-tenant observability queries, exports, and imports? The decision fixes identifier shape, lifetime, and uniqueness scope so that downstream isolation, observability, export, and import decisions all reference the same handle. Note: this decision may be promoted to a shared ADR if other capabilities require the same identifier — surface that during `define-adr`.
+
+### Technical requirements addressed
+
+- [TR-03](../tech-requirements.md#tr-03-tenant-facing-observability-data-must-be-queryable-per-tenant-within-their-data-scope-only) — per-tenant observability scope
+- [TR-05](../tech-requirements.md#tr-05-a-tenant-evicted-from-the-platform-must-be-able-to-take-their-data-with-them) — export scoping
+- [TR-06](../tech-requirements.md#tr-06-new-tenants-must-be-able-to-migrate-existing-data-into-the-platform-without-loss-or-corruption) — import scoping
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): platform contract versioning strategy — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+How does the platform expose multiple contract versions concurrently so that tenants on the prior version continue operating while new tenants adopt the new version, and how is the migration window bounded? The decision covers version surface (URL, header, namespace), concurrency model, and the deprecation/sunset policy.
+
+### Technical requirements addressed
+
+- [TR-02](../tech-requirements.md#tr-02-operators-must-be-able-to-roll-out-a-platform-contract-change-without-breaking-existing-tenants) — contract-change rollout
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): online tenant update strategy — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+What deployment and traffic-cutover mechanism delivers operator-initiated tenant updates (config, version, or capability) without end-user-visible downtime for online workloads? The decision picks among rolling, blue-green, traffic-shifted, or session-drained strategies and establishes the rollback model.
+
+### Technical requirements addressed
+
+- [TR-04](../tech-requirements.md#tr-04-operator-initiated-tenant-updates-must-complete-without-tenant-perceived-downtime-for-online-workloads) — no-downtime updates
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): tenant data export mechanism — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+How does an evicted tenant retrieve all of their data in a portable format within the defined export window? The decision covers export format, trigger, delivery channel, integrity guarantees, and the bound on the export window.
+
+### Technical requirements addressed
+
+- [TR-05](../tech-requirements.md#tr-05-a-tenant-evicted-from-the-platform-must-be-able-to-take-their-data-with-them) — exportability
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): tenant data import mechanism — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+How does the platform accept a new tenant's pre-existing data such that imports are idempotent under retry and integrity is verifiable (no silent loss, no duplication)? The decision covers ingestion interface, idempotency key, integrity verification (e.g. content hashing, manifests), and partial-failure semantics.
+
+### Technical requirements addressed
+
+- [TR-06](../tech-requirements.md#tr-06-new-tenants-must-be-able-to-migrate-existing-data-into-the-platform-without-loss-or-corruption) — migration import
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"
+
+gh issue create \
+  --title "story(adr): per-tenant observability data plane — self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+### Decision
+
+How are metrics, logs, and traces partitioned and exposed so that tenants can query their own workloads but cross-tenant data is inaccessible? The decision covers signal partitioning (per-tenant labels/streams/projects), the query surface tenants use, and the policy that prevents cross-tenant queries.
+
+### Technical requirements addressed
+
+- [TR-03](../tech-requirements.md#tr-03-tenant-facing-observability-data-must-be-queryable-per-tenant-within-their-data-scope-only) — per-tenant observability scope
+
+### Parent capability
+
+[self-hosted-application-platform](../docs/content/capabilities/self-hosted-application-platform/_index.md)
+
+### Authoring
+
+This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
+
+### Related
+
+#722
+EOF
+)"

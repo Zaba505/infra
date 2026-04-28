@@ -1,0 +1,71 @@
+# Intended `gh issue create` invocations. NOT executed per task instructions.
+# Each component in the inventory and each surfaced gap gets its own issue.
+
+# --- Component design issues (one per component in the tech-design inventory) ---
+
+gh issue create \
+  --title "component-design: tenant-registry (self-hosted-application-platform)" \
+  --label "component-design,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the component design for **tenant-registry** under the self-hosted-application-platform capability via the `define-component-design` skill.
+
+**Forced by:** ADR-0001 (per-tenant Firestore namespace), ADR-0002 (records bound contract version per tenant).
+**Tech-design reference:** `docs/content/capabilities/self-hosted-application-platform/tech-design.md` (Component Inventory > Tenant Registry).
+
+The component design must cover (at minimum):
+- Public API surface (endpoints, methods, request/response shapes)
+- Persistence model and how it satisfies TR-01 isolation
+- How tenant -> contract-version binding is recorded (ADR-0002)
+- Failure modes and error contract (`pkg/errorpb`)
+- Observability hooks
+
+**Operator input to consider (NOT pre-decided — the skill must validate against TRs/ADRs and surface alternatives):**
+The operator suggested the HTTP surface should be:
+- `GET    /tenants`
+- `POST   /tenants`
+- `GET    /tenants/{id}`
+- `PATCH  /tenants/{id}`
+- `DELETE /tenants/{id}`
+
+Treat this as a starting proposal for the component-design discussion, not a settled decision. The component-design flow is where endpoint shape, versioning, auth, and payloads are decided — not the tech-design doc.
+EOF
+)"
+
+gh issue create \
+  --title "component-design: contract-version-resolver (self-hosted-application-platform)" \
+  --label "component-design,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the component design for **contract-version-resolver** under the self-hosted-application-platform capability via the `define-component-design` skill.
+
+**Forced by:** ADR-0002 (semver in contract package path), TR-02.
+**Tech-design reference:** `docs/content/capabilities/self-hosted-application-platform/tech-design.md` (Component Inventory > Contract Version Resolver).
+EOF
+)"
+
+gh issue create \
+  --title "component-design: tenant-export-service (self-hosted-application-platform)" \
+  --label "component-design,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+Author the component design for **tenant-export-service** under the self-hosted-application-platform capability via the `define-component-design` skill.
+
+**Forced by:** ADR-0003 (on-demand export to GCS bucket signed URL), TR-05.
+**Tech-design reference:** `docs/content/capabilities/self-hosted-application-platform/tech-design.md` (Component Inventory > Tenant Export Service).
+EOF
+)"
+
+# --- Gap issues (one per requirement not yet covered by an accepted ADR) ---
+
+gh issue create \
+  --title "gap: TR-03 per-tenant observability has no ADR (self-hosted-application-platform)" \
+  --label "gap,capability:self-hosted-application-platform" \
+  --body "TR-03 (per-tenant observability scoping) is not covered by any accepted capability-scoped ADR. Plan via \`plan-adrs\` and decide via \`define-adr\` before implementing the tech design."
+
+gh issue create \
+  --title "gap: TR-04 no-downtime update orchestration has no ADR (self-hosted-application-platform)" \
+  --label "gap,capability:self-hosted-application-platform" \
+  --body "TR-04 is partially covered by ADR-0001 (storage shape) but the update-orchestration mechanism is undecided. Plan via \`plan-adrs\` and decide via \`define-adr\`."
+
+gh issue create \
+  --title "gap: TR-06 tenant data import has no ADR (self-hosted-application-platform)" \
+  --label "gap,capability:self-hosted-application-platform" \
+  --body "TR-06 (idempotent tenant data import with verifiable integrity) is not covered by any accepted ADR. Plan via \`plan-adrs\` and decide via \`define-adr\`."

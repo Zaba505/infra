@@ -1,0 +1,35 @@
+{
+  "eval_id": 2,
+  "eval_name": "files-component-and-gap-issues",
+  "prompt": "All ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/ are accepted (0001 through 0003). tech-requirements.md has TR-01 through TR-07, all covered. Compose tech-design.md and file the follow-up issues \u2014 go.",
+  "assertions": [
+    {
+      "name": "writes_skeleton_tech_design",
+      "check": "tech-design.md is produced with overview, component inventory, and TR \u2192 ADR \u2192 component audit trail."
+    },
+    {
+      "name": "no_inline_per_component_detail",
+      "check": "tech-design.md does NOT contain endpoint paths, table column definitions, or per-UX sequence diagrams. Per-component detail is deferred to component design docs."
+    },
+    {
+      "name": "audit_trail_covers_all_TRs",
+      "check": "Every TR-NN appears in the audit trail; no row has an empty ADR or Realization column."
+    },
+    {
+      "name": "files_one_issue_per_component",
+      "check": "One `gh issue create` invocation per component, with title `story(component): {name} \u2014 {capability-name}` (or close-to-this convention)."
+    },
+    {
+      "name": "component_issue_bodies_reference_define_component_design",
+      "check": "Each component issue body names `define-component-design` as the next-step skill."
+    },
+    {
+      "name": "files_gap_issues_if_gaps_present",
+      "check": "If gaps were surfaced, one `gh issue create` invocation per gap titled `story(gap): {name} \u2014 {capability-name}` (or close-to-this convention)."
+    },
+    {
+      "name": "states_tech_design_not_complete_until_gaps_resolved",
+      "check": "Response explicitly states tech design is not complete until all gap issues are resolved."
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "expectations": [
+    {
+      "text": "preserves_TR_01_through_07",
+      "passed": true,
+      "evidence": "TR-01..TR-07 retained."
+    },
+    {
+      "text": "no_renumbering",
+      "passed": true,
+      "evidence": "Numbering unchanged."
+    },
+    {
+      "text": "stale_link_flagged_not_deleted",
+      "passed": false,
+      "evidence": "Baseline FIXED the broken link (re-pointed to migrate-existing-data.md#journey) instead of flagging \u2014 exactly the failure mode the skill prevents."
+    },
+    {
+      "text": "new_TRs_appended_starting_at_TR_08",
+      "passed": true,
+      "evidence": "(N/A \u2014 no new TRs added; vacuously satisfied.)"
+    },
+    {
+      "text": "reviewed_at_nulled_or_flagged",
+      "passed": false,
+      "evidence": "Baseline BUMPED reviewed_at to 2026-04-27 unprompted, which would let plan-adrs proceed against an unreviewed file."
+    },
+    {
+      "text": "mentions_git_diff_or_living_doc",
+      "passed": false,
+      "evidence": "Baseline did not surface living-doc framing."
+    }
+  ]
+}

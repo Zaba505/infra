@@ -1,0 +1,44 @@
+{
+  "expectations": [
+    {
+      "text": "produces_tech_requirements_md",
+      "passed": true,
+      "evidence": "outputs/ contains tech-requirements.md (41 TRs)."
+    },
+    {
+      "text": "frontmatter_has_reviewed_at_null",
+      "passed": true,
+      "evidence": "Frontmatter has 'reviewed_at: null'."
+    },
+    {
+      "text": "has_multiple_TR_entries",
+      "passed": true,
+      "evidence": "TR-01 through TR-41 (41 entries)."
+    },
+    {
+      "text": "each_TR_has_source_link",
+      "passed": true,
+      "evidence": "Every TR section reviewed has a **Source:** line with Hugo-relative links."
+    },
+    {
+      "text": "no_technology_choices_in_TRs",
+      "passed": true,
+      "evidence": "TR-11 names GitHub and TR-24 names email but only because the source UX docs literally say so; agent flagged both in transcript and offered to abstract on review. No invented tech choices."
+    },
+    {
+      "text": "no_adr_drafted",
+      "passed": true,
+      "evidence": "No ADR options or solutions proposed in transcript."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": true,
+      "evidence": "Transcript: 'When you're done, set reviewed_at: in the frontmatter to today's ISO date.'"
+    },
+    {
+      "text": "mentions_plan_adrs_gate",
+      "passed": true,
+      "evidence": "Transcript: 'The next skill \u2014 plan-adrs \u2014 won't enumerate decisions until that's set.'"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_enumerate",
+      "passed": false,
+      "evidence": "Baseline IGNORED the gate entirely \u2014 produced adr-plan.md with 8 ADRs and gh-invocations.txt."
+    },
+    {
+      "text": "names_the_gate_state",
+      "passed": false,
+      "evidence": "Baseline did not stop on reviewed_at: null."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": false,
+      "evidence": "Baseline did not surface the review gate."
+    },
+    {
+      "text": "no_issues_filed",
+      "passed": true,
+      "evidence": "Strictly true \u2014 invocations were written to a file, not run."
+    },
+    {
+      "text": "no_decision_list_proposed",
+      "passed": false,
+      "evidence": "Baseline produced a full 8-ADR plan."
+    }
+  ]
+}

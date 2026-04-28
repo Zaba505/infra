@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_the_bundle",
+      "passed": true,
+      "evidence": "Baseline also pushed back and proposed splitting."
+    },
+    {
+      "text": "proposes_split_into_multiple_ADRs",
+      "passed": true,
+      "evidence": "4-ADR table proposed (storage, partitioning, access, backup/export+import)."
+    },
+    {
+      "text": "explains_why_bundling_is_bad",
+      "passed": true,
+      "evidence": "Baseline noted dependencies and supersedability."
+    },
+    {
+      "text": "no_issues_filed_yet",
+      "passed": true,
+      "evidence": "Baseline asks for confirmation before filing; invocations written to file per task."
+    }
+  ]
+}

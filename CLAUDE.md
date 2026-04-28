@@ -37,6 +37,10 @@ go mod tidy                               # Dependency management
 
 ### Go Services
 
+Two services live under `services/`:
+- `machine/` — full chi-based HTTP service backed by Firestore; the reference shape for new services
+- `lb-sink/` — placeholder stub (a `main.go` that prints hello); exists to anchor a load-balancer backend
+
 Services do **not** use the humus framework. The current pattern (see `services/machine/`) is:
 
 ```
@@ -56,7 +60,7 @@ services/{service-name}/
 - `google.golang.org/protobuf` — request/response serialization
 - `go.opentelemetry.io/otel` — tracing
 
-**Config** comes from environment variables via `ConfigFromEnv(ctx)`, not embedded YAML:
+**Config** comes from environment variables via `ConfigFromEnv(ctx)`, not embedded YAML. (Note: `services/machine/config.yaml` is a vestigial humus-era artifact — the live config path is env vars.)
 ```go
 func ConfigFromEnv(ctx context.Context) Config {
     return Config{
@@ -99,10 +103,7 @@ Shared error types generated from protobuf. Problems serialize to protobuf and a
 
 ### Terraform Modules
 
-Each `cloud/*` directory is a reusable Terraform module (not a root module):
-- `cloud/rest-api/` - Cloud Run service provisioner
-- `cloud/https-load-balancer/` - HTTPS LB with mTLS support
-- `cloud/mtls/cloudflare-gcp/` - Cloudflare-to-GCP trust anchors
+Each `cloud/*` directory is a reusable Terraform module (not a root module). The set spans ~14 GCP building blocks covering compute (`compute-engine`, `rest-api`), networking (`vpc-network`, `https-load-balancer`, `internal-application-load-balancer`, `network-load-balancer`, `ip`, `dns`), storage/data (`storage-bucket`, `firestore`, `artifact-registry`), IAM (`service-account`), and mTLS trust (`mtls/cloudflare-gcp`).
 
 All use GCP provider v7.11.0 with `create_before_destroy` lifecycle for zero-downtime.
 
@@ -139,6 +140,8 @@ Resource naming:
 
 - `.github/copilot-instructions.md` — Comprehensive AI agent instructions
 - `.github/instructions/go.instructions.md` — Detailed Go coding standards
+- `.github/agents/` — Agent definitions (e.g. `review-capability.agent.md`)
+- `.github/prompts/` — Reusable prompt templates (e.g. `new-adr.prompt.md`)
 - `docs/content/r&d/adrs/` — Architecture Decision Records (MADR 4.0.0 format)
 
 ## Common Pitfalls

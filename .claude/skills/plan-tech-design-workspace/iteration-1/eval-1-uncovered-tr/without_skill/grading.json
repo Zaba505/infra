@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "detects_TR_08_uncovered",
+      "passed": true,
+      "evidence": "Baseline audit trail also flagged TR-08 with '(none)' / '(gap \u2014 see below)'."
+    },
+    {
+      "text": "does_not_paper_over_gap",
+      "passed": true,
+      "evidence": "Baseline marked TR-08 as a gap rather than inventing a realization."
+    },
+    {
+      "text": "routes_to_amend_adrs_or_trs",
+      "passed": true,
+      "evidence": "Baseline noted 3 uncovered TRs (TR-03, TR-06, TR-08) as gap issues."
+    },
+    {
+      "text": "no_premature_completion",
+      "passed": true,
+      "evidence": "Baseline deferred component-design issues until gap ADRs close \u2014 defensible interpretation of 'not complete'."
+    }
+  ]
+}

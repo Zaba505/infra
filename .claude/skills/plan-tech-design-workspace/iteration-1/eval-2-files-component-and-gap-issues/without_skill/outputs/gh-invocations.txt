@@ -1,0 +1,99 @@
+# Intended `gh issue create` invocations for follow-ups from tech-design.md
+# (self-hosted-application-platform capability). NOT executed.
+
+# --- Component design issues (one per component, for define-component-design) ---
+
+gh issue create \
+  --title "Component design: Tenant State Store (self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+Author the component-design document for the **Tenant State Store** component of the self-hosted-application-platform capability.
+
+**Realizes:** ADR-0001 (tenant state storage — per-tenant Firestore namespace)
+**Covers TRs:** TR-01 (isolation), TR-04 (no-downtime updates)
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-component-design` skill. Out of scope: revisiting the storage choice itself (settled in ADR-0001).
+EOF
+)"
+
+gh issue create \
+  --title "Component design: Platform Contract Registry (self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+Author the component-design document for the **Platform Contract Registry** component of the self-hosted-application-platform capability.
+
+**Realizes:** ADR-0002 (contract versioning — semver in package path)
+**Covers TRs:** TR-02 (concurrent contract versions during migration)
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-component-design` skill.
+EOF
+)"
+
+gh issue create \
+  --title "Component design: Tenant Export Service (self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+Author the component-design document for the **Tenant Export Service** component of the self-hosted-application-platform capability.
+
+**Realizes:** ADR-0003 (tenant eviction export — on-demand GCS signed URL)
+**Covers TRs:** TR-05 (evicted tenant data portability)
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-component-design` skill.
+EOF
+)"
+
+gh issue create \
+  --title "Component design: Tenant Lifecycle Controller (self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+Author the component-design document for the **Tenant Lifecycle Controller** component of the self-hosted-application-platform capability.
+
+**Realizes:** Coordinates ADR-0001, ADR-0002, ADR-0003 outcomes (onboarding, contract migration, operator-initiated updates, eviction handoff).
+**Covers TRs:** TR-02, TR-04, TR-05 (orchestration aspects)
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-component-design` skill.
+EOF
+)"
+
+gh issue create \
+  --title "Component design: Platform Edge / Network Path (self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+Author the component-design document for the **Platform Edge / Network Path** component of the self-hosted-application-platform capability.
+
+**Realizes:** Prior shared decision (Cloudflare → GCP with WireGuard to home lab).
+**Covers TRs:** TR-07 (inter-service traffic topology)
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-component-design` skill. Capture the existing topology as it applies to this capability; do not re-decide the shared topology.
+EOF
+)"
+
+# --- Gap issues (one per uncovered TR, for define-adr via plan-adrs) ---
+
+gh issue create \
+  --title "ADR gap: tenant-facing observability scoping (TR-03, self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+TR-03 (tenant-facing observability data must be queryable per-tenant within their data scope only) is not covered by any accepted ADR for the self-hosted-application-platform capability.
+
+Author a new capability-scoped ADR deciding how per-tenant metrics, logs, and traces are collected, stored, and scoped on query.
+
+**Covers TR:** TR-03
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-adr` skill (run `plan-adrs` first if scope is unclear).
+EOF
+)"
+
+gh issue create \
+  --title "ADR gap: tenant data import / migration in (TR-06, self-hosted-application-platform)" \
+  --body "$(cat <<'EOF'
+TR-06 (new tenants must be able to migrate existing data into the platform without loss or corruption) is not covered by any accepted ADR for the self-hosted-application-platform capability.
+
+Author a new capability-scoped ADR deciding the import format, idempotency mechanism, and integrity-verification approach for incoming tenant data.
+
+**Covers TR:** TR-06
+**Parent tech-design:** docs/content/capabilities/self-hosted-application-platform/tech-design.md
+
+Use the `define-adr` skill (run `plan-adrs` first if scope is unclear).
+EOF
+)"

@@ -1,0 +1,122 @@
+{
+  "skill_name": "plan-adrs",
+  "iteration": 1,
+  "trials_per_config": 1,
+  "configs": {
+    "with_skill": {
+      "pass_rate": 1.0,
+      "avg_tokens": 29054.4,
+      "avg_duration_ms": 63646.8
+    },
+    "without_skill": {
+      "pass_rate": 0.7733333333333333,
+      "avg_tokens": 27289.6,
+      "avg_duration_ms": 67840.2
+    }
+  },
+  "delta": {
+    "pass_rate_pp": 22.666666666666668
+  },
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-refuses",
+      "configs": {
+        "with_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 20690,
+          "tokens": 25621
+        },
+        "without_skill": {
+          "passed": 1,
+          "total": 5,
+          "pass_rate": 0.2,
+          "duration_ms": 80655,
+          "tokens": 30546
+        }
+      }
+    },
+    {
+      "id": 1,
+      "name": "enumerates-before-solving",
+      "configs": {
+        "with_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 91269,
+          "tokens": 32439
+        },
+        "without_skill": {
+          "passed": 5,
+          "total": 5,
+          "pass_rate": 1.0,
+          "duration_ms": 102015,
+          "tokens": 32672
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "rejects-bundled",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 65364,
+          "tokens": 29208
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 49378,
+          "tokens": 24317
+        }
+      }
+    },
+    {
+      "id": 3,
+      "name": "flags-shared",
+      "configs": {
+        "with_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 36045,
+          "tokens": 25493
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 4,
+          "pass_rate": 1.0,
+          "duration_ms": 54115,
+          "tokens": 23769
+        }
+      }
+    },
+    {
+      "id": 4,
+      "name": "files-issues-after-approval",
+      "configs": {
+        "with_skill": {
+          "passed": 6,
+          "total": 6,
+          "pass_rate": 1.0,
+          "duration_ms": 104866,
+          "tokens": 32511
+        },
+        "without_skill": {
+          "passed": 4,
+          "total": 6,
+          "pass_rate": 0.6666666666666666,
+          "duration_ms": 53038,
+          "tokens": 25144
+        }
+      }
+    }
+  ]
+}

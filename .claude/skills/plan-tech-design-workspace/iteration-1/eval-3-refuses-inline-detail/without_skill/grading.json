@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_inline_endpoints",
+      "passed": true,
+      "evidence": "Baseline also declined inline endpoints; carried them into the tenant-registry component-design issue."
+    },
+    {
+      "text": "explains_why_per_component_belongs_elsewhere",
+      "passed": true,
+      "evidence": "Baseline summary: 'that detail belongs in a define-component-design doc, not the tech-design skeleton'."
+    },
+    {
+      "text": "files_component_issue_for_tenant_registry",
+      "passed": true,
+      "evidence": "First baseline invocation: 'component-design: tenant-registry ...' \u2014 fires component issue but uses non-repo title convention."
+    },
+    {
+      "text": "preserves_user_intent_for_followup",
+      "passed": true,
+      "evidence": "Baseline 'captured the operator's suggested endpoints as starting input in the tenant-registry component-design issue'."
+    }
+  ]
+}

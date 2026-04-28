@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "produces_a_decision_list",
+      "passed": true,
+      "evidence": "Enumerated 8 capability-scoped ADRs with titles + one-liners."
+    },
+    {
+      "text": "each_item_cites_TRs",
+      "passed": true,
+      "evidence": "Each ADR item ties to specific TR-NNs (TR-01, TR-03, TR-05, etc.)."
+    },
+    {
+      "text": "no_options_proposed",
+      "passed": true,
+      "evidence": "Response explicitly omits storage vendor / compute platform / telemetry backend choices \u2014 left to define-adr."
+    },
+    {
+      "text": "asks_for_user_approval_before_filing",
+      "passed": true,
+      "evidence": "Closes with explicit 'Approved as-is / Approved with changes / Pause' menu and 'Until you approve, no issues are filed.'"
+    },
+    {
+      "text": "no_premature_issue_filing",
+      "passed": true,
+      "evidence": "gh-invocations.txt contains '# DO NOT execute until the user approves'; no actual filing simulated."
+    }
+  ]
+}

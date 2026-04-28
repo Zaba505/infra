@@ -72,6 +72,10 @@ After producing the doc, briefly tell the user:
 - Which sections still have open questions (so they can chase them down)
 - That this is a living document — the next step is to share it with stakeholders for review, not to start building
 
+## Validate the rendered page
+
+After saving the doc, run `cd docs && hugo server` and open the new page in a browser to confirm it renders correctly. A clean build is necessary but not sufficient — pages can build with no errors yet render broken (missing/incorrect front-matter `type`, unresolved `ref` shortcode, mis-nested section, broken Mermaid). The doc is not done until the rendered page has been visually validated. If you cannot run the preview in this session (no browser, sandboxed shell), say so explicitly to the user rather than reporting the doc as done.
+
 ## Output format
 
 Plain markdown matching `assets/template.md`. No code blocks around the whole document. The template includes Hugo/Docsy frontmatter (`title`, `description`, `type: docs`, `weight`); keep it — it is required for the page to render correctly in the published docs site.

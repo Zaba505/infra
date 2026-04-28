@@ -1,0 +1,218 @@
+# Intended `gh issue create` invocations — one per ADR.
+# NOT executed; written here per task instructions.
+# Repo: Zaba505/infra
+# Capability: self-hosted-application-platform
+# Each issue tracks authoring one ADR via the `define-adr` skill.
+
+# ---------- ADR-A ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant compute runtime (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose the tenant compute runtime — the unit of compute the platform offers to host tenant workloads.
+
+## Forced by
+- TR-01 — compute-layer tenant isolation
+- TR-04 — operator-initiated updates must not break online tenants
+- TR-07 — must fit the Cloudflare → GCP / WireGuard topology (constraint, not re-decided here)
+
+## Scope
+- IN: what hosts tenant workloads, the abstraction tenants target.
+- OUT: how tenants are isolated within that runtime (separate ADR), storage shape (separate ADR), contract surface (separate ADR).
+
+## Dependencies
+None — foundational. Author this first.
+
+## Acceptance
+- A capability-scoped MADR ADR exists at `docs/content/capabilities/self-hosted-application-platform/adrs/`.
+- TR-01, TR-04, TR-07 are referenced as drivers/constraints.
+- Drafted via the `define-adr` skill.
+EOF
+)"
+
+# ---------- ADR-B ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant isolation model — data and compute (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose the mechanism that prevents any tenant from reading another tenant's state, secrets, traffic, or telemetry — under normal AND degraded conditions.
+
+## Forced by
+- TR-01 — strict isolation under normal and degraded operation
+- TR-03 — cross-tenant observability data must be inaccessible
+
+## Scope
+- IN: isolation primitives (namespaces / separate clusters / per-tenant projects / VMs / etc.) at both data and compute layers; behavior under degraded conditions.
+- OUT: storage shape (ADR-C), telemetry tagging/authz (ADR-F).
+
+## Dependencies
+Depends on ADR-A (runtime).
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Explicitly addresses TR-01's "degraded operating condition" clause.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-C ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant persistent storage model (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose how per-tenant durable state is provisioned and partitioned, and the integrity primitives that export/import will build on.
+
+## Forced by
+- TR-01 — data-layer isolation
+- TR-05 — exportable in a portable format
+- TR-06 — importable idempotently with verifiable integrity
+
+## Scope
+- IN: storage shape (per-tenant volumes / DB instances / buckets), partitioning, integrity primitives.
+- OUT: export protocol (ADR-G), import protocol (ADR-H), isolation mechanism (ADR-B).
+
+## Dependencies
+Depends on ADR-A, ADR-B.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-D ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: platform contract definition and versioning scheme (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Define what the platform contract is, how versions are identified, how multiple versions coexist, and the shape of the bounded migration window.
+
+## Forced by
+- TR-02 — operator must roll out contract changes without breaking existing tenants; multiple versions concurrent for a bounded window.
+
+## Scope
+- IN: contract surface, version identifier scheme, concurrency of versions, deprecation/migration window policy.
+- OUT: rollout mechanism (ADR-E).
+
+## Dependencies
+Loosely depends on ADR-A.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-E ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant ingress and zero-downtime update mechanism (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose how tenant-facing traffic is routed and how operator-initiated updates roll out so online workloads see no end-user-visible downtime.
+
+## Forced by
+- TR-04 — no end-user-visible downtime on operator-initiated updates
+- TR-07 — traffic must traverse Cloudflare → GCP (constraint)
+
+## Scope
+- IN: ingress topology, rollout strategy (blue/green / rolling / drain), interaction with contract version transitions.
+- OUT: contract definition (ADR-D), runtime choice (ADR-A).
+
+## Dependencies
+Depends on ADR-A, ADR-D.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-F ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: per-tenant observability scoping (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Choose how metrics, logs, and traces are tagged, stored, and authorized so each tenant can query only their own data.
+
+## Forced by
+- TR-03 — per-tenant queryability, no cross-tenant access
+- TR-01 — telemetry isolation
+
+## Scope
+- IN: tenancy tagging model, storage segregation, query-time authz.
+- OUT: storage shape (ADR-C), isolation primitives (ADR-B).
+
+## Dependencies
+Depends on ADR-B.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-G ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant data export mechanism (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Define the export format, trigger, delivery channel, integrity guarantees, and the defined export window for an evicted tenant.
+
+## Forced by
+- TR-05 — evicted tenant must be able to retrieve their data in a portable format within a defined window.
+
+## Scope
+- IN: export protocol, format, packaging/signing, retrieval channel, window policy.
+- OUT: storage shape (ADR-C), import (ADR-H).
+
+## Dependencies
+Depends on ADR-C.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# ---------- ADR-H ----------
+gh issue create \
+  --repo Zaba505/infra \
+  --title "ADR: tenant data import / migration mechanism (self-hosted-application-platform)" \
+  --label "adr,capability:self-hosted-application-platform" \
+  --body "$(cat <<'EOF'
+## Decision to make
+Define how a new tenant's pre-existing data is accepted and imported with idempotency and verifiable integrity.
+
+## Forced by
+- TR-06 — idempotent import with integrity verification (no silent loss, no duplication on retry).
+
+## Scope
+- IN: import protocol, idempotency keys, integrity verification (checksums / manifests), retry semantics.
+- OUT: storage shape (ADR-C), export (ADR-G).
+
+## Dependencies
+Depends on ADR-C.
+
+## Acceptance
+- Capability-scoped MADR ADR.
+- Drafted via `define-adr`.
+EOF
+)"
+
+# Note: TR-07 ("inter-service communication must traverse the Cloudflare → GCP path")
+# is a prior shared decision and is NOT given its own issue. It is referenced as a
+# constraint in ADR-A, ADR-B, ADR-E, and ADR-F.

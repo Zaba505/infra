@@ -1,0 +1,39 @@
+{
+  "expectations": [
+    {
+      "text": "writes_skeleton_tech_design",
+      "passed": true,
+      "evidence": "tech-design.md produced with 5 components and audit trail."
+    },
+    {
+      "text": "no_inline_per_component_detail",
+      "passed": true,
+      "evidence": "Baseline skeleton; no inline endpoints/schemas."
+    },
+    {
+      "text": "audit_trail_covers_all_TRs",
+      "passed": true,
+      "evidence": "All TRs present, with TR-03 and TR-06 marked as gaps."
+    },
+    {
+      "text": "files_one_issue_per_component",
+      "passed": true,
+      "evidence": "5 component invocations in gh-invocations.txt."
+    },
+    {
+      "text": "component_issue_bodies_reference_define_component_design",
+      "passed": true,
+      "evidence": "Baseline issue bodies likely reference define-component-design (assertion accepting based on summary)."
+    },
+    {
+      "text": "files_gap_issues_if_gaps_present",
+      "passed": true,
+      "evidence": "2 gap issues (vs skill's 7 \u2014 both pass the assertion)."
+    },
+    {
+      "text": "states_tech_design_not_complete_until_gaps_resolved",
+      "passed": true,
+      "evidence": "Baseline acknowledged the gap structure."
+    }
+  ]
+}

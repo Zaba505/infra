@@ -1,0 +1,29 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_to_compose",
+      "passed": true,
+      "evidence": "outputs/ contains response.md only (no tech-design.md). Refusal in response."
+    },
+    {
+      "text": "lists_proposed_adrs",
+      "passed": true,
+      "evidence": "Response names ADR-0002 and ADR-0003 as proposed."
+    },
+    {
+      "text": "routes_to_define_adr",
+      "passed": true,
+      "evidence": "Response tells user to accept via define-adr."
+    },
+    {
+      "text": "no_tech_design_written",
+      "passed": true,
+      "evidence": "No tech-design.md file in outputs/."
+    },
+    {
+      "text": "no_issues_filed",
+      "passed": true,
+      "evidence": "gh-invocations.txt empty (per skill discipline)."
+    }
+  ]
+}

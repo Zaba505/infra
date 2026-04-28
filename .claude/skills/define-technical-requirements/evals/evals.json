@@ -1,0 +1,64 @@
+{
+  "skill_name": "define-technical-requirements",
+  "notes": [
+    "Seeded from define-tech-design evals cases #0, #1, #2, #9 — the four that exercise Stage 1 behavior. The other Stage-2/3 cases moved to plan-adrs / define-adr / plan-tech-design.",
+    "Test-design note: fixture frontmatter must NOT describe the skill's rules — that leaks the skill's behavior to the baseline. Use the naive fixture variants under fixtures/."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "missing-inputs-refuses",
+      "prompt": "Help me extract the technical requirements for a new 'shared file vault' capability. We haven't written the capability doc yet but I know what I want — let's just go.",
+      "expected_output": "Should refuse to proceed and route the user to define-capability (and then define-user-experience) first. Should not produce a tech-requirements.md without those inputs.",
+      "assertions": [
+        {"name": "response_refuses_to_proceed", "check": "Response declines to extract requirements until prerequisites exist."},
+        {"name": "routes_to_define_capability", "check": "Response mentions running `define-capability` first."},
+        {"name": "routes_to_define_user_experience", "check": "Response mentions `define-user-experience` as a needed input."},
+        {"name": "no_tech_requirements_md_produced", "check": "outputs/ does not contain a tech-requirements.md (or any populated requirements document)."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "extracts-not-designs",
+      "prompt": "Extract the technical requirements for the self-hosted-application-platform capability. The capability and its user experiences are already documented under docs/content/capabilities/self-hosted-application-platform/.",
+      "expected_output": "Should produce ONLY tech-requirements.md after reading the capability and all UX docs. Each TR should link back to a specific section. Must NOT propose ADRs, must NOT propose solutions or technologies, must NOT skip ahead. Should end by telling the user to set reviewed_at in the frontmatter and explain that plan-adrs is gated on it.",
+      "assertions": [
+        {"name": "produces_tech_requirements_md", "check": "outputs/ contains a file named tech-requirements.md."},
+        {"name": "frontmatter_has_reviewed_at_null", "check": "Produced file's frontmatter contains `reviewed_at: null`."},
+        {"name": "has_multiple_TR_entries", "check": "Produced file has at least 4 TR-NN headings (TR-01..TR-04+)."},
+        {"name": "each_TR_has_source_link", "check": "Every TR-NN section includes a `**Source:**` line with at least one link."},
+        {"name": "no_technology_choices_in_TRs", "check": "TR text does not name specific technologies (Postgres, MySQL, Redis, gRPC, mTLS as a chosen mechanism, etc.) as the requirement itself."},
+        {"name": "no_adr_drafted", "check": "Response does not propose, draft, or list ADR options."},
+        {"name": "instructs_user_to_set_reviewed_at", "check": "Response tells user to set `reviewed_at` to today's date before proceeding."},
+        {"name": "mentions_plan_adrs_gate", "check": "Response mentions that plan-adrs (or the next stage) won't run until reviewed_at is set."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "decision-disguised-as-requirement",
+      "prompt": "For the self-hosted-application-platform capability tech requirements, add: TR-04: use Postgres for tenant metadata storage with logical replication for cross-region failover. The tech-requirements.md file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+      "expected_output": "Should refuse to add this as a requirement. Should explain that 'use Postgres' is a decision (one of several options), not a requirement. Should ask what the underlying requirement is and offer to capture 'consider Postgres + logical replication' as an open question for the ADR stage instead.",
+      "assertions": [
+        {"name": "refuses_to_add_postgres_as_TR", "check": "Response declines to add 'use Postgres ...' as a numbered TR."},
+        {"name": "explains_decision_vs_requirement", "check": "Response explains the distinction between a decision (chosen from options) and a requirement (forced by capability/UX)."},
+        {"name": "asks_for_underlying_requirement", "check": "Response asks the user for the underlying constraint (or proposes one) — e.g. queryable by tenant ID with strong consistency, survives single-region failure, etc."},
+        {"name": "offers_to_park_in_open_questions", "check": "Response offers to capture 'consider Postgres + logical replication' (or equivalent) in Open Questions for the ADR stage."},
+        {"name": "no_postgres_TR_written_to_file", "check": "If tech-requirements.md was modified, it does NOT contain a TR with 'use Postgres' (or equivalent technology choice) as the requirement text."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "re-extraction-preserves-tr-numbers",
+      "prompt": "Re-extract tech-requirements.md for the self-hosted-application-platform capability. The existing file has TR-01 through TR-07 with reviewed_at: 2026-04-20. The file is at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md and one of the existing UX-sourced TRs has a source link that no longer resolves (the source UX section was renamed).",
+      "expected_output": "Should preserve TR-01 through TR-07 numbering. Any TR whose source link no longer resolves should be flagged with a ⚠️ marker, NOT deleted or renumbered. New requirements (if any) should be appended starting at TR-08+. Should null out reviewed_at or surface that it must be re-set before plan-adrs unlocks. Should mention git diff is the review surface.",
+      "assertions": [
+        {"name": "preserves_TR_01_through_07", "check": "Resulting tech-requirements.md still has headings TR-01 through TR-07 (numbering not changed)."},
+        {"name": "no_renumbering", "check": "No existing TR was renumbered to a different identifier."},
+        {"name": "stale_link_flagged_not_deleted", "check": "The TR whose source no longer resolves is marked with a ⚠️ flag (or equivalent 'source no longer resolves' marker) and is NOT deleted."},
+        {"name": "new_TRs_appended_starting_at_TR_08", "check": "Any newly-discovered TR uses identifier TR-08 or higher (not reusing earlier numbers)."},
+        {"name": "reviewed_at_nulled_or_flagged", "check": "Either `reviewed_at` is set back to null in the resulting file, or the response explicitly tells the user it must be re-set before plan-adrs proceeds."},
+        {"name": "mentions_git_diff_or_living_doc", "check": "Response mentions that this is a living doc / git diff is the review surface (or equivalent framing)."}
+      ]
+    }
+  ]
+}

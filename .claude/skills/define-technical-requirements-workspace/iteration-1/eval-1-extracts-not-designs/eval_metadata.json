@@ -1,0 +1,39 @@
+{
+  "eval_id": 1,
+  "eval_name": "extracts-not-designs",
+  "prompt": "Extract the technical requirements for the self-hosted-application-platform capability. The capability and its user experiences are already documented under docs/content/capabilities/self-hosted-application-platform/.",
+  "assertions": [
+    {
+      "name": "produces_tech_requirements_md",
+      "check": "outputs/ contains a file named tech-requirements.md."
+    },
+    {
+      "name": "frontmatter_has_reviewed_at_null",
+      "check": "Produced file's frontmatter contains `reviewed_at: null`."
+    },
+    {
+      "name": "has_multiple_TR_entries",
+      "check": "Produced file has at least 4 TR-NN headings (TR-01..TR-04+)."
+    },
+    {
+      "name": "each_TR_has_source_link",
+      "check": "Every TR-NN section includes a `**Source:**` line with at least one link."
+    },
+    {
+      "name": "no_technology_choices_in_TRs",
+      "check": "TR text does not name specific technologies (Postgres, MySQL, Redis, gRPC, mTLS as a chosen mechanism, etc.) as the requirement itself."
+    },
+    {
+      "name": "no_adr_drafted",
+      "check": "Response does not propose, draft, or list ADR options."
+    },
+    {
+      "name": "instructs_user_to_set_reviewed_at",
+      "check": "Response tells user to set `reviewed_at` to today's date before proceeding."
+    },
+    {
+      "name": "mentions_plan_adrs_gate",
+      "check": "Response mentions that plan-adrs (or the next stage) won't run until reviewed_at is set."
+    }
+  ]
+}

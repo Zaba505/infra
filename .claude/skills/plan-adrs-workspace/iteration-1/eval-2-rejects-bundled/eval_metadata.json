@@ -1,0 +1,23 @@
+{
+  "eval_id": 2,
+  "eval_name": "rejects-bundled-adr",
+  "prompt": "For the self-hosted-application-platform capability, plan a single ADR called 'Tenant data architecture' that covers where tenant state lives, how it's partitioned, how it's accessed, and how it's backed up. Tech-requirements.md is reviewed at docs/content/capabilities/self-hosted-application-platform/tech-requirements.md.",
+  "assertions": [
+    {
+      "name": "refuses_the_bundle",
+      "check": "Response declines to plan a single 'Tenant data architecture' ADR covering all four sub-decisions."
+    },
+    {
+      "name": "proposes_split_into_multiple_ADRs",
+      "check": "Response proposes splitting into at least three separate ADRs (storage, partitioning, access, backup are the four expected)."
+    },
+    {
+      "name": "explains_why_bundling_is_bad",
+      "check": "Response explains that bundling dilutes rationale and/or prevents superseding sub-decisions independently."
+    },
+    {
+      "name": "no_issues_filed_yet",
+      "check": "No issues are filed in this turn \u2014 the split proposal still needs user confirmation."
+    }
+  ]
+}

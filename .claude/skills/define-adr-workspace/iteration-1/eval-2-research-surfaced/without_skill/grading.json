@@ -1,0 +1,24 @@
+{
+  "expectations": [
+    {
+      "text": "surfaces_research_before_options",
+      "passed": true,
+      "evidence": "Baseline included 'Research Tasks (R-1 to R-6)' section in the ADR."
+    },
+    {
+      "text": "asks_user_how_to_resolve_research",
+      "passed": true,
+      "evidence": "Baseline noted Decision Outcome left pending operator selection."
+    },
+    {
+      "text": "does_not_invent_factual_claims",
+      "passed": true,
+      "evidence": "Baseline drafted options but with research-task placeholders, not invented facts."
+    },
+    {
+      "text": "does_not_proceed_to_status_accepted_without_research",
+      "passed": true,
+      "evidence": "Baseline wrote status: proposed (not accepted)."
+    }
+  ]
+}

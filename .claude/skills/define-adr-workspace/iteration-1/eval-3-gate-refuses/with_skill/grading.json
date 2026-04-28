@@ -1,0 +1,19 @@
+{
+  "expectations": [
+    {
+      "text": "refuses_due_to_gate",
+      "passed": true,
+      "evidence": "Response declines to draft because reviewed_at: null."
+    },
+    {
+      "text": "names_reviewed_at_state",
+      "passed": true,
+      "evidence": "Cites reviewed_at: null explicitly."
+    },
+    {
+      "text": "no_adr_file_written",
+      "passed": true,
+      "evidence": "outputs/ contains only response.md \u2014 no ADR file."
+    }
+  ]
+}

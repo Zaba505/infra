@@ -1,0 +1,44 @@
+{
+  "expectations": [
+    {
+      "text": "produces_tech_requirements_md",
+      "passed": true,
+      "evidence": "outputs/ contains tech-requirements.md."
+    },
+    {
+      "text": "frontmatter_has_reviewed_at_null",
+      "passed": false,
+      "evidence": "Baseline used a different format with grouping by concern; needs verification of frontmatter \u2014 saw no Hugo-style frontmatter pattern, ~50 TRs in 9 concern areas instead of flat list."
+    },
+    {
+      "text": "has_multiple_TR_entries",
+      "passed": true,
+      "evidence": "~50 TR entries reported."
+    },
+    {
+      "text": "each_TR_has_source_link",
+      "passed": true,
+      "evidence": "Agent reported source traces back to capability/UX."
+    },
+    {
+      "text": "no_technology_choices_in_TRs",
+      "passed": true,
+      "evidence": "No reported technology choices."
+    },
+    {
+      "text": "no_adr_drafted",
+      "passed": true,
+      "evidence": "No ADRs drafted."
+    },
+    {
+      "text": "instructs_user_to_set_reviewed_at",
+      "passed": false,
+      "evidence": "Baseline did not surface the reviewed_at gate."
+    },
+    {
+      "text": "mentions_plan_adrs_gate",
+      "passed": false,
+      "evidence": "Baseline did not mention plan-adrs gate."
+    }
+  ]
+}

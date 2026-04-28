@@ -1,0 +1,5 @@
+# No gh issue create invocations were made.
+# The plan-tech-design skill's precondition gate (Step 4 of preconditions) failed:
+# ADRs 0002-contract-versioning and 0003-tenant-eviction-export are status: proposed.
+# The skill refuses to compose tech-design.md or file any issues until all ADRs
+# are accepted (or superseded by an accepted superseder).

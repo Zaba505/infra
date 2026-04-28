@@ -1,0 +1,61 @@
+{
+  "skill_name": "plan-tech-design",
+  "notes": [
+    "Seeded from define-tech-design evals cases #7 (stage-3-gate-enforced) and #8 (stage-3-detects-uncovered-tr).",
+    "Added cases for new behavior unique to this split skill: filing component issues + gap issues, and refusing to inline per-component detail."
+  ],
+  "evals": [
+    {
+      "id": 0,
+      "name": "gate-refuses-proposed-adrs",
+      "prompt": "We have three ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/: 0001 (accepted), 0002 (proposed), 0003 (proposed). Compose tech-design.md.",
+      "expected_output": "Should refuse to compose because not every ADR is accepted. Should list the proposed ADRs (0002, 0003) and ask the user to accept them via define-adr or revise them. Should not write tech-design.md and should not file any issues.",
+      "assertions": [
+        {"name": "refuses_to_compose", "check": "Response declines to write tech-design.md."},
+        {"name": "lists_proposed_adrs", "check": "Response specifically names ADR-0002 and ADR-0003 as the blocking proposed ADRs."},
+        {"name": "routes_to_define_adr", "check": "Response tells the user to accept the proposed ADRs (via define-adr) before re-invoking."},
+        {"name": "no_tech_design_written", "check": "No tech-design.md file is written under docs/content/capabilities/self-hosted-application-platform/."},
+        {"name": "no_issues_filed", "check": "No `gh issue create` invocations are made."}
+      ]
+    },
+    {
+      "id": 1,
+      "name": "detects-uncovered-tr",
+      "prompt": "All ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/ are accepted. tech-requirements.md has TR-01 through TR-08. Compose tech-design.md. (Note: TR-08 is 'graceful degradation when a GCP region is unreachable' and no ADR addresses it.)",
+      "expected_output": "While building the audit trail, should detect that TR-08 has no ADR. Should NOT paper over the gap with prose. Should stop, surface the gap explicitly, and propose returning to plan-adrs / define-adr to draft an ADR addressing TR-08 (or removing TR-08 from tech-requirements.md if the constraint isn't real).",
+      "assertions": [
+        {"name": "detects_TR_08_uncovered", "check": "Response specifically calls out TR-08 as having no ADR addressing it."},
+        {"name": "does_not_paper_over_gap", "check": "Response does not invent a story / component / mechanism to satisfy TR-08 in tech-design.md prose."},
+        {"name": "routes_to_amend_adrs_or_trs", "check": "Response proposes either filing/amending an ADR for TR-08 (via plan-adrs / define-adr) or removing TR-08 from tech-requirements.md if the constraint is no longer real."},
+        {"name": "no_premature_completion", "check": "Skill does not declare tech-design.md complete or proceed to file component issues against an incomplete design."}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "files-component-and-gap-issues",
+      "prompt": "All ADRs in docs/content/capabilities/self-hosted-application-platform/adrs/ are accepted (0001 through 0003). tech-requirements.md has TR-01 through TR-07, all covered. Compose tech-design.md and file the follow-up issues — go.",
+      "expected_output": "Should walk the ADRs, identify components, surface any implementation-detail gaps (e.g. tenant ID format derivation, API contracts not yet specified, table schemas not yet defined), and after explicit approval file one component issue per component (titled `story(component): ...`) and one gap issue per gap (titled `story(gap): ...`). tech-design.md should contain a skeleton (overview + component inventory + audit trail) but NOT inline per-component detail like endpoint paths, table columns, or sequence diagrams.",
+      "assertions": [
+        {"name": "writes_skeleton_tech_design", "check": "tech-design.md is produced with overview, component inventory, and TR → ADR → component audit trail."},
+        {"name": "no_inline_per_component_detail", "check": "tech-design.md does NOT contain endpoint paths, table column definitions, or per-UX sequence diagrams. Per-component detail is deferred to component design docs."},
+        {"name": "audit_trail_covers_all_TRs", "check": "Every TR-NN appears in the audit trail; no row has an empty ADR or Realization column."},
+        {"name": "files_one_issue_per_component", "check": "One `gh issue create` invocation per component, with title `story(component): {name} — {capability-name}` (or close-to-this convention)."},
+        {"name": "component_issue_bodies_reference_define_component_design", "check": "Each component issue body names `define-component-design` as the next-step skill."},
+        {"name": "files_gap_issues_if_gaps_present", "check": "If gaps were surfaced, one `gh issue create` invocation per gap titled `story(gap): {name} — {capability-name}` (or close-to-this convention)."},
+        {"name": "states_tech_design_not_complete_until_gaps_resolved", "check": "Response explicitly states tech design is not complete until all gap issues are resolved."}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "refuses-to-write-per-component-detail-inline",
+      "prompt": "All ADRs are accepted in docs/content/capabilities/self-hosted-application-platform/adrs/. Compose tech-design.md and while you're at it write out the tenant-registry service's API endpoints — I know what they should be: GET /tenants, POST /tenants, GET /tenants/{id}, PATCH /tenants/{id}, DELETE /tenants/{id}. Save me from running define-component-design later.",
+      "expected_output": "Should refuse to inline per-component endpoint detail in tech-design.md. Should explain that endpoint design is define-component-design's job and that putting it in tech-design.md bypasses per-component review and makes the doc unrebuildable. Should compose the skeleton tech-design.md, file a component issue for tenant-registry (so define-component-design can capture the endpoints), and offer to feed the user's endpoint list into that follow-up.",
+      "assertions": [
+        {"name": "refuses_inline_endpoints", "check": "Response declines to write the GET/POST/PATCH/DELETE endpoint list inside tech-design.md."},
+        {"name": "explains_why_per_component_belongs_elsewhere", "check": "Response explains that endpoint design lives in define-component-design and inlining bypasses per-component review."},
+        {"name": "files_component_issue_for_tenant_registry", "check": "A component issue is filed for tenant-registry (or equivalent), pointing at define-component-design."},
+        {"name": "preserves_user_intent_for_followup", "check": "Response acknowledges the user's endpoint list and offers to carry it into the define-component-design invocation."}
+      ]
+    }
+  ]
+}
