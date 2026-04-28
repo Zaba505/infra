@@ -1,0 +1,32 @@
+{
+  "expectations": [
+    {
+      "text": "Refuses to inline a per-task development plan",
+      "passed": true,
+      "evidence": "response holds the line on Step 11/12 boundary"
+    },
+    {
+      "text": "Explains why per-task plans belong to Step 12",
+      "passed": true,
+      "evidence": "response references Step 12 ownership"
+    },
+    {
+      "text": "Still files implementation issues (incl. the schema task)",
+      "passed": true,
+      "evidence": "intended_issues=11; schema in titles=True"
+    },
+    {
+      "text": "Acknowledges user intent and offers Step-12 follow-up path",
+      "passed": true,
+      "evidence": "response routes the user's request to Step 12"
+    },
+    {
+      "text": "Response does not contain a per-task plan body for the schema task",
+      "passed": false,
+      "evidence": "no 'files to create' / 'definition of done' section"
+    }
+  ],
+  "passed": 4,
+  "total": 5,
+  "pass_rate": 0.8
+}

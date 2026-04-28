@@ -1,0 +1,27 @@
+{
+  "expectations": [
+    {
+      "text": "Refuses to slice / file issues",
+      "passed": true,
+      "evidence": "intended_issues=0; response declines=True"
+    },
+    {
+      "text": "Names blocking gap issue (#812 / tenant-id derivation)",
+      "passed": true,
+      "evidence": "matches '#812' or 'tenant-id derivation'"
+    },
+    {
+      "text": "Routes user to resolve the gap",
+      "passed": true,
+      "evidence": "mentions one of the resolution routes"
+    },
+    {
+      "text": "No issues filed",
+      "passed": true,
+      "evidence": "intended_issues=0"
+    }
+  ],
+  "passed": 4,
+  "total": 4,
+  "pass_rate": 1.0
+}
