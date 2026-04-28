@@ -54,11 +54,11 @@ Each requirement is **forced** by the capability or a user experience — it sta
 **Why this is a requirement, not a TR or decision:** The capability's "Operator-only operation" rule states this in absolute terms. It is a forced constraint — every UX is shaped around the operator being the only one with administrative reach.
 
 ### BR-06: End users of tenants must have no direct access to the platform {#br-06}
-**Source:** [Capability §Business Rules & Constraints]({{< ref "_index.md#business-rules" >}}) · [UX: Move Off the Platform After Eviction §Constraints Inherited]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#constraints-inherited" >}})
+**Source:** [Capability §Business Rules & Constraints]({{< ref "_index.md#business-rules" >}}) · [UX: Move Off the Platform After Eviction §Constraints Inherited]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#constraints-inherited" >}}) · [UX: Move Off the Platform After Eviction §Journey]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#journey" >}})
 
-**Requirement:** End users of tenant capabilities reach the tenant, not the platform. The platform must have no notion of "end users" of itself, no UI for them, and no communication channel to them.
+**Requirement:** End users of tenant capabilities reach the tenant, not the platform. The platform must have no notion of "end users" of itself, no UI for them, and no communication channel to them — including during eviction. Capability owners, not the platform, are responsible for notifying their own end users of any tenant lifecycle change (such as an impending shutdown).
 
-**Why this is a requirement, not a TR or decision:** The capability explicitly excludes direct end-user access; the eviction UX reinforces it (the platform never tells end users "this tenant has been retired"). The BR forbids a class of behavior, not a specific implementation.
+**Why this is a requirement, not a TR or decision:** The capability explicitly excludes direct end-user access; the eviction UX reinforces it (the platform never tells end users "this tenant has been retired") and assigns the notification responsibility to the capability owner. The BR forbids a class of behavior, not a specific implementation.
 
 ### BR-07: A designated successor must be able to take over operation if the primary operator becomes unavailable {#br-07}
 **Source:** [Capability §Business Rules & Constraints]({{< ref "_index.md#business-rules" >}}) · [UX: Stand Up the Platform §Constraints Inherited]({{< ref "user-experiences/stand-up-the-platform.md#constraints-inherited" >}})
@@ -72,7 +72,7 @@ Each requirement is **forced** by the capability or a user experience — it sta
 
 **Requirement:** While the platform is up, every tenant's users (via the capability owner) must be able to retrieve their content as a portable archive without operator involvement. Export availability is conditional only on the platform being healthy.
 
-**Why this is a requirement, not a TR or decision:** This is half of the capability's "Operator succession" rule (the other half is the successor) and the central mechanism of the eviction UX. It states what the user must be able to obtain, not how the export is implemented.
+**Why this is a requirement, not a TR or decision:** This is half of the capability's "Operator succession" rule (the other half is the successor) and the central mechanism of the eviction UX. It states what the user must be able to obtain, not how the export is implemented. Pairs with [BR-09](#br-09), which forbids gaps in export-tooling coverage.
 
 ### BR-09: Export tooling must exist for every kind of data the platform hosts {#br-09}
 **Source:** [UX: Move Off the Platform After Eviction §Edge Cases]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#edge-cases" >}})
@@ -249,19 +249,17 @@ Each requirement is **forced** by the capability or a user experience — it sta
 
 **Why this is a requirement, not a TR or decision:** The UX names these contents and treats the issue as self-sufficient. It is a content commitment to the departing user.
 
-### BR-34: After the eviction date the tenant must be in a read-only state until tenant-accessible data is removed {#br-34}
+### BR-34: Tenant compute and network must be torn down on the eviction date {#br-34}
 **Source:** [UX: Move Off the Platform After Eviction §Journey]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#journey" >}})
 
-**Requirement:** On the eviction date, compute and network for the tenant must be torn down and tenant data must transition to a read-only state — no further writes by anyone — until tenant-accessible data is removed at the end of the retention window.
+**Requirement:** On the eviction date, compute and network for the tenant must be torn down. Tenant data then enters the export-only, read-only state covered by [BR-11](#br-11) for the duration of the retention window — no further writes by anyone.
 
-**Why this is a requirement, not a TR or decision:** The UX prescribes this exact behavior. It is the user-facing guarantee that the dataset they extract from is stable.
+**Why this is a requirement, not a TR or decision:** The UX prescribes this teardown distinctly from the data-state guarantee. Compute/network teardown is what makes the dataset stable for export; the read-only data window itself is BR-11's commitment, referenced here rather than restated.
 
-### BR-35: Capability owner — not the platform — must notify their own end users of eviction {#br-35}
-**Source:** [UX: Move Off the Platform After Eviction §Journey]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#journey" >}})
+### BR-35: ~~Capability owner — not the platform — must notify their own end users of eviction~~ {#br-35}
+**Status:** Removed on 2026-04-28 — absorbed into [BR-06](#br-06).
 
-**Requirement:** The capability owner must be the one notifying their end users of the impending shutdown. The platform must not communicate with end users directly, even during eviction.
-
-**Why this is a requirement, not a TR or decision:** Reinforces BR-06 in the eviction context. It is a constraint on platform behavior, not a tooling choice.
+The platform-no-communication-with-end-users rule was already absolute in BR-06; the eviction-context clarifier and the capability-owner-notifies content are now folded into BR-06 directly. Number retained per the doc's append-only rule so existing TR citations (if any) stay valid.
 
 ### BR-36: Platform must offer a one-shot migration-process runner for capability-owner-supplied jobs {#br-36}
 **Source:** [UX: Migrate Existing Data §Goal]({{< ref "user-experiences/migrate-existing-data.md#goal" >}}) · [UX: Migrate Existing Data §Constraints Inherited]({{< ref "user-experiences/migrate-existing-data.md#constraints-inherited" >}})
@@ -273,9 +271,9 @@ Each requirement is **forced** by the capability or a user experience — it sta
 ### BR-37: Migration jobs must be packaged in the same form as any other tenant component {#br-37}
 **Source:** [UX: Migrate Existing Data §Constraints Inherited]({{< ref "user-experiences/migrate-existing-data.md#constraints-inherited" >}})
 
-**Requirement:** A migration process must be packaged in the form the platform accepts for any tenant component. The contract must not relax for migration; a process that cannot be packaged this way cannot be run by the platform.
+**Requirement:** The [BR-13](#br-13) packaging requirement applies to migration jobs without exception — the contract must not relax for migration. A process that cannot be packaged in the form the platform accepts cannot be run by the platform.
 
-**Why this is a requirement, not a TR or decision:** The UX states this constraint explicitly. It enforces uniformity of the contract surface.
+**Why this is a requirement, not a TR or decision:** The UX states this no-carve-out constraint explicitly. BR-13 establishes the packaging form; this BR forbids relaxing it for the migration case, which is the only place a relaxation might plausibly be argued for.
 
 ### BR-38: Migration jobs must declare their re-run contract and any temporary spikes up front {#br-38}
 **Source:** [UX: Migrate Existing Data §Journey]({{< ref "user-experiences/migrate-existing-data.md#journey" >}})
@@ -322,9 +320,9 @@ Each requirement is **forced** by the capability or a user experience — it sta
 ### BR-44: Each tenant must be provided compute, persistent storage, network reachability, identity, backup/DR, and observability {#br-44}
 **Source:** [Capability §Outputs & Deliverables]({{< ref "_index.md#outputs" >}})
 
-**Requirement:** For each hosted tenant, the platform must provide compute (a place for the application to run), persistent storage durable to the platform's defined standard, network reachability both internal and external, identity and authentication for the tenant's end users (or BYO), backup and disaster recovery for tenant data, and observability that lets the operator and capability owner tell whether the tenant is healthy.
+**Requirement:** For each hosted tenant, the platform must provide compute (a place for the application to run), persistent storage durable to the platform's defined standard, network reachability both internal and external, identity and authentication for the tenant's end users, backup and disaster recovery for tenant data, and observability that lets the operator and capability owner tell whether the tenant is healthy.
 
-**Why this is a requirement, not a TR or decision:** This is the capability's stated direct outputs. It is the inventory of what every tenant must receive, named in business terms.
+**Why this is a requirement, not a TR or decision:** This is the capability's stated direct outputs. It is the inventory of what every tenant must receive, named in business terms. The identity entry has a tenant-choice carve-out captured separately in [BR-46](#br-46) (BYO identity); this BR commits to availability of the inventory, not to the platform being the sole source of identity.
 
 ### BR-45: Platform-provided identity service must support the "lost credentials cannot be recovered" property {#br-45}
 **Source:** [Capability §Business Rules & Constraints]({{< ref "_index.md#business-rules" >}}) · [UX: Host a Capability §Constraints Inherited]({{< ref "user-experiences/host-a-capability.md#constraints-inherited" >}})
