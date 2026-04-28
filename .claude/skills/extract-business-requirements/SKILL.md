@@ -37,9 +37,9 @@ Before eliciting anything:
 
 1. **Find the parent capability** at `docs/content/capabilities/{name}/_index.md`. If it is still a flat file (`{name}.md`), stop and ask the user to migrate it to page-bundle form first (see `define-user-experience`).
 2. **Read the capability doc end-to-end.** Internalize stakeholders, business rules, success criteria, out-of-scope list.
-3. **Read every UX doc** under `docs/content/capabilities/{name}/user-experiences/`. Not just the one the user mentioned — the requirements have to serve all of them.
+3. **Read every UX doc** under `docs/content/capabilities/{name}/user-experiences/`. **At least one UX doc must exist** — an empty or missing `user-experiences/` directory is a hard stop, not a reason to proceed from the capability alone. Do not just count files: check that the directory contains at least one `*.md` UX doc (other than `_index.md`). If only `_index.md` is present, treat it as empty. Read all of them — not just the one the user mentioned — because the BRs have to serve every journey.
 
-If the capability or any UX docs are missing, **stop and route the user to `define-capability` / `define-user-experience` first.** Business requirements derived from missing inputs are business requirements with missing reasons. Refuse to proceed; do not invent the missing inputs in your head.
+If the capability is missing, or `user-experiences/` is missing/empty (per the rule above), **stop and route the user to `define-capability` / `define-user-experience` first.** Business requirements derived from missing inputs are business requirements with missing reasons. Refuse to proceed; do not invent the missing inputs in your head.
 
 ## Goal
 
