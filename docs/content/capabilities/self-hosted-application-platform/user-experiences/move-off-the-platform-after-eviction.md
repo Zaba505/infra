@@ -33,7 +33,7 @@ That is all the issue carries. The capability owner's state of mind is "the date
 
 ## Journey {#journey}
 
-The journey runs in three phases keyed off the eviction date: a pre-eviction window where the tenant is still live, the eviction date itself when compute and network resources go away, and a 30-day grace window where data is held in an export-only, read-only state before the tenant-accessible copy is removed.
+The journey runs in three phases keyed off the eviction date: a pre-eviction window where the tenant is still live, the eviction date itself when compute and network resources go away, and a 30-day grace window where data is held in an export-only, read-only state before tenant data is permanently deleted across all tiers at day 30.
 
 ### Phase A — Before the eviction date (tenant still live)
 
@@ -88,7 +88,7 @@ flowchart TD
     PhaseC -->|Yes| ExportFinal[Run export against frozen snapshot<br/>download now + verify]
     PhaseC -->|No, already complete| Done
     ExportFinal --> Done[Comment 'done' on issue;<br/>operator closes it]
-    Done --> RetentionEnds([30 days post-eviction:<br/>tenant-accessible copy removed])
+    Done --> RetentionEnds([30 days post-eviction:<br/>all tenant data permanently deleted<br/>including backup-tier copies])
 ```
 
 ## Success {#success}
@@ -131,6 +131,6 @@ This UX must respect the following items from the parent capability — by name:
 - **Re-onboarding the same capability later.** If the capability owner wants to come back, that is a fresh `host-a-capability` journey with no special path inherited from having previously been here.
 - **Operator's side of this journey.** This UX is written from the capability owner's seat. The operator's experience (filing the issue, deprovisioning on the date, posting the cutover comment, closing the issue, watching the 30-day clock) is captured here as a responder, not as a separate document.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 _None at this time._
