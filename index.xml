@@ -741,7 +741,11 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 &lt;/ul&gt;
 &lt;h2 id="aws-native-vpn-support"&gt;AWS Native VPN Support&lt;/h2&gt;
 &lt;h3 id="site-to-site-vpn-ipsec"&gt;Site-to-Site VPN (IPsec)&lt;/h3&gt;
-&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Status&lt;/strong&gt;: ❌ &lt;strong&gt;WireGuard not natively supported&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Business Requirements</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/business-requirements/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/business-requirements/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Living document.&lt;/strong&gt; This is regenerated from the capability and UX docs on demand. Numbering is append-only — once a BR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). Technical requirements cite BR-NN, so renumbering would silently break provenance.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Review gate.&lt;/strong&gt; Set &lt;code&gt;reviewed_at:&lt;/code&gt; in the frontmatter to today&amp;rsquo;s ISO date once you have read and edited this document. The &lt;code&gt;define-technical-requirements&lt;/code&gt; skill will refuse to extract TRs until &lt;code&gt;reviewed_at&lt;/code&gt; is newer than the file&amp;rsquo;s last modification.&lt;/p&gt;</description></item><item><title>Configuration Guide</title><link>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/hp_dl360_gen9/configuration/</guid><description>&lt;h2 id="initial-setup"&gt;Initial Setup&lt;/h2&gt;
 &lt;h3 id="hardware-assembly"&gt;Hardware Assembly&lt;/h3&gt;
 &lt;ol&gt;
 &lt;li&gt;
