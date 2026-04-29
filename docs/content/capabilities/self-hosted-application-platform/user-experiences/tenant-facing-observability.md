@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor is a **capability owner** whose capability has already been onboarded via [Host a Capability](./host-a-capability.md) and is currently running on the platform. As with that UX, this is written **as if the capability owner were a separate person** from the operator, even though today they are the same human wearing different hats.
 
@@ -17,13 +17,13 @@ The actor is a **capability owner** whose capability has already been onboarded 
 - **Context they come from:** Their capability is live and serving its end users. They are not in the middle of onboarding or modifying — that's a different journey. They want to know how their thing is doing right now, or they have just been pinged that something is wrong.
 - **What they care about here:** Knowing the health of *their* capability without depending on end users to report problems first, and without having to interrupt the operator to ask.
 
-## Goal
+## Goal {#goal}
 
 > "I want to know whether my hosted capability is healthy right now — and I want the platform to ping me if it isn't — so I find out before my end users do, and I can tell whether the problem is mine to fix or the platform's."
 
 Two arrival modes share this goal: **proactive pull** (capability owner goes looking) and **reactive push** (an alert reaches them). The view they reach is the same in both cases.
 
-## Entry Point
+## Entry Point {#entry-point}
 
 Two distinct entries, converging on the same view.
 
@@ -38,7 +38,7 @@ They reach it by authenticating to the shared observability offering. After logi
 
 In both cases their access was provisioned automatically as part of the original `onboard my capability` flow (step 5 of [Host a Capability](./host-a-capability.md#5-wait-while-the-operator-provisions)) — observability is part of being hosted, not an add-on they request later.
 
-## Journey
+## Journey {#journey}
 
 ### 1. Access is already in place (set up during onboarding)
 
@@ -108,7 +108,7 @@ flowchart TD
     Watch --> Recover
 ```
 
-## Success
+## Success {#success}
 
 A successful experience looks like:
 
@@ -119,7 +119,7 @@ A successful experience looks like:
 - They understood that the tenant view was authoritative and email was an acceleration path, so silence from email was never the only evidence they relied on.
 - They did not have to set anything up to make this work — onboarding put it in place.
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Alert fatigue / ignored alerts.** A capability owner who stops responding to their own alerts is not the platform's problem — alerts are a courtesy; tenant health is tenant responsibility. The platform keeps emitting; what the capability owner does with them is their call.
 - **Threshold set too tight, capability owner spammed.** Self-serve thresholds means the capability owner can fix this themselves. The platform does not intervene to "save them from themselves."
@@ -129,7 +129,7 @@ A successful experience looks like:
 - **Alert delivery is broken (email bounces, mailbox rule hides it, etc.).** The capability owner does **not** treat silence from email as proof of health; the pull view remains the source of truth. If the offering knows delivery is failing, the tenant view shows alerting as degraded so the capability owner understands email is currently unavailable as a nudge.
 - **Capability owner wants more than email alerts or wants a broader signal bundle.** Goes through `modify my capability`, not this UX — it's a contract change about what the platform delivers to the tenant, even if a small one.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability's Business Rules and Success Criteria:
 
@@ -140,7 +140,7 @@ This UX must respect the following items from the parent capability's Business R
 - **The capability evolves with its tenants.** If multiple tenants need observability beyond the standard health bundle, the right response is to expand the offering's category — not to push instrumentation back onto the tenant.
 - **KPI: 2-hr/week operator maintenance budget.** Implication: the alerting path must not produce so many false positives that the operator is constantly fielding "is this me or you?" questions from capability owners. Self-serve thresholds and "operator gets the same signals" are both pressure-reliefs on this — capability owners can tune their noise themselves, and they do not need to escalate "is this the platform?" questions to the operator because they can read the signals directly.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **Changing the signal bundle or adding non-email alert channels.** Both go through [Host a Capability](./host-a-capability.md)'s *modify* loop, not here. They are contract changes about what the platform delivers.
 - **End-user-facing observability.** End users of a tenant do not get a "is the thing I use up?" view from the platform. If a tenant wants a status page for their end users, that is a feature of the tenant capability, not the platform.

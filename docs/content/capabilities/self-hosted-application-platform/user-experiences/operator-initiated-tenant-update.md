@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor here is the **operator** — the *Owner / Accountable party* from the parent capability's Stakeholders. The capability owner is a responder in this journey, not the initiator. As with `host-a-capability`, this UX is written as if the operator and the capability owner were separate people: the role boundary is treated as real, even though today both hats are worn by the same person.
 
@@ -17,11 +17,11 @@ The actor here is the **operator** — the *Owner / Accountable party* from the 
 - **Context they come from:** They have just learned that something in the platform itself must change — a cloud provider is sunsetting a service the platform depends on; a CVE has landed against a platform component; a runtime version the platform offers is being retired upstream. The change forces an update on every tenant still using the affected component.
 - **What they care about here:** Getting affected tenants migrated *with* their capability owners, on a timeline driven by the real external pressure, without burning down the "we work with you, we don't evict for fall-behind" promise — and without letting the situation drag past the point where the platform itself becomes unsafe or unsupportable.
 
-## Goal
+## Goal {#goal}
 
 > "I want every tenant still on the falling-behind component to be moved onto what the platform now supports, on a timeline that fits the external pressure that forced this — and I want to do it by working *with* each capability owner rather than evicting them."
 
-## Entry Point
+## Entry Point {#entry-point}
 
 The operator arrives at this experience because of a **platform-level dependency event** that is not under their control:
 
@@ -35,7 +35,7 @@ What they have in hand: knowledge of which platform offering is changing, by whe
 
 There is no formal tenant-facing pending-update view ahead of this moment. If the platform ever adds an earlier deprecation or pending-update signal for capability owners, that signal would live in [Tenant-Facing Observability](./tenant-facing-observability.md) rather than in this operator-side journey. The operator-filed issue remains the first official signal that this journey has begun.
 
-## Journey
+## Journey {#journey}
 
 ### 1. File a "platform update required" issue per affected tenant
 
@@ -105,7 +105,7 @@ flowchart TD
     Evict --> Closed([This issue closed —<br/>superseded by eviction])
 ```
 
-## Success
+## Success {#success}
 
 When the issue closes cleanly, the operator walks away with:
 
@@ -114,7 +114,7 @@ When the issue closes cleanly, the operator walks away with:
 - The platform is free to actually retire the old offering, since there are no tenants left on it. The external pressure that started the whole journey can now be fully addressed.
 - A trail on each issue showing what was asked for, when, and what was shipped — useful the next time a similar dependency event happens.
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Multiple tenants affected by the same platform event.** Each gets its own issue, so each capability owner sees a request scoped to their capability. The operator coordinates timelines across all of them but does not bundle them into a single thread.
 - **Capability owner goes silent.** Same shape as silence in `host-a-capability` — there is no formal SLA in either direction. *Experience-level handling:* the operator can grant an extension only if safe slack exists, but if silence persists past the operative delivery date, step 5 applies.
@@ -123,7 +123,7 @@ When the issue closes cleanly, the operator walks away with:
 - **Update reveals a new requirement that the platform doesn't yet offer.** Hand off into the `host-a-capability` change-later loop's "new offering needed" branch — the platform-update issue stays open while the new offering is added, then resumes at step 3.
 - **Multiple overlapping platform updates against the same tenant.** The operator opens one issue per forcing event, even for the same tenant, so each deadline and external reason stays legible. If the remediation overlaps, the issues cross-link and the operator coordinates them together.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability — by name, so the lineage is traceable:
 
@@ -134,7 +134,7 @@ This UX must respect the following items from the parent capability — by name,
 - **KPI: 2-hr/week operator maintenance budget.** A tenant that routinely needs hand-holding through these updates — repeatedly missing deadlines, repeatedly needing extensions — is consuming disproportionate operator time and crosses into the eviction-threshold rule on its own merits, even before any single missed operative delivery date.
 - **KPI: 1-hour reproducibility.** Implication for this UX: the re-provision step in the inner loop must run through the platform's existing definitions (now updated to the new offering), not through a per-tenant snowflake patch. If the only way to keep a tenant alive is bespoke manual config, that is itself eviction-threshold material.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **The eviction journey itself.** When step 5 fires, the operator opens a separate eviction issue and the capability owner's experience continues in *Capability owner moves off the platform after eviction* — a sibling UX, not part of this one.
 - **Platform-contract changes that aren't forced by an external dependency event.** When the *operator* decides to change the platform's contract (retire a packaging form, alter availability characteristics) absent external pressure, that's the *platform-contract-change rollout* UX, not this one. The seam: this UX is reactive (something outside the operator's control forced the update); the contract-change UX is proactive (the operator chose to change something).

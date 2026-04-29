@@ -9,7 +9,7 @@ type: docs
 
 **Parent capability:** [Self-Hosted Application Platform](../_index.md)
 
-## Persona
+## Persona {#persona}
 
 The actor here is the **operator** — the *Owner / Accountable party* from the parent capability's Stakeholders. The capability owners are responders in this journey, not initiators. As with `host-a-capability` and `operator-initiated-tenant-update`, this UX is written as if the operator and the capability owners were separate people: the role boundary is treated as real even though today both hats are worn by the same person.
 
@@ -17,11 +17,11 @@ The actor here is the **operator** — the *Owner / Accountable party* from the 
 - **Context they come from:** They have decided to change a term of the platform's contract — retire an offering, change a packaging form, alter availability characteristics, alter platform-imposed constraints. The decision has already been made and is *not* forced by external pressure. They have flushed out the technical details of the change and (where applicable) prepared a migration guideline for tenants. Where the change replaces an offering with a new one, the replacement offering has already been implemented and is running on the platform alongside the old one.
 - **What they care about here:** Getting every affected tenant migrated onto the new contract by a hard deadline, without surprising anyone, while honoring the *evergreen contract* promise — change is communicated ahead of time and tenants are migrated, not sprung on.
 
-## Goal
+## Goal {#goal}
 
 > "I want to change a term of the platform's contract — retire an offering, change a packaging form, alter availability characteristics — communicate that change to every affected tenant ahead of time, and have them all migrated onto the new contract before the old one is retired, without surprising anyone."
 
-## Entry Point
+## Entry Point {#entry-point}
 
 The operator arrives at this experience having *chosen* to change the contract. The deciding (the *why* — cost, simplification, security posture, no longer wanting to maintain two runtimes, etc.) is upstream of this UX and not part of it. What they have in hand at step 0:
 
@@ -34,7 +34,7 @@ The operator's state of mind is "I have decided this is changing; how do I get e
 
 The seam with `operator-initiated-tenant-update` (UX #2) is sharp: that journey is *reactive* (an external event — vendor sunset, CVE, EOL — forced the update and dictated the deadline). This journey is *proactive* (the operator chose the change and is choosing the deadline).
 
-## Journey
+## Journey {#journey}
 
 ### 1. File a "platform contract change" umbrella issue
 
@@ -96,7 +96,7 @@ flowchart TD
     CloseUmbrella --> Done([Contract change has shipped])
 ```
 
-## Success
+## Success {#success}
 
 When the umbrella issue closes, the operator walks away with:
 
@@ -105,7 +105,7 @@ When the umbrella issue closes, the operator walks away with:
 - The *evergreen contract* promise was honored: the change was announced ahead of time with a migration guideline and a hard deadline, no tenant was surprised at retirement, and tenants were given a coordinated window in which both old and new ran concurrently (except for full removals, where concurrency is impossible).
 - A trail across the umbrella issue, the per-tenant `modify` issues, and any linked eviction issues — showing what changed, why, who migrated when, and who didn't. Useful the next time a contract change ships.
 
-## Edge Cases & Failure Modes
+## Edge Cases & Failure Modes {#edge-cases}
 
 - **Capability owner does not acknowledge in the umbrella.** *Experience-level handling:* the operator chases — in-thread mention, direct ping, separate message as the deadline approaches. If no acknowledgment arrives by the deadline, the missing acknowledgment is treated as non-engagement and the laggard branch (eviction issue per tenant) applies. Acknowledgment is required, but the consequence of withholding it is the same as failing to migrate.
 - **Migration guideline turns out to be wrong or insufficient mid-rollout.** Two sub-cases:
@@ -117,7 +117,7 @@ When the umbrella issue closes, the operator walks away with:
 - **Cross-tenant question reveals a conflict in the migration guideline.** Same shape as the isolated-miss branch above: amend in-thread, continue. The umbrella thread is the source of truth for the guideline as it evolves during the rollout.
 - **Two contract changes are in flight at once and the same tenant is affected by both.** Each change still gets its own umbrella issue and the tenant is expected to acknowledge in each thread. If one migration satisfies both changes, the tenant may use one combined `modify my capability` issue, provided it links back to both umbrellas so each rollout can still be tracked and closed independently.
 
-## Constraints Inherited from the Capability
+## Constraints Inherited from the Capability {#constraints-inherited}
 
 This UX must respect the following items from the parent capability — by name, so the lineage is traceable:
 
@@ -131,7 +131,7 @@ This UX must respect the following items from the parent capability — by name,
 - **KPI: 2-hr/week operator maintenance budget.** Implication for this UX: the rollout cadence — including status updates and per-tenant `modify` reviews — must fit within the operator's weekly budget across the rollout window. A contract change that would clearly blow the budget is a signal to reduce the scope of the change, lengthen the deadline, or stage the rollout, *before* the umbrella issue is filed.
 - **KPI: 1-hour reproducibility.** Implication for this UX: the new contract must itself be reproducible from definitions. A contract change that ships with the *platform* itself stuck on a snowflake configuration to keep both forms running has failed the rule. Concurrent old/new during rollout is fine; permanent dual-form support is not the goal.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **Externally-forced updates.** Vendor sunset, CVE remediation, runtime EOL — those are *reactive* updates with deadlines inherited from outside, and they belong in `operator-initiated-tenant-update` (UX #2). The seam: that UX is reactive; this UX is proactive.
 - **Routine modify requests.** A capability owner shipping a version bump or new component on their own initiative is the change-later loop in `host-a-capability`, not this UX.
