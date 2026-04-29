@@ -71,7 +71,7 @@ For capability owners who already pulled what they needed in Phase A, Phase C is
 
 #### 7. Walk away
 
-Once the capability owner is satisfied they have everything, they comment on the issue indicating they are done. The operator closes the issue. After 30 days from the eviction date, the platform stops offering any tenant-accessible copy of their data regardless of whether the capability owner ever closed the loop. Whether any deeper backup-tier copies remain after that point, how long they are retained, and who can access them is an explicit platform policy TBD and is not defined by this UX document. There is no "are you sure?" — the 30-day clock is hard.
+Once the capability owner is satisfied they have everything, they comment on the issue indicating they are done. The operator closes the issue. After 30 days from the eviction date, the platform permanently deletes the tenant's data — both the tenant-accessible copy and any platform-held backup-tier copies — regardless of whether the capability owner ever closed the loop. No residual copy survives day 30 in any tier the platform controls. There is no "are you sure?" — the 30-day clock is hard.
 
 ### Flow Diagram
 
@@ -97,7 +97,7 @@ When the journey ends cleanly, the capability owner walks away with:
 
 - A verified, complete archive of their tenant's data, sized and checksummed by the platform, validated by them.
 - A clear paper trail on the eviction issue showing the date, the reason, and confirmation that they pulled what they needed.
-- Nothing left to chase down on the platform. After the 30-day window the platform offers no tenant-accessible copy of their data. Any deeper residual backup copies, their retention duration, deletion behavior, and operator-access/privacy constraints are **TBD** and are not part of the 30-day guarantee in this document.
+- Nothing left to chase down on the platform. After the 30-day window the platform permanently deletes the tenant's data across every tier it controls — no tenant-accessible copy and no deeper backup-tier copy survives.
 - An amicable ending. The operator filed the issue, the platform held the data the agreed amount of time, and the capability owner left under their own power. The relationship is intact for whatever comes next.
 
 ## Edge Cases & Failure Modes {#edge-cases}
@@ -133,4 +133,4 @@ This UX must respect the following items from the parent capability — by name:
 
 ## Open Questions
 
-- **What is the authoritative policy for deeper backup-tier copies after the 30-day retention window ends?** This UX now defines only the tenant-facing guarantee: no tenant-accessible copy remains after day 30. The deeper backup-tier policy — retention duration, deletion behavior, and operator-access/privacy constraints — still needs to be defined or linked from an authoritative platform policy.
+_None at this time._

@@ -464,8 +464,13 @@ The platform-no-communication-with-end-users rule was already absolute in BR-06;
 
 **Why this is a requirement, not a TR or decision:** The capability defines this rule and the host-a-capability UX's "new offering needed" branch operationalizes it. It is the rule that keeps the platform tenant-aligned without making it infinitely extensible.
 
+### BR-65: All tenant data — including platform-held backups — must be permanently deleted at the end of the 30-day post-eviction retention window {#br-65}
+**Source:** [UX: Move Off the Platform After Eviction §Journey]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#journey" >}}) · [UX: Move Off the Platform After Eviction §Success]({{< ref "user-experiences/move-off-the-platform-after-eviction.md#success" >}})
+
+**Requirement:** When the 30-day post-eviction retention window ends, the platform must permanently delete the tenant's data across every tier it controls — the tenant-accessible export-only copy and any deeper backup-tier copies. No residual platform-held copy of an evicted tenant's data may survive day 30 in any tier, and no operator-only access path may persist past that point.
+
+**Why this is a requirement, not a TR or decision:** [BR-11](#br-11) commits only to the tenant-accessible-copy side; this BR closes the symmetric question for the platform's own backup tier. It is a privacy commitment to the departing tenant — the eviction date plus 30 days is the last day any platform-controlled copy of their data exists, full stop. The BR forbids residual copies as a class; how backups are pruned (retention-policy mechanics, deletion verification) is a downstream concern.
+
 ## Open Questions
 
-- **Authoritative deeper-backup-tier policy after the 30-day post-eviction window.** Carried from [Move Off the Platform After Eviction §Open Questions]({{< ref "user-experiences/move-off-the-platform-after-eviction.md" >}}). The retention duration, deletion behavior, and operator-access/privacy constraints of any backup-tier copies that survive past day 30 are not yet defined. BR-11 covers only the tenant-accessible-copy guarantee.
-- **Tenant-facing pending-update visibility.** Carried from [Operator-Initiated Tenant Update §Entry Point]({{< ref "user-experiences/operator-initiated-tenant-update.md#entry-point" >}}). If the platform later adds a tenant-side surface for pending platform updates, BRs in the BR-20..BR-22 cluster will need a companion BR for that signal. Until then, the operator-filed issue remains the first official signal.
 - **Volunteered-but-parked technical translations.** None volunteered during this extraction. Placeholder so re-extractions have a home for things like specific cadences, durability levels, or protocols that surface during conversation.
