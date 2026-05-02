@@ -424,7 +424,7 @@ With Reserved Instance (1-year, no upfront):
 
 ## Recommendations
 
-### For Home Lab VPN (per ADR-0002)
+### For Home Lab VPN
 
 1. **Self-Managed WireGuard**: Deploy on EC2 t4g.micro instance
    - **Cost**: ~$6/month on-demand, ~$3.50/month with Reserved Instance

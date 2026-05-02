@@ -19,8 +19,6 @@ The Boot Service is deployed on GCP Cloud Run and accessed through a WireGuard V
 ## Related Documentation
 
 - [Machine Service](../machine-mgmt/) - Machine hardware profile management
-- [ADR-0005: Network Boot Infrastructure Implementation on Google Cloud](../../adrs/0005-network-boot-infrastructure-gcp/) - Architecture decision and design rationale
-- [ADR-0002: Network Boot Architecture](../../adrs/0002-network-boot-architecture/) - Overall network boot strategy
 
 ## API Endpoints
 
@@ -66,7 +64,7 @@ Since HP DL360 Gen 9 servers do not support client-side TLS certificates for UEF
 
 ### Error Responses
 
-All API endpoints follow the RFC 7807 Problem Details standard (see [ADR-0007](../../adrs/0007-standard-api-error-response/)):
+All API endpoints follow the RFC 7807 Problem Details standard:
 
 ```json
 {

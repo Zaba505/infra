@@ -44,7 +44,3 @@ Each option is evaluated based on:
 5. **Learning Curve** - Ease of adoption and operational complexity
 6. **Community Support** - Documentation quality and ecosystem maturity
 7. **Security Posture** - Attack surface and security-first design
-
-## Related ADRs
-
-- [ADR-0004: Server Operating System Selection](../../adrs/0004-server-operating-system/) - Final decision based on this analysis

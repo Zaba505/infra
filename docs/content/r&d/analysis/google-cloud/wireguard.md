@@ -386,7 +386,7 @@ gcloud compute instances add-metadata wireguard-gateway-vm \
 
 ## Recommendations
 
-### For Home Lab VPN (per ADR-0002)
+### For Home Lab VPN
 
 1. **Self-Managed WireGuard**: Deploy on Compute Engine e2-micro VM
    - **Cost**: ~$10/month (vs ~$73/month for Cloud VPN)
