@@ -1,11 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/</link><description>Recent content on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/index.xml" rel="self" type="application/rss+xml"/><item><title>[0001] Use MADR for Architecture Decision Records</title><link>https://zaba505.github.io/infra/rd/adrs/0001-use-madr-for-architecture-decision-records/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0001-use-madr-for-architecture-decision-records/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;As the project grows, architectural decisions are made that have long-term impacts on the system&amp;rsquo;s design, maintainability, and scalability. Without a structured way to document these decisions, we risk losing the context and rationale behind important choices, making it difficult for current and future team members to understand why certain approaches were taken.&lt;/p&gt;</description></item><item><title>Ubuntu Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/ubuntu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/ubuntu/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/</link><description>Recent content on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/index.xml" rel="self" type="application/rss+xml"/><item><title>Ubuntu Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/ubuntu/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/ubuntu/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Ubuntu Server is a popular general-purpose Linux distribution developed by Canonical. It provides Long Term Support (LTS) releases with 5 years of standard support and optional Extended Security Maintenance (ESM).&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -30,14 +23,7 @@ ADR Categories:
 &lt;li&gt;All characters are in RFC 3986 §2.3 unreserved set&lt;/li&gt;
 &lt;li&gt;Case-insensitive (lowercase recommended per RFC 9562)&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Usage in URIs:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>[0002] Network Boot Architecture for Home Lab</title><link>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</link><pubDate>Sun, 16 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0002-network-boot-architecture/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;When setting up a home lab infrastructure, servers need to be provisioned and booted over the network using PXE (Preboot Execution Environment). This requires a TFTP/HTTP server to serve boot files to requesting machines. The question is: where should this boot server be hosted to balance security, reliability, cost, and operational complexity?&lt;/p&gt;</description></item><item><title>Fedora Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/fedora/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/fedora/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Usage in URIs:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Fedora Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/fedora/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/fedora/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Fedora Server is a cutting-edge Linux distribution sponsored by Red Hat, serving as the upstream for Red Hat Enterprise Linux (RHEL). It emphasizes innovation with the latest software packages and kernel versions.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -60,14 +46,7 @@ ADR Categories:
 &lt;li&gt;Excluded: &lt;code&gt;I&lt;/code&gt;, &lt;code&gt;L&lt;/code&gt;, &lt;code&gt;O&lt;/code&gt;, &lt;code&gt;U&lt;/code&gt; (avoid confusion and potential abuse)&lt;/li&gt;
 &lt;li&gt;32 unique characters&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;Format:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>[0003] Cloud Provider Selection for Network Boot Infrastructure</title><link>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0003-cloud-provider-selection/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider and accessed via VPN (specifically WireGuard from the UDM Pro). The decision to use cloud hosting provides resilience against local hardware failures while maintaining security through encrypted VPN tunnels.&lt;/p&gt;</description></item><item><title>Cloud Storage FUSE (gcsfuse)</title><link>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;Format:&lt;/strong&gt;&lt;/p&gt;</description></item><item><title>Cloud Storage FUSE (gcsfuse)</title><link>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/google-cloud/gcsfuse/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Cloud Storage FUSE (gcsfuse) is a FUSE-based filesystem adapter that allows Google Cloud Storage (GCS) buckets to be mounted and accessed as local filesystems on Linux systems. This enables applications to interact with object storage using standard filesystem operations (open, read, write, etc.) rather than requiring GCS-specific APIs.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Project&lt;/strong&gt;: &lt;a href="https://github.com/GoogleCloudPlatform/gcsfuse"&gt;GoogleCloudPlatform/gcsfuse&lt;/a&gt;
 &lt;strong&gt;License&lt;/strong&gt;: Apache 2.0
@@ -90,14 +69,7 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: talosctl CLI + Kubernetes API&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Talos Linux has &lt;strong&gt;built-in Kubernetes&lt;/strong&gt; - there is only one installation method.&lt;/p&gt;</description></item><item><title>[0004] Server Operating System Selection</title><link>https://zaba505.github.io/infra/rd/adrs/0004-server-operating-system/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0004-server-operating-system/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;The homelab infrastructure requires a server operating system to run Kubernetes clusters for container workloads. The choice of operating system significantly impacts ease of cluster initialization, ongoing maintenance burden, security posture, and operational complexity.&lt;/p&gt;</description></item><item><title>Harvester Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/harvester/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/harvester/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
+&lt;p&gt;Talos Linux has &lt;strong&gt;built-in Kubernetes&lt;/strong&gt; - there is only one installation method.&lt;/p&gt;</description></item><item><title>Harvester Analysis</title><link>https://zaba505.github.io/infra/rd/analysis/server-os/harvester/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/analysis/server-os/harvester/</guid><description>&lt;h2 id="overview"&gt;Overview&lt;/h2&gt;
 &lt;p&gt;Harvester is a Hyperconverged Infrastructure (HCI) platform built on Kubernetes, designed to provide VM and container management on a unified platform. It combines compute, storage, and networking with built-in K3s for orchestration.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Key Facts&lt;/strong&gt;:&lt;/p&gt;
 &lt;ul&gt;
@@ -108,28 +80,7 @@ ADR Categories:
 &lt;li&gt;&lt;strong&gt;Management&lt;/strong&gt;: Web UI + kubectl + Rancher integration&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h2 id="kubernetes-installation-methods"&gt;Kubernetes Installation Methods&lt;/h2&gt;
-&lt;p&gt;Harvester &lt;strong&gt;includes K3s as its foundation&lt;/strong&gt; - Kubernetes is built-in.&lt;/p&gt;</description></item><item><title>[0005] Network Boot Infrastructure Implementation on Google Cloud</title><link>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</link><pubDate>Mon, 17 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0005-network-boot-infrastructure-gcp/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;&lt;a href="./0002-network-boot-architecture/"&gt;ADR-0002&lt;/a&gt; established that network boot infrastructure will be hosted on a cloud provider accessed via WireGuard VPN. &lt;a href="./0003-cloud-provider-selection/"&gt;ADR-0003&lt;/a&gt; selected Google Cloud Platform as the hosting provider to consolidate infrastructure and leverage existing expertise.&lt;/p&gt;</description></item><item><title>[0006] Universal Resource Identifier Standard</title><link>https://zaba505.github.io/infra/rd/adrs/0006-resource-identifier-standard/</link><pubDate>Sun, 23 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0006-resource-identifier-standard/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;As the infrastructure and services grow, we need a consistent way to identify resources across different systems, databases, APIs, and logs. Resources include servers, VMs, containers, services, configurations, and any other trackable entities. Without a standardized identifier format, we risk inconsistencies in references, difficulty correlating logs and traces, and challenges in cross-system integration.&lt;/p&gt;</description></item><item><title>[0007] Standard API Error Response Format</title><link>https://zaba505.github.io/infra/rd/adrs/0007-standard-api-error-response/</link><pubDate>Mon, 24 Nov 2025 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/adrs/0007-standard-api-error-response/</guid><description>&lt;!--
-ADR Categories:
-- strategic: High-level architectural decisions (frameworks, auth strategies, cross-cutting patterns)
-- user-journey: Solutions for specific user journey problems (feature implementation approaches)
-- api-design: API endpoint design decisions (pagination, filtering, bulk operations)
---&gt;
-&lt;h2 id="context-and-problem-statement"&gt;Context and Problem Statement&lt;/h2&gt;
-&lt;p&gt;Currently, there is no standardized error response format across API endpoints in the infrastructure. This inconsistency makes it difficult for clients to handle errors uniformly, complicates debugging, and reduces the overall developer experience. How should we structure error responses to ensure consistency, provide adequate debugging information, and follow industry best practices?&lt;/p&gt;</description></item><item><title>GET /boot.ipxe</title><link>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</guid><description>&lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address. This endpoint is accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process through the WireGuard VPN tunnel.&lt;/p&gt;
+&lt;p&gt;Harvester &lt;strong&gt;includes K3s as its foundation&lt;/strong&gt; - Kubernetes is built-in.&lt;/p&gt;</description></item><item><title>GET /boot.ipxe</title><link>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/boot-ipxe/</guid><description>&lt;p&gt;Serves iPXE boot scripts customized for the requesting machine based on its MAC address. This endpoint is accessed by bare metal servers (HP DL360 Gen 9) during the UEFI HTTP boot process through the WireGuard VPN tunnel.&lt;/p&gt;
 &lt;h2 id="sequence-diagram"&gt;Sequence Diagram&lt;/h2&gt;
 &lt;pre class="mermaid"&gt;sequenceDiagram
  participant Client as Bare Metal Server
@@ -577,7 +528,7 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 &lt;p&gt;&lt;strong&gt;Response (204 No Content):&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;Empty response body.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Error Responses:&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;All error responses follow RFC 7807 Problem Details format (see &lt;a href="../../adrs/0007-standard-api-error-response/"&gt;ADR-0007&lt;/a&gt;) with &lt;code&gt;Content-Type: application/problem+json&lt;/code&gt;.&lt;/p&gt;</description></item><item><title>GET /health/startup</title><link>https://zaba505.github.io/infra/rd/services/boot/health-startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/health-startup/</guid><description>&lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
+&lt;p&gt;All error responses follow the RFC 7807 Problem Details format with &lt;code&gt;Content-Type: application/problem+json&lt;/code&gt;.&lt;/p&gt;</description></item><item><title>GET /health/startup</title><link>https://zaba505.github.io/infra/rd/services/boot/health-startup/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/rd/services/boot/health-startup/</guid><description>&lt;p&gt;Indicates whether the application has completed initialization and is ready to receive traffic.&lt;/p&gt;
 &lt;h2 id="request"&gt;Request&lt;/h2&gt;
 &lt;p&gt;&lt;strong&gt;Request Example:&lt;/strong&gt;&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-http" data-lang="http"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nf"&gt;GET&lt;/span&gt; &lt;span class="nn"&gt;/health/startup&lt;/span&gt; &lt;span class="kr"&gt;HTTP&lt;/span&gt;&lt;span class="o"&gt;/&lt;/span&gt;&lt;span class="m"&gt;1.1&lt;/span&gt;
@@ -903,7 +854,11 @@ gs://boot-server-blobs/blobs/018c7dbd-b200-7000-8000-987654321fed
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Parent capability:&lt;/strong&gt; &lt;a href="../_index.md"&gt;Self-Hosted Application Platform&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id="persona"&gt;Persona&lt;/h2&gt;
-&lt;p&gt;The actor here is &lt;strong&gt;the operator&lt;/strong&gt; — the parent capability&amp;rsquo;s &lt;em&gt;Owner / Accountable party&lt;/em&gt; and sole administrator. There are no co-operators in this journey, and the sealed successor credentials are not in play during routine standup.&lt;/p&gt;</description></item><item><title>Tenant-Facing Observability</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/tenant-facing-observability/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/tenant-facing-observability/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;The actor here is &lt;strong&gt;the operator&lt;/strong&gt; — the parent capability&amp;rsquo;s &lt;em&gt;Owner / Accountable party&lt;/em&gt; and sole administrator. There are no co-operators in this journey, and the sealed successor credentials are not in play during routine standup.&lt;/p&gt;</description></item><item><title>Technical Requirements</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/tech-requirements/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/tech-requirements/</guid><description>&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Living document.&lt;/strong&gt; This is regenerated from &lt;code&gt;business-requirements.md&lt;/code&gt; (and the capability/UX docs) on demand. Numbering is append-only — once a TR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). ADRs cite TR-NN, so renumbering would silently break provenance.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;strong&gt;Review gate.&lt;/strong&gt; Set &lt;code&gt;reviewed_at:&lt;/code&gt; in the frontmatter to today&amp;rsquo;s ISO date once you have read and edited this document. The &lt;code&gt;plan-adrs&lt;/code&gt; skill will refuse to enumerate decisions until &lt;code&gt;reviewed_at&lt;/code&gt; is newer than the file&amp;rsquo;s last modification.&lt;/p&gt;</description></item><item><title>Tenant-Facing Observability</title><link>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/tenant-facing-observability/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/capabilities/self-hosted-application-platform/user-experiences/tenant-facing-observability/</guid><description>&lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;One-line definition:&lt;/strong&gt; A capability owner with a live tenant checks whether their hosted capability is healthy — either pulling the view themselves or being pushed an alert when something crosses a threshold they set.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;p&gt;&lt;strong&gt;Parent capability:&lt;/strong&gt; &lt;a href="../_index.md"&gt;Self-Hosted Application Platform&lt;/a&gt;&lt;/p&gt;
