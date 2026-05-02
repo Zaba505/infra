@@ -397,19 +397,11 @@ Each TR is **forced** — by a BR (the primary case), by a prior shared ADR, or 
 
 **Why this is a TR, not a BR or decision:** BR-59 fixes the maintenance budget. The TR is the design-time obligation that follows: every operator-facing surface is bounded by its share of the 2-hour weekly envelope. How the budgeting is performed is downstream.
 
-### TR-55: Platform-managed resources must use the universal resource identifier standard {#tr-55}
-**Source:** [ADR-0006]({{< ref "/r&d/adrs/0006-resource-identifier-standard" >}})
+### TR-55: ~~Platform-managed resources must use the universal resource identifier standard~~ {#tr-55}
+> 🗑️ removed on 2026-04-28 — sourced only to ADR-0006, which was deleted when the repo's existing ADRs were cleared in preparation for the new capability development workflow. Number is reserved and will not be reused.
 
-**Requirement:** Every persistently-tracked resource the platform manages — tenants, offerings, jobs, secrets, eviction records, etc. — must use the resource-identifier form defined by ADR-0006 as its identifier across capabilities and tooling. Platform-internal identifiers that do not need to be exposed externally are not bound by this rule.
-
-**Why this is a TR, not a BR or decision:** ADR-0006 is an accepted prior shared decision binding identifier shape across the repo. The TR inherits that constraint into this capability rather than re-deciding it.
-
-### TR-56: Platform APIs must use the standard API error response format {#tr-56}
-**Source:** [ADR-0007]({{< ref "/r&d/adrs/0007-standard-api-error-response" >}})
-
-**Requirement:** Every platform-internal or capability-owner-facing API endpoint the platform exposes must return errors in the format defined by ADR-0007. Engagement-thread surfaces (issues, comments) are not APIs in this sense and are not bound by this TR.
-
-**Why this is a TR, not a BR or decision:** ADR-0007 is an accepted prior shared decision binding error-response shape across the repo. The TR inherits that constraint into this capability rather than re-deciding it.
+### TR-56: ~~Platform APIs must use the standard API error response format~~ {#tr-56}
+> 🗑️ removed on 2026-04-28 — sourced only to ADR-0007, which was deleted when the repo's existing ADRs were cleared in preparation for the new capability development workflow. Number is reserved and will not be reused.
 
 ## Open Questions
 
@@ -419,6 +411,6 @@ Things volunteered as solutions during extraction (parked for the ADR stage), or
 - **Cost-data refresh cadence and granularity (TR-53).** BR-62 demands cost-vs-value judgment but doesn't quantify "regular," "queryable," or how granular per-component cost must be. Treat as ADR input alongside the observability-offering decisions.
 - **Status-update cadence sizing rules (TR-30, TR-25).** BR-29 prescribes a regular cadence "sized to the timeline" and BR-24 imposes the ≥2-cycle deadline rule, but neither fixes a procedure for picking the cadence. Treat as ADR input or per-rollout operator guidance.
 - **Last-known-good reference for preflight drift check (TR-05).** The standup UX names "the live platform or the last known-good environment" as the comparison surface but does not specify the form of "last known-good" (snapshot ID, signed manifest, etc.). Treat as ADR input for the drift-detection design.
-- **Topology adoption (TR-17, TR-03).** The current repo pattern is Internet → Cloudflare (mTLS proxy + DDoS) → home-lab ↔ GCP (Wireguard). Whether the platform formally inherits this topology — or selects a different one for the cross-environment foundations — is an ADR decision; this TR doc deliberately does not assume the inherited pattern.
+- **Topology adoption (TR-17, TR-03).** The current repo pattern places an Internet-facing edge layer (with mutual-authentication and traffic-control duties) in front of a private home-lab environment connected to a public-cloud environment through a secure cross-environment tunnel. Whether the platform formally inherits this shape — or selects a different one for the cross-environment foundations — is an ADR decision; this TR doc deliberately does not assume the inherited pattern, and the specific vendors that currently realize each layer are out of scope here.
 - **Maintained checklist (UX: Stand Up the Platform).** The standup UX references a "maintained checklist" used during phase validation. Its shape is unspecified; capture as ADR input alongside the rebuild-flow design.
 - **Public-cloud account vs. home-lab boundary in TR-18.** Whether a public-cloud account itself counts as a "third-party component" for the BR-03 admissibility test (read/modify config, export data, revoke credentials without vendor cooperation) is ambiguous; the cloud is named in BR-52 as part of foundations and in the capability rules as allowed. Treat as ADR input when picking specific cloud-side components.
