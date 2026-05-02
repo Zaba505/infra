@@ -3,7 +3,7 @@ title: "Technical Requirements"
 description: >
     Technical requirements derived from the Self-Hosted Application Platform capability's business requirements, with the capability and UX docs as supporting context. Each TR cites the BR-NN it derives from. Decisions belong in ADRs, not here.
 type: docs
-reviewed_at: null
+reviewed_at: 2026-05-02
 ---
 
 > **Living document.** This is regenerated from `business-requirements.md` (and the capability/UX docs) on demand. Numbering is append-only — once a TR is assigned, it keeps that number forever, even if removed (mark removed ones explicitly). ADRs cite TR-NN, so renumbering would silently break provenance.
