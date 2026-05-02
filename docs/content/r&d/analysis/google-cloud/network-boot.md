@@ -21,7 +21,7 @@ GCP's Cloud Load Balancing services (Application Load Balancer, Network Load Bal
 
 #### Option 1: Direct VM Access (Recommended for VPN Scenario)
 
-Since ADR-0002 specifies a VPN-based architecture, TFTP can be served directly from a Compute Engine VM without load balancing:
+Since the architecture under evaluation is VPN-based, TFTP can be served directly from a Compute Engine VM without load balancing:
 
 - **Approach**: Run TFTP server (e.g., `tftpd-hpa`, `dnsmasq`) on a Compute Engine VM
 - **Access**: Home lab connects via VPN tunnel to the VM's private IP
@@ -214,7 +214,7 @@ For additional security if boot server has public access:
 
 ## Recommendations
 
-### For VPN-Based Architecture (per ADR-0002)
+### For VPN-Based Architecture
 
 1. **Compute Engine VM**: Deploy single e2-micro VM with:
    - TFTP server (`tftpd-hpa` or `dnsmasq`)

@@ -61,7 +61,7 @@ X-RateLimit-Remaining: 95
 X-RateLimit-Reset: 1700000000
 ```
 
-When rate limit is exceeded, API returns `429 Too Many Requests` using RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)):
+When rate limit is exceeded, API returns `429 Too Many Requests` using the RFC 7807 Problem Details format:
 
 ```json
 {

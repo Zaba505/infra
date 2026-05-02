@@ -27,7 +27,7 @@ TFTP operates on UDP port 69 with unique protocol semantics (variable block size
 
 #### Option 1: Direct EC2 Instance Access (Recommended for VPN Scenario)
 
-Since ADR-0002 specifies a VPN-based architecture, TFTP can be served directly from an EC2 instance:
+Since the architecture under evaluation is VPN-based, TFTP can be served directly from an EC2 instance:
 
 - **Approach**: Run TFTP server (e.g., `tftpd-hpa`, `dnsmasq`) on an EC2 instance
 - **Access**: Home lab connects via VPN tunnel to instance's private IP
@@ -225,7 +225,7 @@ AWS ALB supports mutual TLS authentication (as of 2022):
 
 ## Recommendations
 
-### For VPN-Based Architecture (per ADR-0002)
+### For VPN-Based Architecture
 
 1. **EC2 Instance**: Deploy single t4g.micro or t3.micro instance with:
    - TFTP server (`tftpd-hpa` or `dnsmasq`)

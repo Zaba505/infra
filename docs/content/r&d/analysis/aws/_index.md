@@ -5,11 +5,11 @@ description: >
   Technical analysis of Amazon Web Services capabilities for hosting network boot infrastructure
 ---
 
-This section contains detailed analysis of Amazon Web Services (AWS) for hosting the network boot server infrastructure, evaluating its support for TFTP, HTTP/HTTPS routing, and WireGuard VPN connectivity as required by ADR-0002.
+This section contains detailed analysis of Amazon Web Services (AWS) for hosting the network boot server infrastructure, evaluating its support for TFTP, HTTP/HTTPS routing, and WireGuard VPN connectivity required by the network boot architecture under evaluation.
 
 ## Overview
 
-Amazon Web Services is Amazon's comprehensive cloud computing platform, offering compute, storage, networking, and managed services. This analysis focuses on AWS's capabilities to support the network boot architecture decided in [ADR-0002](../../adrs/0002-network-boot-architecture/).
+Amazon Web Services is Amazon's comprehensive cloud computing platform, offering compute, storage, networking, and managed services. This analysis focuses on AWS's capabilities to support the network boot architecture under evaluation.
 
 ## Key Services Evaluated
 

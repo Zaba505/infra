@@ -114,7 +114,7 @@ Content-Type: application/json
 
 **Error Responses:**
 
-All error responses follow RFC 7807 Problem Details format (see [ADR-0007](../../adrs/0007-standard-api-error-response/)) with `Content-Type: application/problem+json`.
+All error responses follow the RFC 7807 Problem Details format with `Content-Type: application/problem+json`.
 
 **400 Bad Request** - Invalid request body or missing required fields:
 

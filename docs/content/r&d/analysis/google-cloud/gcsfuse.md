@@ -30,7 +30,7 @@ gcsfuse translates filesystem operations into GCS API calls:
 
 ## Relevance to Network Boot Infrastructure
 
-In the context of [ADR-0005 Network Boot Infrastructure](../../adrs/0005-network-boot-infrastructure-gcp.md), gcsfuse offers a potential approach for serving boot assets from Cloud Storage without custom integration code.
+For the network boot infrastructure under evaluation, gcsfuse offers a potential approach for serving boot assets from Cloud Storage without custom integration code.
 
 ### Potential Use Cases
 
@@ -296,7 +296,7 @@ CMD gcsfuse --foreground boot-assets /mnt/boot-assets & \
 
 ## Network Boot Infrastructure Evaluation
 
-### Applicability to ADR-0005
+### Applicability to the Network Boot Infrastructure
 
 Based on the analysis, gcsfuse is **not recommended** for the network boot infrastructure for the following reasons:
 
@@ -304,12 +304,12 @@ Based on the analysis, gcsfuse is **not recommended** for the network boot infra
 
 - gcsfuse requires FUSE kernel module and privileged containers
 - Cloud Run does not support FUSE or privileged mode
-- ADR-0005 prefers Cloud Run deployment (HTTP-only boot enables serverless)
+- The infrastructure design prefers Cloud Run deployment (HTTP-only boot enables serverless)
 - **Impact**: Blocks Cloud Run deployment, forcing Compute Engine VM
 
 #### ❌ Boot Latency Requirements
 
-- Boot file requests target < 100ms latency (ADR-0005 confirmation criteria)
+- Boot file requests target < 100ms latency (confirmation criteria for the infrastructure design)
 - gcsfuse adds 10-50ms+ latency per operation (network round-trips)
 - Kernel/initrd downloads are latency-sensitive (network boot timeout)
 - **Impact**: May exceed boot timeout thresholds
@@ -338,7 +338,7 @@ Using `cloud.google.com/go/storage` SDK directly offers:
 - **Simpler deployment**: No mount management, no FUSE dependencies
 - **Cost**: Similar API call costs to gcsfuse
 
-**Recommended approach** (from ADR-0005):
+**Recommended approach**:
 ```go
 // Custom boot server using Cloud Storage SDK
 storage := storage.NewClient(ctx)
@@ -507,4 +507,3 @@ gcsfuse may be useful for **development/testing** or **Matchbox prototyping** on
 - [gcsfuse GitHub Repository](https://github.com/GoogleCloudPlatform/gcsfuse)
 - [Performance Tuning Best Practices](https://cloud.google.com/storage/docs/gcsfuse-performance-and-best-practices)
 - [gcsfuse Semantics](https://github.com/GoogleCloudPlatform/gcsfuse/blob/master/docs/semantics.md)
-- [ADR-0005: Network Boot Infrastructure Implementation on Google Cloud](../../adrs/0005-network-boot-infrastructure-gcp.md)
