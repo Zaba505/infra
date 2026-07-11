@@ -3,7 +3,7 @@ module github.com/Zaba505/infra
 go 1.26.0
 
 require (
-	cloud.google.com/go/firestore v1.22.0
+	cloud.google.com/go/firestore v1.23.0
 	github.com/go-chi/chi/v5 v5.3.1
 	github.com/google/uuid v1.6.0
 	github.com/sourcegraph/conc v0.3.0
