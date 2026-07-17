@@ -49,6 +49,8 @@ Because provisioning is entirely operator-driven, the user is never asked to pro
 
 The person perceives an invitation to set up their account — an unmistakable signal that it is their turn to act, arriving through whatever channel the operator uses. What matters at the experience level is that it is clearly *for them*, clearly *from the operator they trust*, and clearly *time-bound to a setup action they take now*.
 
+The invitation is genuinely time-bound: it carries the credential the person uses to establish their account, and a setup credential that stays valid forever is a standing security liability. So an **unaccepted invitation expires** after a bounded window (on the order of a week — long enough that a real person acting in good faith is not rushed, short enough that a stale setup link does not linger). Expiry is quiet and carries no penalty or stigma: if the person let it lapse, they are still exactly as invited as before. The operator simply **re-invites** them — the same one-step action as the original invitation, producing a fresh time-bound setup credential. There is no distinct "expired, please retry" flow the user must navigate; from their seat, the invitation just arrives again.
+
 ### 3. Accept or decline
 
 The person decides whether to join.
@@ -69,6 +71,8 @@ This is the **comprehension beat** — the emotional and conceptual center of th
 
 The experience-level obligation here is **informed consent**: the user should leave this step genuinely understanding the no-recovery trade-off and knowing they are responsible for safeguarding their credentials (e.g. keeping them in a password manager). Burying this in fine print would be a failure of the journey, because a user who did not understand it will later experience an unrecoverable loss as a betrayal rather than a known trade-off they accepted.
 
+The confirmation itself is a **simple explicit acknowledgement** — after the plain-language explanation, the user affirms once that they understand losing their credentials means losing their data. It is deliberately *not* a quiz, a typed recovery-phrase re-entry, or any other gate: the trusted-circle relationship is the point, and turning onboarding into a bureaucratic checkpoint would betray it. This does place real weight on the *explanation* rather than the mechanic — the load-bearing consent work is the operator's plain-language walkthrough and the honest framing above, not the tap that follows it. That is a conscious trade-off in favor of a low-friction, trust-based experience, accepting the residual risk that a determined user can still click past a simple acknowledgement.
+
 ### 5. First sign-in to a ready, empty library
 
 The person signs in for the first time and lands in their own space: private, theirs, and empty. The emptiness is an invitation — the system points them at what to do next.
@@ -76,6 +80,8 @@ The person signs in for the first time and lands in their own space: private, th
 ### 6. Pointed toward first content
 
 The account is ready, so the journey hands off to the user's first real use. They are oriented toward the two natural next steps: [uploading content](./upload-content.md) (a first photo, or turning on automatic device backup) or [bulk-importing](./bulk-import-from-a-prior-provider.md) their whole existing library from a prior provider. This handoff is where "provisioned" starts becoming "active."
+
+This handoff is deliberately **passive direction** rather than active hand-holding: the empty library clearly points at those two next steps, but the system does not march the user through a scripted first upload. Even for a non-technical person, an obvious, plainly-labelled pair of choices respects their autonomy and keeps onboarding from feeling like a wizard that won't let them out. The trade-off is a higher risk that some users land and stall; that risk is not solved by force here but *watched* — dormancy is tracked through the *Number of active users* KPI, and chronic stalling is a signal to revisit this choice rather than a reason to bolt on a mandatory tour.
 
 ### Flow Diagram
 
@@ -105,6 +111,7 @@ Emotionally, success feels like *being let into a trusted, private circle* — t
 ## Edge Cases & Failure Modes {#edge-cases}
 
 - **The person declines the invitation.** Handled in the journey: nothing is provisioned, no pressure is applied, and this is recorded simply as "not a user." The closed, trust-based nature of the circle makes declining unremarkable.
+- **The invitation lapses before the person acts.** A good-faith invitee who got busy and let the setup window pass is not a failure state. The invitation simply expires, and the operator re-invites with the same one-step action, issuing a fresh setup credential. The user experiences a second invitation arriving, not an error to recover from. Distinguishing an innocent lapse from a soft decline is not the flow's job — either way the remedy is identical and cost-free (re-invite, or don't).
 - **The person loses their credentials immediately after setup, before storing anything.** The loss is genuinely unrecoverable — but the stakes are near zero because the library is empty. *Experience-level handling:* treat this as a low-cost teaching moment. The operator can re-provision a **fresh** account (the operator can always add a user), but this is a *new* account, not a recovery of the old one — consistent with lost-credentials-equals-lost-data. The value of losing an empty account is that it reinforces the trade-off before anything is at stake.
 - **The person never uses the account after provisioning.** They become a **dormant** provisioned user, not an **active** one, per the *Number of active users* KPI. *Experience-level handling:* this is not an error state to fix inside the flow, but the journey should end by pointing clearly at a first action, precisely so that provisioned-and-idle is the exception rather than the default. Chronic dormancy is a signal the capability isn't meeting the person's real need — it is tracked, not papered over.
 - **The person doesn't understand, or is uncomfortable with, the no-recovery deal.** This is the most important failure mode to get right. *Experience-level handling:* the honest response is to make sure they understand *before* they rely on the system — informed consent is part of onboarding, not fine print. If, having understood it, they are not comfortable with it, that discomfort is legitimate and may mean this system isn't right for them. The wrong handling would be to soften or hide the trade-off to keep them; that would only convert a clear up-front choice into a future betrayal.
@@ -133,6 +140,8 @@ This UX must respect the following items from the parent capability's Business R
 
 ## Open Questions {#open-questions}
 
-- **Depth of the comprehension check.** The journey asserts the user should *genuinely understand* the lost-credentials trade-off, but stops short of prescribing how comprehension is confirmed (a simple acknowledgement vs. a more deliberate confirmation that they have safeguarded their credentials). How strong a confirmation is appropriate — without turning a trusted-circle onboarding into a bureaucratic gate — is unresolved.
-- **Invitation expiry and re-invitation.** Whether an unaccepted invitation should expire, and how the operator re-invites someone who let it lapse, is not specified at the experience level.
-- **Guided vs. self-directed first step.** Whether the system should actively walk a non-technical user into their first upload/import, or simply point at the options and let them proceed, is an open experience question that affects the active-vs-dormant KPI outcome.
+None remaining. The three questions this journey previously carried have been resolved and folded into the sections above:
+
+- **Depth of the comprehension check** → a **simple explicit acknowledgement** after the plain-language explanation, deliberately not a quiz or gate ([Journey, step 4](#journey)).
+- **Invitation expiry and re-invitation** → unaccepted invitations **expire** after a bounded window, and the operator **re-invites** with the same one-step action, no penalty ([Journey, step 2](#journey) and [Edge Cases](#edge-cases)).
+- **Guided vs. self-directed first step** → **passive direction**: the empty library points at upload/import and lets the user proceed, with dormancy watched via the active-users KPI rather than forced away ([Journey, step 6](#journey)).
