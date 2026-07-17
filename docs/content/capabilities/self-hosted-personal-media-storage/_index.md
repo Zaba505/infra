@@ -8,7 +8,7 @@ weight: 10
 
 > **One-line definition:** Provide a self-operated place where the operator, family, and friends can store and share their personal media (photos, videos, files) under their own control instead of paying a third-party cloud provider.
 
-## Purpose & Business Outcome
+## Purpose & Business Outcome {#purpose}
 What business outcome does this capability deliver? Why does it exist?
 
 This capability exists so that a small, trusted circle of people (the operator, their family, and their friends) can keep their personal media without surrendering it to a commercial cloud provider. The outcomes it delivers, in order of importance:
@@ -20,14 +20,14 @@ This capability exists so that a small, trusted circle of people (the operator, 
 
 When these outcomes conflict, the order above is the tiebreaker. Privacy beats convenience; longevity beats operator convenience; control beats cost.
 
-## Stakeholders
+## Stakeholders {#stakeholders}
 
 - **Owner / Accountable party:** The operator (Carson). Sole accountable party for the system existing, running, and continuing to run.
 - **Primary actors (initiators):** Any authorized user — the operator, family members, or friends — uploading, viewing, sharing, or deleting their own content.
 - **Secondary actors / consumers:** Other authorized users who have been explicitly granted access to a piece of content (individually or via a shared group/album).
 - **Affected parties (impacted but not directly involved):** Subjects depicted in shared media (e.g. a family member who appears in a photo someone else uploaded) — they are affected by the privacy posture even if they are not the user who uploaded the content.
 
-## Triggers & Inputs
+## Triggers & Inputs {#triggers}
 What initiates the capability, and what information must be available?
 
 - **Triggers:**
@@ -45,7 +45,7 @@ What initiates the capability, and what information must be available?
   - The user has been explicitly invited and provisioned by the operator (the user set is closed; no self-signup).
   - The user holds their own credentials. Lost credentials cannot be recovered (see Business Rules).
 
-## Outputs & Deliverables
+## Outputs & Deliverables {#outputs}
 What does the capability produce? What changes in the world after it runs?
 
 - **Direct outputs:**
@@ -56,7 +56,7 @@ What does the capability produce? What changes in the world after it runs?
   - The user (and the people they share with) can rely on this system as their primary store and stop paying a commercial provider for the same content.
   - The operator's circle accumulates a long-lived, private archive of personal media that is not dependent on any external vendor.
 
-## Business Rules & Constraints
+## Business Rules & Constraints {#business-rules}
 
 - **Closed user set.** Only the operator can add or remove users. There is no public sign-up. Users may be the operator, family members, or friends — chosen by the operator.
 - **Private by default.** All content is private to its owner unless the owner explicitly shares it. Sharing may be one-to-one or via a shared group (e.g. a "family album"). No content is visible to other users — including the operator — without an explicit share.
@@ -68,12 +68,12 @@ What does the capability produce? What changes in the world after it runs?
 - **30-day retention after deletion / departure.** When a user deletes content, or when a user leaves the system entirely, their data is retained for 30 days and then purged. The window exists for accident recovery; after it elapses, the data is gone.
 - **Operator succession.** Longevity is preserved through two complementary mechanisms: (a) every user can pull a complete on-demand archive of their own content, without operator involvement, *while the system is healthy* — users are expected to pull these proactively (and may schedule periodic pulls), since on-demand export is only available when the system is up; and (b) a designated successor operator holds the credentials and runbook needed to keep the system running if the primary operator becomes unavailable. Successor credentials are sealed/escrowed (e.g. via a password-manager handoff or physical envelope) and not used for routine operation; takeover is a discrete event triggered by operator unavailability, not ongoing shared administration. Exports preserve user data even if no successor takes over; the successor preserves continuity of the system itself. If the system is down and no successor takes over, only previously-pulled exports survive — this is the accepted trade-off behind "lost credentials = lost data." The successor's access is to operate the system, not to read user content — the privacy properties (private by default, lost credentials = lost data) continue to hold.
 
-## Success Criteria & KPIs
+## Success Criteria & KPIs {#success-criteria}
 
 - **Number of active users.** People in the operator's circle who actually use the system as a place to put their content (not just provisioned accounts that sit idle). A user counts as **active** if they performed at least one of {upload, view, download, share} within the trailing 30 days; a provisioned user with no such activity in that window is **dormant**. Growth — or at minimum non-attrition — in the active count over time indicates the capability is meeting a real need versus their previous cloud provider.
 - **Zero data loss.** No user ever loses content that they did not themselves delete. This is a hard binary: any incident of unintended data loss is a failure of the capability, regardless of cause.
 
-## Out of Scope
+## Out of Scope {#out-of-scope}
 
 - **General-purpose self-hosted application hosting** (e.g. running a Minecraft server, hosting other apps for the operator's circle). This is a separate capability and will be defined in its own document.
 - **Public sharing.** Sharing content with anyone outside the operator's invited user set is not supported.
@@ -81,6 +81,6 @@ What does the capability produce? What changes in the world after it runs?
 - **Monetization or commercial use.** The capability serves a private circle; it is not a product offered to the public.
 - **Account/credential recovery.** Explicitly excluded by the privacy posture above.
 
-## Open Questions
+## Open Questions {#open-questions}
 
 _None at this time._
