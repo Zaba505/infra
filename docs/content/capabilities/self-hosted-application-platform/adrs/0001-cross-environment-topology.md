@@ -37,7 +37,7 @@ The open question is whether the platform inherits the shape the repository alre
 ## Decision Drivers
 
 * **TR-03** — both environments *and* the link between them are phase-1 foundations, not afterthoughts; a single-environment shape is disqualified outright.
-* **TR-17** — the shape must provide a clean **external** reachability tier for tenant applications and **internal** cross-environment reachability for platform operation, and must not concentrate backup/DR so narrowly that a single environment's loss is unrecoverable.
+* **TR-17** — the shape must provide a clean **external** reachability tier for tenant applications, cross-environment reachability for platform operation, and must not concentrate backup/DR so narrowly that a single environment's loss is unrecoverable. *(TR-17's internal reachability — between tenants — is not satisfied by the operations plane; see the amendment note under Decision Outcome.)*
 * **TR-01 / TR-02** ([def]({{< ref "../tech-requirements.md#tr-01" >}}), [rebuild]({{< ref "../tech-requirements.md#tr-02" >}})) — the whole topology must be expressible as version-controlled definitions and rebuildable end-to-end within 60 minutes; reusing shapes already realized as reproducible definitions is favored over shapes that must be built from scratch.
 * **TR-04** ([teardown]({{< ref "../tech-requirements.md#tr-04" >}})) — each environment and the connectivity between them must be independently teardown-able at a phase checkpoint.
 * **TR-18** ([admissibility]({{< ref "../tech-requirements.md#tr-18" >}})) — the edge and tunnel components must allow configuration control, data export, and credential revocation/rotation without vendor cooperation; more vendor surface is more admissibility risk.
@@ -53,7 +53,7 @@ Keep the shape the repository already realizes: an Internet-facing edge tier car
 
 * Satisfies **TR-03**: two environments plus their connectivity, all already foundation-phase concerns.
 * Strongest on **TR-01/TR-02**: the definitions already exist and are already reproducible, so it is the shortest path to a ≤60-minute rebuild.
-* Provides the dedicated external-reachability + scrubbing tier that **TR-17** external reachability wants, while the tunnel carries the internal cross-environment reachability.
+* Provides the dedicated external-reachability + scrubbing tier that **TR-17** external reachability wants, while the tunnel carries cross-environment reachability for platform operation.
 * Ranks highest on the **reproducibility** tiebreaker (reuse of proven definitions).
 * Cost: carries the most vendor surface (a dedicated edge vendor), the weakest position on **TR-18** and the vendor-independence tiebreaker — the edge vendor must pass the TR-18 admissibility test (config control, export, credential rotation without vendor cooperation).
 
@@ -83,7 +83,9 @@ Chosen option: **Option A — inherit the three-tier shape**, because it satisfi
 **The two cross-environment paths are strictly separated planes, and this separation is part of the decision:**
 
 * **Application data plane (end-user traffic).** Deployed tenant applications are reached by end users **only** through the Internet-facing edge, regardless of which environment hosts them: `end user → edge (mTLS + DDoS) → tenant application`. This is the **external** reachability of TR-17. Tenant application traffic never traverses the operations tunnel.
-* **Operations / maintenance plane.** The public-cloud ↔ home-lab tunnel (today WireGuard) exists **solely** for platform operation and maintenance — the operator's control of the home-lab environment from the public-cloud side. It is the **internal** reachability of TR-17 and carries no tenant application traffic.
+* **Operations / maintenance plane.** The public-cloud ↔ home-lab tunnel (today WireGuard) exists **solely** for platform operation and maintenance — the operator's control of the home-lab environment from the public-cloud side. It carries no tenant application traffic.
+
+> **Amended 2026-07-18.** This sub-decision previously described the operations tunnel as "the **internal** reachability of [TR-17]({{< ref "../tech-requirements.md#tr-17" >}})." That was a misreading, corrected here without changing what the ADR decides. The capability defines TR-17's internal reachability as reachability **between tenants**; the tunnel provides *platform*-internal reachability — the operator reaching the home lab — which is a different thing. The two planes decided above are unchanged and remain correct. What the correction exposes is that **tenant-to-tenant reachability across environments has no plane assigned to it**: not the tunnel (excluded by rule above), and not the edge (the end-user plane). That gap is now carried as an open question below. It is currently unexercised — no UX in this capability describes tenants calling each other — but it constrains placement, and [ADR-0002]({{< ref "0002-tenant-workload-placement-policy.md" >}}) depends on it.
 
 **Workload placement sub-decision: both environments are valid tenant-hosting targets.**
 
@@ -170,7 +172,8 @@ WireGuard is self-hosted and configuration-file-driven, with keys generated loca
 ### Consequences
 
 * Good, because the foundations phase reuses already-reproducible `cloud/` definitions, keeping the TR-02 ≤60-minute rebuild target reachable and honoring the reproducibility tiebreaker.
-* Good, because separating the application data plane (edge) from the operations plane (tunnel) gives TR-17 a clean external-reachability tier and a distinct internal-reachability tier, and prevents tenant traffic from ever depending on the operations tunnel.
+* Good, because separating the application data plane (edge) from the operations plane (tunnel) gives TR-17 a clean external-reachability tier and a distinct platform-operations tier, and prevents tenant traffic from ever depending on the operations tunnel.
+* Bad, because that same separation leaves **TR-17's internal (tenant-to-tenant) reachability unassigned across environments** — the tunnel is excluded by rule and the edge is the end-user plane. Two interacting tenants are therefore safely placed only in the same environment until this is decided (see Open Questions), and whole-tenant placement in ADR-0002 is forced rather than merely preferred.
 * Good, because routing both environments' tenant traffic through the one edge keeps mutual-auth and traffic-control duties in a single tier — a tenant's reachability story does not change when its placement changes, and placement stays a migratable property rather than a baked-in commitment.
 * Bad, because the dedicated edge vendor is the largest vendor-surface commitment, making it the weakest point against TR-18 and the vendor-independence tiebreaker; it must clear the TR-18 admissibility test.
 * Bad, because two valid hosting environments means TR-17 offerings may have to be realized **in both** — the requirement is that offerings are shared across tenants, not that they exist once, and a per-environment implementation of each offering is real duplicated surface. The offering-parity sub-decision **bounds** this cost rather than eliminating it: duplication is paid per offering per environment *on demand*, not up front for the whole inventory. Divergence between two implementations of the same offering remains a live risk the tech design must contain.
@@ -196,7 +199,11 @@ WireGuard is self-hosted and configuration-file-driven, with keys generated loca
 
 ## Open Questions
 
-None remain. The five realization questions this ADR previously carried are resolved and folded into the sections above; the sixth — tenant placement policy — was handed to its own ADR and has since been decided there.
+One remains, surfaced by the 2026-07-18 amendment. The five realization questions this ADR originally carried are resolved and folded into the sections above; the sixth — tenant placement policy — was handed to its own ADR and has since been decided there.
+
+* **Tenant-to-tenant reachability across environments (TR-17).** *Open.* [TR-17]({{< ref "../tech-requirements.md#tr-17" >}}) requires internal reachability, which the capability defines as reachability **between tenants**. This ADR's plane separation assigns it no path across environments: the operations tunnel carries no tenant application traffic, and the edge is the end-user data plane. Two tenants that must reach each other are therefore only safely co-placed in a single environment.
+  Deciding this means choosing between routing tenant-to-tenant traffic through the edge (consistent with "reachable only through the edge", but sends internal traffic out to the Internet and back), opening a third cross-environment plane distinct from the operations tunnel (preserves the tunnel's operations-only rule at the cost of a new plane to secure and reproduce), or accepting the constraint as a placement rule and never splitting interacting tenants (free, but silently narrows placement as the tenant set grows).
+  **Not decided here**, because it is currently unexercised — no UX in this capability describes tenants calling each other — and choosing a plane on a hypothetical would be guessing. The trigger to decide it is the first tenant that declares a dependency on another tenant.
 
 ### Resolved
 
