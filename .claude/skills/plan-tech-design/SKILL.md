@@ -112,7 +112,22 @@ Once approved, file via `gh issue create`:
 - **One component issue per component**, title `story(component): {component name} — {capability-name}`. Body includes: capability link, the ADR(s) that established this component, the responsibility, and a pointer to `define-component-design` as the authoring skill.
 - **One gap issue per gap**, title `story(gap): {gap name} — {capability-name}`. Body includes: the gap statement, what type of resolution is needed (`define-technical-requirements`, amending `define-adr`, or per-component spec), and a link back to the parent capability planning issue.
 
-Print the issue numbers/URLs back as a manifest.
+**Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+
+```bash
+gh issue create \
+  --title "story(component): {component name} — {capability-name}" \
+  --body-file "{tmp}/{slug}.md" \
+  --label documentation \
+  --label "epic:{epic}" \
+  --milestone "{milestone}"
+```
+
+**File in topological order and refer to sibling issues only by GitHub issue number**, never by their position in the approved list — `#4` is live GitHub syntax and links to issue 4, not to the fourth component you planned. A component that consumes another component's contract can only cite it once that issue exists.
+
+Gap issues generally block the components they touch: file gaps first, then reference their real numbers from the dependent component issues.
+
+Print the issue numbers/URLs back as a manifest, in dependency order.
 
 ### Component issue body template
 
@@ -131,6 +146,15 @@ Print the issue numbers/URLs back as a manifest.
 ### Authoring
 
 This component's design doc will be authored via `define-component-design` — one invocation per component. The doc format is type-specific (e.g. table definition vs. API service). The composed `tech-design.md` will be updated to link to the component design once written.
+
+### Depends on
+
+- #{issue} — {gap or sibling component title}
+
+<!-- Hard prerequisites ONLY: unresolved gaps that block this component, or
+     components whose contract this one consumes. Write "None." when there
+     are none. Components that merely sit near each other in the topology
+     are NOT dependencies — leave those in prose. -->
 
 ### Parent capability
 
@@ -158,6 +182,13 @@ This component's design doc will be authored via `define-component-design` — o
 ### Surfaced during
 
 Composition of `tech-design.md` for [{capability-name}](../docs/content/capabilities/{name}/_index.md).
+
+### Depends on
+
+- #{issue} — {blocking issue title}
+
+<!-- Hard prerequisites ONLY. Write "None." when there are none.
+     Most gaps depend on nothing — they are what everything else waits on. -->
 
 ### Related
 

@@ -87,8 +87,29 @@ Once the user approves the list, file one GitHub issue per ADR via `gh issue cre
 - **Title:** `story(adr): {short ADR title} — {capability-name}` (matches the repo's `story(scope): description` convention).
 - **Body:** parent capability link, the TR-NNs to be addressed, a one-paragraph statement of the decision to be made, and a link back to the parent capability planning issue if one exists.
 - **Body must reference `define-adr`** as the skill that will author the ADR and explain that one invocation of `define-adr` produces one ADR file.
+- **Milestone and epic label:** before filing anything, ask the user which milestone these ADRs belong to and which `epic:` labels apply. Run `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:` to offer the existing ones. **Never invent a milestone or epic name** — if none fits, ask the user to name it and create it explicitly.
 
-After filing, print the issue numbers/URLs back to the user as a manifest.
+Write each body to a temp file and file with:
+
+```bash
+gh issue create \
+  --title "story(adr): {short ADR title} — {capability-name}" \
+  --body-file "{tmp}/{slug}.md" \
+  --label documentation \
+  --label "epic:{epic}" \
+  --milestone "{milestone}"
+```
+
+After filing, print the issue numbers/URLs back to the user as a manifest, **in dependency order**.
+
+### Cross-referencing sibling ADRs — read this before writing any body
+
+**Refer to sibling ADRs by their GitHub issue number, never by their position in the approved list.** During planning it is natural to number the proposed ADRs 1..N and write "depends on #8" — but `#8` is live GitHub syntax that links to *issue* 8, an unrelated issue. That defect shipped once already across a 20-issue batch and had to be repaired by hand.
+
+Two consequences for how you file:
+
+1. **File in topological order** — an ADR's prerequisites must be filed before it, because their issue numbers do not exist until they are filed.
+2. While drafting, use an unambiguous placeholder such as `{{ADR-8}}` and substitute the real issue number once known. If a number is genuinely not yet available, write the ADR's title in prose rather than any `#`-prefixed token.
 
 ### Issue body template
 
@@ -110,10 +131,21 @@ After filing, print the issue numbers/URLs back to the user as a manifest.
 
 This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
 
+### Depends on
+
+- #{issue} — {sibling ADR title}
+
+<!-- Hard prerequisites ONLY: this ADR cannot be decided until those are.
+     Write "None." when there are none. Boundary splits ("this ADR owns A,
+     that one owns B"), analogies, and decisions this ADR *constrains*
+     downstream are NOT dependencies — leave those in prose. -->
+
 ### Related
 
 #{parent-capability-issue-or-722}
 ```
+
+**Direction matters.** "X must be pinned here so that Y has something to act against" means **Y depends on this ADR**, not the reverse. When in doubt, ask: *could this ADR be authored today if the other were never written?* If yes, it is not a hard dependency.
 
 ## Conversation discipline
 

@@ -92,6 +92,18 @@ Once the user approves the list, file one GitHub issue per experience via `gh is
 - **Title:** `story(ux): {short verb-led journey title} — {capability-name}` (matches the repo's `story(scope): description` convention).
 - **Body:** parent capability link, the persona, the goal in one sentence, and which capability sections (Stakeholders / Triggers / Outputs / Business Rules / Success Criteria) the journey is anchored in.
 - **Body must reference `define-user-experience`** as the skill that will author the UX doc, and explain that one invocation of `define-user-experience` produces one UX file under `docs/content/capabilities/{capability-name}/user-experiences/`.
+- **Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+
+```bash
+gh issue create \
+  --title "story(ux): {short verb-led journey title} — {capability-name}" \
+  --body-file "{tmp}/{slug}.md" \
+  --label documentation \
+  --label "epic:{epic}" \
+  --milestone "{milestone}"
+```
+
+**Refer to sibling experiences by GitHub issue number, never by their position in the approved list** — `#3` is live GitHub syntax and links to issue 3, not to the third journey you planned. Where one journey must be authored before another, file in topological order so the prerequisite's number exists first.
 
 After filing, print the issue numbers/URLs back to the user as a manifest.
 
@@ -123,6 +135,15 @@ After filing, print the issue numbers/URLs back to the user as a manifest.
 ### Authoring
 
 This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/{capability-name}/user-experiences/{ux-name}.md`.
+
+### Depends on
+
+- #{issue} — {sibling experience title}
+
+<!-- Hard prerequisites ONLY: journeys that must be authored before this one
+     can be. Write "None." when there are none. Journeys that merely touch
+     the same persona or hand off to each other are NOT dependencies —
+     leave those in prose. -->
 
 ### Related
 
