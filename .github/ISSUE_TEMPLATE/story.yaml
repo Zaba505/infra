@@ -20,6 +20,15 @@ body:
       required: true
 
   - type: textarea
+    id: depends-on
+    attributes:
+      label: Depends on
+      description: Hard prerequisites only — issues that must be resolved before this story can start. One per line as `- #123 — short title`. Write `None.` if there are none. Merely related work belongs in Related Issues below, not here.
+      placeholder: None.
+    validations:
+      required: false
+
+  - type: textarea
     id: related-issues
     attributes:
       label: Related Issues

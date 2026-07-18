@@ -130,6 +130,20 @@ Once approved, file one GitHub issue per task via `gh issue create`. Each issue:
 
 - **Title:** `story(impl): {short verb-led task title} — {capability-name}` (matches the repo's `story(scope): description` convention; `impl` is the implementation-task scope, parallel to `component`, `ux`, `gap`, etc.).
 - **Body:** uses the template below.
+- **Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+
+```bash
+gh issue create \
+  --title "story(impl): {short verb-led task title} — {capability-name}" \
+  --body-file "{tmp}/{slug}.md" \
+  --label documentation \
+  --label "epic:{epic}" \
+  --milestone "{milestone}"
+```
+
+**File in topological order — prerequisites first.** A task's prerequisite issue numbers do not exist until those issues are filed, so a task can only reference prerequisites that were filed before it. Sort the approved task list topologically before the first `gh issue create` call, not after.
+
+Refer to sibling tasks **only by GitHub issue number**, never by their position in the approved list — `#8` is live GitHub syntax and will link to issue 8, not to the eighth task you planned.
 
 After filing, print the issue numbers/URLs back as a manifest, in dependency order.
 
@@ -157,9 +171,16 @@ After filing, print the issue numbers/URLs back as a manifest, in dependency ord
 - [ ] {Test signal — e.g., "Unit tests cover validation paths, integration test exercises the round-trip."}
 - [ ] {Operational signal where relevant — e.g., "Module applies cleanly via `terraform fmt -recursive -check` and a dry-run plan."}
 
-### Prerequisite tasks
+### Depends on
 
-- #{issue-number} — {prerequisite task title}, OR "None."
+- #{issue-number} — {prerequisite task title}
+
+<!-- Hard prerequisites ONLY: tasks that must merge before this one can start.
+     Write "None." when there are none. Tasks that merely touch the same
+     component are NOT dependencies — leave those in prose. -->
+
+<!-- Section name is shared with plan-adrs / plan-experiences / plan-tech-design
+     so dependencies are greppable across every issue type. -->
 
 ### Authoring
 
