@@ -24,7 +24,7 @@ The plan-tech-design skill refuses to compose tech-design.md until every ADR is 
 -->
 
 **Parent capability:** [Self-Hosted Application Platform]({{< ref "../_index.md" >}})
-**Addresses requirements:** TR-01, TR-04, TR-05, TR-02, TR-18, TR-54
+**Addresses requirements:** TR-01, TR-04, TR-05, TR-02, TR-18, TR-54, TR-06, TR-07
 
 ## Context and Problem Statement
 
@@ -168,6 +168,22 @@ State stays where it is — a GCS bucket in the target environment, per-componen
 
 The consequence to carry forward is that **[TR-04]({{< ref "../tech-requirements.md#tr-04" >}}) teardown depends on state durability**. A phase's deterministic teardown is driven by definitions but executed against state; losing state does not merely inconvenience a teardown, it strands resources the definitions can no longer address. State durability is therefore a teardown correctness concern, not an operational nicety.
 
+### Sub-decision: the state backend is bootstrapped by a definitions-driven phase 0 that adopts its own state
+
+The sub-decision above creates a chicken-and-egg: the bucket holding applied state cannot be managed by the state it holds. It is resolved here rather than deferred, because the state-location decision is what creates it.
+
+**The bootstrap is a definitions-driven phase 0.** A bootstrap root module in the binding repository — committed like any other definition, not a hand-run command — creates the state bucket with versioning and retention. It runs against a *local* backend on its first execution and then migrates its own state into the bucket it just created, after which it is an ordinary component managed exactly like every other. The chicken-and-egg is discharged once, at the only moment it exists.
+
+Committing the bootstrap's state to the binding repository instead was considered and rejected: a bucket-only state is unlikely to carry secret material, but the never-committed rule above admits no per-case exceptions without becoming a judgment call at every future component.
+
+**It is a new phase, and it counts against the TR-02 budget.** The [standup UX]({{< ref "../user-experiences/stand-up-the-platform.md#journey" >}}) enumerates four phases beginning at foundations and has no provisioning step before the preflight check; phase 0 precedes [TR-03]({{< ref "../tech-requirements.md#tr-03" >}})'s foundations phase and is a required change to that UX. Excluding it from the 60-minute budget was considered and rejected: the budget is a *target* rather than a gate — missing it files a follow-up issue and does not stop the platform going into service — so exclusion protects nothing, while it would let the reproducibility KPI be measured against a rebuild that was not actually from scratch.
+
+**It is parameterized by target, which is what makes [TR-06]({{< ref "../tech-requirements.md#tr-06" >}}) literally true.** A drill creates its own scratch bucket by running the same phase 0 against a different target. Without this, "drill mode and live mode differ only in the underlying target" would be true of everything except the one resource the drill most needs to not share.
+
+**Its [TR-04]({{< ref "../tech-requirements.md#tr-04" >}}) teardown exists but carries an ordering constraint: phase 0 tears down last**, after every phase whose state it holds. Torn down out of order it strands precisely what the state-durability consequence above warns about. "Delete everything provisioned so far and start over" stays viable at every checkpoint; what is fixed here is the order in which that unwinds.
+
+The residual is real and recorded: after adoption, the bootstrap module's own state lives in the bucket that module manages. Losing the bucket therefore also loses the record of how to rebuild it. It is recoverable — the bucket is re-creatable and re-importable by re-running phase 0 — but recovery is a manual exception rather than the ordinary path.
+
 ### Sub-decision: secrets live in Secret Manager and are referenced by name in both repositories
 
 No secret value is committed to either repository, including the private one. Definitions carry references; [TR-44]({{< ref "../tech-requirements.md#tr-44" >}})'s secret-management surface carries values.
@@ -198,6 +214,34 @@ Three narrower rationales do survive scrutiny, and they are the recorded basis:
 
 The actual control remains architectural, not confidential: per [ADR-0001]({{< ref "0001-cross-environment-topology.md" >}}) the origin refuses any request that does not present an edge-issued client certificate, so traffic reaching an origin directly fails at the TLS layer. **Discovery buys an attacker noise, not access** — conditional on that posture holding, which ADR-0001 requires of both environments and which the home-lab side has not yet realized.
 
+### Sub-decision: forge-held non-git state is admissible under TR-18; rulesets are the live gap
+
+Git gives [TR-18]({{< ref "../tech-requirements.md#tr-18" >}}) a near-vacuous answer for the definitions themselves, but the forge also holds state that is *not* git. That state is three unlike things, and TR-18's three limbs must be applied to each separately rather than to "the forge" as a lump.
+
+**Rulesets are configuration, and they are the actual gap.** TR-18's limb (a) requires configuration control *through the platform's tracked-changes surface* — not merely that the operator can change it. Rulesets are set through the forge's web UI and recorded in no definition, which is drift by [TR-01]({{< ref "../tech-requirements.md#tr-01" >}})'s plain reading, the same failure class as [ADR-0001]({{< ref "0001-cross-environment-topology.md" >}})'s residual risk 3.
+
+This one is worth stating sharply because it is self-referential: **the ruleset that enforces this ADR's pull-request gate is itself an untracked value.** The mechanism the substrate leans on for tamper-evidence is configured the same way the module reference was, and is drift for the same reason. Expressing both repositories' rulesets as definitions is therefore an obligation of this decision, not a downstream nicety.
+
+**Workflow run history is derived, and this ADR is what makes that true.** It was load-bearing only because the module reference lived in it and nowhere else — the violation this ADR exists to fix. Once the pin is a tracked definition, run history is operational telemetry downstream of the definitions, in the same class as applied state but without state's teardown role. It carries no export obligation.
+
+**Issues are data of record, and limb (b) passes.** The [TR-19]({{< ref "../tech-requirements.md#tr-19" >}})/[TR-20]({{< ref "../tech-requirements.md#tr-20" >}}) engagement thread is genuinely platform-held data, and the operator can export it in portable form through a documented API with no vendor approval, negotiation, or plan change. **"Without vendor cooperation" means without needing the vendor's permission — not without using the vendor's interfaces.** The stricter reading is rejected on consistency grounds as much as on merit: it would retroactively disqualify the edge vendor that ADR-0001 already admitted, since that vendor's configuration is likewise driven through its API. An accepted sibling cannot be invalidated by a reading adopted here in passing.
+
+What limb (b) demands is that the export be *routine rather than theoretical*. An export path that has never been run is an assumption, not a capability.
+
+**Scope discipline.** This settles the forge's admissibility as the **substrate's host** — the question this ADR opened. It does not choose the engagement channel, which remains its own decision. What that decision inherits is a narrowed constraint rather than an open question: whatever channel it selects must carry an operator-executable export of the thread, and if it selects this forge it inherits the ruleset obligation above as well.
+
+### Reconciliation sequencing: clean plans per component, then one drill
+
+The binding repository's ~20-month staleness must be closed before [TR-05]({{< ref "../tech-requirements.md#tr-05" >}})'s preflight check can produce a meaningful result — but closing it is itself a large tracked change, and the check that would validate it does not yet work. The resolution splits the problem in two rather than choosing between evidence and tractability.
+
+**Stage 1 — clean-plan reconciliation, component by component.** A `terraform plan` that proposes no changes against live infrastructure *is* a drift check for that component: it demonstrates the definitions and reality agree. This needs no new machinery and no scratch infrastructure, and it decomposes — each component is a separate tracked change, separately reviewable, rather than one enormous diff whose failure modes cannot be localized. Removal or migration of the legacy `terraform/` tree happens here.
+
+The limit is important and is the reason stage 2 exists: **a clean plan reconciles the definitions to what *is*, not to what *should be*.** Drift that is itself wrong gets ratified into the definitions by a process that only ever drives the diff to zero. Each plan's revealed differences must therefore be *inspected and judged*, not merely eliminated — the operator is deciding, per difference, whether reality or the definition is correct.
+
+**Stage 2 — one full drill establishes the baseline.** With every component planning clean, a single [TR-06]({{< ref "../tech-requirements.md#tr-06" >}}) drill runs the rebuild end-to-end against scratch infrastructure, and the [TR-07]({{< ref "../tech-requirements.md#tr-07" >}}) canary going green stamps the first last-known-good SHA. This is what makes the initial TR-05 baseline *demonstrated* rather than asserted. Accepting the reconciliation on inspection alone was rejected for exactly that: it would poison the baseline at the moment it is established, and every later drift check would measure against a reference no one had ever validated.
+
+**Ordering.** Stage 2 depends on the phase-0 bootstrap being parameterized by target, since the drill needs its own state bucket — which is why the bootstrap sub-decision sequences ahead of reconciliation. Reconciliation is deliberately **not** gated on the home-lab module surface, which does not exist yet: waiting for it would hold the TR-05 baseline hostage to a build-out that is separate work.
+
 ### Reconciling ADR-0001's "peer surface" with the seam
 
 [ADR-0001]({{< ref "0001-cross-environment-topology.md" >}}) required home-lab foundations to be *"version-controlled definitions in the same tracked-changes repository, as a peer top-level surface alongside `cloud/`"*. That wording predates this ADR naming the seam, and read literally against a two-repository substrate it is ambiguous. This ADR resolves the ambiguity **without weakening what ADR-0001 decided**:
@@ -221,28 +265,41 @@ This also gives ADR-0001's **residual risk 3** (the home-lab tunnel endpoint con
 * Bad, because two repositories mean two rulesets, two CI surfaces, and two contribution flows — a public fork-and-PR path for declarations, a private grant-based path for bindings — all of which is TR-54 surface that a single repository would not spend.
 * Bad, because **the binding repository is roughly 20 months stale** (last pushed 2024-11-16) relative to the modules it pins, and it retains a legacy `terraform/` tree predating the Terragrunt layout. The first preflight drift check under TR-05 will therefore run against a large accumulated gap, and reconciling it is real work that this decision creates rather than resolves.
 * Bad, because TR-04 teardown now visibly depends on applied-state durability: losing state strands resources the definitions can no longer address. Classifying state as derived is correct, but it does not make teardown independent of it.
-* Bad, because the forge holds platform-adjacent state that is *not* git — issues, rulesets, workflow run history — which git's portability argument does not cover. TR-18 admissibility for that surface is not settled here.
+* Good, because the forge's non-git state was tested against TR-18 limb by limb and cleared, converting an open risk into one named obligation (rulesets as definitions) and one narrowed constraint handed to the engagement-channel ADR (a routine thread export).
+* Good, because the phase-0 bootstrap is parameterized by target, which makes TR-06's "drill and live differ only in the underlying target" true of applied state as well — the drill no longer needs a hand-made bucket to be honest.
+* Good, because reconciliation decomposes into per-component clean plans rather than one large diff, so the work is separately reviewable and needs no scratch infrastructure until the final baseline drill.
+* Bad, because **the ruleset enforcing this ADR's own pull-request gate is untracked configuration** — the substrate's tamper-evidence rests on a value configured the same way the module reference was. Recorded as an obligation rather than resolved, and it compounds the bypass cost above: neither the gate nor its configuration is enforced by construction today.
+* Bad, because phase 0 adds a rebuild phase the standup UX does not have, and its teardown carries an ordering constraint the other phases do not — phase 0 must tear down last, so "delete everything and start over" is order-sensitive in a way TR-04's flat per-phase framing does not anticipate.
+* Bad, because after adoption the bootstrap module's state lives in the bucket it manages, so losing the bucket loses the record of how to rebuild it. Recovery is re-running phase 0 and re-importing — possible, but a manual exception rather than the ordinary path.
+* Bad, because clean-plan reconciliation drives the diff to zero against *current* reality, which ratifies any drift that is itself wrong unless each revealed difference is judged rather than merely eliminated. The stage-2 drill bounds this but does not remove it — the operator's inspection is load-bearing.
 * Requires: the module reference committed to the binding repository, and every per-component workflow changed to read it rather than accept a `workflow_dispatch` input.
+* Requires: a phase-0 bootstrap root module in the binding repository that creates the state bucket, adopts its own state into it, and is parameterized by target; plus a standup-UX change introducing phase 0 ahead of foundations, with its teardown documented as last-out.
+* Requires: both repositories' rulesets expressed as definitions rather than set through the forge's UI, closing the self-referential TR-01 gap on this ADR's own enforcement gate.
+* Requires: the engagement thread's export path exercised at least once, so TR-18 limb (b) rests on a demonstrated capability rather than a documented one.
 * Requires: the `Zaba505/infra` ruleset (signatures, linear history, no force-push, no deletion, PR with zero required approvals) replicated on `Zaba505/homelab`, which has no equivalent today.
-* Requires: reconciliation of the binding repository against current `cloud/*`, including removal or migration of the legacy `terraform/` tree, before the first TR-05 preflight check can be meaningful.
+* Requires: reconciliation of the binding repository against current `cloud/*`, including removal or migration of the legacy `terraform/` tree, before the first TR-05 preflight check can be meaningful — sequenced as per-component clean plans followed by one baseline drill, per the [reconciliation note](#reconciliation-sequencing-clean-plans-per-component-then-one-drill).
 * Requires: a home-lab module surface in the public repository, peer to `cloud/`, per the reconciliation note — the destination for ADR-0001's residual risk 3.
-* Requires: a bootstrap path for the state backend, since the bucket holding state cannot itself be managed by the state it holds (see Open Questions).
+* Requires: the first last-known-good SHA to be stamped by a green canary on a full drill, not asserted on inspection — so TR-05's baseline is demonstrated from the outset.
 
 ### Realization
 
 * **`Zaba505/infra` (public)** — `cloud/*` reusable modules; capability docs including tenant TR-09 declarations per ADR-0002; `pkg/` and `services/` unchanged by this decision. Gains a home-lab module surface peer to `cloud/`.
 * **`Zaba505/homelab` (private)** — root modules and the Terragrunt layout (`{component}/{env}/terragrunt.hcl` + `terraform.tfvars`, with optional `{region}/terraform.tfvars`), per-component apply workflows, and **the committed module pin** this ADR introduces. Its `main` is the platform's authoritative reference.
 * **`terragrunt.hcl` (repository root of the binding repo)** — the seam's mechanism: `source = "git::https://github.com/Zaba505/infra.git//${module_path}?ref=${module_ref}"`, with `module_ref` becoming a tracked value. Also generates the backend and provider configuration.
-* **GCS state bucket, project `infra-home-lab`** — applied state, per-component prefixed via `path_relative_to_include()`. Outside both repositories by decision, and a TR-04 teardown dependency.
+* **GCS state bucket, project `infra-home-lab`** — applied state, per-component prefixed via `path_relative_to_include()`. Outside both repositories by decision, and a TR-04 teardown dependency. Created by phase 0 rather than assumed present.
+* **Phase-0 bootstrap root module (binding repository)** — **new.** Creates the state bucket with versioning and retention, adopts its own state into it on first run, and is parameterized by target so drills bootstrap scratch state. Tears down last.
+* **Ruleset definitions for both repositories** — **new.** The signatures / linear-history / no-force-push / no-deletion / PR-required configuration expressed as definitions rather than set through the forge's UI, on `Zaba505/infra` and `Zaba505/homelab` alike.
 * **Secret Manager** — secret values, referenced by name from both repositories; already the destination for the origin keypair and trust anchor per `cloud/mtls/cloudflare-gcp/`.
 * **`cloud/mtls/cloudflare-gcp/`** — ADR-0001's residual risk 2 (trust anchor fetched live from the vendor at apply time) now has a decided home: the anchor belongs vendored in the public module surface with a tracked update path. A vendored copy already exists in the binding repository's legacy `terraform/load-balancer/` tree, on the wrong side of the seam.
 * `tech-design.md` (composed later by `plan-tech-design`) will fold this substrate into the rebuild-flow narrative alongside the other accepted ADRs.
 
 ## Open Questions
 
-* **State-backend bootstrap (TR-02, TR-04).** The GCS bucket holding applied state cannot be managed by the state it holds, so some phase-zero step must create it before phase 1 can apply anything. Whether that bootstrap is itself definitions-driven, whether it is teardown-able under TR-04, and whether it counts against TR-02's 60-minute budget are all undecided. This is a genuine chicken-and-egg that the rebuild-orchestrator ADR inherits; it is surfaced here because the state-location sub-decision creates it.
-* **Forge-held non-git state under TR-18.** Issues (the TR-19/TR-20 engagement channel), rulesets, and workflow run history live with the forge and are not covered by git's every-clone-is-an-export property. Exporting them requires vendor API cooperation, which is the limb TR-18 tests. Not decided here because the engagement channel is its own decision; flagged so that ADR inherits it rather than rediscovering it.
-* **Reconciliation sequencing.** The binding repository's ~20-month staleness must be closed before TR-05's preflight check can produce a meaningful result, but closing it is itself a large tracked change whose correctness cannot be verified by the check that does not yet work. Whether the first reconciliation is validated by a drill on scratch infrastructure ([TR-06]({{< ref "../tech-requirements.md#tr-06" >}})) or accepted on inspection is not decided here.
+**None remain.** The three questions this ADR previously carried are resolved and folded into the sections above. What is *handed downstream* is not a set of open questions but a set of constraints already decided here:
+
+* The **rebuild-orchestrator ADR** inherits phase 0 as a decided phase — definitions-driven, target-parameterized, inside the TR-02 budget, torn down last — rather than a chicken-and-egg to solve. It still owns how the phases are sequenced and checkpointed.
+* The **drift-detection ADR** inherits a last-known-good reference whose form is fixed (a commit SHA) and whose first value has a decided provenance (stamped by a green canary on the stage-2 drill). It still owns capture and comparison.
+* The **engagement-channel ADR** inherits a constraint, not a question: whatever channel it picks must carry an operator-executable export of the thread, and if it picks this forge it inherits the ruleset obligation too. It still owns the channel choice.
 
 ### Resolved
 
@@ -253,4 +310,7 @@ This also gives ADR-0001's **residual risk 3** (the home-lab tunnel endpoint con
 * **Where applied state lives.** → **In the target environment, never committed.** State is derived, not a definition; it contains plaintext secret material; and drill-versus-live parity under TR-06 only works if state is a property of the target. The cost is that TR-04 teardown depends on state durability ([sub-decision](#sub-decision-applied-state-is-derived-lives-in-the-target-environment-and-is-never-committed)).
 * **Administrative bypass of the gate.** → **Retained; discipline is convention.** Accepted with its cost recorded in full: TR-01 is enforced by convention rather than construction, and TR-05 cannot distinguish a bypass from drift. The first exercised bypass is the trigger to revisit ([sub-decision](#sub-decision-mutations-are-gated-by-pull-request-into-main-under-the-existing-ruleset)).
 * **Why the private side is private.** → **Aggregation, pre-disclosure, and mistake blast radius — explicitly not obscurity.** Hostnames and IPs are public by construction via Certificate Transparency and continuous IPv4 scanning; the recorded rationale is narrowed accordingly so it does not decay into security-by-obscurity ([sub-decision](#sub-decision-the-publicprivate-seam-is-justified-by-aggregation-not-obscurity)).
+* **State-backend bootstrap (TR-02, TR-04).** → **A definitions-driven phase 0 that adopts its own state, counts against the budget, and tears down last.** A committed bootstrap module creates the bucket against a local backend, then migrates its state into the bucket it created. It is parameterized by target, which is what makes TR-06's drill-versus-live parity true of applied state. Exclusion from the 60-minute budget was rejected because the budget is a target rather than a gate, so exclusion protects nothing while letting the KPI be measured against a rebuild that was not from scratch ([sub-decision](#sub-decision-the-state-backend-is-bootstrapped-by-a-definitions-driven-phase-0-that-adopts-its-own-state)).
+* **Forge-held non-git state under TR-18.** → **Admissible, on a three-way classification.** Rulesets are configuration and are the live gap — untracked today, and self-referentially so, since the ruleset enforcing this ADR's gate is itself undefined in any definition. Workflow run history is derived and carries no export obligation, a classification this ADR's own pin makes true. Issues are data of record and pass limb (b), because "without vendor cooperation" means without the vendor's permission, not without the vendor's interfaces — the strict reading would retroactively disqualify the edge vendor ADR-0001 already admitted ([sub-decision](#sub-decision-forge-held-non-git-state-is-admissible-under-tr-18-rulesets-are-the-live-gap)).
+* **Reconciliation sequencing.** → **Per-component clean plans, then one baseline drill.** A no-op `terraform plan` is itself a per-component drift check, needing no new machinery and decomposing the work into separately reviewable changes; a single TR-06 drill whose TR-07 canary goes green then stamps the first last-known-good SHA. Acceptance on inspection was rejected for poisoning the TR-05 baseline at the moment it is established. The recorded limit is that clean plans reconcile to what *is*, so each revealed difference must be judged rather than merely zeroed ([reconciliation note](#reconciliation-sequencing-clean-plans-per-component-then-one-drill)).
 * **ADR-0001's "peer surface alongside `cloud/`".** → **Honored at the module layer; bindings follow the seam.** "Same repository" resolves per layer rather than per environment. The property ADR-0001 protected — that the home lab is not a hand-managed second-class environment — is preserved intact ([reconciliation note](#reconciling-adr-0001s-peer-surface-with-the-seam)).
