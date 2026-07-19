@@ -1,7 +1,7 @@
 ---
 title: "[0004] Rebuild Orchestrator & Phase Model"
 description: >
-    The rebuild's phase model, ordering, teardown contract, and drill-vs-live parameterization live in a Dagger module written in Go in the public repository; the forge is a thin invoker that supplies the target and hosts the operator checkpoints. Phase ordering is reordered so the operations tunnel precedes home-lab bare metal, and iPXE chainloads from a stable cloud-hosted endpoint rather than a LAN appliance.
+    The rebuild's phase model, ordering, teardown contract, and drill-vs-live parameterization live in a Dagger module written in Go in the public repository; the forge is a thin invoker that supplies the target and hosts the operator checkpoints. Phase ordering is reordered so the operations tunnel precedes home-lab bare metal, iPXE chainloads from a stable cloud-hosted endpoint rather than a LAN appliance, drills exercise the home-lab phase against virtual hosts on the home-lab LAN, and phase 4 exposes an idempotent canary teardown whose failure is a readiness failure.
 type: docs
 weight: 4
 category: "strategic"
@@ -24,7 +24,7 @@ The plan-tech-design skill refuses to compose tech-design.md until every ADR is 
 -->
 
 **Parent capability:** [Self-Hosted Application Platform]({{< ref "../_index.md" >}})
-**Addresses requirements:** TR-02, TR-03, TR-04, TR-06
+**Addresses requirements:** TR-02, TR-03, TR-04, TR-06, TR-07
 
 ## Context and Problem Statement
 
@@ -228,6 +228,35 @@ The single-parameter form is the decision, and its rationale is the same one ADR
 
 Target definitions are **specific and bound**, so per ADR-0003's seam they live in the private repository; the orchestrator that consumes them is reusable and parameterized, so it lives in the public one.
 
+### Sub-decision: a drill's home-lab target is virtual hosts on the home-lab LAN
+
+The single-target form above is straightforwardly satisfiable for every cloud phase — a drill target names a different project, bucket, and zone. It is not straightforwardly satisfiable for **phase 1c**: a drill cannot reprovision the live home lab's bare metal without destroying the thing it is drilling against, and there is no second set of hardware.
+
+The decision: **a drill target's home-lab target names virtual machines on existing home-lab hypervisor capacity**, where a live target names the physical hosts. Phase 1c then runs *unchanged* — same chainload, same boot artifacts, same OS image, same post-boot definitions — against virtual NICs and virtual disks. [TR-06]({{< ref "../tech-requirements.md#tr-06" >}})'s "differ only in the underlying target" stays literally true, because the virtualization is a property of the target rather than a branch in the flow.
+
+**Why home-lab capacity rather than the cloud.** Virtualizing the home-lab side *into the cloud anchor* was the cheaper-looking variant and is rejected: it would make phase 1b degenerate, with the tunnel terminating on both ends inside one environment. A drill would then no longer span two environments, and [TR-03]({{< ref "../tech-requirements.md#tr-03" >}})'s both-sides-plus-the-link coverage would be silently narrowed in exactly the mode that exists to verify it. Keeping the virtual hosts on the home-lab LAN preserves the tunnel as a real crossing, which is the property a drill most needs to hold.
+
+[BR-50]({{< ref "../business-requirements.md#br-50" >}})'s "without touching live platform state" is satisfied on the distinction that matters: a drill VM consumes live *capacity* but produces no live platform state.
+
+The two alternatives are recorded with their rejections. **Spare hardware as a standing precondition** gives the highest fidelity, and is rejected on the same objection that killed the LAN boot appliance above — it makes the rebuild flow depend on a hand-maintained device the rebuild does not itself build. **Cloud-only drills** cost nothing, and are rejected because they make drill and live differ in *scope* as well as target, which lets the reproducibility KPI certify a rebuild that skips a phase.
+
+Two consequences follow and are decided here rather than left to implementation:
+
+* **Drill hosts sit on an isolated segment with their own DHCP chainload directive.** The stable name decided above points at the *live* target's boot endpoint. A drill VM booting on the live LAN's DHCP scope would therefore chainload live artifacts — a drill that quietly rebuilds from the live target is worse than no drill at all, because it returns a green signal for something it never tested. The drill segment's directive points at the drill target's boot endpoint. This grows the out-of-band router surface from one directive to two; it does not change its class.
+* **What a drill does not prove is named rather than implied.** Firmware, BMC power-on, disk controller and layout, and NIC driver behaviour — the failure modes specific to metal — go unexercised. A drill certifies the phase model, the sequencing, the definitions, and the teardown; it does not certify that *this hardware* boots. That is the honest bound on what the reproducibility KPI demonstrates, and it belongs next to the KPI rather than being discovered after a disaster-recovery event.
+
+### Sub-decision: phase 4 exposes an idempotent canary teardown, and a canary that will not tear down is a phase-4 failure
+
+[TR-07]({{< ref "../tech-requirements.md#tr-07" >}}) has the canary deployed, exercised, and torn down *within* phase 4, so its teardown is partly intrinsic to the success path. That is not sufficient for [TR-04]({{< ref "../tech-requirements.md#tr-04" >}}), and the reason is specific: the checkpoint at which phase 4's teardown is actually reached is the one where the **canary failed** — the [standup UX]({{< ref "../user-experiences/stand-up-the-platform.md#edge-cases" >}})'s "canary tenant fails to come up" case — and there the intrinsic teardown never ran. A phase whose teardown assumes the success path has no teardown for the case it exists to serve.
+
+Phase 4 therefore exposes the standard TR-04 entry point as an **idempotent removal of the canary's runtime footprint wherever it landed** — compute, persistent storage, identity registration, backup enrolment, and observability series, matching the surfaces the standup UX has the canary exercise. Idempotence is the operative property, because the teardown cannot know which of three states it faces: a canary that removed itself cleanly, one that removed itself partway, or one that never deployed. All three must be safe.
+
+What it does **not** remove is the canary's definitions. TR-07 maintains the canary alongside the platform definitions, so it is a permanent artifact; teardown removes what a rebuild instantiated, never the canary itself.
+
+The second half of the decision is a claim about readiness: **a canary that comes up green but does not tear down cleanly is a phase-4 failure.** TR-07 names deployment, exercise, and teardown as one obligation, but the reason is not symmetry — the canary's teardown *is* the platform's tenant-offboarding path exercised for real. A canary that cannot be removed has demonstrated that the platform cannot offboard a tenant, which is a readiness defect exactly as much as one that cannot be onboarded, and the standup UX's rule that readiness does not bend for a failed canary applies unchanged.
+
+This is also where the cache-buster rule is load-bearing a second time. Canary deploy and canary teardown are both side-effecting and both go through the mandatory helper; a cached canary teardown would report a clean removal that never happened, leaving residue that the next rebuild's canary then collides with.
+
 ### Sub-decision: checkpoint wait time counts against the 60-minute budget
 
 The [TR-02]({{< ref "../tech-requirements.md#tr-02" >}}) budget is measured as **wall-clock from invocation to canary-green, including time parked at checkpoints.**
@@ -245,6 +274,10 @@ The consequence is that the KPI partly measures operator validation speed, which
 * Good, because ordering the tunnel ahead of home-lab bare metal discharges a circularity — that bare metal must be *triggered* over a path the rebuild has not yet built — without weakening TR-03 or losing ADR-0001's independent-tunnel-retry benefit.
 * Good, because no runner and no boot appliance is required inside the home lab; the executor for home-lab-touching phases is provisioned by phase 1a, so it is definitions-driven rather than a hand-built precondition.
 * Good, because checkpoint acknowledgments land on the TR-19/TR-20 engagement thread, leaving an auditable record of what the operator validated and when — which environment approvals would have left only in run metadata.
+* Good, because drills exercise phase 1c for real rather than skipping it — the home-lab target is virtualized rather than the flow being branched, so TR-06's "differ only in target" stays literally true and the reproducibility KPI certifies the whole phase model rather than its cloud half.
+* Good, because keeping the drill's virtual hosts on the home-lab LAN keeps phase 1b's tunnel a genuine cross-environment crossing during a drill, so TR-03's coverage is not quietly narrowed in the mode that exists to verify it.
+* Good, because phase 4's teardown is idempotent across all three states the canary can be left in, so TR-04 holds at the checkpoint the operator actually reaches most often — the failed canary, where the intrinsic success-path teardown never ran.
+* Good, because treating a canary that will not tear down as a phase-4 failure makes each rebuild exercise the tenant-offboarding path and not only the onboarding one.
 * Bad, because **Dagger's caching can silently skip side-effecting operations**, and the documented `cache="never"` control does not cover execs. A cached teardown reports success without executing, which produces exactly the carried-forward partial state the standup UX rules out. This is mitigated by a mandatory per-run cache-buster, but the mitigation is the design's most load-bearing convention and its failure mode is a *successful-looking* rebuild.
 * Bad, because **Dagger is pre-1.0** with no API-stability guarantee, and shipped a breaking Modules v2 redesign in the current minor line. The orchestrator inherits an upgrade treadmill charged against TR-54, and version pinning is mandatory rather than prudent.
 * Bad, because **the Dagger engine must run privileged**, so the host is the security boundary. This is acceptable on a dedicated runner and would not be on a shared one.
@@ -254,6 +287,11 @@ The consequence is that the KPI partly measures operator validation speed, which
 * Bad, because **a job parked on a checkpoint poll consumes runner minutes**, where an environment approval would not, and hosted jobs cap at six hours. Neither binds a 60-minute rebuild; an abandoned one is waste.
 * Bad, because **Option C is the most work of any option considered**, and a bespoke orchestrator has no natural forcing function keeping it current. The operator's prior Dagger experience lowers this cost but does not remove it.
 * Bad, because **phase 1c's teardown is not resource deletion.** Powering off and wiping bare metal is a weaker determinism story than a cloud destroy, making it the weakest link in the per-phase teardown contract.
+* Bad, because **a virtualized drill target does not exercise metal.** Firmware, BMC power-on, disk controller and layout, and NIC driver behaviour go unproven, so the reproducibility KPI certifies the phase model and the definitions rather than that this hardware boots. This is recorded as the honest bound on the KPI rather than mitigated, and it is the residual a spare-hardware precondition would have bought out.
+* Bad, because **a drill's phase-1c teardown is VM deletion rather than power-off-and-wipe**, so drills exercise a teardown path that is both stronger than and different from the live one. The weakest link in the teardown contract is precisely the link drills do not test.
+* Bad, because **the drill's home-lab hosts require a second out-of-band DHCP directive** on an isolated segment. Without it a drill chainloads the live target's boot artifacts and returns a green signal for something it never tested. The untracked router surface grows from one directive to two — the same TR-01 class, twice.
+* Bad, because **drill hosts consume live home-lab capacity.** No live platform state is touched, which is what BR-50 tests, but a drill and the live platform contend for the same hypervisor — so drill sizing is bounded by what the home lab can spare while still serving.
+* Bad, because **phase 4's teardown must be written defensively rather than derived.** Unlike the Terraform-backed phases, the canary's footprint spans identity, backup, and observability enrolments whose removal has no dependency graph to reverse, so this is the one teardown that is a hand-written inverse — the mirror-drift problem this ADR rejected Option A over, readmitted at one phase and accepted because TR-07's canary surface is small and fixed.
 * Neutral but load-bearing: **Terragrunt provides no resume-from-failure and no transactional rollback**, so re-running a teardown must be safe against a partially-destroyed graph. This is a property the orchestrator must hold, not one it inherits.
 * Requires: a Dagger module in `Zaba505/infra` holding the phase model, per-phase apply and teardown functions, and the target parameter, with the Dagger version and every tool image pinned.
 * Requires: a single helper through which all side-effecting execs are constructed, injecting the per-run cache-buster, so omission requires bypassing the helper rather than forgetting a parameter.
@@ -263,6 +301,10 @@ The consequence is that the KPI partly measures operator validation speed, which
 * Requires: phase scoping that excludes external dependencies on teardown, plus a test asserting each phase's membership and destroy order against the dry-run output.
 * Requires: a standup-UX update — phase 0 from ADR-0003, the 1a/1b/1c subdivision with the tunnel ahead of bare metal, and the issue-thread checkpoint replacing the implied local `continue`.
 * Requires: empirical verification that outbound TCP from a Dagger container reaches an RFC1918 address over the tunnel, before phases 2 and 3 are built on the assumption. Official documentation does not guarantee it.
+* Requires: drill target definitions to name virtual home-lab hosts on an isolated LAN segment, with that segment's own DHCP chainload directive pointing at the drill target's boot endpoint — not the live one.
+* Requires: home-lab hypervisor capacity sufficient to stand up the drill's virtual host set alongside live workloads, which is a capacity floor the home-lab definitions surface must account for rather than discover at drill time.
+* Requires: phase 4 to expose an idempotent canary teardown covering compute, persistent storage, identity registration, backup enrolment, and observability, safe against a canary that removed itself, removed itself partway, or never deployed — and constructed through the cache-buster helper like every other side-effecting operation.
+* Requires: the [standup UX]({{< ref "../user-experiences/stand-up-the-platform.md" >}}) update already noted above to additionally record that a canary which will not tear down cleanly fails phase 4, and that drills exercise the home-lab phase virtually.
 
 ### Realization
 
@@ -273,15 +315,18 @@ The consequence is that the KPI partly measures operator validation speed, which
 * **`cloud/compute-engine/` + `cloud/service-account/`** — the cloud-anchor self-hosted runner provisioned by phase 1a, plus its registration identity.
 * **Phase-0 bootstrap root module (`Zaba505/homelab`)** — from ADR-0003; invoked here as phase 0 and torn down last.
 * **`cloud/vpc-network/` and the tunnel module** — phase 1b, ADR-0001's distinct checkpoint, reordered ahead of home-lab bare metal.
-* **Home-lab module surface (`Zaba505/infra`, peer to `cloud/`)** — from ADR-0003's reconciliation note; phase 1c's definitions land here once ADR-0001's deferred tooling decision is made. The boot-trigger work runs host-side, outside Dagger.
+* **Home-lab module surface (`Zaba505/infra`, peer to `cloud/`)** — from ADR-0003's reconciliation note; phase 1c's definitions land here once ADR-0001's deferred tooling decision is made. The boot-trigger work runs host-side, outside Dagger. Must address both a physical and a virtual host target, and declare the hypervisor capacity a drill requires.
+* **Canary tenant definitions (`Zaba505/infra`)** — from TR-07, maintained alongside the platform definitions and never removed by teardown. Phase 4's apply deploys and exercises it; phase 4's teardown removes its runtime footprint idempotently across compute, storage, identity, backup, and observability.
 * `tech-design.md` (composed later by `plan-tech-design`) will fold the phase model into the rebuild-flow narrative alongside the other accepted ADRs.
 
 ## Open Questions
 
-* **How is the home-lab side of a drill exercised?** [TR-06]({{< ref "../tech-requirements.md#tr-06" >}}) requires drill and live to differ only in target, and that is straightforwardly true of every cloud phase — a drill target names a different project, bucket, and zone. It is **not** obviously true of phase 1c: a drill cannot reprovision the live home lab's bare metal without destroying the thing it is drilling against, and there is no second set of hardware. The candidate answers are that drill targets virtualize the home-lab side, that drills are cloud-only with home-lab reproducibility proven on a separate cadence, or that spare hardware becomes a platform precondition. Each has a different cost and none is obviously right; this is left open rather than guessed. It bounds what the reproducibility KPI actually demonstrates, so it should be resolved before the first drill rather than after.
-* **What is the canary's teardown relationship to phase 4?** [TR-07]({{< ref "../tech-requirements.md#tr-07" >}}) has the canary deployed, exercised, and torn down *within* the final phase, so phase 4's teardown is partly intrinsic to its success path. Whether phase 4 additionally exposes the standard TR-04 teardown entry point, and what it removes if the canary already removed itself, is a component-design question this ADR does not need to settle.
+None remain. Both questions this ADR previously carried are resolved and folded into the sections above.
 
 ### Resolved
+
+* **How the home-lab side of a drill is exercised.** → **A drill target's home-lab target names virtual machines on existing home-lab hypervisor capacity**, so phase 1c runs unchanged against virtual NICs and disks and TR-06's "differ only in target" stays literally true. Virtualizing into the cloud anchor was rejected for making phase 1b's tunnel degenerate and narrowing TR-03 coverage in the mode that exists to verify it; spare hardware was rejected on the LAN-appliance objection; cloud-only drills were rejected for making drill and live differ in scope. Recorded limits: metal-specific failure modes go unproven, drill hosts need their own DHCP chainload directive, and drill teardown is VM deletion rather than the live power-off-and-wipe ([sub-decision](#sub-decision-a-drills-home-lab-target-is-virtual-hosts-on-the-home-lab-lan)).
+* **The canary's teardown relationship to phase 4.** → **Phase 4 exposes the standard TR-04 entry point as an idempotent removal of the canary's runtime footprint, and a canary that will not tear down cleanly fails phase 4.** The intrinsic success-path teardown is insufficient because the checkpoint where teardown is reached is the *failed* canary, where it never ran; idempotence is required because teardown cannot know whether the canary removed itself, removed itself partway, or never deployed. The canary's definitions are never removed. Failure is a readiness failure because the canary's teardown is the tenant-offboarding path exercised for real ([sub-decision](#sub-decision-phase-4-exposes-an-idempotent-canary-teardown-and-a-canary-that-will-not-tear-down-is-a-phase-4-failure)).
 
 * **What holds the phase model.** → **A Dagger module in Go in the public repository.** The forge holds the invocation sequence and the checkpoint gate; it holds no ordering logic. Chosen for testable teardown (TR-04), pinned toolchain (TR-01), and forge portability (TR-18) ([Decision Outcome](#decision-outcome)).
 * **Phase ordering.** → **0 → 1a cloud anchor + edge → 1b tunnel → 1c home-lab bare metal → 2 core → 3 cross-cutting → 4 canary.** The tunnel is reordered ahead of bare metal because bare metal must be triggered over a LAN path the rebuild would not otherwise have built yet. TR-03 is unweakened: phase 1 completes only when all three checkpoints pass ([sub-decision](#sub-decision-the-tunnel-precedes-home-lab-bare-metal-reordering-adr-0001s-phase-1)).
