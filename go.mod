@@ -28,8 +28,8 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.20 // indirect
 	github.com/googleapis/gax-go/v2 v2.23.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.70.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.70.0 // indirect
 	go.opentelemetry.io/otel/metric v1.45.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.54.0 // indirect
@@ -41,6 +41,6 @@ require (
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto v0.0.0-20260724162435-b2f20204f0df // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260724162435-b2f20204f0df // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260724162435-b2f20204f0df // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260803160001-6ac0973c030d // indirect
 	google.golang.org/grpc v1.83.0 // indirect
 )
