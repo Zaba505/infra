@@ -105,6 +105,38 @@ Ask:
 
 Wait for explicit approval before filing.
 
+## Where dependencies, grouping and sequence live
+
+**Dependencies are GitHub issue relationships, not prose.** This repo does not carry a
+`Depends on` section in issue bodies — it was removed from `.github/ISSUE_TEMPLATE/story.yaml`
+and every edge that existed in prose was converted to a typed `blocked by` relationship. Write
+ordering with `gh issue edit --add-blocked-by`; never reintroduce a `### Depends on` heading.
+
+**Grouping is the project board's `Area` field, not a label.** The `epic:*` labels were
+deleted. Every issue this skill files belongs on the repo's project board with `Area` set.
+
+**Milestones are a delivery sequence, not a grouping.** They run `00 · Authoring pipeline`
+through `08 · Media storage as tenant`, each named for a demonstrable end state. The invariant:
+**every `blocked by` edge must point backward or stay inside its own milestone.** So the
+milestone question and the dependency question are one question — placing an issue in an early
+milestone while making it blocked by something in a later one is the mistake to watch for. After
+pass 2, check the edges you wrote against the milestones you chose; if one points forward, say
+so and ask the user which of the two moves.
+
+Resolve the board rather than hard-coding it — a number written into a skill is a number that
+survives a rename by describing the wrong thing:
+
+```bash
+OWNER=$(gh repo view --json owner --jq .owner.login)
+REPO_NAME=$(gh repo view --json name --jq .name)
+PROJECT=$(gh project list --owner "$OWNER" --format json \
+  --jq ".projects[] | select(.title==\"$REPO_NAME\") | .number")
+gh project field-list "$PROJECT" --owner "$OWNER"   # confirms the Area options
+```
+
+This needs the `project` token scope (`gh auth refresh -s project`); `repo` alone does not
+include it.
+
 ## Step 5 — File issues
 
 Once approved, file via `gh issue create`:
@@ -112,22 +144,32 @@ Once approved, file via `gh issue create`:
 - **One component issue per component**, title `story(component): {component name} — {capability-name}`. Body includes: capability link, the ADR(s) that established this component, the responsibility, and a pointer to `define-component-design` as the authoring skill.
 - **One gap issue per gap**, title `story(gap): {gap name} — {capability-name}`. Body includes: the gap statement, what type of resolution is needed (`define-technical-requirements`, amending `define-adr`, or per-component spec), and a link back to the parent capability planning issue.
 
-**Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+**Milestone and `Area`:** before filing anything, ask the user which milestone and which `Area` value applies. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh project field-list "$PROJECT" --owner "$OWNER"`. **Never invent a milestone or an `Area` value** — a single-select rejects one anyway; if none fits, ask the user to add it explicitly.
+
+File in three passes — create every issue, then wire the ordering, then put them on the board:
 
 ```bash
+# Pass 1 — create. Keep a slug -> issue-number map as you go.
 gh issue create \
   --title "story(component): {component name} — {capability-name}" \
   --body-file "{tmp}/{slug}.md" \
   --label documentation \
-  --label "epic:{epic}" \
   --milestone "{milestone}"
+
+# Pass 2 — wire the ordering, using the real numbers from the map.
+gh issue edit {issue} --add-blocked-by {prereq},{prereq}
+
+# Pass 3 — put them on the board, then set Area on each item.
+gh project item-add "$PROJECT" --owner "$OWNER" --url {issue-url}
 ```
 
-**File in topological order and refer to sibling issues only by GitHub issue number**, never by their position in the approved list — `#4` is live GitHub syntax and links to issue 4, not to the fourth component you planned. A component that consumes another component's contract can only cite it once that issue exists.
+Splitting creation from wiring is what removes the old topological-order constraint: no body cites a sibling, so gaps and components can be created in any order and the edges written afterwards.
 
-Gap issues generally block the components they touch: file gaps first, then reference their real numbers from the dependent component issues.
+**Never write a `#`-prefixed token for a sibling issue in a body** — `#4` is live GitHub syntax and links to issue 4, not to the fourth component you planned. While drafting, name a sibling by its component or gap title in prose.
 
-Print the issue numbers/URLs back as a manifest, in dependency order.
+**Gap issues generally block the components they touch.** In pass 2 that is `gh issue edit {component} --add-blocked-by {gap}` — the edge hangs off the component, pointing at the gap.
+
+Print the issue numbers/URLs back as a manifest, in dependency order, and state which `blocked by` edges you wrote.
 
 ### Component issue body template
 
@@ -147,14 +189,11 @@ Print the issue numbers/URLs back as a manifest, in dependency order.
 
 This component's design doc will be authored via `define-component-design` — one invocation per component. The doc format is type-specific (e.g. table definition vs. API service). The composed `tech-design.md` will be updated to link to the component design once written.
 
-### Depends on
-
-- #{issue} — {gap or sibling component title}
-
-<!-- Hard prerequisites ONLY: unresolved gaps that block this component, or
-     components whose contract this one consumes. Write "None." when there
-     are none. Components that merely sit near each other in the topology
-     are NOT dependencies — leave those in prose. -->
+<!-- Ordering, if any, is a `blocked by` edge written in pass 2 — not a body
+     section. Hard prerequisites ONLY: unresolved gaps that block this
+     component, or components whose contract this one consumes. Components
+     that merely sit near each other in the topology are NOT dependencies —
+     leave those in prose. -->
 
 ### Parent capability
 
@@ -183,12 +222,9 @@ This component's design doc will be authored via `define-component-design` — o
 
 Composition of `tech-design.md` for [{capability-name}](../docs/content/capabilities/{name}/_index.md).
 
-### Depends on
-
-- #{issue} — {blocking issue title}
-
-<!-- Hard prerequisites ONLY. Write "None." when there are none.
-     Most gaps depend on nothing — they are what everything else waits on. -->
+<!-- Most gaps are blocked by nothing — they are what everything else waits
+     on. If one genuinely is, that is a `blocked by` edge written in pass 2,
+     not a body section. -->
 
 ### Related
 
@@ -216,7 +252,7 @@ After saving `tech-design.md` (and before filing component/gap issues), run `cd 
 
 `tech-design.md` is plain markdown with Hugo/Docsy frontmatter. Mermaid renders natively in Docsy. Component-inventory and audit-trail tables use standard markdown tables. No code fences around the whole document.
 
-GitHub issues are filed via `gh issue create` after explicit user approval, one per component and one per gap.
+GitHub issues are filed via `gh issue create` after explicit user approval, one per component and one per gap, then wired with `gh issue edit --add-blocked-by` and added to the project board.
 
 ## Examples of good behavior
 

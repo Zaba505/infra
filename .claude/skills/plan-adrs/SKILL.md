@@ -80,6 +80,38 @@ If a proposed decision is obviously cross-capability (touches Cloudflare topolog
 
 The shared-ADR flow is out of scope here. Do not draft or file capability-scoped issues for shared decisions.
 
+## Where dependencies, grouping and sequence live
+
+**Dependencies are GitHub issue relationships, not prose.** This repo does not carry a
+`Depends on` section in issue bodies — it was removed from `.github/ISSUE_TEMPLATE/story.yaml`
+and every edge that existed in prose was converted to a typed `blocked by` relationship. Write
+ordering with `gh issue edit --add-blocked-by`; never reintroduce a `### Depends on` heading.
+
+**Grouping is the project board's `Area` field, not a label.** The `epic:*` labels were
+deleted. Every issue this skill files belongs on the repo's project board with `Area` set.
+
+**Milestones are a delivery sequence, not a grouping.** They run `00 · Authoring pipeline`
+through `08 · Media storage as tenant`, each named for a demonstrable end state. The invariant:
+**every `blocked by` edge must point backward or stay inside its own milestone.** So the
+milestone question and the dependency question are one question — placing an issue in an early
+milestone while making it blocked by something in a later one is the mistake to watch for. After
+pass 2, check the edges you wrote against the milestones you chose; if one points forward, say
+so and ask the user which of the two moves.
+
+Resolve the board rather than hard-coding it — a number written into a skill is a number that
+survives a rename by describing the wrong thing:
+
+```bash
+OWNER=$(gh repo view --json owner --jq .owner.login)
+REPO_NAME=$(gh repo view --json name --jq .name)
+PROJECT=$(gh project list --owner "$OWNER" --format json \
+  --jq ".projects[] | select(.title==\"$REPO_NAME\") | .number")
+gh project field-list "$PROJECT" --owner "$OWNER"   # confirms the Area options
+```
+
+This needs the `project` token scope (`gh auth refresh -s project`); `repo` alone does not
+include it.
+
 ## Filing the issues
 
 Once the user approves the list, file one GitHub issue per ADR via `gh issue create`. Each issue:
@@ -87,29 +119,48 @@ Once the user approves the list, file one GitHub issue per ADR via `gh issue cre
 - **Title:** `story(adr): {short ADR title} — {capability-name}` (matches the repo's `story(scope): description` convention).
 - **Body:** parent capability link, the TR-NNs to be addressed, a one-paragraph statement of the decision to be made, and a link back to the parent capability planning issue if one exists.
 - **Body must reference `define-adr`** as the skill that will author the ADR and explain that one invocation of `define-adr` produces one ADR file.
-- **Milestone and epic label:** before filing anything, ask the user which milestone these ADRs belong to and which `epic:` labels apply. Run `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:` to offer the existing ones. **Never invent a milestone or epic name** — if none fits, ask the user to name it and create it explicitly.
+- **Milestone and `Area`:** before filing anything, ask the user which milestone these ADRs belong to and which `Area` value applies. Run `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` for the milestones and `gh project field-list "$PROJECT" --owner "$OWNER"` for the `Area` options. **Never invent a milestone or an `Area` value** — a single-select rejects one anyway; if none fits, ask the user to add it explicitly.
 
-Write each body to a temp file and file with:
+File in three passes. Pass 1 creates every issue, pass 2 wires the ordering between them, pass 3
+puts them on the board. Splitting them is what removes the old topological-order constraint: no
+body cites a sibling, so no issue has to exist before another.
+
+**Pass 1 — create.** Write each body to a temp file and file it:
 
 ```bash
 gh issue create \
   --title "story(adr): {short ADR title} — {capability-name}" \
   --body-file "{tmp}/{slug}.md" \
   --label documentation \
-  --label "epic:{epic}" \
   --milestone "{milestone}"
 ```
 
-After filing, print the issue numbers/URLs back to the user as a manifest, **in dependency order**.
+Keep a slug → issue-number map as you go; passes 2 and 3 are driven from it.
+
+**Pass 2 — wire the ordering.** One call per ADR that has prerequisites, naming them by the real
+issue numbers from the map:
+
+```bash
+gh issue edit {issue} --add-blocked-by {prereq},{prereq}
+```
+
+**Pass 3 — put them on the board.**
+
+```bash
+gh project item-add "$PROJECT" --owner "$OWNER" --url {issue-url}
+```
+
+then set `Area` on each added item. `gh project item-edit` needs the item id, the field id and
+the option id, so read them once from `gh project field-list` and `gh project item-list` rather
+than per issue.
+
+After filing, print the issue numbers/URLs back to the user as a manifest, **in dependency order**, and state which `blocked by` edges you wrote.
 
 ### Cross-referencing sibling ADRs — read this before writing any body
 
-**Refer to sibling ADRs by their GitHub issue number, never by their position in the approved list.** During planning it is natural to number the proposed ADRs 1..N and write "depends on #8" — but `#8` is live GitHub syntax that links to *issue* 8, an unrelated issue. That defect shipped once already across a 20-issue batch and had to be repaired by hand.
+**Never write a `#`-prefixed token for a sibling ADR in a body.** During planning it is natural to number the proposed ADRs 1..N and write "depends on #8" — but `#8` is live GitHub syntax that links to *issue* 8, an unrelated issue. That defect shipped once already across a 20-issue batch and had to be repaired by hand.
 
-Two consequences for how you file:
-
-1. **File in topological order** — an ADR's prerequisites must be filed before it, because their issue numbers do not exist until they are filed.
-2. While drafting, use an unambiguous placeholder such as `{{ADR-8}}` and substitute the real issue number once known. If a number is genuinely not yet available, write the ADR's title in prose rather than any `#`-prefixed token.
+Ordering is not a body's job here — it is a typed `blocked by` edge written in pass 2, against numbers that exist by then. So while drafting, refer to a sibling by its ADR title in prose, or use an unambiguous placeholder such as `{{ADR-8}}` that you resolve into the pass-2 `--add-blocked-by` arguments. A placeholder that reaches a body is a bug; a `#N` that reaches a body is a worse one.
 
 ### Issue body template
 
@@ -131,21 +182,12 @@ Two consequences for how you file:
 
 This ADR will be authored via the `define-adr` skill — one invocation per ADR. The skill will identify research tasks, propose options tied back to the TR-NNs above, and stop for the human to make the final selection.
 
-### Depends on
-
-- #{issue} — {sibling ADR title}
-
-<!-- Hard prerequisites ONLY: this ADR cannot be decided until those are.
-     Write "None." when there are none. Boundary splits ("this ADR owns A,
-     that one owns B"), analogies, and decisions this ADR *constrains*
-     downstream are NOT dependencies — leave those in prose. -->
-
 ### Related
 
 #{parent-capability-issue-or-722}
 ```
 
-**Direction matters.** "X must be pinned here so that Y has something to act against" means **Y depends on this ADR**, not the reverse. When in doubt, ask: *could this ADR be authored today if the other were never written?* If yes, it is not a hard dependency.
+**Hard prerequisites only, and direction matters.** A `blocked by` edge says this ADR cannot be *decided* until the other is. Boundary splits ("this ADR owns A, that one owns B"), analogies, and decisions this ADR *constrains* downstream are not dependencies — leave those in prose in the body. "X must be pinned here so that Y has something to act against" means **Y is blocked by this ADR**, not the reverse. When in doubt, ask: *could this ADR be authored today if the other were never written?* If yes, write no edge.
 
 ## Conversation discipline
 
