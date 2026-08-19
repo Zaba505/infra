@@ -136,6 +136,37 @@ Resource naming:
 - Branch: `story/issue-{number}/{description}` or `fix/issue-{number}/{description}`
 - Commit: `feat(issue-123): description` or `fix(issue-123): description`
 
+## Issue Tracking
+
+Work is tracked on the **[infra project board](https://github.com/users/Zaba505/projects/9)**
+(user-scoped, project number 9). Resolve it at run time rather than hard-coding the number:
+
+```bash
+OWNER=$(gh repo view --json owner --jq .owner.login)
+PROJECT=$(gh project list --owner "$OWNER" --format json \
+  --jq '.projects[] | select(.title=="infra") | .number')
+```
+
+Needs the `project` token scope — `gh auth refresh -s project`.
+
+- **Dependencies are native GitHub issue relationships**, written with
+  `gh issue edit {issue} --add-blocked-by {prereq}` and read back from the `blockedBy` GraphQL
+  field. There is no `Depends on` section in issue bodies and no such field in
+  `.github/ISSUE_TEMPLATE/story.yaml` — do not reintroduce either. Prose in a body is not a
+  dependency; only a typed edge is.
+- **Grouping is the board's `Area` single-select**, not a label. The `epic:*` labels it
+  replaced were deleted. Never invent an `Area` value — the single-select rejects one; read the
+  options with `gh project field-list "$PROJECT" --owner "$OWNER"`.
+- **Milestones are a delivery sequence, not a grouping.** `00 · Authoring pipeline` through
+  `08 · Media storage as tenant`, each named for a demonstrable end state and ordered so that
+  every `blocked by` edge points backward or stays inside its own milestone. Adding an issue
+  means choosing where in that order it falls; if an edge would point *forward* into a later
+  milestone, one of the two is in the wrong place. The numeric prefix is what sorts them —
+  keep it.
+- When filing a batch of issues, create them all first, then wire `--add-blocked-by` in a second
+  pass. Bodies must never cite a sibling by `#N` — during drafting those numbers do not exist
+  yet, and `#8` links to whatever issue 8 happens to be.
+
 ## Important Files
 
 - `.github/copilot-instructions.md` — Comprehensive AI agent instructions

@@ -124,28 +124,68 @@ Ask:
 
 Wait for explicit approval before filing.
 
+## Where dependencies, grouping and sequence live
+
+**Dependencies are GitHub issue relationships, not prose.** This repo does not carry a
+`Depends on` section in issue bodies — it was removed from `.github/ISSUE_TEMPLATE/story.yaml`
+and every edge that existed in prose was converted to a typed `blocked by` relationship. Write
+ordering with `gh issue edit --add-blocked-by`; never reintroduce a `### Depends on` heading.
+
+**Grouping is the project board's `Area` field, not a label.** The `epic:*` labels were
+deleted. Every issue this skill files belongs on the repo's project board with `Area` set.
+
+**Milestones are a delivery sequence, not a grouping.** They run `00 · Authoring pipeline`
+through `08 · Media storage as tenant`, each named for a demonstrable end state. The invariant:
+**every `blocked by` edge must point backward or stay inside its own milestone.** So the
+milestone question and the dependency question are one question — placing an issue in an early
+milestone while making it blocked by something in a later one is the mistake to watch for. After
+pass 2, check the edges you wrote against the milestones you chose; if one points forward, say
+so and ask the user which of the two moves.
+
+Resolve the board rather than hard-coding it — a number written into a skill is a number that
+survives a rename by describing the wrong thing:
+
+```bash
+OWNER=$(gh repo view --json owner --jq .owner.login)
+REPO_NAME=$(gh repo view --json name --jq .name)
+PROJECT=$(gh project list --owner "$OWNER" --format json \
+  --jq ".projects[] | select(.title==\"$REPO_NAME\") | .number")
+gh project field-list "$PROJECT" --owner "$OWNER"   # confirms the Area options
+```
+
+This needs the `project` token scope (`gh auth refresh -s project`); `repo` alone does not
+include it.
+
 ## Step 3 — File issues
 
 Once approved, file one GitHub issue per task via `gh issue create`. Each issue:
 
 - **Title:** `story(impl): {short verb-led task title} — {capability-name}` (matches the repo's `story(scope): description` convention; `impl` is the implementation-task scope, parallel to `component`, `ux`, `gap`, etc.).
 - **Body:** uses the template below.
-- **Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+- **Milestone and `Area`:** before filing anything, ask the user which milestone and which `Area` value applies. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh project field-list "$PROJECT" --owner "$OWNER"`. **Never invent a milestone or an `Area` value** — a single-select rejects one anyway; if none fits, ask the user to add it explicitly.
+
+File in three passes — create every task, then wire the ordering, then put them on the board:
 
 ```bash
+# Pass 1 — create. Keep a slug -> issue-number map as you go.
 gh issue create \
   --title "story(impl): {short verb-led task title} — {capability-name}" \
   --body-file "{tmp}/{slug}.md" \
   --label documentation \
-  --label "epic:{epic}" \
   --milestone "{milestone}"
+
+# Pass 2 — wire the ordering, using the real numbers from the map.
+gh issue edit {issue} --add-blocked-by {prereq},{prereq}
+
+# Pass 3 — put them on the board, then set Area on each item.
+gh project item-add "$PROJECT" --owner "$OWNER" --url {issue-url}
 ```
 
-**File in topological order — prerequisites first.** A task's prerequisite issue numbers do not exist until those issues are filed, so a task can only reference prerequisites that were filed before it. Sort the approved task list topologically before the first `gh issue create` call, not after.
+**Topological order is no longer required at creation time.** It used to be, because a task's body cited its prerequisites by number and those numbers did not exist yet. Bodies no longer cite prerequisites at all — the ordering is a typed edge written in pass 2, once every number exists — so create in whatever order is convenient and let pass 2 impose the order. Do still *compute* the topological order: it is what pass 2 is driven from and what the manifest is printed in.
 
-Refer to sibling tasks **only by GitHub issue number**, never by their position in the approved list — `#8` is live GitHub syntax and will link to issue 8, not to the eighth task you planned.
+**Never write a `#`-prefixed token for a sibling task in a body** — `#8` is live GitHub syntax and will link to issue 8, not to the eighth task you planned. While drafting, name a sibling by its task title in prose.
 
-After filing, print the issue numbers/URLs back as a manifest, in dependency order.
+After filing, print the issue numbers/URLs back as a manifest, in dependency order, and state which `blocked by` edges you wrote.
 
 ### Issue body template
 
@@ -171,16 +211,10 @@ After filing, print the issue numbers/URLs back as a manifest, in dependency ord
 - [ ] {Test signal — e.g., "Unit tests cover validation paths, integration test exercises the round-trip."}
 - [ ] {Operational signal where relevant — e.g., "Module applies cleanly via `terraform fmt -recursive -check` and a dry-run plan."}
 
-### Depends on
-
-- #{issue-number} — {prerequisite task title}
-
-<!-- Hard prerequisites ONLY: tasks that must merge before this one can start.
-     Write "None." when there are none. Tasks that merely touch the same
-     component are NOT dependencies — leave those in prose. -->
-
-<!-- Section name is shared with plan-adrs / plan-experiences / plan-tech-design
-     so dependencies are greppable across every issue type. -->
+<!-- Ordering, if any, is a `blocked by` edge written in pass 2 — not a body
+     section. Hard prerequisites ONLY: tasks that must merge before this one
+     can start. Tasks that merely touch the same component are NOT
+     dependencies — leave those in prose. -->
 
 ### Authoring
 

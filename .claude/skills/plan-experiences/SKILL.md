@@ -85,6 +85,38 @@ If a proposed journey obviously belongs to a different capability, do not includ
 
 Cross-capability journeys are out of scope here. Do not draft or file issues for them under the current capability.
 
+## Where dependencies, grouping and sequence live
+
+**Dependencies are GitHub issue relationships, not prose.** This repo does not carry a
+`Depends on` section in issue bodies — it was removed from `.github/ISSUE_TEMPLATE/story.yaml`
+and every edge that existed in prose was converted to a typed `blocked by` relationship. Write
+ordering with `gh issue edit --add-blocked-by`; never reintroduce a `### Depends on` heading.
+
+**Grouping is the project board's `Area` field, not a label.** The `epic:*` labels were
+deleted. Every issue this skill files belongs on the repo's project board with `Area` set.
+
+**Milestones are a delivery sequence, not a grouping.** They run `00 · Authoring pipeline`
+through `08 · Media storage as tenant`, each named for a demonstrable end state. The invariant:
+**every `blocked by` edge must point backward or stay inside its own milestone.** So the
+milestone question and the dependency question are one question — placing an issue in an early
+milestone while making it blocked by something in a later one is the mistake to watch for. After
+pass 2, check the edges you wrote against the milestones you chose; if one points forward, say
+so and ask the user which of the two moves.
+
+Resolve the board rather than hard-coding it — a number written into a skill is a number that
+survives a rename by describing the wrong thing:
+
+```bash
+OWNER=$(gh repo view --json owner --jq .owner.login)
+REPO_NAME=$(gh repo view --json name --jq .name)
+PROJECT=$(gh project list --owner "$OWNER" --format json \
+  --jq ".projects[] | select(.title==\"$REPO_NAME\") | .number")
+gh project field-list "$PROJECT" --owner "$OWNER"   # confirms the Area options
+```
+
+This needs the `project` token scope (`gh auth refresh -s project`); `repo` alone does not
+include it.
+
 ## Filing the issues
 
 Once the user approves the list, file one GitHub issue per experience via `gh issue create`. Each issue:
@@ -92,20 +124,30 @@ Once the user approves the list, file one GitHub issue per experience via `gh is
 - **Title:** `story(ux): {short verb-led journey title} — {capability-name}` (matches the repo's `story(scope): description` convention).
 - **Body:** parent capability link, the persona, the goal in one sentence, and which capability sections (Stakeholders / Triggers / Outputs / Business Rules / Success Criteria) the journey is anchored in.
 - **Body must reference `define-user-experience`** as the skill that will author the UX doc, and explain that one invocation of `define-user-experience` produces one UX file under `docs/content/capabilities/{capability-name}/user-experiences/`.
-- **Milestone and epic label:** before filing anything, ask the user which milestone and which `epic:` labels apply. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh label list --search epic:`. **Never invent a milestone or epic name.**
+- **Milestone and `Area`:** before filing anything, ask the user which milestone and which `Area` value applies. Offer the existing ones via `gh api repos/{owner}/{repo}/milestones --jq '.[].title'` and `gh project field-list "$PROJECT" --owner "$OWNER"`. **Never invent a milestone or an `Area` value** — a single-select rejects one anyway; if none fits, ask the user to add it explicitly.
+
+File in three passes — create, then wire the ordering, then put them on the board:
 
 ```bash
+# Pass 1 — create. Keep a slug -> issue-number map as you go.
 gh issue create \
   --title "story(ux): {short verb-led journey title} — {capability-name}" \
   --body-file "{tmp}/{slug}.md" \
   --label documentation \
-  --label "epic:{epic}" \
   --milestone "{milestone}"
+
+# Pass 2 — wire the ordering, using the real numbers from the map.
+gh issue edit {issue} --add-blocked-by {prereq},{prereq}
+
+# Pass 3 — put them on the board, then set Area on each item.
+gh project item-add "$PROJECT" --owner "$OWNER" --url {issue-url}
 ```
 
-**Refer to sibling experiences by GitHub issue number, never by their position in the approved list** — `#3` is live GitHub syntax and links to issue 3, not to the third journey you planned. Where one journey must be authored before another, file in topological order so the prerequisite's number exists first.
+Splitting creation from wiring is what removes the old topological-order constraint: no body cites a sibling, so no issue has to exist before another.
 
-After filing, print the issue numbers/URLs back to the user as a manifest.
+**Never write a `#`-prefixed token for a sibling experience in a body** — `#3` is live GitHub syntax and links to issue 3, not to the third journey you planned. Ordering is a typed `blocked by` edge written in pass 2, against numbers that exist by then; while drafting, name a sibling by its journey title in prose.
+
+After filing, print the issue numbers/URLs back to the user as a manifest, and state which `blocked by` edges you wrote.
 
 ### Issue body template
 
@@ -136,14 +178,10 @@ After filing, print the issue numbers/URLs back to the user as a manifest.
 
 This UX will be authored via the `define-user-experience` skill — one invocation per UX. The skill will elicit persona, goal, entry point, journey, success, and edge cases, and save the doc under `docs/content/capabilities/{capability-name}/user-experiences/{ux-name}.md`.
 
-### Depends on
-
-- #{issue} — {sibling experience title}
-
-<!-- Hard prerequisites ONLY: journeys that must be authored before this one
-     can be. Write "None." when there are none. Journeys that merely touch
-     the same persona or hand off to each other are NOT dependencies —
-     leave those in prose. -->
+<!-- Ordering, if any, is a `blocked by` edge written in pass 2 — not a body
+     section. Hard prerequisites ONLY: journeys that must be authored before
+     this one can be. Journeys that merely touch the same persona or hand off
+     to each other are NOT dependencies — leave those in prose. -->
 
 ### Related
 
