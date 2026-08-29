@@ -10,7 +10,7 @@ require (
 	github.com/z5labs/bedrock v0.21.0
 	go.opentelemetry.io/otel v1.46.0
 	go.opentelemetry.io/otel/trace v1.46.0
-	google.golang.org/api v0.294.0
+	google.golang.org/api v0.295.0
 	google.golang.org/protobuf v1.36.12
 )
 
