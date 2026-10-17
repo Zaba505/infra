@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/google/uuid v1.6.0
 	github.com/sourcegraph/conc v0.3.0
-	github.com/z5labs/bedrock v0.23.1
+	github.com/z5labs/bedrock v0.24.0
 	go.opentelemetry.io/otel v1.47.0
 	go.opentelemetry.io/otel/trace v1.47.0
 	google.golang.org/api v0.301.0
