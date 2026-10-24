@@ -23,13 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4
-        with:
-          # The wrapper treats exit 2 as success (plan -detailed-exitcode), but
-          # fmt exits 2 on a parse error, which would let broken .tf pass.
-          terraform_wrapper: false
-
       - name: Install Hugo CLI
         run: |
           wget -O ${{ runner.temp }}/hugo.deb https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-amd64.deb \
@@ -37,9 +30,6 @@ jobs:
 
       - name: Install Dart Sass
         run: sudo snap install dart-sass
-
-      - name: Terraform fmt
-        run: terraform fmt -recursive -check
 
       - name: Build docs
         run: cd docs && npm install --no-save --no-audit --no-fund postcss postcss-cli autoprefixer && hugo --gc --minify

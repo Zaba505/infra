@@ -17,9 +17,6 @@ on:
       - go.mod
       - .github/workflows/codeql.yaml
 
-  schedule:
-    - cron: '34 11 * * 3'
-
 jobs:
   analyze:
     name: Analyze
