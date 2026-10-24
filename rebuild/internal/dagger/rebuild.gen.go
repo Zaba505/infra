@@ -21,8 +21,9 @@ func (r *Query) Rebuild() *Rebuild { // rebuild (../../../:0:0)
 type Rebuild struct { // rebuild (../../../:0:0)
 	query *querybuilder.Selection
 
-	goPipeline *Void
-	id         *ID
+	goPipeline  *Void
+	id          *ID
+	runCoverage *Void
 }
 
 func (r *Rebuild) WithGraphQLQuery(q *querybuilder.Selection) *Rebuild {
@@ -113,6 +114,27 @@ func (r *Rebuild) UnmarshalJSON(bs []byte) error {
 	}
 	*r = Rebuild{query: selectNode(dag.query, id, "Rebuild")}
 	return nil
+}
+
+// RunCoverage fails when the statement coverage of rebuild/run/, the phase
+// model, drops below 80%. It is a library package, and the repository holds
+// every library package to that floor.
+//
+// It runs go test over rebuild/run/ and the packages under it with the
+// coverage of all of them counted, so a test helper package is measured by
+// the tests that use it.
+//
+// It touches no target, so its execs may cache. It is never cached itself, for
+// GoPipeline's reason: the workspace is a live view of the tree.
+func (r *Rebuild) RunCoverage(ctx context.Context, callingWorkspace *Workspace) error {
+	assertNotNil("callingWorkspace", callingWorkspace)
+	if r.runCoverage != nil {
+		return nil
+	}
+	q := r.query.Select("runCoverage")
+	q = q.Arg("callingWorkspace", callingWorkspace)
+
+	return q.Execute(ctx)
 }
 
 // CacheProbe runs one command, which prints a random UUID, through each of the

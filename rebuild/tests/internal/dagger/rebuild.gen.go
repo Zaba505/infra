@@ -55,7 +55,7 @@ func (r *Rebuild) CacheProbe() *RebuildCacheProbe { // rebuild (../../../../rebu
 // It is never cached, because the workspace the CLI fills in is a live view
 // of the tree rather than an argument a cache key can describe: a cached pass
 // would be a pass for a tree the check never looked at.
-func (r *Rebuild) GoPipeline(callingWorkspace *Workspace) *Check { // rebuild (../../../../rebuild/checks.go:34:1)
+func (r *Rebuild) GoPipeline(callingWorkspace *Workspace) *Check { // rebuild (../../../../rebuild/checks.go:35:1)
 	assertNotNil("callingWorkspace", callingWorkspace)
 	q := r.query.Select("goPipeline")
 	q = q.Arg("callingWorkspace", callingWorkspace)
@@ -112,6 +112,26 @@ func (r *Rebuild) UnmarshalJSON(bs []byte) error {
 	}
 	*r = Rebuild{query: selectNode(dag.query, id, "Rebuild")}
 	return nil
+}
+
+// RunCoverage fails when the statement coverage of rebuild/run/, the phase
+// model, drops below 80%. It is a library package, and the repository holds
+// every library package to that floor.
+//
+// It runs go test over rebuild/run/ and the packages under it with the
+// coverage of all of them counted, so a test helper package is measured by
+// the tests that use it.
+//
+// It touches no target, so its execs may cache. It is never cached itself, for
+// GoPipeline's reason: the workspace is a live view of the tree.
+func (r *Rebuild) RunCoverage(callingWorkspace *Workspace) *Check { // rebuild (../../../../rebuild/checks.go:87:1)
+	assertNotNil("callingWorkspace", callingWorkspace)
+	q := r.query.Select("runCoverage")
+	q = q.Arg("callingWorkspace", callingWorkspace)
+
+	return &Check{
+		query: q,
+	}
 }
 
 // AsNode returns this Rebuild as a Node.
