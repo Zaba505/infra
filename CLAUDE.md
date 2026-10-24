@@ -69,7 +69,9 @@ Needs the `project` token scope — `gh auth refresh -s project`.
 
 ## Engineering rules
 
-From the charter. These are enforced in CI rather than by review:
+From the charter. These are enforced in CI rather than by review. Today `Build` runs only the
+docs build, because the repository holds no Go code or infrastructure modules yet; each other
+check is added to `Build` (and to `verify`) by the story that first lands code it applies to.
 
 - **One required check.** A workflow named `Build` (`.github/workflows/build.yaml`) runs every
   check below, and the `default` ruleset requires it. The `verify` commands in
