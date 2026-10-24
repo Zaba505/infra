@@ -36,6 +36,13 @@ func lastRun(t *testing.T, target run.Target) run.Record {
 	return rec
 }
 
+// up runs run.Up and keeps only its error, for the tests that read what a run
+// did from the target and its record rather than from the summary.
+func up(ctx context.Context, target run.Target, ps []run.Phase, opts ...run.UpOption) error {
+	_, err := run.Up(ctx, target, ps, opts...)
+	return err
+}
+
 func records(t *testing.T, target run.Target) []run.Record {
 	t.Helper()
 	recs, err := target.Store().Records(t.Context())
@@ -46,7 +53,7 @@ func records(t *testing.T, target run.Target) []run.Record {
 func TestUp_RunsEachPhasesApplyThenVerifyInOrder(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	err := run.Up(t.Context(), target, phases(nil))
+	err := up(t.Context(), target, phases(nil), run.NoPause())
 	require.NoError(t, err)
 	require.Equal(t, []string{
 		"0 apply", "0 verify", "1a apply", "1a verify", "1b apply", "1b verify",
@@ -70,7 +77,7 @@ func TestUp_RunsEachPhasesApplyThenVerifyInOrder(t *testing.T) {
 func TestUp_WithNoPhasesFinishesWithNothingToDo(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	require.NoError(t, run.Up(t.Context(), target, nil))
+	require.NoError(t, up(t.Context(), target, nil, run.NoPause()))
 	require.Empty(t, target.Calls())
 	rec := lastRun(t, target)
 	require.True(t, rec.Finished)
@@ -80,8 +87,8 @@ func TestUp_WithNoPhasesFinishesWithNothingToDo(t *testing.T) {
 func TestUp_EachRunGetsItsOwnID(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 
 	recs := records(t, target)
 	require.Len(t, recs, 2)
@@ -91,7 +98,7 @@ func TestUp_EachRunGetsItsOwnID(t *testing.T) {
 func TestUp_StopsAfterThePhaseThroughNames(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	err := run.Up(t.Context(), target, phases(nil), run.Through("1a"))
+	err := up(t.Context(), target, phases(nil), run.Through("1a"), run.NoPause())
 	require.NoError(t, err)
 	require.Equal(t, []string{"0 apply", "0 verify", "1a apply", "1a verify"}, target.Calls())
 
@@ -104,14 +111,14 @@ func TestUp_StopsAfterThePhaseThroughNames(t *testing.T) {
 func TestUp_ThroughTheLastPhaseFinishes(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil), run.Through("1b")))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.Through("1b"), run.NoPause()))
 	require.True(t, lastRun(t, target).Finished)
 }
 
 func TestUp_ThroughAPhaseNotInTheOrderRunsNothing(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 
-	err := run.Up(t.Context(), target, phases(nil), run.Through("9"))
+	err := up(t.Context(), target, phases(nil), run.Through("9"), run.NoPause())
 	require.ErrorIs(t, err, run.ErrUnknownPhase)
 	require.Empty(t, target.Calls())
 	require.Empty(t, records(t, target))
@@ -122,9 +129,9 @@ func TestUp_AFailedApplyStopsTheRunAtOnce(t *testing.T) {
 		t.Run(failing, func(t *testing.T) {
 			target := runtest.NewTarget(t, runtest.Drill)
 
-			err := run.Up(t.Context(), target, phases(map[string][]runtest.PhaseOption{
+			err := up(t.Context(), target, phases(map[string][]runtest.PhaseOption{
 				failing: {runtest.FailApply(errNoEdge)},
-			}))
+			}), run.NoPause())
 			require.ErrorIs(t, err, errNoEdge)
 			require.ErrorContains(t, err, "phase "+failing+": apply")
 
@@ -148,7 +155,7 @@ func TestUp_AFailedVerifyStopsTheRunAndLeavesItUnfinished(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 	ps := phases(map[string][]runtest.PhaseOption{"1a": {runtest.FailVerify(errNoEdge)}})
 
-	err := run.Up(t.Context(), target, ps)
+	err := up(t.Context(), target, ps, run.NoPause())
 	require.ErrorIs(t, err, errNoEdge)
 	require.ErrorContains(t, err, "phase 1a: verify")
 	require.Equal(t, []string{"0 apply", "0 verify", "1a apply", "1a verify"}, target.Calls())
@@ -168,7 +175,7 @@ func TestUp_RunsThePreflightCheckBeforeApplyingAnything(t *testing.T) {
 		Phases:   []run.PhaseRecord{{Name: "0", Verified: true}, {Name: "1a", Verified: true}},
 	}))
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	require.Equal(t, []string{
 		"0 verify", "1a verify",
 		"0 apply", "0 verify", "1a apply", "1a verify", "1b apply", "1b verify",
@@ -177,11 +184,11 @@ func TestUp_RunsThePreflightCheckBeforeApplyingAnything(t *testing.T) {
 
 func TestUp_StopsBeforeAnythingChangesWhenThePreflightCheckFails(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	before := target.Calls()
 
 	ps := phases(map[string][]runtest.PhaseOption{"1a": {runtest.FailVerify(errNoEdge)}})
-	err := run.Up(t.Context(), target, ps)
+	err := up(t.Context(), target, ps, run.NoPause())
 	require.ErrorIs(t, err, run.ErrDrift)
 	require.ErrorIs(t, err, errNoEdge)
 	require.Equal(t, append(before, "0 verify", "1a verify"), target.Calls())
@@ -205,7 +212,7 @@ func TestUp_ALiveRunRefusesUncommittedChanges(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			target := runtest.NewTarget(t, runtest.Live, runtest.WithSource(tc.src))
 
-			err := run.Up(t.Context(), target, phases(nil))
+			err := up(t.Context(), target, phases(nil), run.NoPause())
 			require.ErrorIs(t, err, run.ErrUncommitted)
 			require.ErrorContains(t, err, tc.want)
 			require.Empty(t, target.Calls())
@@ -217,7 +224,7 @@ func TestUp_ALiveRunRefusesUncommittedChanges(t *testing.T) {
 func TestUp_ALiveRunFromCommittedChangesRuns(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Live)
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	require.True(t, lastRun(t, target).Finished)
 }
 
@@ -228,7 +235,7 @@ func TestUp_ADrillMayRunFromUncommittedChangesAndItsRecordSaysSo(t *testing.T) {
 	}
 	target := runtest.NewTarget(t, runtest.Drill, runtest.WithSource(src))
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	for _, p := range lastRun(t, target).Phases {
 		require.Equal(t, src, p.Source)
 		require.True(t, p.Source.Uncommitted())
@@ -239,7 +246,7 @@ func TestUp_KeepsItsRecordOncePhaseZeroHasMadeTheStateBackend(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
 	ps := phases(map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend()}})
 
-	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.NoError(t, up(t.Context(), target, ps, run.NoPause()))
 	require.Len(t, target.Calls(), 6)
 	rec := lastRun(t, target)
 	require.True(t, rec.Finished)
@@ -249,7 +256,7 @@ func TestUp_KeepsItsRecordOncePhaseZeroHasMadeTheStateBackend(t *testing.T) {
 func TestUp_WithNoStateBackendAndNoPhasesFinishesWithNothingToKeep(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
 
-	require.NoError(t, run.Up(t.Context(), target, nil))
+	require.NoError(t, up(t.Context(), target, nil, run.NoPause()))
 	_, ok, err := run.LastRun(t.Context(), target.Store())
 	require.NoError(t, err)
 	require.False(t, ok)
@@ -259,7 +266,7 @@ func TestUp_AFailedFirstPhaseNeedsNoStateBackendToStop(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
 	ps := phases(map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend(), runtest.FailApply(errNoEdge)}})
 
-	err := run.Up(t.Context(), target, ps)
+	err := up(t.Context(), target, ps, run.NoPause())
 	require.ErrorIs(t, err, errNoEdge)
 	require.NotErrorIs(t, err, run.ErrNoBackend)
 	require.Equal(t, []string{"0 apply"}, target.Calls())
@@ -268,7 +275,7 @@ func TestUp_AFailedFirstPhaseNeedsNoStateBackendToStop(t *testing.T) {
 func TestUp_StopsWhenThereIsStillNoStateBackendAfterPhaseZero(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
 
-	err := run.Up(t.Context(), target, phases(nil))
+	err := up(t.Context(), target, phases(nil), run.NoPause())
 	require.ErrorIs(t, err, run.ErrNoBackend)
 	require.Equal(t, []string{"0 apply", "0 verify"}, target.Calls(), "no later phase runs unrecorded")
 }
@@ -279,7 +286,7 @@ func TestUp_RecordsWhereItStoppedWhenItsContextIsCancelled(t *testing.T) {
 	defer cancel()
 	ps := []run.Phase{runtest.Phase("0"), cancelling{name: "1a", cancel: cancel}, runtest.Phase("1b")}
 
-	err := run.Up(ctx, target, ps)
+	err := up(ctx, target, ps, run.NoPause())
 	require.ErrorIs(t, err, context.Canceled)
 	rec := lastRun(t, target)
 	require.Equal(t, &run.Stop{Phase: "1a", Step: run.StepApply, Error: context.Canceled.Error()}, rec.Stopped)
@@ -321,14 +328,14 @@ func TestUp_StopsWhenItsRecordCannotBeWritten(t *testing.T) {
 			also:   errNoEdge,
 		},
 		"when the run finishes": {
-			writes: 4,
+			writes: 3,
 			calls:  []string{"0 apply", "0 verify", "1a apply", "1a verify", "1b apply", "1b verify"},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			target := runtest.NewTarget(t, runtest.Drill, runtest.FailStoreWrites(tc.writes, errBroken))
 
-			err := run.Up(t.Context(), target, phases(tc.opts))
+			err := up(t.Context(), target, phases(tc.opts), run.NoPause())
 			require.ErrorIs(t, err, errBroken)
 			require.ErrorContains(t, err, "writing run")
 			if tc.also != nil {
@@ -342,7 +349,7 @@ func TestUp_StopsWhenItsRecordCannotBeWritten(t *testing.T) {
 func TestUp_StopsWhenTheTargetsRecordsCannotBeRead(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.FailStore(errBroken))
 
-	err := run.Up(t.Context(), target, phases(nil))
+	err := up(t.Context(), target, phases(nil), run.NoPause())
 	require.ErrorIs(t, err, errBroken)
 	require.Empty(t, target.Calls())
 }
@@ -350,7 +357,7 @@ func TestUp_StopsWhenTheTargetsRecordsCannotBeRead(t *testing.T) {
 func TestUp_StopsWhenTheTargetsSourceCannotBeRead(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.FailSource(errBroken))
 
-	err := run.Up(t.Context(), target, phases(nil))
+	err := up(t.Context(), target, phases(nil), run.NoPause())
 	require.ErrorIs(t, err, errBroken)
 	require.Empty(t, target.Calls())
 }
@@ -370,7 +377,7 @@ func TestUp_MeasuresEachPhaseAndTheTotalFromTheStartOfUp(t *testing.T) {
 		"1b": {runtest.Takes(clock, 5*time.Minute)},
 	})
 
-	require.NoError(t, run.Up(t.Context(), target, ps, run.WithClock(clock)))
+	require.NoError(t, up(t.Context(), target, ps, run.WithClock(clock), run.NoPause()))
 
 	rec := lastRun(t, target)
 	require.Equal(t, start, rec.Started)
@@ -389,7 +396,7 @@ func TestUp_AFailedRunsTimeRunsToWhereItStopped(t *testing.T) {
 		"1a": {runtest.Takes(clock, 5*time.Minute), runtest.FailVerify(errNoEdge)},
 	})
 
-	require.ErrorIs(t, run.Up(t.Context(), target, ps, run.WithClock(clock)), errNoEdge)
+	require.ErrorIs(t, up(t.Context(), target, ps, run.WithClock(clock), run.NoPause()), errNoEdge)
 
 	rec := lastRun(t, target)
 	require.Equal(t, 20*time.Minute, rec.Total)
@@ -414,7 +421,7 @@ func TestUp_ARunOver60MinutesIsMarkedAndFinishes(t *testing.T) {
 				"1b": {runtest.Takes(clock, tc.each)},
 			})
 
-			require.NoError(t, run.Up(t.Context(), target, ps, run.WithClock(clock)))
+			require.NoError(t, up(t.Context(), target, ps, run.WithClock(clock), run.NoPause()))
 			require.Len(t, target.Calls(), 6, "a run running long is never stopped")
 
 			rec := lastRun(t, target)
@@ -436,7 +443,7 @@ func TestUp_RefusesATargetItCannotBePointedAt(t *testing.T) {
 		"of another kind": {target: runtest.NewTarget(t, run.Kind(7)), want: run.ErrUnknownKind},
 	} {
 		t.Run(name, func(t *testing.T) {
-			require.ErrorIs(t, run.Up(t.Context(), tc.target, phases(nil)), tc.want)
+			require.ErrorIs(t, up(t.Context(), tc.target, phases(nil), run.NoPause()), tc.want)
 			require.ErrorIs(t, run.Preflight(t.Context(), tc.target, phases(nil)), tc.want)
 			require.ErrorIs(t, run.Down(t.Context(), tc.target, phases(nil), run.Confirm("x")), tc.want)
 		})
@@ -451,7 +458,7 @@ func TestUp_RefusesAnInvalidPhaseOrder(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			target := runtest.NewTarget(t, runtest.Drill)
-			require.ErrorIs(t, run.Up(t.Context(), target, ps), run.ErrInvalidPhases)
+			require.ErrorIs(t, up(t.Context(), target, ps, run.NoPause()), run.ErrInvalidPhases)
 			require.ErrorIs(t, run.Preflight(t.Context(), target, ps), run.ErrInvalidPhases)
 			require.ErrorIs(t, run.Down(t.Context(), target, ps), run.ErrInvalidPhases)
 			require.Empty(t, target.Calls())
@@ -464,7 +471,7 @@ func TestUp_HandsEveryPhaseTheSameRun(t *testing.T) {
 	var seen []*run.Run
 	ps := []run.Phase{spy{name: "0", seen: &seen}, spy{name: "1a", seen: &seen}}
 
-	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.NoError(t, up(t.Context(), target, ps, run.NoPause()))
 	require.Len(t, seen, 4)
 	for _, r := range seen {
 		require.Same(t, seen[0], r)

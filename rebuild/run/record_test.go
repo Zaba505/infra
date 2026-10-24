@@ -13,13 +13,13 @@ import (
 
 func TestLastKnownGood_IsTheLastRunThatFinished(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	good := lastRun(t, target)
 	require.Len(t, records(t, target), 2)
 
 	ps := phases(map[string][]runtest.PhaseOption{"1b": {runtest.FailApply(errNoEdge)}})
-	require.ErrorIs(t, run.Up(t.Context(), target, ps), errNoEdge)
+	require.ErrorIs(t, up(t.Context(), target, ps, run.NoPause()), errNoEdge)
 	failed := lastRun(t, target)
 	require.NotEqual(t, good.ID, failed.ID)
 
@@ -35,7 +35,7 @@ func TestLastKnownGood_IsNothingUntilARunFinishes(t *testing.T) {
 		"with no records":       runtest.NewTarget(t, runtest.Drill),
 		"after a run stopped where Through said": func() *runtest.Target {
 			target := runtest.NewTarget(t, runtest.Drill)
-			require.NoError(t, run.Up(t.Context(), target, phases(nil), run.Through("0")))
+			require.NoError(t, up(t.Context(), target, phases(nil), run.Through("0")))
 			return target
 		}(),
 	} {
@@ -67,9 +67,11 @@ func TestRecord_SurvivesARoundTripThroughJSON(t *testing.T) {
 				Repo:   run.Commit{SHA: "a", Uncommitted: true},
 				Values: run.Commit{SHA: "b"},
 			},
+			Made:     []string{"the state backend"},
 			Duration: 3 * time.Minute,
+			Verified: true,
 		}},
-		Stopped: &run.Stop{Phase: "0", Step: run.StepVerify, Error: "boom"},
+		Stopped: &run.Stop{Phase: "0", Step: run.StepCheckpoint},
 		Total:   61 * time.Minute,
 		Over:    true,
 	}

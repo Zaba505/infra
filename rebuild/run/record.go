@@ -36,31 +36,38 @@ type Store interface {
 }
 
 // Record is what a run leaves in its target's state backend. Up writes it when
-// the run starts, after every phase, and when the run stops.
+// the run starts, when a resume of it starts, after every phase, and when the
+// run stops.
 type Record struct {
-	// ID is the run's ID.
+	// ID is the run's ID. A resumed run keeps it.
 	ID string `json:"id"`
 
 	// Target is the name of the target the run was pointed at.
 	Target string `json:"target"`
 
-	// Started is when the run's up started, before the preflight check.
+	// Started is when the run's first up started, before the preflight
+	// check. Resuming the run doesn't move it.
 	Started time.Time `json:"started"`
 
 	// Phases holds each phase the run applied, in the order it applied them.
+	// A phase applied again on a resume, after it failed, replaces the
+	// phase's earlier entry, so the run holds one entry per phase, and it
+	// holds the commits that phase was last applied from.
 	Phases []PhaseRecord `json:"phases"`
 
 	// Finished is true once the run has verified the last phase in the
 	// order. A run that is not finished is unfinished, whether it failed,
-	// stopped where Through said, or is still going.
+	// paused at a checkpoint, stopped where Through said, or is still going.
+	// Up with Resume continues an unfinished run.
 	Finished bool `json:"finished"`
 
 	// Stopped says where an unfinished run stopped. It is nil for a run that
 	// finished, and for one that is still going.
 	Stopped *Stop `json:"stopped,omitempty"`
 
-	// Total is the run's time: from Started to the last phase's verify,
-	// including the preflight check.
+	// Total is the run's time: from Started to the last phase's verify. It
+	// includes the preflight check, the time between calls at every
+	// checkpoint, and the time between a failure and its resume.
 	Total time.Duration `json:"total"`
 
 	// Over is true when Total is over TimeTarget.
@@ -74,8 +81,14 @@ type PhaseRecord struct {
 
 	// Source is what the phase was applied from: the commits of this
 	// repository and of the target's values, and whether either had
-	// uncommitted changes.
+	// uncommitted changes. A resumed run may apply its phases from a
+	// different commit than the one it started from, so each phase keeps
+	// its own.
 	Source Source `json:"source"`
+
+	// Made is what the phase reported it made, through Run.Made, in the
+	// order it reported it.
+	Made []string `json:"made,omitempty"`
 
 	// Duration is how long the phase took, from the start of its apply to
 	// the end of its verify.
@@ -94,6 +107,10 @@ const (
 
 	// StepVerify is a phase's Verify.
 	StepVerify Step = "verify"
+
+	// StepCheckpoint is the checkpoint after a phase: the run verified it
+	// and paused there, for the operator to resume or tear down.
+	StepCheckpoint Step = "checkpoint"
 
 	// StepThrough is the phase Through named: the run verified it and
 	// stopped there, as it was asked to.
@@ -151,15 +168,38 @@ func records(ctx context.Context, store Store) ([]Record, error) {
 	return recs, nil
 }
 
-// write saves rec. Until phase 0 has made the target's state backend there is
-// nowhere to keep it, and that is not a failure when beforeBackend says the
-// run hasn't got that far: the target then holds nothing a later run would
-// need explained. Once phase 0 has verified, a target with no backend is one
-// whose record would be lost, so the run stops.
-func write(ctx context.Context, store Store, rec Record, beforeBackend bool) error {
-	err := store.Write(ctx, rec)
-	if err == nil || beforeBackend && errors.Is(err, ErrNoBackend) {
-		return nil
+// put adds pr to the run's phases, in place of the phase's earlier entry when
+// a resume applies it again.
+func (rec *Record) put(pr PhaseRecord) {
+	for i := range rec.Phases {
+		if rec.Phases[i].Name == pr.Name {
+			rec.Phases[i] = pr
+			return
+		}
 	}
-	return fmt.Errorf("writing run %s's record: %w", rec.ID, err)
+	rec.Phases = append(rec.Phases, pr)
+}
+
+// measure sets the run's time to now, and marks it when it's over the target.
+func (rec *Record) measure(now time.Time) {
+	rec.Total = now.Sub(rec.Started)
+	rec.Over = rec.Total > TimeTarget
+}
+
+// write saves rec, and reports whether the target kept it. Until phase 0 has
+// made the target's state backend there is nowhere to keep it, and that is
+// not a failure when beforeBackend says the run hasn't got that far: the
+// target then holds nothing a later run would need explained. Once phase 0
+// has verified, a target with no backend is one whose record would be lost,
+// so the run stops.
+func write(ctx context.Context, store Store, rec Record, beforeBackend bool) (bool, error) {
+	err := store.Write(ctx, rec)
+	switch {
+	case err == nil:
+		return true, nil
+	case beforeBackend && errors.Is(err, ErrNoBackend):
+		return false, nil
+	default:
+		return false, fmt.Errorf("writing run %s's record: %w", rec.ID, err)
+	}
 }

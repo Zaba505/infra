@@ -21,7 +21,7 @@ func TestPreflight_PassesFromNothing(t *testing.T) {
 	}
 }
 
-func TestPreflight_StopsOnAnUnfinishedRunAndSaysToTearItDown(t *testing.T) {
+func TestPreflight_StopsOnAnUnfinishedRunAndSaysItCanBeResumedOrTornDown(t *testing.T) {
 	for name, tc := range map[string]struct {
 		stop *run.Stop
 		want string
@@ -29,6 +29,10 @@ func TestPreflight_StopsOnAnUnfinishedRunAndSaysToTearItDown(t *testing.T) {
 		"that failed": {
 			stop: &run.Stop{Phase: "1a", Step: run.StepApply, Error: "boom"},
 			want: "stopped at phase 1a's apply",
+		},
+		"that paused at a checkpoint": {
+			stop: &run.Stop{Phase: "0", Step: run.StepCheckpoint},
+			want: "paused at the checkpoint after phase 0",
 		},
 		"that stopped where Through said": {
 			stop: &run.Stop{Phase: "0", Step: run.StepThrough},
@@ -49,10 +53,10 @@ func TestPreflight_StopsOnAnUnfinishedRunAndSaysToTearItDown(t *testing.T) {
 			err := run.Preflight(t.Context(), target, phases(nil))
 			require.ErrorIs(t, err, run.ErrUnfinishedRun)
 			require.ErrorContains(t, err, "run earlier "+tc.want)
-			require.ErrorContains(t, err, "Tear the target down with down first")
+			require.ErrorContains(t, err, "Resume it with up --resume, or tear the target down with down")
 			require.Empty(t, target.Calls(), "nothing is verified on top of a partial run")
 
-			err = run.Up(t.Context(), target, phases(nil))
+			err = up(t.Context(), target, phases(nil), run.NoPause())
 			require.ErrorIs(t, err, run.ErrUnfinishedRun)
 			require.Empty(t, target.Calls())
 		})
@@ -61,7 +65,7 @@ func TestPreflight_StopsOnAnUnfinishedRunAndSaysToTearItDown(t *testing.T) {
 
 func TestPreflight_VerifiesEveryPhaseTheLastRunApplied(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	applied := len(target.Calls())
 
 	require.NoError(t, run.Preflight(t.Context(), target, phases(nil)))
@@ -70,7 +74,7 @@ func TestPreflight_VerifiesEveryPhaseTheLastRunApplied(t *testing.T) {
 
 func TestPreflight_StopsOnAFailedVerify(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 	applied := len(target.Calls())
 
 	ps := phases(map[string][]runtest.PhaseOption{"1a": {runtest.FailVerify(errNoEdge)}})
@@ -83,7 +87,7 @@ func TestPreflight_StopsOnAFailedVerify(t *testing.T) {
 
 func TestPreflight_StopsWhenTheLastRunAppliedAPhaseNoLongerInTheOrder(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
+	require.NoError(t, up(t.Context(), target, phases(nil), run.NoPause()))
 
 	err := run.Preflight(t.Context(), target, []run.Phase{runtest.Phase("0"), runtest.Phase("1a")})
 	require.ErrorIs(t, err, run.ErrUnknownPhase)
