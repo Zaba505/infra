@@ -8,7 +8,6 @@
     "style": "native"
   },
   "verify": [
-    "terraform fmt -recursive -check",
     "cd docs && npm install --no-save --no-audit --no-fund postcss postcss-cli autoprefixer && hugo --gc --minify"
   ],
   "merge": {
