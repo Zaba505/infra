@@ -45,10 +45,15 @@ the values checkout, `targets/<name>.yaml`, which says which it is:
 kind: drill
 ```
 
-`kind` is `live` or `drill`, and only one target is live. The file is read
-strictly: a key it shouldn't have, a second YAML document or any other kind is
-refused, and so is a target with no file. The rest of the file, the values
-each phase reads, comes with phase 0.
+`kind` is `live` or `drill`. The file is read strictly: a key it shouldn't
+have, a second YAML document or any other kind is refused, and so is a target
+with no file. The rest of the file, the values each phase reads, comes with
+phase 0.
+
+Only one target is live. Every call reads every target's file, as the values
+checkout's commit has it and as the checkout stands, and refuses to run when
+more than one target is live. A target is live when either version of its
+file says so, so an uncommitted edit can't turn the live target into a drill.
 
 The values checkout is a git repository outside this one. A Dagger function
 can't read the machine it's called from, so the module takes the checkout as

@@ -199,6 +199,13 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
 			return nil, (*Tests).All(&parent, ctx)
+		case "AnUncommittedEditKeepsTheLiveTargetLive":
+			var parent Tests
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			return nil, (*Tests).AnUncommittedEditKeepsTheLiveTargetLive(&parent, ctx)
 		case "CachedExecIsCached":
 			var parent Tests
 			err = json.Unmarshal(parentJSON, &parent)
@@ -213,6 +220,13 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
 			return nil, (*Tests).DownAgainstLiveIsRefusedWithoutConfirm(&parent, ctx)
+		case "MoreThanOneLiveTargetIsRefused":
+			var parent Tests
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			return nil, (*Tests).MoreThanOneLiveTargetIsRefused(&parent, ctx)
 		case "TargetExecIsNeverCached":
 			var parent Tests
 			err = json.Unmarshal(parentJSON, &parent)
@@ -234,6 +248,13 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
 			return nil, (*Tests).UpAgainstDrillFinishes(&parent, ctx)
+		case "UpAgainstLiveFromAnUncommittedWorkspaceIsRefused":
+			var parent Tests
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			return nil, (*Tests).UpAgainstLiveFromAnUncommittedWorkspaceIsRefused(&parent, ctx)
 		case "UpAgainstLiveWithCommittedValuesFinishes":
 			var parent Tests
 			err = json.Unmarshal(parentJSON, &parent)
@@ -264,11 +285,17 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 							WithSourceMap(dag.SourceMap("main.go", 22, 1)).
 							WithCheck()).
 					WithFunction(
+						dag.Function("AnUncommittedEditKeepsTheLiveTargetLive",
+							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
+							WithDescription("AnUncommittedEditKeepsTheLiveTargetLive shows that the live target\nstays live when its file is edited to say kind: drill and not committed: up\nstill refuses the uncommitted change, and down still needs --confirm.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 109, 1))).
+					WithFunction(
 						dag.Function("CachedExecIsCached",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
 							WithDescription("CachedExecIsCached shows that an exec through the helper for work that may\ncache comes back from the cache: the function around it is never cached, so\na second call that prints the first call's UUID was served by the exec's\ncache rather than run again.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 60, 1))).
+							WithSourceMap(dag.SourceMap("main.go", 63, 1))).
 					WithFunction(
 						dag.Function("DownAgainstLiveIsRefusedWithoutConfirm",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
@@ -276,11 +303,17 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
 							WithSourceMap(dag.SourceMap("commands.go", 62, 1))).
 					WithFunction(
+						dag.Function("MoreThanOneLiveTargetIsRefused",
+							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
+							WithDescription("MoreThanOneLiveTargetIsRefused shows that up, down and preflight each refuse\nto run when a second target says kind: live, even against a drill.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 123, 1))).
+					WithFunction(
 						dag.Function("TargetExecIsNeverCached",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
 							WithDescription("TargetExecIsNeverCached shows that an exec through the helper for execs\nthat touch a target runs again on a second call: the probe prints a fresh\nUUID each time it really runs, so two calls print two different ones.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 39, 1))).
+							WithSourceMap(dag.SourceMap("main.go", 42, 1))).
 					WithFunction(
 						dag.Function("TargetWithNoFileIsRefused",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
@@ -293,6 +326,12 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 							WithDescription("UpAgainstDrillFinishes shows that up against a drill, with no phase in the\norder, passes the preflight check as a rebuild from nothing and finishes. The\nvalues have uncommitted changes, which a drill may run from.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
 							WithSourceMap(dag.SourceMap("commands.go", 23, 1))).
+					WithFunction(
+						dag.Function("UpAgainstLiveFromAnUncommittedWorkspaceIsRefused",
+							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
+							WithDescription("UpAgainstLiveFromAnUncommittedWorkspaceIsRefused shows that up against the\nlive target reads this repository's uncommitted changes from the\nworkspace's git, and refuses them.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 98, 1))).
 					WithFunction(
 						dag.Function("UpAgainstLiveWithCommittedValuesFinishes",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).

@@ -28,6 +28,9 @@ func (t *Tests) All(ctx context.Context) error {
 		WithJob("up against the live target with uncommitted values is refused", t.UpAgainstLiveWithUncommittedValuesIsRefused).
 		WithJob("down against the live target is refused without --confirm", t.DownAgainstLiveIsRefusedWithoutConfirm).
 		WithJob("a target with no file in the values checkout is refused", t.TargetWithNoFileIsRefused).
+		WithJob("up against the live target from an uncommitted workspace is refused", t.UpAgainstLiveFromAnUncommittedWorkspaceIsRefused).
+		WithJob("an uncommitted edit keeps the live target live", t.AnUncommittedEditKeepsTheLiveTargetLive).
+		WithJob("more than one live target is refused", t.MoreThanOneLiveTargetIsRefused).
 		Run(ctx)
 }
 

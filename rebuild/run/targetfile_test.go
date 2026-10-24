@@ -72,3 +72,121 @@ func TestParseTargetFile_IsStrict(t *testing.T) {
 		})
 	}
 }
+
+func TestTargetKind_ReadsTheTargetsKind(t *testing.T) {
+	files := map[string][]byte{
+		"live":  []byte("kind: live\n"),
+		"drill": []byte("kind: drill\n"),
+	}
+	for name, want := range map[string]run.Kind{"live": run.Live, "drill": run.Drill} {
+		t.Run(name, func(t *testing.T) {
+			got, err := run.TargetKind(name, files, files)
+			require.NoError(t, err)
+			require.Equal(t, want, got)
+		})
+	}
+}
+
+func TestTargetKind_ATargetIsLiveWhenEitherVersionOfItsFileSaysSo(t *testing.T) {
+	live := []byte("kind: live\n")
+	drill := []byte("kind: drill\n")
+	for name, tc := range map[string]struct {
+		committed, working map[string][]byte
+		want               run.Kind
+	}{
+		"an uncommitted edit to drill over a committed live": {
+			committed: map[string][]byte{"t": live},
+			working:   map[string][]byte{"t": drill},
+			want:      run.Live,
+		},
+		"an uncommitted edit to live over a committed drill": {
+			committed: map[string][]byte{"t": drill},
+			working:   map[string][]byte{"t": live},
+			want:      run.Live,
+		},
+		"a drill not committed yet": {
+			committed: map[string][]byte{},
+			working:   map[string][]byte{"t": drill},
+			want:      run.Drill,
+		},
+		"a drill in both": {
+			committed: map[string][]byte{"t": drill},
+			working:   map[string][]byte{"t": drill},
+			want:      run.Drill,
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			got, err := run.TargetKind("t", tc.committed, tc.working)
+			require.NoError(t, err)
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestTargetKind_RefusesMoreThanOneLiveTarget(t *testing.T) {
+	live := []byte("kind: live\n")
+	drill := []byte("kind: drill\n")
+	for name, tc := range map[string]struct {
+		committed, working map[string][]byte
+	}{
+		"two live files": {
+			committed: map[string][]byte{"live": live, "prod": live},
+			working:   map[string][]byte{"live": live, "prod": live},
+		},
+		"a second live target not committed yet": {
+			committed: map[string][]byte{"live": live, "prod": drill},
+			working:   map[string][]byte{"live": live, "prod": live},
+		},
+		"a live target removed but not committed": {
+			committed: map[string][]byte{"live": live, "prod": live},
+			working:   map[string][]byte{"live": live},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			for _, target := range []string{"live", "prod"} {
+				_, err := run.TargetKind(target, tc.committed, tc.working)
+				require.ErrorIs(t, err, run.ErrMoreThanOneLive)
+				require.ErrorContains(t, err, "live, prod each say kind: live")
+			}
+		})
+	}
+}
+
+func TestTargetKind_RefusesATargetWithNoFile(t *testing.T) {
+	files := map[string][]byte{"drill": []byte("kind: drill\n")}
+	for name, committed := range map[string]map[string][]byte{
+		"that never had one":                 files,
+		"whose file is removed, uncommitted": {"drill": files["drill"], "staging": []byte("kind: drill\n")},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := run.TargetKind("staging", committed, files)
+			require.ErrorIs(t, err, run.ErrUnknownTarget)
+			require.ErrorContains(t, err, "staging: the values checkout has no targets/staging.yaml")
+		})
+	}
+}
+
+func TestTargetKind_ReadsEveryFileStrictlyInBothVersions(t *testing.T) {
+	good := map[string][]byte{"drill": []byte("kind: drill\n")}
+	bad := map[string][]byte{"drill": []byte("kind: drill\n"), "other": []byte("kind: staging\n")}
+	for name, tc := range map[string]struct {
+		committed, working map[string][]byte
+		want               string
+	}{
+		"another target's file as it stands": {committed: good, working: bad, want: "target other: targets/other.yaml, as it stands"},
+		"another target's file as committed": {committed: bad, working: good, want: "target other: targets/other.yaml, as committed"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, err := run.TargetKind("drill", tc.committed, tc.working)
+			require.ErrorIs(t, err, run.ErrInvalidTargetFile)
+			require.ErrorContains(t, err, tc.want)
+		})
+	}
+}
+
+func TestTargetKind_RefusesABadName(t *testing.T) {
+	_, err := run.TargetKind("../live", nil, nil)
+	require.ErrorIs(t, err, run.ErrUnknownTarget)
+	_, err = run.TargetKind("", nil, nil)
+	require.ErrorIs(t, err, run.ErrNoTarget)
+}

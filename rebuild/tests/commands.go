@@ -90,6 +90,49 @@ func (t *Tests) TargetWithNoFileIsRefused(ctx context.Context) error {
 	)
 }
 
+// UpAgainstLiveFromAnUncommittedWorkspaceIsRefused shows that up against the
+// live target reads this repository's uncommitted changes from the
+// workspace's git, and refuses them.
+//
+// +cache="never"
+func (t *Tests) UpAgainstLiveFromAnUncommittedWorkspaceIsRefused(ctx context.Context) error {
+	workspace := repository(workspaceFiles, map[string]string{"NOTES.md": "not committed yet\n"})
+	_, err := rebuildIn(workspace, committedValues()).Up(ctx, "live")
+	return refused(err, "a run against the live target refuses uncommitted changes: this repository has uncommitted changes")
+}
+
+// AnUncommittedEditKeepsTheLiveTargetLive shows that the live target
+// stays live when its file is edited to say kind: drill and not committed: up
+// still refuses the uncommitted change, and down still needs --confirm.
+//
+// +cache="never"
+func (t *Tests) AnUncommittedEditKeepsTheLiveTargetLive(ctx context.Context) error {
+	m := rebuild(repository(targetFiles, map[string]string{"targets/live.yaml": "kind: drill\n"}))
+	_, upErr := m.Up(ctx, "live")
+	_, downErr := m.Down(ctx, "live")
+	return errors.Join(
+		refused(upErr, "a run against the live target refuses uncommitted changes: the target's values have uncommitted changes"),
+		refused(downErr, `down was not confirmed with the target's name: live is the live target`),
+	)
+}
+
+// MoreThanOneLiveTargetIsRefused shows that up, down and preflight each refuse
+// to run when a second target says kind: live, even against a drill.
+//
+// +cache="never"
+func (t *Tests) MoreThanOneLiveTargetIsRefused(ctx context.Context) error {
+	const want = "more than one target is live: live, prod each say kind: live"
+	m := rebuild(repository(targetFiles, map[string]string{"targets/prod.yaml": "kind: live\n"}))
+	_, upErr := m.Up(ctx, "drill")
+	_, downErr := m.Down(ctx, "drill")
+	_, preflightErr := m.Preflight(ctx, "drill")
+	return errors.Join(
+		refused(upErr, want),
+		refused(downErr, want),
+		refused(preflightErr, want),
+	)
+}
+
 // refused fails unless err is a refusal that says want.
 func refused(err error, want string) error {
 	return check.Require(func(rt require.TestingT) {
@@ -102,9 +145,17 @@ func refused(err error, want string) error {
 // own: a repository with one commit and nothing uncommitted. The cache probe
 // needs no values, and takes nil.
 func rebuild(values *dagger.GitRepository) *dagger.Rebuild {
-	workspace := repository(map[string]string{"README.md": "the repository a run rebuilds from\n"}, nil)
+	return rebuildIn(repository(workspaceFiles, nil), values)
+}
+
+// rebuildIn is the rebuild module, pointed at values and at workspace.
+func rebuildIn(workspace, values *dagger.GitRepository) *dagger.Rebuild {
 	return dag.Rebuild(workspace.AsWorkspace(), dagger.RebuildOpts{Values: values})
 }
+
+// workspaceFiles is the committed contents of the workspace the tests run the
+// module in.
+var workspaceFiles = map[string]string{"README.md": "the repository a run rebuilds from\n"}
 
 // targetFiles is the values checkout's committed contents: one live target and
 // one drill, and no file for staging.

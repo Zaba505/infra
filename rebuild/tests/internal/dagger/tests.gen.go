@@ -21,15 +21,18 @@ func (r *Query) Tests() *Tests { // tests (../../../../:0:0)
 type Tests struct { // tests (../../../../:0:0)
 	query *querybuilder.Selection
 
-	all                                         *Void
-	cachedExecIsCached                          *Void
-	downAgainstLiveIsRefusedWithoutConfirm      *Void
-	id                                          *ID
-	targetExecIsNeverCached                     *Void
-	targetWithNoFileIsRefused                   *Void
-	upAgainstDrillFinishes                      *Void
-	upAgainstLiveWithCommittedValuesFinishes    *Void
-	upAgainstLiveWithUncommittedValuesIsRefused *Void
+	all                                              *Void
+	anUncommittedEditKeepsTheLiveTargetLive          *Void
+	cachedExecIsCached                               *Void
+	downAgainstLiveIsRefusedWithoutConfirm           *Void
+	id                                               *ID
+	moreThanOneLiveTargetIsRefused                   *Void
+	targetExecIsNeverCached                          *Void
+	targetWithNoFileIsRefused                        *Void
+	upAgainstDrillFinishes                           *Void
+	upAgainstLiveFromAnUncommittedWorkspaceIsRefused *Void
+	upAgainstLiveWithCommittedValuesFinishes         *Void
+	upAgainstLiveWithUncommittedValuesIsRefused      *Void
 }
 
 func (r *Tests) WithGraphQLQuery(q *querybuilder.Selection) *Tests {
@@ -44,6 +47,18 @@ func (r *Tests) All(ctx context.Context) error {
 		return nil
 	}
 	q := r.query.Select("all")
+
+	return q.Execute(ctx)
+}
+
+// AnUncommittedEditKeepsTheLiveTargetLive shows that the live target
+// stays live when its file is edited to say kind: drill and not committed: up
+// still refuses the uncommitted change, and down still needs --confirm.
+func (r *Tests) AnUncommittedEditKeepsTheLiveTargetLive(ctx context.Context) error {
+	if r.anUncommittedEditKeepsTheLiveTargetLive != nil {
+		return nil
+	}
+	q := r.query.Select("anUncommittedEditKeepsTheLiveTargetLive")
 
 	return q.Execute(ctx)
 }
@@ -121,6 +136,17 @@ func (r *Tests) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// MoreThanOneLiveTargetIsRefused shows that up, down and preflight each refuse
+// to run when a second target says kind: live, even against a drill.
+func (r *Tests) MoreThanOneLiveTargetIsRefused(ctx context.Context) error {
+	if r.moreThanOneLiveTargetIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("moreThanOneLiveTargetIsRefused")
+
+	return q.Execute(ctx)
+}
+
 // TargetExecIsNeverCached shows that an exec through the helper for execs
 // that touch a target runs again on a second call: the probe prints a fresh
 // UUID each time it really runs, so two calls print two different ones.
@@ -152,6 +178,18 @@ func (r *Tests) UpAgainstDrillFinishes(ctx context.Context) error {
 		return nil
 	}
 	q := r.query.Select("upAgainstDrillFinishes")
+
+	return q.Execute(ctx)
+}
+
+// UpAgainstLiveFromAnUncommittedWorkspaceIsRefused shows that up against the
+// live target reads this repository's uncommitted changes from the
+// workspace's git, and refuses them.
+func (r *Tests) UpAgainstLiveFromAnUncommittedWorkspaceIsRefused(ctx context.Context) error {
+	if r.upAgainstLiveFromAnUncommittedWorkspaceIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("upAgainstLiveFromAnUncommittedWorkspaceIsRefused")
 
 	return q.Execute(ctx)
 }

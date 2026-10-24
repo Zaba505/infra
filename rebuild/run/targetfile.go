@@ -7,6 +7,8 @@ import (
 	"io"
 	"path"
 	"regexp"
+	"slices"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -93,4 +95,70 @@ func (k *Kind) UnmarshalText(text []byte) error {
 		return fmt.Errorf("kind %q is neither live nor drill", text)
 	}
 	return nil
+}
+
+// ErrMoreThanOneLive is returned when more than one target in the values
+// checkout is live. Only one target is.
+var ErrMoreThanOneLive = errors.New("more than one target is live")
+
+// TargetKind reads the named target's kind from the values checkout's target
+// files, each keyed by its target's name: committed holds them as the
+// checkout's commit has them, and working as the checkout stands, uncommitted
+// changes included.
+//
+// A target is live when either version of its file says so, so an uncommitted
+// edit can never turn the live target into a drill, and lift the rules that
+// keep a drill off it. Every file is read strictly, in both versions, and
+// TargetKind stops with ErrMoreThanOneLive when more than one target is live.
+// It stops with ErrUnknownTarget when the checkout as it stands has no file for
+// the target.
+func TargetKind(name string, committed, working map[string][]byte) (Kind, error) {
+	path, err := TargetFilePath(name)
+	if err != nil {
+		return 0, err
+	}
+	names := make([]string, 0, len(working)+len(committed))
+	for n := range working {
+		names = append(names, n)
+	}
+	for n := range committed {
+		if _, ok := working[n]; !ok {
+			names = append(names, n)
+		}
+	}
+	slices.Sort(names)
+
+	kinds := make(map[string]Kind, len(names))
+	var live []string
+	for _, n := range names {
+		kind := Drill
+		for _, v := range []struct {
+			files map[string][]byte
+			as    string
+		}{{committed, "as committed"}, {working, "as it stands"}} {
+			data, ok := v.files[n]
+			if !ok {
+				continue
+			}
+			f, err := ParseTargetFile(data)
+			if err != nil {
+				return 0, fmt.Errorf("target %s: %s/%s.yaml, %s: %w", n, TargetsDir, n, v.as, err)
+			}
+			if f.Kind == Live {
+				kind = Live
+			}
+		}
+		kinds[n] = kind
+		if kind == Live {
+			live = append(live, n)
+		}
+	}
+	if len(live) > 1 {
+		return 0, fmt.Errorf("%w: %s each say kind: live, in the values checkout as committed or as it stands",
+			ErrMoreThanOneLive, strings.Join(live, ", "))
+	}
+	if _, ok := working[name]; !ok {
+		return 0, fmt.Errorf("%w: %s: the values checkout has no %s", ErrUnknownTarget, name, path)
+	}
+	return kinds[name], nil
 }

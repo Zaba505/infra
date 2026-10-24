@@ -16,7 +16,8 @@ Give the live target a file in the values checkout, `targets/live.yaml`:
 kind: live
 ```
 
-Only one target is live.
+Only one target is live: every call refuses to run while a second target's
+file says `kind: live`, as committed or as it stands.
 
 ## Commit everything first
 

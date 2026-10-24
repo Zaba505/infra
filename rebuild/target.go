@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"path"
+	"strings"
 
 	"dagger/rebuild/internal/dagger"
 	"dagger/rebuild/run"
@@ -18,32 +20,47 @@ var errNoValues = errors.New("no values checkout: set it once with dagger settin
 // is one whose file says neither kind: live nor kind: drill.
 //
 // The file is read from the checkout as it stands, uncommitted changes
-// included. A drill may run from them, and a live run refuses them.
+// included, so a drill may run from them. It is read as committed too: a
+// target is live when either version says so, so an uncommitted edit can't
+// turn the live target into a drill. Every target's file is read, and the call
+// is refused when more than one target is live.
 func (m *Rebuild) target(ctx context.Context, name string) (run.Target, error) {
 	if m.Values == nil {
 		return nil, errNoValues
 	}
-	path, err := run.TargetFilePath(name)
+	if _, err := run.TargetFilePath(name); err != nil {
+		return nil, err
+	}
+	committed, err := targetFiles(ctx, m.Values.Head().Tree())
+	if err != nil {
+		return nil, fmt.Errorf("target %s: reading the values checkout as committed: %w", name, err)
+	}
+	working, err := targetFiles(ctx, m.Values.Uncommitted().After())
+	if err != nil {
+		return nil, fmt.Errorf("target %s: reading the values checkout as it stands: %w", name, err)
+	}
+	kind, err := run.TargetKind(name, committed, working)
 	if err != nil {
 		return nil, err
 	}
-	checkout := m.Values.Uncommitted().After()
-	ok, err := checkout.Exists(ctx, path, dagger.DirectoryExistsOpts{ExpectedType: dagger.ExistsTypeRegularType})
+	return &target{name: name, kind: kind, workspace: m.Workspace, values: m.Values}, nil
+}
+
+// targetFiles reads every target's file in dir, keyed by the target's name.
+func targetFiles(ctx context.Context, dir *dagger.Directory) (map[string][]byte, error) {
+	paths, err := dir.Glob(ctx, run.TargetsDir+"/*.yaml")
 	if err != nil {
-		return nil, fmt.Errorf("target %s: reading the values checkout: %w", name, err)
+		return nil, err
 	}
-	if !ok {
-		return nil, fmt.Errorf("%w: %s: the values checkout has no %s", run.ErrUnknownTarget, name, path)
+	files := make(map[string][]byte, len(paths))
+	for _, p := range paths {
+		data, err := dir.File(p).Contents(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("reading %s: %w", p, err)
+		}
+		files[strings.TrimSuffix(path.Base(p), ".yaml")] = []byte(data)
 	}
-	data, err := checkout.File(path).Contents(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("target %s: reading %s: %w", name, path, err)
-	}
-	f, err := run.ParseTargetFile([]byte(data))
-	if err != nil {
-		return nil, fmt.Errorf("target %s: %s: %w", name, path, err)
-	}
-	return &target{name: name, kind: f.Kind, workspace: m.Workspace, values: m.Values}, nil
+	return files, nil
 }
 
 // target is the run.Target a call is pointed at.
