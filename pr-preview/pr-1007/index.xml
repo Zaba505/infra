@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Overview on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/</link><description>Recent content in Overview on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-1007/index.xml" rel="self" type="application/rss+xml"/><item><title>What you need</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/</guid><description>&lt;p&gt;The rebuild entry point is a Dagger module in this repository. Everything it
+runs, it runs in containers it puts together, so the machine that calls it needs
+only two tools, and the module needs to know where the values checkout is.&lt;/p&gt;
+&lt;h2 id="the-dagger-cli"&gt;The Dagger CLI&lt;/h2&gt;
+&lt;p&gt;The CLI has to be the version the module pins. That&amp;rsquo;s &lt;code&gt;v1.0.0-beta.15&lt;/code&gt;, the
+&lt;code&gt;engineVersion&lt;/code&gt; in the repository&amp;rsquo;s &lt;code&gt;dagger-module.toml&lt;/code&gt;. Install it with
+Dagger&amp;rsquo;s install script, at that version:&lt;/p&gt;</description></item><item><title>A first drill</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/first-drill/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/first-drill/</guid><description>&lt;p&gt;A drill is a rebuild against a scratch target, which leaves the live platform
+untouched. Drill and live differ only in the target, so a drill is the same
+commands a live rebuild runs. Run them from this repository&amp;rsquo;s checkout, with
+the values checkout set as
+&lt;a href="https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/#the-values-checkout"&gt;What you need&lt;/a&gt;
+says.&lt;/p&gt;
+&lt;h2 id="add-the-drills-target"&gt;Add the drill&amp;rsquo;s target&lt;/h2&gt;
+&lt;p&gt;Give the drill a file in the values checkout, &lt;code&gt;targets/drill.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;drill&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The name of the file, without &lt;code&gt;.yaml&lt;/code&gt;, is the target&amp;rsquo;s name. A drill may run
+from uncommitted changes, in either checkout, so the file doesn&amp;rsquo;t need to be
+committed first. The run&amp;rsquo;s record says it was.&lt;/p&gt;</description></item><item><title>Routine maintenance</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/operating/routine-maintenance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/operating/routine-maintenance/</guid><description>&lt;h2 id="keeping-dagger-current"&gt;Keeping Dagger current&lt;/h2&gt;
+&lt;p&gt;The rebuild entry point is a Dagger module, and these pin the Dagger it runs
+on:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;engineVersion&lt;/code&gt;&lt;/strong&gt;, in every &lt;code&gt;dagger-module.toml&lt;/code&gt;: the repository root&amp;rsquo;s,
+for the module, and &lt;code&gt;rebuild/tests/dagger-module.toml&lt;/code&gt;, for its tests. It
+pins the engine.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;DAGGER_VERSION&lt;/code&gt;&lt;/strong&gt;, in &lt;code&gt;.github/workflows/build.yaml&lt;/code&gt;: the CLI that &lt;code&gt;Build&lt;/code&gt;
+installs. &lt;a href="https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/"&gt;What you need&lt;/a&gt;
+tells the operator to install the same version.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;dagger.lock&lt;/code&gt;&lt;/strong&gt;: every image and git ref the workspace uses, by digest or
+commit. That includes the Go SDK that writes the module&amp;rsquo;s generated code, and
+devex&amp;rsquo;s modules, which the module&amp;rsquo;s checks run.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Nothing moves any of them except a pull request.&lt;/p&gt;</description></item><item><title>The rebuild and its phases</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/fundamentals/rebuild/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/fundamentals/rebuild/</guid><description>&lt;p&gt;The platform is rebuilt, not repaired. One module in this repository stands it
+up from nothing, one phase at a time, against one named target, and tears it
+down again in reverse.&lt;/p&gt;
+&lt;h2 id="the-command"&gt;The command&lt;/h2&gt;
+&lt;p&gt;The rebuild is three functions of the &lt;code&gt;rebuild&lt;/code&gt; Dagger module, which
+&lt;code&gt;dagger.toml&lt;/code&gt; makes the workspace&amp;rsquo;s entry point. Run them from this
+repository&amp;rsquo;s checkout:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call up --target &amp;lt;name&amp;gt; &lt;span class="o"&gt;[&lt;/span&gt;--resume&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;--through &amp;lt;phase&amp;gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;--no-pause&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call down --target &amp;lt;name&amp;gt; &lt;span class="o"&gt;[&lt;/span&gt;--confirm &amp;lt;name&amp;gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call preflight --target &amp;lt;name&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;up&lt;/code&gt;&lt;/strong&gt; runs the preflight check, then applies and verifies phases in
+order. It stops at a checkpoint after each phase. &lt;code&gt;--no-pause&lt;/code&gt; runs on
+without stopping, and &lt;code&gt;--through&lt;/code&gt; names the last phase it runs. With
+&lt;code&gt;--resume&lt;/code&gt;, it continues the target&amp;rsquo;s unfinished run instead of starting a
+new one.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;down&lt;/code&gt;&lt;/strong&gt; tears down every phase in reverse order, phase 0 last. It&amp;rsquo;s safe
+to run again after it fails partway, and it succeeds when there&amp;rsquo;s nothing
+left.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;preflight&lt;/code&gt;&lt;/strong&gt; runs only the preflight check, and changes nothing.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There&amp;rsquo;s no default target: each function refuses to run without &lt;code&gt;--target&lt;/code&gt;.
+None of them is ever served from Dagger&amp;rsquo;s cache, and neither is any command a
+phase runs against a target, so every call really reads and changes the
+target it names.&lt;/p&gt;</description></item><item><title>Going live</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/going-live/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/going-live/</guid><description>&lt;p&gt;Going live is the same rebuild a drill runs, against the live target. The
+commands are the same; what changes is the target, and two rules that keep a
+drill from ever reaching it by mistake.&lt;/p&gt;
+&lt;h2 id="add-the-live-target"&gt;Add the live target&lt;/h2&gt;
+&lt;p&gt;Give the live target a file in the values checkout, &lt;code&gt;targets/live.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;live&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Only one target is live.&lt;/p&gt;
+&lt;h2 id="commit-everything-first"&gt;Commit everything first&lt;/h2&gt;
+&lt;p&gt;A run against the live target refuses uncommitted changes, in this repository
+or in the values checkout, so every change to the live platform is made from
+history. Commit both, and check that neither has anything left over:&lt;/p&gt;</description></item><item><title>Hardware</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</guid><description>&lt;h2 id="components"&gt;Components&lt;/h2&gt;
+&lt;h3 id="router"&gt;Router&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://store.ui.com/us/en/products/udm-pro"&gt;Ubiquiti Dream Machine Pro&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="switch"&gt;Switch&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://store.ui.com/us/en/category/all-switching/products/usw-48-poe"&gt;Ubiquiti 48 port PoE&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="servers"&gt;Servers&lt;/h3&gt;
+&lt;h4 id="hp-dl360---hp-proliant-dl360-gen-9"&gt;hp-dl360 - HP ProLiant DL360 Gen 9&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU: 2 x Intel(R) Xeon(R) CPU E5-2620 v3&lt;/li&gt;
+&lt;li&gt;Mem: 8 x 16GB DDR4-2133 RDIMM&lt;/li&gt;
+&lt;li&gt;Boot: 1 x 250GB Samsung 970 Evo Plus M.2-2280 PCIe 3.0 NVME&lt;/li&gt;
+&lt;li&gt;Storage: 4 x 1TB Samsung 870 Evo&lt;/li&gt;
+&lt;li&gt;Power: 2 x HP 500W Flex Slot Platinum Power Supply&lt;/li&gt;
+&lt;li&gt;Accelerator: N/A&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="camd-ryzen5---custom-pc"&gt;camd-ryzen5 - Custom PC&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU: 1 x Ryzen 5 5600X&lt;/li&gt;
+&lt;li&gt;Mem: 2 x 8GB DDR4-3600 CL19&lt;/li&gt;
+&lt;li&gt;Boot: N/A&lt;/li&gt;
+&lt;li&gt;Storage: 1 x 1TB Samsung 970 Evo Plus M.2-2280 PCIe 3.0 NVME&lt;/li&gt;
+&lt;li&gt;Power: 1 x EVGA SuperNOVA 750 GT 750 W 80+ Gold&lt;/li&gt;
+&lt;li&gt;Accelerator: 1 x Gigabyte EAGLE Radeon RX 6700 XT 12 GB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="network-topology"&gt;Network Topology&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;flowchart TB
+ router@{ label: &amp;#34;Router&amp;#34;, shape: circle }
+ switch@{ label: &amp;#34;Switch&amp;#34;, shape: circle }
+ server_a@{ label: &amp;#34;hp-dl360&amp;#34;, shape: rect }
+ server_b@{ label: &amp;#34;hp-dl360&amp;#34;, shape: rect }
+ server_c@{ label: &amp;#34;camd-ryzen5&amp;#34;, shape: rect }
+
+ subgraph one [IPMI VLAN]
+ server_a_ipmi@{ label: &amp;#34;hp-dl360 IPMI Interface&amp;#34;, shape: terminal }
+ server_b_ipmi@{ label: &amp;#34;hp-dl360 IPMI Interface&amp;#34;, shape: terminal }
+ end
+
+ subgraph two [Homelab VLAN]
+ server_a_port2@{ label: &amp;#34;hp-dl360 Port 2&amp;#34;, shape: terminal }
+ server_a_port3@{ label: &amp;#34;hp-dl360 Port 3&amp;#34;, shape: terminal }
+ server_a_port4@{ label: &amp;#34;hp-dl360 Port 4&amp;#34;, shape: terminal }
+ server_b_port2@{ label: &amp;#34;hp-dl360 Port 2&amp;#34;, shape: terminal }
+ server_b_port3@{ label: &amp;#34;hp-dl360 Port 3&amp;#34;, shape: terminal }
+ server_b_port4@{ label: &amp;#34;hp-dl360 Port 4&amp;#34;, shape: terminal }
+ server_c_port@{ label: &amp;#34;camd-ryzen5 Port&amp;#34;, shape: terminal }
+ end
+
+ subgraph three [Network Boot VLAN]
+ server_a_port1@{ label: &amp;#34;hp-dl360 Port 1&amp;#34;, shape: terminal }
+ server_b_port1@{ label: &amp;#34;hp-dl360 Port 1&amp;#34;, shape: terminal }
+ end
+
+ router --- switch
+
+ switch --- server_a_ipmi
+ switch --- server_a_port1
+ switch --- server_a_port2
+ switch --- server_a_port3
+ switch --- server_a_port4
+
+ server_a_ipmi --- server_a
+ server_a_port1 --- server_a
+ server_a_port2 --- server_a
+ server_a_port3 --- server_a
+ server_a_port4 --- server_a
+
+ switch --- server_b_ipmi
+ switch --- server_b_port1
+ switch --- server_b_port2
+ switch --- server_b_port3
+ switch --- server_b_port4
+
+ server_b_ipmi --- server_b
+ server_b_port1 --- server_b
+ server_b_port2 --- server_b
+ server_b_port3 --- server_b
+ server_b_port4 --- server_b
+
+ switch --- server_c_port
+
+ server_c_port --- server_c&lt;/pre&gt;
+&lt;h3 id="ipmi-vlan"&gt;IPMI VLAN&lt;/h3&gt;
+&lt;p&gt;This VLAN groups the &lt;a href="https://en.wikipedia.org/wiki/Intelligent_Platform_Management_Interface"&gt;IPMI&lt;/a&gt;
+or IPMI-like interfaces for all servers in the homelab so that each machine
+can be remotely accessed. Most importantly, this access can be restricted via
+VLAN firewall rules.&lt;/p&gt;</description></item></channel></rss>

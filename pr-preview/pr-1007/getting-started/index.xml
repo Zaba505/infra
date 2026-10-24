@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Getting started on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/</link><description>Recent content in Getting started on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/index.xml" rel="self" type="application/rss+xml"/><item><title>What you need</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/</guid><description>&lt;p&gt;The rebuild entry point is a Dagger module in this repository. Everything it
+runs, it runs in containers it puts together, so the machine that calls it needs
+only two tools, and the module needs to know where the values checkout is.&lt;/p&gt;
+&lt;h2 id="the-dagger-cli"&gt;The Dagger CLI&lt;/h2&gt;
+&lt;p&gt;The CLI has to be the version the module pins. That&amp;rsquo;s &lt;code&gt;v1.0.0-beta.15&lt;/code&gt;, the
+&lt;code&gt;engineVersion&lt;/code&gt; in the repository&amp;rsquo;s &lt;code&gt;dagger-module.toml&lt;/code&gt;. Install it with
+Dagger&amp;rsquo;s install script, at that version:&lt;/p&gt;</description></item><item><title>A first drill</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/first-drill/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/first-drill/</guid><description>&lt;p&gt;A drill is a rebuild against a scratch target, which leaves the live platform
+untouched. Drill and live differ only in the target, so a drill is the same
+commands a live rebuild runs. Run them from this repository&amp;rsquo;s checkout, with
+the values checkout set as
+&lt;a href="https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/prerequisites/#the-values-checkout"&gt;What you need&lt;/a&gt;
+says.&lt;/p&gt;
+&lt;h2 id="add-the-drills-target"&gt;Add the drill&amp;rsquo;s target&lt;/h2&gt;
+&lt;p&gt;Give the drill a file in the values checkout, &lt;code&gt;targets/drill.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;drill&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;The name of the file, without &lt;code&gt;.yaml&lt;/code&gt;, is the target&amp;rsquo;s name. A drill may run
+from uncommitted changes, in either checkout, so the file doesn&amp;rsquo;t need to be
+committed first. The run&amp;rsquo;s record says it was.&lt;/p&gt;</description></item><item><title>Going live</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/going-live/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/getting-started/going-live/</guid><description>&lt;p&gt;Going live is the same rebuild a drill runs, against the live target. The
+commands are the same; what changes is the target, and two rules that keep a
+drill from ever reaching it by mistake.&lt;/p&gt;
+&lt;h2 id="add-the-live-target"&gt;Add the live target&lt;/h2&gt;
+&lt;p&gt;Give the live target a file in the values checkout, &lt;code&gt;targets/live.yaml&lt;/code&gt;:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;live&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Only one target is live.&lt;/p&gt;
+&lt;h2 id="commit-everything-first"&gt;Commit everything first&lt;/h2&gt;
+&lt;p&gt;A run against the live target refuses uncommitted changes, in this repository
+or in the values checkout, so every change to the live platform is made from
+history. Commit both, and check that neither has anything left over:&lt;/p&gt;</description></item></channel></rss>
