@@ -34,6 +34,13 @@ func TestRequire(t *testing.T) {
 		require.EqualError(t, err, "first")
 	})
 
+	t.Run("fails when FailNow is called with no failure recorded", func(t *testing.T) {
+		err := Require(func(rt require.TestingT) {
+			rt.FailNow()
+		})
+		require.ErrorIs(t, err, errNoFailure)
+	})
+
 	t.Run("lets any other panic through", func(t *testing.T) {
 		boom := errors.New("boom")
 		require.PanicsWithValue(t, boom, func() {

@@ -10,6 +10,7 @@
 package check
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/stretchr/testify/require"
@@ -27,11 +28,19 @@ func Require(fn func(t require.TestingT)) (err error) {
 				panic(v)
 			}
 			err = t.failure
+			if err == nil {
+				err = errNoFailure
+			}
 		}
 	}()
 	fn(t)
 	return t.failure
 }
+
+// errNoFailure is what Require returns when fn stops with FailNow before
+// any assertion recorded why. A test that asked to stop has failed, whether
+// or not it said why.
+var errNoFailure = errors.New("the test stopped with FailNow and recorded no failure")
 
 // failNow is what recorder panics with to stop fn at a failed assertion.
 type failNow struct{}

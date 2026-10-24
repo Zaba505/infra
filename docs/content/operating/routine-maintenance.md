@@ -6,14 +6,15 @@ weight: 20
 
 ## Keeping Dagger current
 
-The rebuild entry point is a Dagger module, and three things pin the Dagger it
-runs on:
+The rebuild entry point is a Dagger module, and these pin the Dagger it runs
+on:
 
 - **`engineVersion`**, in every `dagger-module.toml`: the repository root's,
   for the module, and `rebuild/tests/dagger-module.toml`, for its tests. It
   pins the engine.
 - **`DAGGER_VERSION`**, in `.github/workflows/build.yaml`: the CLI that `Build`
-  installs.
+  installs. [What you need]({{< ref "/getting-started/prerequisites.md" >}})
+  tells the operator to install the same version.
 - **`dagger.lock`**: every image and git ref the workspace uses, by digest or
   commit. That includes the Go SDK that writes the module's generated code, and
   devex's modules, which the module's checks run.
@@ -23,9 +24,11 @@ Nothing moves any of them except a pull request.
 ### Moving the engine
 
 Move `engineVersion` and the CLI pin in `Build` together, in one pull
-request. `Build` fails when they differ. Then install the same CLI version
-locally, as in [What you need]({{< ref "/getting-started/prerequisites.md" >}}),
-and regenerate the module's code:
+request, along with the version on
+[What you need]({{< ref "/getting-started/prerequisites.md" >}}).
+`.github/scripts/check-dagger-pin.sh` fails `Build` when they differ. Then
+install the same CLI version locally, as that page says, and regenerate the
+module's code:
 
 ```sh
 dagger generate -y

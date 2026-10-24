@@ -91,9 +91,10 @@ is added to `Build` (and to `verify`) by the story that first lands code it appl
   `targetExec`, which puts a fresh nonce on an exec that reads or changes a target so it is
   never cached, or `cachedExec`, for work that may cache. `.golangci.yml` bans `WithExec`
   everywhere else. A function that touches a target is also marked `+cache="never"`.
-- **Dagger is pinned.** `engineVersion` in every `dagger-module.toml` and `DAGGER_VERSION` in
-  `Build` move together, `dagger.lock` is committed, and `dagger generate -y` regenerates the
-  bindings. devex's `daggerverse/CLAUDE.md` records the pitfalls of Dagger 1.0 beta.
+- **Dagger is pinned.** `engineVersion` in every `dagger-module.toml`, `DAGGER_VERSION` in
+  `Build` and the version on Getting started → What you need move together
+  (`.github/scripts/check-dagger-pin.sh` checks), `dagger.lock` is committed, and
+  `dagger generate -y` regenerates the bindings. devex's `daggerverse/CLAUDE.md` records the pitfalls of Dagger 1.0 beta.
 
 ## Docs site
 

@@ -33,7 +33,10 @@ func (r *Rebuild) WithGraphQLQuery(q *querybuilder.Selection) *Rebuild {
 
 // CacheProbe returns the probe the tests module uses to show what each of the
 // module's two exec helpers does with the cache. It touches no target.
-func (r *Rebuild) CacheProbe() *RebuildCacheProbe { // rebuild (../../../../rebuild/main.go:25:1)
+//
+// It is for the module's tests, not part of the rebuild interface. It is
+// public only because a tests module can reach nothing else.
+func (r *Rebuild) CacheProbe() *RebuildCacheProbe { // rebuild (../../../../rebuild/main.go:28:1)
 	q := r.query.Select("cacheProbe")
 
 	return &RebuildCacheProbe{
@@ -52,7 +55,7 @@ func (r *Rebuild) CacheProbe() *RebuildCacheProbe { // rebuild (../../../../rebu
 // It is never cached, because the workspace the CLI fills in is a live view
 // of the tree rather than an argument a cache key can describe: a cached pass
 // would be a pass for a tree the check never looked at.
-func (r *Rebuild) GoPipeline(callingWorkspace *Workspace) *Check { // rebuild (../../../../rebuild/checks.go:32:1)
+func (r *Rebuild) GoPipeline(callingWorkspace *Workspace) *Check { // rebuild (../../../../rebuild/checks.go:34:1)
 	assertNotNil("callingWorkspace", callingWorkspace)
 	q := r.query.Select("goPipeline")
 	q = q.Arg("callingWorkspace", callingWorkspace)
@@ -123,7 +126,7 @@ func (r *Rebuild) AsNode() Node {
 // module's exec helpers. Both of its functions are never cached themselves, so
 // the only thing that can hand a second call the first call's UUID is the
 // cache of the exec underneath.
-type RebuildCacheProbe struct { // rebuild (../../../../rebuild/main.go:33:6)
+type RebuildCacheProbe struct { // rebuild (../../../../rebuild/main.go:36:6)
 	query *querybuilder.Selection
 
 	cached *string
@@ -139,7 +142,7 @@ func (r *RebuildCacheProbe) WithGraphQLQuery(q *querybuilder.Selection) *Rebuild
 
 // Cached runs the probe's command through the helper for work that may cache,
 // and returns what it printed. A second call prints the first call's UUID.
-func (r *RebuildCacheProbe) Cached(ctx context.Context) (string, error) { // rebuild (../../../../rebuild/main.go:52:1)
+func (r *RebuildCacheProbe) Cached(ctx context.Context) (string, error) { // rebuild (../../../../rebuild/main.go:51:1)
 	if r.cached != nil {
 		return *r.cached, nil
 	}
@@ -154,7 +157,7 @@ func (r *RebuildCacheProbe) Cached(ctx context.Context) (string, error) { // reb
 // Fresh runs the probe's command through the helper for execs that read or
 // change a target, and returns what it printed. Two calls print two different
 // UUIDs.
-func (r *RebuildCacheProbe) Fresh(ctx context.Context) (string, error) { // rebuild (../../../../rebuild/main.go:40:1)
+func (r *RebuildCacheProbe) Fresh(ctx context.Context) (string, error) { // rebuild (../../../../rebuild/main.go:43:1)
 	if r.fresh != nil {
 		return *r.fresh, nil
 	}

@@ -2,8 +2,6 @@ package main
 
 import (
 	"crypto/rand"
-	"encoding/hex"
-	"fmt"
 
 	"dagger/rebuild/internal/dagger"
 )
@@ -29,12 +27,15 @@ const nonceEnv = "REBUILD_EXEC_NONCE"
 //
 // The function that calls it must be marked +cache="never" as well, or the
 // function's own result is cached and the exec is never reached.
-func targetExec(ctr *dagger.Container, args []string, opts ...dagger.ContainerWithExecOpts) (*dagger.Container, error) {
-	n, err := nonce()
-	if err != nil {
-		return nil, err
-	}
-	return ctr.WithEnvVariable(nonceEnv, n).WithExec(args, opts...), nil //nolint:forbidigo // one of the module's two exec helpers
+//
+// The nonce is taken off the container again after the exec, so it reaches
+// no later exec and no image built from the result. That changes only the
+// container's metadata: the exec's cache key still holds the nonce.
+func targetExec(ctr *dagger.Container, args []string, opts ...dagger.ContainerWithExecOpts) *dagger.Container {
+	return ctr.
+		WithEnvVariable(nonceEnv, rand.Text()).
+		WithExec(args, opts...). //nolint:forbidigo // one of the module's two exec helpers
+		WithoutEnvVariable(nonceEnv)
 }
 
 // cachedExec runs args in ctr as work that may come from the cache, such as
@@ -45,13 +46,4 @@ func targetExec(ctr *dagger.Container, args []string, opts ...dagger.ContainerWi
 // targetExec's.
 func cachedExec(ctr *dagger.Container, args []string, opts ...dagger.ContainerWithExecOpts) *dagger.Container {
 	return ctr.WithExec(args, opts...) //nolint:forbidigo // one of the module's two exec helpers
-}
-
-// nonce returns 32 hex characters of cryptographically random data.
-func nonce() (string, error) {
-	b := make([]byte, 16)
-	if _, err := rand.Read(b); err != nil {
-		return "", fmt.Errorf("generate an exec nonce: %w", err)
-	}
-	return hex.EncodeToString(b), nil
 }

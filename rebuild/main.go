@@ -22,6 +22,9 @@ const probeImage = "alpine:3.22"
 
 // CacheProbe returns the probe the tests module uses to show what each of the
 // module's two exec helpers does with the cache. It touches no target.
+//
+// It is for the module's tests, not part of the rebuild interface. It is
+// public only because a tests module can reach nothing else.
 func (m *Rebuild) CacheProbe() *CacheProbe {
 	return &CacheProbe{}
 }
@@ -38,11 +41,7 @@ type CacheProbe struct{}
 //
 // +cache="never"
 func (p *CacheProbe) Fresh(ctx context.Context) (string, error) {
-	ctr, err := targetExec(p.container(), probeCommand)
-	if err != nil {
-		return "", err
-	}
-	return ctr.Stdout(ctx)
+	return targetExec(p.container(), probeCommand).Stdout(ctx)
 }
 
 // Cached runs the probe's command through the helper for work that may cache,

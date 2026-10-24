@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"dagger/rebuild/internal/dagger"
 )
@@ -40,10 +42,16 @@ func (m *Rebuild) GoPipeline(
 		// The tests module is a Go module of its own, checked below.
 		Exclude: []string{"tests/"},
 	})
+	// Both run whatever the other finds, and each failure names its Go
+	// module, so one red run reports everything there is to fix.
+	var errs []error
 	if err := goPipeline(ctx, module, lint); err != nil {
-		return err
+		errs = append(errs, fmt.Errorf("rebuild/: %w", err))
 	}
-	return goPipeline(ctx, callingWorkspace.Directory(testsDir), lint)
+	if err := goPipeline(ctx, callingWorkspace.Directory(testsDir), lint); err != nil {
+		errs = append(errs, fmt.Errorf("rebuild/tests/: %w", err))
+	}
+	return errors.Join(errs...)
 }
 
 func goPipeline(ctx context.Context, source *dagger.Directory, lint *dagger.File) error {

@@ -257,30 +257,30 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 					WithFunction(
 						dag.Function("CacheProbe",
 							dag.TypeDef().WithObject("CacheProbe")).
-							WithDescription("CacheProbe returns the probe the tests module uses to show what each of the\nmodule's two exec helpers does with the cache. It touches no target.").
-							WithSourceMap(dag.SourceMap("main.go", 25, 1))).
+							WithDescription("CacheProbe returns the probe the tests module uses to show what each of the\nmodule's two exec helpers does with the cache. It touches no target.\n\nIt is for the module's tests, not part of the rebuild interface. It is\npublic only because a tests module can reach nothing else.").
+							WithSourceMap(dag.SourceMap("main.go", 28, 1))).
 					WithFunction(
 						dag.Function("GoPipeline",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
 							WithDescription("GoPipeline runs devex's z5labs Go pipeline over the module's Go and the\nGo of its tests module: gofmt, go vet, golangci-lint with this\nrepository's .golangci.yml, and go test with the race detector.\n\nGenerated code is left to the generator. golangci-lint skips files marked\nas generated, and the Go SDK's own check, dagger-go-sdk:stale, is what\nholds them to what the generator writes.\n\nIt is never cached, because the workspace the CLI fills in is a live view\nof the tree rather than an argument a cache key can describe: a cached pass\nwould be a pass for a tree the check never looked at.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("checks.go", 32, 1)).
+							WithSourceMap(dag.SourceMap("checks.go", 34, 1)).
 							WithCheck().
-							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 36, 2)}))).
+							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 38, 2)}))).
 			WithObject(
-				dag.TypeDef().WithObject("CacheProbe", dagger.TypeDefWithObjectOpts{Description: "CacheProbe runs one command, which prints a random UUID, through each of the\nmodule's exec helpers. Both of its functions are never cached themselves, so\nthe only thing that can hand a second call the first call's UUID is the\ncache of the exec underneath.", SourceMap: dag.SourceMap("main.go", 33, 6)}).
+				dag.TypeDef().WithObject("CacheProbe", dagger.TypeDefWithObjectOpts{Description: "CacheProbe runs one command, which prints a random UUID, through each of the\nmodule's exec helpers. Both of its functions are never cached themselves, so\nthe only thing that can hand a second call the first call's UUID is the\ncache of the exec underneath.", SourceMap: dag.SourceMap("main.go", 36, 6)}).
 					WithFunction(
 						dag.Function("Cached",
 							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
 							WithDescription("Cached runs the probe's command through the helper for work that may cache,\nand returns what it printed. A second call prints the first call's UUID.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 52, 1))).
+							WithSourceMap(dag.SourceMap("main.go", 51, 1))).
 					WithFunction(
 						dag.Function("Fresh",
 							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
 							WithDescription("Fresh runs the probe's command through the helper for execs that read or\nchange a target, and returns what it printed. Two calls print two different\nUUIDs.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 40, 1)))), nil
+							WithSourceMap(dag.SourceMap("main.go", 43, 1)))), nil
 	default:
 		return nil, fmt.Errorf("unknown object %s", parentName)
 	}

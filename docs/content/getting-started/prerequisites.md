@@ -4,9 +4,9 @@ type: docs
 weight: 10
 ---
 
-A rebuild is a call to the rebuild entry point, a Dagger module in this
-repository. Every step of a run is a container the module puts together, so the
-machine that starts a run needs only two things.
+The rebuild entry point is a Dagger module in this repository. Everything it
+runs, it runs in containers it puts together, so the machine that calls it needs
+only two things.
 
 ## The Dagger CLI
 
@@ -25,7 +25,7 @@ Check that the CLI on your `PATH` is the right one:
 dagger version
 ```
 
-It should print `v1.0.0-beta.15`. Dagger 1.0 is in beta, and the module
+It should report `v1.0.0-beta.15`. Dagger 1.0 is in beta, and the module
 moves to a newer engine only when a pull request moves it. Install a newer CLI
 then, too.
 

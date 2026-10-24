@@ -8,6 +8,7 @@
     "style": "native"
   },
   "verify": [
+    ".github/scripts/check-dagger-pin.sh",
     "dagger check",
     "dagger -m rebuild/tests check --module tests",
     "git diff --exit-code -- dagger.lock",

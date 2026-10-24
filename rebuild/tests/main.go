@@ -40,9 +40,9 @@ func (t *Tests) TargetExecIsNeverCached(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return check.Require(func(t require.TestingT) {
-		require.NotEmpty(t, first)
-		require.NotEqual(t, first, second, "the second exec came from the cache")
+	return check.Require(func(rt require.TestingT) {
+		require.NotEmpty(rt, first)
+		require.NotEqual(rt, first, second, "the second exec came from the cache")
 	})
 }
 
@@ -61,8 +61,8 @@ func (t *Tests) CachedExecIsCached(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return check.Require(func(t require.TestingT) {
-		require.NotEmpty(t, first)
-		require.Equal(t, first, second, "the second exec ran again")
+	return check.Require(func(rt require.TestingT) {
+		require.NotEmpty(rt, first)
+		require.Equal(rt, first, second, "the second exec ran again")
 	})
 }

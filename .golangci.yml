@@ -42,6 +42,12 @@ linters:
         # never served from the cache, or cachedExec, for work that may
         # cache. Those two calls carry the only nolint:forbidigo for this
         # rule. See the rebuild entry point proposal, #987.
+        #
+        # It covers WithExec, the way the module runs a command to
+        # completion. A long-running service started with AsService is not
+        # an exec and is not covered, and the other half of the rule, that a
+        # function touching a target is marked +cache="never", is held by
+        # review rather than by this linter.
         - pattern: (^|\.)WithExec$
           msg: run execs through targetExec, for an exec that reads or changes a target, or cachedExec, for work that may cache; see rebuild/exec.go
   exclusions:
