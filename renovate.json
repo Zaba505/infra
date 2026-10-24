@@ -2,7 +2,7 @@
     "extends": [
         "config:best-practices"
     ],
-    "ignorePaths": ["docs/**"],
+    "ignorePaths": ["docs/**", "rebuild/**"],
     "osvVulnerabilityAlerts": true,
     "schedule": [
         "before 4am"
