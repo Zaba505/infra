@@ -1,0 +1,26 @@
+{
+  "select": {
+    "label": "story",
+    "milestone": null,
+    "limit": 200
+  },
+  "dependencies": {
+    "style": "native"
+  },
+  "verify": [
+    "terraform fmt -recursive -check",
+    "cd docs && npm install --no-save --no-audit --no-fund postcss postcss-cli autoprefixer && hugo --gc --minify"
+  ],
+  "merge": {
+    "label": "auto-merge",
+    "workflow": "auto-merge.yaml"
+  },
+  "review": {
+    "reviewers": ["copilot", "local"],
+    "app": {
+      "idEnv": "ZABA505_REVIEW_APP_ID",
+      "keyEnv": "ZABA505_REVIEW_APP_KEY"
+    }
+  },
+  "worktreeDir": ".claude/worktrees"
+}
