@@ -10,12 +10,10 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.32
 	go.opentelemetry.io/otel v1.45.0
 	go.opentelemetry.io/otel/trace v1.45.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
-require (
-	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
+require github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 
 require (
 	github.com/99designs/gqlgen v0.17.89 // indirect

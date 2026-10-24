@@ -21,10 +21,18 @@ func (r *Query) Tests() *Tests { // tests (../../../../:0:0)
 type Tests struct { // tests (../../../../:0:0)
 	query *querybuilder.Selection
 
-	all                     *Void
-	cachedExecIsCached      *Void
-	id                      *ID
-	targetExecIsNeverCached *Void
+	all                                              *Void
+	anUncommittedEditKeepsTheLiveTargetLive          *Void
+	cachedExecIsCached                               *Void
+	downAgainstLiveIsRefusedWithoutConfirm           *Void
+	id                                               *ID
+	moreThanOneLiveTargetIsRefused                   *Void
+	targetExecIsNeverCached                          *Void
+	targetWithNoFileIsRefused                        *Void
+	upAgainstDrillFinishes                           *Void
+	upAgainstLiveFromAnUncommittedWorkspaceIsRefused *Void
+	upAgainstLiveWithCommittedValuesFinishes         *Void
+	upAgainstLiveWithUncommittedValuesIsRefused      *Void
 }
 
 func (r *Tests) WithGraphQLQuery(q *querybuilder.Selection) *Tests {
@@ -43,6 +51,18 @@ func (r *Tests) All(ctx context.Context) error {
 	return q.Execute(ctx)
 }
 
+// AnUncommittedEditKeepsTheLiveTargetLive shows that the live target
+// stays live when its file is edited to say kind: drill and not committed: up
+// still refuses the uncommitted change, and down still needs --confirm.
+func (r *Tests) AnUncommittedEditKeepsTheLiveTargetLive(ctx context.Context) error {
+	if r.anUncommittedEditKeepsTheLiveTargetLive != nil {
+		return nil
+	}
+	q := r.query.Select("anUncommittedEditKeepsTheLiveTargetLive")
+
+	return q.Execute(ctx)
+}
+
 // CachedExecIsCached shows that an exec through the helper for work that may
 // cache comes back from the cache: the function around it is never cached, so
 // a second call that prints the first call's UUID was served by the exec's
@@ -52,6 +72,17 @@ func (r *Tests) CachedExecIsCached(ctx context.Context) error {
 		return nil
 	}
 	q := r.query.Select("cachedExecIsCached")
+
+	return q.Execute(ctx)
+}
+
+// DownAgainstLiveIsRefusedWithoutConfirm shows that down against the live
+// target refuses unless --confirm names it, and goes ahead when it does.
+func (r *Tests) DownAgainstLiveIsRefusedWithoutConfirm(ctx context.Context) error {
+	if r.downAgainstLiveIsRefusedWithoutConfirm != nil {
+		return nil
+	}
+	q := r.query.Select("downAgainstLiveIsRefusedWithoutConfirm")
 
 	return q.Execute(ctx)
 }
@@ -105,6 +136,17 @@ func (r *Tests) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// MoreThanOneLiveTargetIsRefused shows that up, down and preflight each refuse
+// to run when a second target says kind: live, even against a drill.
+func (r *Tests) MoreThanOneLiveTargetIsRefused(ctx context.Context) error {
+	if r.moreThanOneLiveTargetIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("moreThanOneLiveTargetIsRefused")
+
+	return q.Execute(ctx)
+}
+
 // TargetExecIsNeverCached shows that an exec through the helper for execs
 // that touch a target runs again on a second call: the probe prints a fresh
 // UUID each time it really runs, so two calls print two different ones.
@@ -113,6 +155,63 @@ func (r *Tests) TargetExecIsNeverCached(ctx context.Context) error {
 		return nil
 	}
 	q := r.query.Select("targetExecIsNeverCached")
+
+	return q.Execute(ctx)
+}
+
+// TargetWithNoFileIsRefused shows that up, down and preflight each refuse a
+// target the values checkout has no file for.
+func (r *Tests) TargetWithNoFileIsRefused(ctx context.Context) error {
+	if r.targetWithNoFileIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("targetWithNoFileIsRefused")
+
+	return q.Execute(ctx)
+}
+
+// UpAgainstDrillFinishes shows that up against a drill, with no phase in the
+// order, passes the preflight check as a rebuild from nothing and finishes. The
+// values have uncommitted changes, which a drill may run from.
+func (r *Tests) UpAgainstDrillFinishes(ctx context.Context) error {
+	if r.upAgainstDrillFinishes != nil {
+		return nil
+	}
+	q := r.query.Select("upAgainstDrillFinishes")
+
+	return q.Execute(ctx)
+}
+
+// UpAgainstLiveFromAnUncommittedWorkspaceIsRefused shows that up against the
+// live target reads this repository's uncommitted changes from the
+// workspace's git, and refuses them.
+func (r *Tests) UpAgainstLiveFromAnUncommittedWorkspaceIsRefused(ctx context.Context) error {
+	if r.upAgainstLiveFromAnUncommittedWorkspaceIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("upAgainstLiveFromAnUncommittedWorkspaceIsRefused")
+
+	return q.Execute(ctx)
+}
+
+// UpAgainstLiveWithCommittedValuesFinishes shows that a live run from history
+// isn't refused, so the refusal below is the uncommitted values' doing.
+func (r *Tests) UpAgainstLiveWithCommittedValuesFinishes(ctx context.Context) error {
+	if r.upAgainstLiveWithCommittedValuesFinishes != nil {
+		return nil
+	}
+	q := r.query.Select("upAgainstLiveWithCommittedValuesFinishes")
+
+	return q.Execute(ctx)
+}
+
+// UpAgainstLiveWithUncommittedValuesIsRefused shows that up against the live
+// target refuses a values checkout with uncommitted changes.
+func (r *Tests) UpAgainstLiveWithUncommittedValuesIsRefused(ctx context.Context) error {
+	if r.upAgainstLiveWithUncommittedValuesIsRefused != nil {
+		return nil
+	}
+	q := r.query.Select("upAgainstLiveWithUncommittedValuesIsRefused")
 
 	return q.Execute(ctx)
 }

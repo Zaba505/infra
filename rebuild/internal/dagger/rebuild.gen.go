@@ -9,21 +9,43 @@ import (
 	"github.com/dagger/querybuilder"
 )
 
-func (r *Query) Rebuild() *Rebuild { // rebuild (../../../:0:0)
+// RebuildOpts contains options for Query.Rebuild
+type RebuildOpts struct {
+	// The values checkout, a git repository holding a file per target,
+	// targets/<name>.yaml. Set it once, outside this repository, with
+	// dagger settings -g rebuild values <path>. up, down and preflight refuse
+	// to run without it; the module's checks don't need it.
+	Values *GitRepository
+}
+
+func (r *Query) Rebuild(workspace *Workspace, opts ...RebuildOpts) *Rebuild { // rebuild (../../../:0:0)
+	assertNotNil("workspace", workspace)
 	q := r.query.Select("rebuild")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `values` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Values) {
+			q = q.Arg("values", opts[i].Values)
+		}
+	}
+	q = q.Arg("workspace", workspace)
 
 	return &Rebuild{
 		query: q,
 	}
 }
 
-// Rebuild holds no state.
+// Rebuild is the module. It holds what every run reads from the machine that
+// starts it, since a Dagger function can't read the host: this repository's
+// workspace and the values checkout.
 type Rebuild struct { // rebuild (../../../:0:0)
 	query *querybuilder.Selection
 
+	down        *string
 	goPipeline  *Void
 	id          *ID
+	preflight   *string
 	runCoverage *Void
+	up          *string
 }
 
 func (r *Rebuild) WithGraphQLQuery(q *querybuilder.Selection) *Rebuild {
@@ -43,6 +65,40 @@ func (r *Rebuild) CacheProbe() *RebuildCacheProbe {
 	return &RebuildCacheProbe{
 		query: q,
 	}
+}
+
+// RebuildDownOpts contains options for Rebuild.Down
+type RebuildDownOpts struct {
+	// The target's name, to confirm the teardown. The live target refuses
+	// without it. A drill doesn't need it, but refuses a name that isn't its
+	// own.
+	Confirm string
+}
+
+// Down tears down every phase against the target, in reverse order, so phase
+// 0 is torn down last. It stops at the first teardown that fails, leaving the
+// phases before it in place. It's safe to run again after it fails partway,
+// and it succeeds when there's nothing left to remove.
+//
+// Against the live target it refuses unless --confirm names the target, and
+// refuses uncommitted changes, as up does.
+func (r *Rebuild) Down(ctx context.Context, target string, opts ...RebuildDownOpts) (string, error) {
+	if r.down != nil {
+		return *r.down, nil
+	}
+	q := r.query.Select("down")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `confirm` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Confirm) {
+			q = q.Arg("confirm", opts[i].Confirm)
+		}
+	}
+	q = q.Arg("target", target)
+
+	var response string
+
+	q = q.Bind(&response)
+	return response, q.Execute(ctx)
 }
 
 // GoPipeline runs devex's z5labs Go pipeline over the module's Go and the
@@ -116,6 +172,24 @@ func (r *Rebuild) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
+// Preflight runs only the preflight check against the target, as up does
+// before it applies anything, and changes nothing. It passes against a target
+// with no state backend, as a rebuild from nothing. It fails when the target's
+// last run is unfinished, and when a phase that run applied no longer
+// verifies, which is drift.
+func (r *Rebuild) Preflight(ctx context.Context, target string) (string, error) {
+	if r.preflight != nil {
+		return *r.preflight, nil
+	}
+	q := r.query.Select("preflight")
+	q = q.Arg("target", target)
+
+	var response string
+
+	q = q.Bind(&response)
+	return response, q.Execute(ctx)
+}
+
 // RunCoverage fails when the statement coverage of rebuild/run/, the phase
 // model, drops below 80%. It is a library package, and the repository holds
 // every library package to that floor.
@@ -135,6 +209,61 @@ func (r *Rebuild) RunCoverage(ctx context.Context, callingWorkspace *Workspace) 
 	q = q.Arg("callingWorkspace", callingWorkspace)
 
 	return q.Execute(ctx)
+}
+
+// RebuildUpOpts contains options for Rebuild.Up
+type RebuildUpOpts struct {
+	// Continue the target's unfinished run instead of starting a new one,
+	// whether it paused at a checkpoint, stopped where --through said, or
+	// failed. It verifies every phase the run has verified so far, then
+	// continues from the first one it hasn't.
+	Resume bool
+	// The last phase to run, such as 0 or 1a. Without it, up runs through the
+	// last phase in the order.
+	Through string
+	// Run on from one phase to the next without stopping at the checkpoint
+	// between them, as CI and drills do. Each phase's verify is then the only
+	// gate.
+	NoPause bool
+}
+
+// Up runs the rebuild against the target: the preflight check, then each
+// phase's apply and verify, in order. After each phase verifies, it writes the
+// run's record and stops at a checkpoint, and returns the run's summary: what
+// the phase made, how long it took and the run's time so far. Continue the run
+// with --resume, or tear the target down with down.
+//
+// A failed apply or verify stops the run at once, and fails the call with what
+// failed and the summary. The target is left as it is to look at; --resume
+// applies the failed phase again, and down is always the way back to nothing.
+//
+// Against the live target, it refuses uncommitted changes, in this repository
+// or in the values checkout.
+func (r *Rebuild) Up(ctx context.Context, target string, opts ...RebuildUpOpts) (string, error) {
+	if r.up != nil {
+		return *r.up, nil
+	}
+	q := r.query.Select("up")
+	for i := len(opts) - 1; i >= 0; i-- {
+		// `resume` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Resume) {
+			q = q.Arg("resume", opts[i].Resume)
+		}
+		// `through` optional argument
+		if !querybuilder.IsZeroValue(opts[i].Through) {
+			q = q.Arg("through", opts[i].Through)
+		}
+		// `noPause` optional argument
+		if !querybuilder.IsZeroValue(opts[i].NoPause) {
+			q = q.Arg("noPause", opts[i].NoPause)
+		}
+	}
+	q = q.Arg("target", target)
+
+	var response string
+
+	q = q.Bind(&response)
+	return response, q.Execute(ctx)
 }
 
 // CacheProbe runs one command, which prints a random UUID, through each of the

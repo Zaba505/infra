@@ -23,6 +23,14 @@ func (t *Tests) All(ctx context.Context) error {
 	return parallel.New().
 		WithJob("an exec that touches a target runs on every call", t.TargetExecIsNeverCached).
 		WithJob("an exec that may cache comes from the cache", t.CachedExecIsCached).
+		WithJob("up against a drill with no phases finishes", t.UpAgainstDrillFinishes).
+		WithJob("up against the live target with committed values finishes", t.UpAgainstLiveWithCommittedValuesFinishes).
+		WithJob("up against the live target with uncommitted values is refused", t.UpAgainstLiveWithUncommittedValuesIsRefused).
+		WithJob("down against the live target is refused without --confirm", t.DownAgainstLiveIsRefusedWithoutConfirm).
+		WithJob("a target with no file in the values checkout is refused", t.TargetWithNoFileIsRefused).
+		WithJob("up against the live target from an uncommitted workspace is refused", t.UpAgainstLiveFromAnUncommittedWorkspaceIsRefused).
+		WithJob("an uncommitted edit keeps the live target live", t.AnUncommittedEditKeepsTheLiveTargetLive).
+		WithJob("more than one live target is refused", t.MoreThanOneLiveTargetIsRefused).
 		Run(ctx)
 }
 
@@ -32,11 +40,11 @@ func (t *Tests) All(ctx context.Context) error {
 //
 // +cache="never"
 func (t *Tests) TargetExecIsNeverCached(ctx context.Context) error {
-	first, err := dag.Rebuild().CacheProbe().Fresh(ctx)
+	first, err := rebuild(nil).CacheProbe().Fresh(ctx)
 	if err != nil {
 		return err
 	}
-	second, err := dag.Rebuild().CacheProbe().Fresh(ctx)
+	second, err := rebuild(nil).CacheProbe().Fresh(ctx)
 	if err != nil {
 		return err
 	}
@@ -53,11 +61,11 @@ func (t *Tests) TargetExecIsNeverCached(ctx context.Context) error {
 //
 // +cache="never"
 func (t *Tests) CachedExecIsCached(ctx context.Context) error {
-	first, err := dag.Rebuild().CacheProbe().Cached(ctx)
+	first, err := rebuild(nil).CacheProbe().Cached(ctx)
 	if err != nil {
 		return err
 	}
-	second, err := dag.Rebuild().CacheProbe().Cached(ctx)
+	second, err := rebuild(nil).CacheProbe().Cached(ctx)
 	if err != nil {
 		return err
 	}

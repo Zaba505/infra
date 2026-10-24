@@ -63,8 +63,11 @@ linters:
         # of the two helpers in rebuild/exec.go: targetExec, which puts a
         # fresh nonce on an exec that reads or changes a target so it is
         # never served from the cache, or cachedExec, for work that may
-        # cache. Those two calls carry the only nolint:forbidigo for this
-        # rule. See the rebuild entry point proposal, #987.
+        # cache. Those two calls carry the module's only nolint:forbidigo for
+        # this rule. The tests module has one more, fixtureExec in
+        # rebuild/tests/fixture.go, which makes the git repositories its tests
+        # run against and touches no target. See the rebuild entry point
+        # proposal, #987.
         #
         # It covers WithExec, the way the module runs a command to
         # completion. A long-running service started with AsService is not
