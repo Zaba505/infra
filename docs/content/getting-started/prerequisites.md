@@ -6,7 +6,7 @@ weight: 10
 
 The rebuild entry point is a Dagger module in this repository. Everything it
 runs, it runs in containers it puts together, so the machine that calls it needs
-only two things.
+only two tools, and the module needs to know where the values checkout is.
 
 ## The Dagger CLI
 
@@ -36,9 +36,38 @@ of a run in containers of its own. Any runtime the Dagger CLI can start the
 engine with works, such as Docker or Podman. The CLI starts the engine on the
 first call and reuses it after that.
 
+## The values checkout {#the-values-checkout}
+
+The values checkout is a git repository of its own, outside this one. It holds
+a file per target, `targets/<name>.yaml`, which says whether the target is live
+or a drill:
+
+```text
+targets/
+  live.yaml     kind: live
+  drill.yaml    kind: drill
+```
+
+A Dagger function can't read the machine it's called from, so the module takes
+the checkout as an argument. Set it once, from this repository's checkout, as a
+user-level Dagger setting:
+
+```sh
+dagger settings -g rebuild values ../infra-values
+```
+
+`-g` keeps the setting out of the repository: Dagger writes it to
+`~/.config/dagger/config.toml`, keyed by this repository's git remote, so
+nothing about your machine is committed. Every `dagger call` in a checkout of
+this repository then uses it. Check it with:
+
+```sh
+dagger settings rebuild
+```
+
 ## To work on the module
 
 Go is needed only to change the module's code, not to run it. The module's
 `go.mod` files name the Go version.
 
-Next: [Fundamentals]({{< ref "/fundamentals/_index.md" >}})
+Next: [A first drill]({{< ref "/getting-started/first-drill.md" >}})

@@ -60,16 +60,26 @@ func convertSlice[I any, O any](in []I, f func(I) O) []O {
 }
 
 func (r Rebuild) MarshalJSON() ([]byte, error) {
-	var concrete struct{}
+	var concrete struct {
+		Workspace *dagger.Workspace
+		Values    *dagger.GitRepository
+	}
+	concrete.Workspace = r.Workspace
+	concrete.Values = r.Values
 	return json.Marshal(&concrete)
 }
 
 func (r *Rebuild) UnmarshalJSON(bs []byte) error {
-	var concrete struct{}
+	var concrete struct {
+		Workspace *dagger.Workspace
+		Values    *dagger.GitRepository
+	}
 	err := json.Unmarshal(bs, &concrete)
 	if err != nil {
 		return err
 	}
+	r.Workspace = concrete.Workspace
+	r.Values = concrete.Values
 	return nil
 }
 
@@ -232,6 +242,27 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
 			}
 			return (*Rebuild).CacheProbe(&parent), nil
+		case "Down":
+			var parent Rebuild
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var target string
+			if inputArgs["target"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["target"]), &target)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg target", err))
+				}
+			}
+			var confirm string
+			if inputArgs["confirm"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["confirm"]), &confirm)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg confirm", err))
+				}
+			}
+			return (*Rebuild).Down(&parent, ctx, target, confirm)
 		case "GoPipeline":
 			var parent Rebuild
 			err = json.Unmarshal(parentJSON, &parent)
@@ -246,6 +277,20 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				}
 			}
 			return nil, (*Rebuild).GoPipeline(&parent, ctx, callingWorkspace)
+		case "Preflight":
+			var parent Rebuild
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var target string
+			if inputArgs["target"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["target"]), &target)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg target", err))
+				}
+			}
+			return (*Rebuild).Preflight(&parent, ctx, target)
 		case "RunCoverage":
 			var parent Rebuild
 			err = json.Unmarshal(parentJSON, &parent)
@@ -260,19 +305,83 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				}
 			}
 			return nil, (*Rebuild).RunCoverage(&parent, ctx, callingWorkspace)
+		case "Up":
+			var parent Rebuild
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var target string
+			if inputArgs["target"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["target"]), &target)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg target", err))
+				}
+			}
+			var resume bool
+			if inputArgs["resume"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["resume"]), &resume)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg resume", err))
+				}
+			}
+			var through string
+			if inputArgs["through"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["through"]), &through)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg through", err))
+				}
+			}
+			var noPause bool
+			if inputArgs["noPause"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["noPause"]), &noPause)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg noPause", err))
+				}
+			}
+			return (*Rebuild).Up(&parent, ctx, target, resume, through, noPause)
+		case "":
+			var parent Rebuild
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var workspace *dagger.Workspace
+			if inputArgs["workspace"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["workspace"]), &workspace)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg workspace", err))
+				}
+			}
+			var values *dagger.GitRepository
+			if inputArgs["values"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["values"]), &values)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg values", err))
+				}
+			}
+			return New(workspace, values), nil
 		default:
 			return nil, fmt.Errorf("unknown function %s", fnName)
 		}
 	case "":
 		return dag.Module().
-			WithDescription("Rebuild is the platform's rebuild entry point: the Dagger module that\nstands the platform up from this repository, and tears it down again.\n\nIt lands its commands in later stories. Today it holds the rule every one\nof them depends on — an exec that reads or changes a target never comes from\nthe cache — and the checks that hold the module's Go to the repository's\nrules.\n").
+			WithDescription("Rebuild is the platform's rebuild entry point: the Dagger module that\nstands the platform up from this repository, and tears it down again.\n\nIts commands are up, down and preflight, each against one named target:\n\n\tdagger call up        --target <name> [--resume] [--through <phase>] [--no-pause]\n\tdagger call down      --target <name> [--confirm <name>]\n\tdagger call preflight --target <name>\n\nEach is a thin layer over rebuild/run/, the phase model, which imports\nnothing from Dagger. The module reads the target from the values checkout,\nbuilds the phases in rebuild/phases.go, and hands both to run. It also holds\nthe rule every phase depends on — an exec that reads or changes a target\nnever comes from the cache — and the checks that hold the module's Go to the\nrepository's rules.\n").
 			WithObject(
-				dag.TypeDef().WithObject("Rebuild", dagger.TypeDefWithObjectOpts{Description: "Rebuild holds no state.", SourceMap: dag.SourceMap("main.go", 17, 6)}).
+				dag.TypeDef().WithObject("Rebuild", dagger.TypeDefWithObjectOpts{Description: "Rebuild is the module. It holds what every run reads from the machine that\nstarts it, since a Dagger function can't read the host: this repository's\nworkspace and the values checkout.", SourceMap: dag.SourceMap("main.go", 27, 6)}).
 					WithFunction(
 						dag.Function("CacheProbe",
 							dag.TypeDef().WithObject("CacheProbe")).
 							WithDescription("CacheProbe returns the probe the tests module uses to show what each of the\nmodule's two exec helpers does with the cache. It touches no target.\n\nIt is for the module's tests, not part of the rebuild interface. It is\npublic only because a tests module can reach nothing else.").
-							WithSourceMap(dag.SourceMap("main.go", 28, 1))).
+							WithSourceMap(dag.SourceMap("main.go", 68, 1))).
+					WithFunction(
+						dag.Function("Down",
+							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
+							WithDescription("Down tears down every phase against the target, in reverse order, so phase\n0 is torn down last. It stops at the first teardown that fails, leaving the\nphases before it in place. It's safe to run again after it fails partway,\nand it succeeds when there's nothing left to remove.\n\nAgainst the live target it refuses unless --confirm names the target, and\nrefuses uncommitted changes, as up does.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 81, 1)).
+							WithArg("target", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The target to tear down: the name of a file in the values checkout's\ntargets/ directory, without .yaml. There is no default.", SourceMap: dag.SourceMap("commands.go", 85, 2)}).
+							WithArg("confirm", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind).WithOptional(true), dagger.FunctionWithArgOpts{Description: "The target's name, to confirm the teardown. The live target refuses\nwithout it. A drill doesn't need it, but refuses a name that isn't its\nown.", SourceMap: dag.SourceMap("commands.go", 91, 2)})).
 					WithFunction(
 						dag.Function("GoPipeline",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
@@ -282,27 +391,51 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 							WithCheck().
 							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 39, 2)})).
 					WithFunction(
+						dag.Function("Preflight",
+							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
+							WithDescription("Preflight runs only the preflight check against the target, as up does\nbefore it applies anything, and changes nothing. It passes against a target\nwith no state backend, as a rebuild from nothing. It fails when the target's\nlast run is unfinished, and when a phase that run applied no longer\nverifies, which is drift.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 114, 1)).
+							WithArg("target", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The target to check: the name of a file in the values checkout's\ntargets/ directory, without .yaml. There is no default.", SourceMap: dag.SourceMap("commands.go", 118, 2)})).
+					WithFunction(
 						dag.Function("RunCoverage",
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
 							WithDescription("RunCoverage fails when the statement coverage of rebuild/run/, the phase\nmodel, drops below 80%. It is a library package, and the repository holds\nevery library package to that floor.\n\nIt runs go test over rebuild/run/ and the packages under it with the\ncoverage of all of them counted, so a test helper package is measured by\nthe tests that use it.\n\nIt touches no target, so its execs may cache. It is never cached itself, for\nGoPipeline's reason: the workspace is a live view of the tree.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
 							WithSourceMap(dag.SourceMap("checks.go", 87, 1)).
 							WithCheck().
-							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 91, 2)}))).
+							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 91, 2)})).
+					WithFunction(
+						dag.Function("Up",
+							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
+							WithDescription("Up runs the rebuild against the target: the preflight check, then each\nphase's apply and verify, in order. After each phase verifies, it writes the\nrun's record and stops at a checkpoint, and returns the run's summary: what\nthe phase made, how long it took and the run's time so far. Continue the run\nwith --resume, or tear the target down with down.\n\nA failed apply or verify stops the run at once, and fails the call with what\nfailed and the summary. The target is left as it is to look at; --resume\napplies the failed phase again, and down is always the way back to nothing.\n\nAgainst the live target, it refuses uncommitted changes, in this repository\nor in the values checkout.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("commands.go", 24, 1)).
+							WithArg("target", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind), dagger.FunctionWithArgOpts{Description: "The target to run against: the name of a file in the values checkout's\ntargets/ directory, without .yaml. There is no default.", SourceMap: dag.SourceMap("commands.go", 28, 2)}).
+							WithArg("resume", dag.TypeDef().WithKind(dagger.TypeDefKindBooleanKind).WithOptional(true), dagger.FunctionWithArgOpts{Description: "Continue the target's unfinished run instead of starting a new one,\nwhether it paused at a checkpoint, stopped where --through said, or\nfailed. It verifies every phase the run has verified so far, then\ncontinues from the first one it hasn't.", SourceMap: dag.SourceMap("commands.go", 35, 2)}).
+							WithArg("through", dag.TypeDef().WithKind(dagger.TypeDefKindStringKind).WithOptional(true), dagger.FunctionWithArgOpts{Description: "The last phase to run, such as 0 or 1a. Without it, up runs through the\nlast phase in the order.", SourceMap: dag.SourceMap("commands.go", 40, 2)}).
+							WithArg("noPause", dag.TypeDef().WithKind(dagger.TypeDefKindBooleanKind).WithOptional(true), dagger.FunctionWithArgOpts{Description: "Run on from one phase to the next without stopping at the checkpoint\nbetween them, as CI and drills do. Each phase's verify is then the only\ngate.", SourceMap: dag.SourceMap("commands.go", 46, 2)})).
+					WithConstructor(
+						dag.Function("New",
+							dag.TypeDef().WithObject("Rebuild")).
+							WithDescription("New returns the module.").
+							WithSourceMap(dag.SourceMap("main.go", 44, 1)).
+							WithArg("workspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "This repository's workspace. The Dagger CLI fills it in from the\nworkspace the call runs in.", SourceMap: dag.SourceMap("main.go", 47, 2)}).
+							WithArg("values", dag.TypeDef().WithObject("GitRepository").WithOptional(true), dagger.FunctionWithArgOpts{Description: "The values checkout, a git repository holding a file per target,\ntargets/<name>.yaml. Set it once, outside this repository, with\ndagger settings -g rebuild values <path>. up, down and preflight refuse\nto run without it; the module's checks don't need it.", SourceMap: dag.SourceMap("main.go", 54, 2)}))).
 			WithObject(
-				dag.TypeDef().WithObject("CacheProbe", dagger.TypeDefWithObjectOpts{Description: "CacheProbe runs one command, which prints a random UUID, through each of the\nmodule's exec helpers. Both of its functions are never cached themselves, so\nthe only thing that can hand a second call the first call's UUID is the\ncache of the exec underneath.", SourceMap: dag.SourceMap("main.go", 36, 6)}).
+				dag.TypeDef().WithObject("CacheProbe", dagger.TypeDefWithObjectOpts{Description: "CacheProbe runs one command, which prints a random UUID, through each of the\nmodule's exec helpers. Both of its functions are never cached themselves, so\nthe only thing that can hand a second call the first call's UUID is the\ncache of the exec underneath.", SourceMap: dag.SourceMap("main.go", 76, 6)}).
 					WithFunction(
 						dag.Function("Cached",
 							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
 							WithDescription("Cached runs the probe's command through the helper for work that may cache,\nand returns what it printed. A second call prints the first call's UUID.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 51, 1))).
+							WithSourceMap(dag.SourceMap("main.go", 91, 1))).
 					WithFunction(
 						dag.Function("Fresh",
 							dag.TypeDef().WithKind(dagger.TypeDefKindStringKind)).
 							WithDescription("Fresh runs the probe's command through the helper for execs that read or\nchange a target, and returns what it printed. Two calls print two different\nUUIDs.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("main.go", 43, 1)))), nil
+							WithSourceMap(dag.SourceMap("main.go", 83, 1)))), nil
 	default:
 		return nil, fmt.Errorf("unknown object %s", parentName)
 	}
