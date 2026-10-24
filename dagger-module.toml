@@ -1,0 +1,13 @@
+name = "rebuild"
+engineVersion = "v1.0.0-beta.15"
+source = "rebuild"
+
+[runtime]
+  source = "go"
+
+[[dependencies]]
+  name = "z5labs"
+  source = "github.com/z5labs/devex/daggerverse/z5labs@main"
+
+[codegen]
+  automaticGitignore = false

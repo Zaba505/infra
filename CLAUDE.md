@@ -69,9 +69,10 @@ Needs the `project` token scope — `gh auth refresh -s project`.
 
 ## Engineering rules
 
-From the charter. These are enforced in CI rather than by review. Today `Build` runs only the
-docs build, because the repository holds no Go code or infrastructure modules yet; each other
-check is added to `Build` (and to `verify`) by the story that first lands code it applies to.
+From the charter. These are enforced in CI rather than by review. Today `Build` runs the docs
+build and the rebuild module's Dagger checks: `dagger check` (the Go SDK's `dagger-go-sdk:stale`
+and `rebuild:go-pipeline`) and `dagger -m rebuild/tests check --module tests`. Each other check
+is added to `Build` (and to `verify`) by the story that first lands code it applies to.
 
 - **One required check.** A workflow named `Build` (`.github/workflows/build.yaml`) runs every
   check below, and the `default` ruleset requires it. The `verify` commands in
@@ -86,6 +87,13 @@ check is added to `Build` (and to `verify`) by the story that first lands code i
 - **Every vendor and third-party component is justified** in the proposal that adds it. The
   operator must control its configuration, be able to export its data, and be able to revoke its
   credentials.
+- **The rebuild module runs every exec through one of two helpers** in `rebuild/exec.go`:
+  `targetExec`, which puts a fresh nonce on an exec that reads or changes a target so it is
+  never cached, or `cachedExec`, for work that may cache. `.golangci.yml` bans `WithExec`
+  everywhere else. A function that touches a target is also marked `+cache="never"`.
+- **Dagger is pinned.** `engineVersion` in every `dagger-module.toml` and `DAGGER_VERSION` in
+  `Build` move together, `dagger.lock` is committed, and `dagger generate -y` regenerates the
+  bindings. devex's `daggerverse/CLAUDE.md` records the pitfalls of Dagger 1.0 beta.
 
 ## Docs site
 

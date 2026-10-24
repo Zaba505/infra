@@ -8,6 +8,9 @@
     "style": "native"
   },
   "verify": [
+    "dagger check",
+    "dagger -m rebuild/tests check --module tests",
+    "git diff --exit-code -- dagger.lock",
     "cd docs && npm install --no-save --no-audit --no-fund postcss postcss-cli autoprefixer && hugo --gc --minify"
   ],
   "merge": {
@@ -15,7 +18,10 @@
     "workflow": "auto-merge.yaml"
   },
   "review": {
-    "reviewers": ["copilot", "local"],
+    "reviewers": [
+      "copilot",
+      "local"
+    ],
     "app": {
       "idEnv": "ZABA505_REVIEW_APP_ID",
       "keyEnv": "ZABA505_REVIEW_APP_KEY"

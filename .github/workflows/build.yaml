@@ -15,13 +15,64 @@ permissions:
 
 jobs:
   build:
+    # The ruleset requires a check named Build, so this name stays.
     name: Build
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.152.2
+      # The Dagger CLI pin. It moves together with engineVersion in every
+      # dagger-module.toml; the first Dagger step fails when they differ.
+      DAGGER_VERSION: 1.0.0-beta.15
+      DAGGER_PROGRESS: dots
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check the Dagger CLI pin matches the module's engineVersion
+        run: |
+          set -euo pipefail
+          status=0
+          while IFS= read -r -d '' manifest; do
+            pinned=$(sed -n -E 's/^engineVersion[[:space:]]*=[[:space:]]*"v?([^"]+)".*/\1/p' "$manifest")
+            if [ "$pinned" != "$DAGGER_VERSION" ]; then
+              echo "::error file=$manifest::engineVersion is '$pinned' but Build installs the Dagger CLI at '$DAGGER_VERSION'. Move them together."
+              status=1
+            fi
+          done < <(git ls-files -z -- 'dagger-module.toml' '**/dagger-module.toml')
+          exit "$status"
+
+      - name: Install Dagger CLI
+        run: |
+          set -euo pipefail
+          curl -fsSL https://dl.dagger.io/dagger/install.sh \
+            | DAGGER_VERSION="$DAGGER_VERSION" BIN_DIR="$HOME/.local/bin" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # The workspace's checks: the Go SDK's dagger-go-sdk:stale, which fails
+      # when the committed bindings are not what dagger generate writes, and
+      # the rebuild module's go-pipeline, devex's z5labs Go pipeline over the
+      # module's Go.
+      - name: Workspace checks
+        run: dagger check
+
+      - name: Tests module
+        run: dagger -m rebuild/tests check --module tests
+
+      # The engine records every image and git ref it resolves in dagger.lock
+      # and never removes one, so a run that changed it resolved something the
+      # committed pins do not cover.
+      - name: Check dagger.lock is unchanged
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          changed="$(git status --porcelain -- dagger.lock)"
+          if [ -z "$changed" ]; then
+            echo "dagger.lock records everything this run resolved"
+            exit 0
+          fi
+          git --no-pager diff -- dagger.lock
+          echo "::error file=dagger.lock::this run resolved something the committed dagger.lock does not record. Run 'dagger check' and 'dagger -m rebuild/tests check --module tests' locally and commit the dagger.lock they leave behind."
+          exit 1
 
       - name: Install Hugo CLI
         run: |

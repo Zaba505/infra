@@ -1,0 +1,17 @@
+[modules.rebuild]
+source = "."
+entrypoint = true
+
+[modules.dagger-go-sdk]
+source = "github.com/dagger/go-sdk"
+
+[sdks.go]
+module = "dagger-go-sdk"
+
+[sdks.go.scopes."."]
+is-module = true
+clients = ["github.com/z5labs/devex/daggerverse/z5labs@main"]
+
+[sdks.go.scopes."rebuild/tests"]
+clients = ["."]
+is-module = true

@@ -1,0 +1,51 @@
+# The lint policy for every Go module in this repository. The rebuild
+# module's GoPipeline check runs golangci-lint v2 with this file, through
+# devex's z5labs Go pipeline, over rebuild/ and rebuild/tests/.
+#
+# It is written in the v2 dialect: `version: "2"` is the config schema's
+# version, not the tool pin. devex's go module pins the binary.
+version: "2"
+
+run:
+  timeout: 5m
+  # Test code is linted too, and held to the same forbidigo list.
+  tests: true
+
+linters:
+  # The linters devex's bundled policy enables, plus forbidigo.
+  default: none
+  enable:
+    - errcheck
+    - forbidigo
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  settings:
+    forbidigo:
+      # Examples are documentation that people copy, so they are held to the
+      # same rules as everything else.
+      exclude-godoc-examples: false
+      forbid:
+        # bedrock's list. An App reaches its OS process only through the
+        # bedrock.Process it is run with, and exits by returning a
+        # bedrock.ExitStatus.
+        - pattern: ^os\.(Args|Stdin|Stdout|Stderr|Getenv|LookupEnv|Environ|Exit)$
+          msg: read the process through bedrock.Process, and exit by returning a bedrock.ExitStatus
+        - pattern: ^signal\.(Notify|NotifyContext)$
+          msg: listen for signals through bedrock.Process.NotifyContext
+        - pattern: ^flag\.(Parse|CommandLine)$
+          msg: parse p.Args[1:] with a flag.FlagSet of your own, using flag.ContinueOnError and p.Stderr as its output
+        # The rebuild module's rule about execs. Every exec goes through one
+        # of the two helpers in rebuild/exec.go: targetExec, which puts a
+        # fresh nonce on an exec that reads or changes a target so it is
+        # never served from the cache, or cachedExec, for work that may
+        # cache. Those two calls carry the only nolint:forbidigo for this
+        # rule. See the rebuild entry point proposal, #987.
+        - pattern: (^|\.)WithExec$
+          msg: run execs through targetExec, for an exec that reads or changes a target, or cachedExec, for work that may cache; see rebuild/exec.go
+  exclusions:
+    # Generated code is the generator's, and the Go SDK's dagger-go-sdk:stale
+    # check holds it to what the generator writes. This is golangci-lint's
+    # default, stated so that it is a decision rather than an accident.
+    generated: lax
