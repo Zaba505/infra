@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>The platform on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-986/platform/</link><description>Recent content in The platform on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-986/platform/index.xml" rel="self" type="application/rss+xml"/><item><title>Hardware</title><link>https://zaba505.github.io/infra/pr-preview/pr-986/platform/hardware/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-986/platform/hardware/</guid><description>&lt;h2 id="components"&gt;Components&lt;/h2&gt;
+&lt;h3 id="router"&gt;Router&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://store.ui.com/us/en/products/udm-pro"&gt;Ubiquiti Dream Machine Pro&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="switch"&gt;Switch&lt;/h3&gt;
+&lt;p&gt;&lt;a href="https://store.ui.com/us/en/category/all-switching/products/usw-48-poe"&gt;Ubiquiti 48 port PoE&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id="servers"&gt;Servers&lt;/h3&gt;
+&lt;h4 id="hp-dl360---hp-proliant-dl360-gen-9"&gt;hp-dl360 - HP ProLiant DL360 Gen 9&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU: 2 x Intel(R) Xeon(R) CPU E5-2620 v3&lt;/li&gt;
+&lt;li&gt;Mem: 8 x 16GB DDR4-2133 RDIMM&lt;/li&gt;
+&lt;li&gt;Boot: 1 x 250GB Samsung 970 Evo Plus M.2-2280 PCIe 3.0 NVME&lt;/li&gt;
+&lt;li&gt;Storage: 4 x 1TB Samsung 870 Evo&lt;/li&gt;
+&lt;li&gt;Power: 2 x HP 500W Flex Slot Platinum Power Supply&lt;/li&gt;
+&lt;li&gt;Accelerator: N/A&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id="camd-ryzen5---custom-pc"&gt;camd-ryzen5 - Custom PC&lt;/h4&gt;
+&lt;ul&gt;
+&lt;li&gt;CPU: 1 x Ryzen 5 5600X&lt;/li&gt;
+&lt;li&gt;Mem: 2 x 8GB DDR4-3600 CL19&lt;/li&gt;
+&lt;li&gt;Boot: N/A&lt;/li&gt;
+&lt;li&gt;Storage: 1 x 1TB Samsung 970 Evo Plus M.2-2280 PCIe 3.0 NVME&lt;/li&gt;
+&lt;li&gt;Power: 1 x EVGA SuperNOVA 750 GT 750 W 80+ Gold&lt;/li&gt;
+&lt;li&gt;Accelerator: 1 x Gigabyte EAGLE Radeon RX 6700 XT 12 GB&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="network-topology"&gt;Network Topology&lt;/h2&gt;
+&lt;pre class="mermaid"&gt;flowchart TB
+ router@{ label: &amp;#34;Router&amp;#34;, shape: circle }
+ switch@{ label: &amp;#34;Switch&amp;#34;, shape: circle }
+ server_a@{ label: &amp;#34;hp-dl360&amp;#34;, shape: rect }
+ server_b@{ label: &amp;#34;hp-dl360&amp;#34;, shape: rect }
+ server_c@{ label: &amp;#34;camd-ryzen5&amp;#34;, shape: rect }
+
+ subgraph one [IPMI VLAN]
+ server_a_ipmi@{ label: &amp;#34;hp-dl360 IPMI Interface&amp;#34;, shape: terminal }
+ server_b_ipmi@{ label: &amp;#34;hp-dl360 IPMI Interface&amp;#34;, shape: terminal }
+ end
+
+ subgraph two [Homelab VLAN]
+ server_a_port2@{ label: &amp;#34;hp-dl360 Port 2&amp;#34;, shape: terminal }
+ server_a_port3@{ label: &amp;#34;hp-dl360 Port 3&amp;#34;, shape: terminal }
+ server_a_port4@{ label: &amp;#34;hp-dl360 Port 4&amp;#34;, shape: terminal }
+ server_b_port2@{ label: &amp;#34;hp-dl360 Port 2&amp;#34;, shape: terminal }
+ server_b_port3@{ label: &amp;#34;hp-dl360 Port 3&amp;#34;, shape: terminal }
+ server_b_port4@{ label: &amp;#34;hp-dl360 Port 4&amp;#34;, shape: terminal }
+ server_c_port@{ label: &amp;#34;camd-ryzen5 Port&amp;#34;, shape: terminal }
+ end
+
+ subgraph three [Network Boot VLAN]
+ server_a_port1@{ label: &amp;#34;hp-dl360 Port 1&amp;#34;, shape: terminal }
+ server_b_port1@{ label: &amp;#34;hp-dl360 Port 1&amp;#34;, shape: terminal }
+ end
+
+ router --- switch
+
+ switch --- server_a_ipmi
+ switch --- server_a_port1
+ switch --- server_a_port2
+ switch --- server_a_port3
+ switch --- server_a_port4
+
+ server_a_ipmi --- server_a
+ server_a_port1 --- server_a
+ server_a_port2 --- server_a
+ server_a_port3 --- server_a
+ server_a_port4 --- server_a
+
+ switch --- server_b_ipmi
+ switch --- server_b_port1
+ switch --- server_b_port2
+ switch --- server_b_port3
+ switch --- server_b_port4
+
+ server_b_ipmi --- server_b
+ server_b_port1 --- server_b
+ server_b_port2 --- server_b
+ server_b_port3 --- server_b
+ server_b_port4 --- server_b
+
+ switch --- server_c_port
+
+ server_c_port --- server_c&lt;/pre&gt;
+&lt;h3 id="ipmi-vlan"&gt;IPMI VLAN&lt;/h3&gt;
+&lt;p&gt;This VLAN groups the &lt;a href="https://en.wikipedia.org/wiki/Intelligent_Platform_Management_Interface"&gt;IPMI&lt;/a&gt;
+or IPMI-like interfaces for all servers in the homelab so that each machine
+can be remotely accessed. Most importantly, this access can be restricted via
+VLAN firewall rules.&lt;/p&gt;</description></item></channel></rss>
