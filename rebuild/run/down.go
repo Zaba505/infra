@@ -26,6 +26,10 @@ func Confirm(name string) DownOption {
 // the state backend, and removing it while later phases still stand would lose
 // what they are.
 //
+// Down keeps no record of its own. Phase 0's teardown removes the state
+// backend and the records in it, so a Down that finishes leaves the target as
+// a rebuild from nothing; see Store.
+//
 // Every Teardown succeeds when there's nothing left to remove, so Down
 // succeeds against a target with nothing on it, including one Apply never ran
 // against, and it's safe to run again after it fails partway.
@@ -47,7 +51,7 @@ func Down(ctx context.Context, target Target, phases []Phase, opts ...DownOption
 	case o.confirm != "" && o.confirm != target.Name():
 		return fmt.Errorf("%w: confirmed with %q, but the target is %q", ErrNotConfirmed, o.confirm, target.Name())
 	case o.confirm == "" && target.Kind() == Live:
-		return fmt.Errorf("%w: confirm with %q to tear it down", ErrNotConfirmed, target.Name())
+		return fmt.Errorf("%w: %s is the live target; confirm with %q to tear it down", ErrNotConfirmed, target.Name(), target.Name())
 	}
 
 	r, err := newRun(ctx, target, true)

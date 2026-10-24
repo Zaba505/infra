@@ -30,12 +30,14 @@ linters:
         # Dagger, and their tests run without an engine. See the rebuild entry
         # point proposal, #987.
         #
-        # The glob matches the file's absolute path, which is /src/run/... in
-        # devex's Go pipeline and .../rebuild/run/... in a local checkout. No
-        # other directory in either Go module is named run.
+        # The globs match the file's absolute path. devex's Go pipeline mounts
+        # rebuild/ at /src, so there it is /src/run/...; in a local checkout it
+        # is .../rebuild/run/.... Neither matches a file outside rebuild/run/,
+        # wherever the checkout is.
         run-imports-nothing-from-dagger:
           files:
-            - "**/run/**"
+            - "/src/run/**"
+            - "**/rebuild/run/**"
           deny:
             - pkg: dagger.io
               desc: rebuild/run/ imports nothing from Dagger

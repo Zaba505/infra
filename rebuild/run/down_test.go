@@ -89,6 +89,9 @@ func TestDown_AgainstTheLiveTargetRefusesWithoutItsName(t *testing.T) {
 			err := run.Down(t.Context(), target, phases(nil), opts...)
 			require.ErrorIs(t, err, run.ErrNotConfirmed)
 			require.Empty(t, target.Calls())
+			if len(opts) == 0 || name == "confirmed with blank" {
+				require.ErrorContains(t, err, `live is the live target; confirm with "live"`)
+			}
 		})
 	}
 }
@@ -105,7 +108,10 @@ func TestDown_AgainstADrillNeedsNoConfirmationButRefusesTheWrongName(t *testing.
 
 	require.NoError(t, run.Down(t.Context(), target, phases(nil)))
 	require.NoError(t, run.Down(t.Context(), target, phases(nil), run.Confirm("scratch")))
-	require.ErrorIs(t, run.Down(t.Context(), target, phases(nil), run.Confirm("prod")), run.ErrNotConfirmed)
+	err := run.Down(t.Context(), target, phases(nil), run.Confirm("prod"))
+	require.ErrorIs(t, err, run.ErrNotConfirmed)
+	require.ErrorContains(t, err, `confirmed with "prod", but the target is "scratch"`)
+	require.NotContains(t, err.Error(), "live")
 	require.Len(t, target.Calls(), 6)
 }
 
@@ -124,4 +130,41 @@ func TestDown_StopsWhenTheTargetsSourceCannotBeRead(t *testing.T) {
 
 	require.ErrorIs(t, run.Down(t.Context(), target, phases(nil)), errBroken)
 	require.Empty(t, target.Calls())
+}
+
+func TestDown_AfterAFailedUpLetsTheNextUpStartFromNothing(t *testing.T) {
+	for _, failing := range order {
+		t.Run(failing, func(t *testing.T) {
+			target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+			opts := map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend()}}
+			opts[failing] = append(opts[failing], runtest.FailVerifyOnce(errNoEdge))
+			failed := phases(opts)
+			require.ErrorIs(t, run.Up(t.Context(), target, failed), errNoEdge)
+			require.ErrorIs(t, run.Up(t.Context(), target, failed), run.ErrUnfinishedRun)
+
+			require.NoError(t, run.Down(t.Context(), target, failed))
+			_, ok, err := run.LastRun(t.Context(), target.Store())
+			require.NoError(t, err)
+			require.False(t, ok, "phase 0's teardown took the records with the backend")
+
+			require.NoError(t, run.Up(t.Context(), target, failed))
+			require.True(t, lastRun(t, target).Finished)
+		})
+	}
+}
+
+func TestDown_ThatFailedPartwayKeepsTheNextUpOffWhatIsLeft(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+	ps := phases(map[string][]runtest.PhaseOption{
+		"0":  {runtest.ProvidesBackend()},
+		"1a": {runtest.FailTeardownOnce(errBroken)},
+		"1b": {runtest.FailVerify(errNoEdge)},
+	})
+	require.ErrorIs(t, run.Up(t.Context(), target, ps), errNoEdge)
+
+	require.ErrorIs(t, run.Down(t.Context(), target, ps), errBroken)
+	require.ErrorIs(t, run.Up(t.Context(), target, ps), run.ErrUnfinishedRun)
+
+	require.NoError(t, run.Down(t.Context(), target, ps))
+	require.Empty(t, target.Left())
 }

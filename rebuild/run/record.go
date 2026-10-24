@@ -18,6 +18,12 @@ var ErrNoBackend = errors.New("the target has no state backend")
 
 // A Store keeps a target's run records, in the target's state backend. Phase
 // 0's proposal provides the real one; the tests use runtest's in-memory one.
+//
+// The state backend is phase 0's: its Apply makes it and its Teardown removes
+// it, records and all. So a Down that succeeds leaves no record behind, and
+// the next Up's preflight check passes as a rebuild from nothing. A Down that
+// fails partway leaves phase 0, and with it the unfinished record that keeps
+// the next Up from building on what's left.
 type Store interface {
 	// Records returns every record the target holds, oldest first. It
 	// returns ErrNoBackend when the target has no state backend.
@@ -145,12 +151,14 @@ func records(ctx context.Context, store Store) ([]Record, error) {
 	return recs, nil
 }
 
-// write saves rec. A target with no state backend has nowhere to keep it,
-// which is the case until phase 0 has made one, so that is not a failure:
-// the target then holds nothing a later run would need explained.
-func write(ctx context.Context, store Store, rec Record) error {
+// write saves rec. Until phase 0 has made the target's state backend there is
+// nowhere to keep it, and that is not a failure when beforeBackend says the
+// run hasn't got that far: the target then holds nothing a later run would
+// need explained. Once phase 0 has verified, a target with no backend is one
+// whose record would be lost, so the run stops.
+func write(ctx context.Context, store Store, rec Record, beforeBackend bool) error {
 	err := store.Write(ctx, rec)
-	if err == nil || errors.Is(err, ErrNoBackend) {
+	if err == nil || beforeBackend && errors.Is(err, ErrNoBackend) {
 		return nil
 	}
 	return fmt.Errorf("writing run %s's record: %w", rec.ID, err)

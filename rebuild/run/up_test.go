@@ -235,15 +235,72 @@ func TestUp_ADrillMayRunFromUncommittedChangesAndItsRecordSaysSo(t *testing.T) {
 	}
 }
 
-func TestUp_WithNoStateBackendRunsAndKeepsNoRecord(t *testing.T) {
+func TestUp_KeepsItsRecordOncePhaseZeroHasMadeTheStateBackend(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+	ps := phases(map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend()}})
+
+	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.Len(t, target.Calls(), 6)
+	rec := lastRun(t, target)
+	require.True(t, rec.Finished)
+	require.Len(t, rec.Phases, 3)
+}
+
+func TestUp_WithNoStateBackendAndNoPhasesFinishesWithNothingToKeep(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
 
-	require.NoError(t, run.Up(t.Context(), target, phases(nil)))
-	require.Len(t, target.Calls(), 6)
+	require.NoError(t, run.Up(t.Context(), target, nil))
 	_, ok, err := run.LastRun(t.Context(), target.Store())
 	require.NoError(t, err)
 	require.False(t, ok)
 }
+
+func TestUp_AFailedFirstPhaseNeedsNoStateBackendToStop(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+	ps := phases(map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend(), runtest.FailApply(errNoEdge)}})
+
+	err := run.Up(t.Context(), target, ps)
+	require.ErrorIs(t, err, errNoEdge)
+	require.NotErrorIs(t, err, run.ErrNoBackend)
+	require.Equal(t, []string{"0 apply"}, target.Calls())
+}
+
+func TestUp_StopsWhenThereIsStillNoStateBackendAfterPhaseZero(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+
+	err := run.Up(t.Context(), target, phases(nil))
+	require.ErrorIs(t, err, run.ErrNoBackend)
+	require.Equal(t, []string{"0 apply", "0 verify"}, target.Calls(), "no later phase runs unrecorded")
+}
+
+func TestUp_RecordsWhereItStoppedWhenItsContextIsCancelled(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	ps := []run.Phase{runtest.Phase("0"), cancelling{name: "1a", cancel: cancel}, runtest.Phase("1b")}
+
+	err := run.Up(ctx, target, ps)
+	require.ErrorIs(t, err, context.Canceled)
+	rec := lastRun(t, target)
+	require.Equal(t, &run.Stop{Phase: "1a", Step: run.StepApply, Error: context.Canceled.Error()}, rec.Stopped)
+}
+
+// cancelling is a phase whose Apply cancels the run's context, as an operator
+// interrupting the run does, and fails with the context's error.
+type cancelling struct {
+	name   string
+	cancel context.CancelFunc
+}
+
+func (c cancelling) Name() string { return c.name }
+
+func (c cancelling) Apply(ctx context.Context, _ *run.Run) error {
+	c.cancel()
+	return ctx.Err()
+}
+
+func (c cancelling) Verify(context.Context, *run.Run) error   { return nil }
+func (c cancelling) Teardown(context.Context, *run.Run) error { return nil }
 
 func TestUp_StopsWhenItsRecordCannotBeWritten(t *testing.T) {
 	for name, tc := range map[string]struct {

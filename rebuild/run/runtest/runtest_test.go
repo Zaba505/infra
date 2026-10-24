@@ -121,6 +121,34 @@ func TestStore_WithNoBackendKeepsNothing(t *testing.T) {
 	require.ErrorIs(t, err, run.ErrNoBackend)
 }
 
+func TestStore_FailsOnAContextThatIsDone(t *testing.T) {
+	store := runtest.NewTarget(t, runtest.Drill).Store()
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+
+	require.ErrorIs(t, store.Write(ctx, run.Record{ID: "a"}), context.Canceled)
+	_, err := store.Records(ctx)
+	require.ErrorIs(t, err, context.Canceled)
+}
+
+func TestPhase_ThatProvidesTheBackendMakesItAndTakesItAway(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+	r := &run.Run{Target: target}
+	p := runtest.Phase("0", runtest.ProvidesBackend())
+	ctx := t.Context()
+
+	require.NoError(t, p.Apply(ctx, r))
+	require.NoError(t, target.Store().Write(ctx, run.Record{ID: "a"}))
+	require.NoError(t, p.Teardown(ctx, r))
+	_, err := target.Store().Records(ctx)
+	require.ErrorIs(t, err, run.ErrNoBackend)
+
+	require.NoError(t, p.Apply(ctx, r))
+	recs, err := target.Store().Records(ctx)
+	require.NoError(t, err)
+	require.Empty(t, recs, "the records went with the backend")
+}
+
 // other is a target runtest didn't make.
 type other struct{}
 

@@ -131,7 +131,7 @@ var (
 
 	// ErrNotConfirmed is returned when down against the live target is not
 	// confirmed with the target's name.
-	ErrNotConfirmed = errors.New("down against the live target must be confirmed with the target's name")
+	ErrNotConfirmed = errors.New("down was not confirmed with the target's name")
 
 	// ErrUnfinishedRun is returned by the preflight check when the target's
 	// last run did not finish.

@@ -16,9 +16,13 @@ type upOptions struct {
 }
 
 // Through names the last phase Up runs. Without it, Up runs through the last
-// phase in the order. A run that stops where Through said has not finished,
-// because it hasn't verified the whole rebuild, so it is never the target's
-// last-known-good.
+// phase in the order.
+//
+// A run that stops where Through said has not finished, because it hasn't
+// verified the whole rebuild, so it is never the target's last-known-good. That
+// makes it unfinished, and the preflight check refuses to start a new run on
+// top of it: the next Up stops until the target is torn down. Through is for a
+// drill of the first phases, not for building a target up in steps.
 func Through(phase string) UpOption {
 	return func(o *upOptions) { o.through = phase }
 }
@@ -73,14 +77,19 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) er
 		return err
 	}
 
+	// The record is written whatever became of the run's context, so a run
+	// cancelled partway still records where it stopped.
+	wctx := context.WithoutCancel(ctx)
 	store := target.Store()
 	rec := Record{ID: r.ID, Target: target.Name(), Started: started}
 	rec.measure(o.clock.Now())
-	if err := write(ctx, store, rec); err != nil {
+	// Until the first phase, phase 0, has applied and verified, the target
+	// may have no state backend to keep the record in.
+	if err := write(wctx, store, rec, true); err != nil {
 		return err
 	}
 
-	for _, p := range phases[:last+1] {
+	for i, p := range phases[:last+1] {
 		begun := o.clock.Now()
 		step := StepApply
 		err := p.Apply(ctx, r)
@@ -100,10 +109,10 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) er
 			rec.Stopped = &Stop{Phase: p.Name(), Step: step, Error: err.Error()}
 			return errors.Join(
 				fmt.Errorf("phase %s: %s: %w", p.Name(), step, err),
-				write(ctx, store, rec),
+				write(wctx, store, rec, i == 0),
 			)
 		}
-		if err := write(ctx, store, rec); err != nil {
+		if err := write(wctx, store, rec, false); err != nil {
 			return err
 		}
 	}
@@ -113,7 +122,7 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) er
 	} else {
 		rec.Finished = true
 	}
-	return write(ctx, store, rec)
+	return write(wctx, store, rec, last < 0)
 }
 
 // measure sets the run's time to now, and marks it when it's over the target.

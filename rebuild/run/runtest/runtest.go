@@ -45,7 +45,8 @@ func FailSource(err error) TargetOption {
 }
 
 // NoBackend makes a target with no state backend, as before phase 0 has made
-// one: its store holds no records and keeps none.
+// one: its store holds no records and keeps none until a phase made with
+// ProvidesBackend applies.
 func NoBackend() TargetOption {
 	return func(t *Target) { t.store.backend = false }
 }
@@ -157,10 +158,10 @@ type Store struct {
 var _ run.Store = (*Store)(nil)
 
 // Records returns every record the store holds, oldest first.
-func (s *Store) Records(context.Context) ([]run.Record, error) {
+func (s *Store) Records(ctx context.Context) ([]run.Record, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.check(); err != nil {
+	if err := s.check(ctx); err != nil {
 		return nil, err
 	}
 	recs := make([]run.Record, len(s.records))
@@ -171,10 +172,10 @@ func (s *Store) Records(context.Context) ([]run.Record, error) {
 }
 
 // Write saves rec, replacing the record with the same ID.
-func (s *Store) Write(_ context.Context, rec run.Record) error {
+func (s *Store) Write(ctx context.Context, rec run.Record) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if err := s.check(); err != nil {
+	if err := s.check(ctx); err != nil {
 		return err
 	}
 	if s.writesLeft == 0 {
@@ -194,7 +195,23 @@ func (s *Store) Write(_ context.Context, rec run.Record) error {
 	return nil
 }
 
-func (s *Store) check() error {
+// setBackend makes or removes the store's backend. Removing it removes every
+// record in it.
+func (s *Store) setBackend(on bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.backend = on
+	if !on {
+		s.records = nil
+	}
+}
+
+// check fails a read or a write as a real store would: on a context that's
+// done, on the error FailStore set, or with no backend.
+func (s *Store) check(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	if s.err != nil {
 		return s.err
 	}
@@ -245,6 +262,13 @@ func FailTeardownOnce(err error) PhaseOption {
 	return func(p *FakePhase) { p.teardown = failure{err: err, times: 1} }
 }
 
+// ProvidesBackend makes the phase the one that holds the target's state
+// backend, as phase 0 does: an Apply that passes makes the backend, and a
+// Teardown that passes removes it and every record in it.
+func ProvidesBackend() PhaseOption {
+	return func(p *FakePhase) { p.backend = true }
+}
+
 // Takes makes every Apply and every Verify move clock on by d, as though each
 // took that long.
 func Takes(clock *Clock, d time.Duration) PhaseOption {
@@ -262,6 +286,7 @@ type FakePhase struct {
 	teardown failure
 	clock    *Clock
 	takes    time.Duration
+	backend  bool
 }
 
 var _ run.Phase = (*FakePhase)(nil)
@@ -307,6 +332,14 @@ func (p *FakePhase) do(r *run.Run, method string, f *failure, timed bool) error 
 	}
 	err := f.next()
 	t.call(p.name, method, err)
+	if p.backend && err == nil {
+		switch method {
+		case "apply":
+			t.store.setBackend(true)
+		case "teardown":
+			t.store.setBackend(false)
+		}
+	}
 	return err
 }
 
