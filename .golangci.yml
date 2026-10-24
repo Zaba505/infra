@@ -15,6 +15,7 @@ linters:
   # The linters devex's bundled policy enables, plus forbidigo.
   default: none
   enable:
+    - depguard
     - errcheck
     - forbidigo
     - govet
@@ -22,6 +23,28 @@ linters:
     - staticcheck
     - unused
   settings:
+    depguard:
+      rules:
+        # The phase model is plain Go: the rebuild module builds each phase
+        # with what it needs, so rebuild/run/ and its test helpers never see
+        # Dagger, and their tests run without an engine. See the rebuild entry
+        # point proposal, #987.
+        #
+        # The globs match the file's absolute path. devex's Go pipeline mounts
+        # rebuild/ at /src, so there it is /src/run/...; in a local checkout it
+        # is .../rebuild/run/.... Neither matches a file outside rebuild/run/,
+        # wherever the checkout is.
+        run-imports-nothing-from-dagger:
+          files:
+            - "/src/run/**"
+            - "**/rebuild/run/**"
+          deny:
+            - pkg: dagger.io
+              desc: rebuild/run/ imports nothing from Dagger
+            - pkg: github.com/dagger
+              desc: rebuild/run/ imports nothing from Dagger
+            - pkg: dagger/rebuild/internal
+              desc: rebuild/run/ imports nothing from Dagger, the module's generated bindings included
     forbidigo:
       # Examples are documentation that people copy, so they are held to the
       # same rules as everything else.

@@ -41,9 +41,10 @@ jobs:
           "$HOME/.local/bin/dagger" version | grep -F "v$DAGGER_VERSION"
 
       # The workspace's checks: the Go SDK's dagger-go-sdk:stale, which fails
-      # when the committed bindings are not what dagger generate writes, and
-      # the rebuild module's go-pipeline, devex's z5labs Go pipeline over the
-      # module's Go.
+      # when the committed bindings are not what dagger generate writes; the
+      # rebuild module's go-pipeline, devex's z5labs Go pipeline over the
+      # module's Go; and its run-coverage, which fails when rebuild/run/
+      # drops below 80% statement coverage.
       - name: Workspace checks
         run: dagger check
 

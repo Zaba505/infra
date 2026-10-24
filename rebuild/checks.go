@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"dagger/rebuild/internal/dagger"
+	"dagger/rebuild/internal/gotool"
 )
 
 // The module's Go lives in two Go modules: the module itself, in rebuild/, and
@@ -60,4 +61,66 @@ func goPipeline(ctx context.Context, source *dagger.Directory, lint *dagger.File
 		WithLint(dagger.Z5LabsGoChainWithLintOpts{Config: lint}).
 		WithTest(true).
 		Ci(ctx)
+}
+
+// coverageFloor is the statement coverage, in percent, below which a library
+// package fails the module's checks.
+const coverageFloor = 80.0
+
+// runPackages are the packages RunCoverage holds to coverageFloor: the phase
+// model and its test helpers, measured together.
+const runPackages = "./run/..."
+
+// RunCoverage fails when the statement coverage of rebuild/run/, the phase
+// model, drops below 80%. It is a library package, and the repository holds
+// every library package to that floor.
+//
+// It runs go test over rebuild/run/ and the packages under it with the
+// coverage of all of them counted, so a test helper package is measured by
+// the tests that use it.
+//
+// It touches no target, so its execs may cache. It is never cached itself, for
+// GoPipeline's reason: the workspace is a live view of the tree.
+//
+// +check
+// +cache="never"
+func (m *Rebuild) RunCoverage(
+	ctx context.Context,
+	// The workspace to check. The Dagger CLI fills this in from the workspace
+	// the check runs in.
+	callingWorkspace *dagger.Workspace,
+) error {
+	module := callingWorkspace.Directory(moduleDir, dagger.WorkspaceDirectoryOpts{
+		Exclude: []string{"tests/"},
+	})
+	goMod, err := module.File("go.mod").Contents(ctx)
+	if err != nil {
+		return err
+	}
+	version, err := gotool.GoVersion(goMod)
+	if err != nil {
+		return err
+	}
+	const profile = "/tmp/cover.out"
+	ctr := dag.Container().
+		From("golang:"+version).
+		WithMountedCache("/go/pkg/mod", dag.CacheVolume("rebuild-go-mod")).
+		WithMountedCache("/root/.cache/go-build", dag.CacheVolume("rebuild-go-build")).
+		WithMountedDirectory("/src", module).
+		WithWorkdir("/src")
+	ctr = cachedExec(ctr, []string{
+		"go", "test", "-coverpkg=" + runPackages, "-coverprofile=" + profile, runPackages,
+	})
+	out, err := cachedExec(ctr, []string{"go", "tool", "cover", "-func=" + profile}).Stdout(ctx)
+	if err != nil {
+		return err
+	}
+	total, err := gotool.CoverageTotal(out)
+	if err != nil {
+		return err
+	}
+	if total < coverageFloor {
+		return fmt.Errorf("rebuild/run/ has %.1f%% statement coverage, below the %.0f%% floor", total, coverageFloor)
+	}
+	return nil
 }

@@ -246,6 +246,20 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 				}
 			}
 			return nil, (*Rebuild).GoPipeline(&parent, ctx, callingWorkspace)
+		case "RunCoverage":
+			var parent Rebuild
+			err = json.Unmarshal(parentJSON, &parent)
+			if err != nil {
+				panic(fmt.Errorf("%s: %w", "failed to unmarshal parent object", err))
+			}
+			var callingWorkspace *dagger.Workspace
+			if inputArgs["callingWorkspace"] != nil {
+				err = json.Unmarshal([]byte(inputArgs["callingWorkspace"]), &callingWorkspace)
+				if err != nil {
+					panic(fmt.Errorf("%s: %w", "failed to unmarshal input arg callingWorkspace", err))
+				}
+			}
+			return nil, (*Rebuild).RunCoverage(&parent, ctx, callingWorkspace)
 		default:
 			return nil, fmt.Errorf("unknown function %s", fnName)
 		}
@@ -264,9 +278,17 @@ func invoke(ctx context.Context, parentJSON []byte, parentName string, fnName st
 							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
 							WithDescription("GoPipeline runs devex's z5labs Go pipeline over the module's Go and the\nGo of its tests module: gofmt, go vet, golangci-lint with this\nrepository's .golangci.yml, and go test with the race detector.\n\nGenerated code is left to the generator. golangci-lint skips files marked\nas generated, and the Go SDK's own check, dagger-go-sdk:stale, is what\nholds them to what the generator writes.\n\nIt is never cached, because the workspace the CLI fills in is a live view\nof the tree rather than an argument a cache key can describe: a cached pass\nwould be a pass for a tree the check never looked at.").
 							WithCachePolicy(dagger.FunctionCachePolicyNever).
-							WithSourceMap(dag.SourceMap("checks.go", 34, 1)).
+							WithSourceMap(dag.SourceMap("checks.go", 35, 1)).
 							WithCheck().
-							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 38, 2)}))).
+							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 39, 2)})).
+					WithFunction(
+						dag.Function("RunCoverage",
+							dag.TypeDef().WithKind(dagger.TypeDefKindVoidKind).WithOptional(true)).
+							WithDescription("RunCoverage fails when the statement coverage of rebuild/run/, the phase\nmodel, drops below 80%. It is a library package, and the repository holds\nevery library package to that floor.\n\nIt runs go test over rebuild/run/ and the packages under it with the\ncoverage of all of them counted, so a test helper package is measured by\nthe tests that use it.\n\nIt touches no target, so its execs may cache. It is never cached itself, for\nGoPipeline's reason: the workspace is a live view of the tree.").
+							WithCachePolicy(dagger.FunctionCachePolicyNever).
+							WithSourceMap(dag.SourceMap("checks.go", 87, 1)).
+							WithCheck().
+							WithArg("callingWorkspace", dag.TypeDef().WithObject("Workspace"), dagger.FunctionWithArgOpts{Description: "The workspace to check. The Dagger CLI fills this in from the workspace\nthe check runs in.", SourceMap: dag.SourceMap("checks.go", 91, 2)}))).
 			WithObject(
 				dag.TypeDef().WithObject("CacheProbe", dagger.TypeDefWithObjectOpts{Description: "CacheProbe runs one command, which prints a random UUID, through each of the\nmodule's exec helpers. Both of its functions are never cached themselves, so\nthe only thing that can hand a second call the first call's UUID is the\ncache of the exec underneath.", SourceMap: dag.SourceMap("main.go", 36, 6)}).
 					WithFunction(
