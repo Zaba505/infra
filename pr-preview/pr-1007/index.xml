@@ -59,11 +59,8 @@ drill from ever reaching it by mistake.&lt;/p&gt;
 &lt;h2 id="add-the-live-target"&gt;Add the live target&lt;/h2&gt;
 &lt;p&gt;Give the live target a file in the values checkout, &lt;code&gt;targets/live.yaml&lt;/code&gt;:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-yaml" data-lang="yaml"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="nt"&gt;kind&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="l"&gt;live&lt;/span&gt;&lt;span class="w"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Only one target is live.&lt;/p&gt;
-&lt;h2 id="commit-everything-first"&gt;Commit everything first&lt;/h2&gt;
-&lt;p&gt;A run against the live target refuses uncommitted changes, in this repository
-or in the values checkout, so every change to the live platform is made from
-history. Commit both, and check that neither has anything left over:&lt;/p&gt;</description></item><item><title>Hardware</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</guid><description>&lt;h2 id="components"&gt;Components&lt;/h2&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Only one target is live: every call refuses to run while a second target&amp;rsquo;s
+file says &lt;code&gt;kind: live&lt;/code&gt;, as committed or as it stands.&lt;/p&gt;</description></item><item><title>Hardware</title><link>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1007/platform/hardware/</guid><description>&lt;h2 id="components"&gt;Components&lt;/h2&gt;
 &lt;h3 id="router"&gt;Router&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://store.ui.com/us/en/products/udm-pro"&gt;Ubiquiti Dream Machine Pro&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id="switch"&gt;Switch&lt;/h3&gt;
