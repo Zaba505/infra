@@ -2,144 +2,53 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Overview
+## What infra is
 
-Personal home lab infrastructure monorepo containing IaC, services, and documentation. Intentionally over-engineered for learning purposes.
+infra defines a self-hosted application platform: the place the operator's own capabilities run
+by default, so that none of them depends on a vendor's hosting product.
 
-**Architecture**: Internet → Cloudflare (mTLS proxy + DDoS) → Home Lab ↔ GCP (Wireguard)
+- **It's rebuilt, not repaired.** The platform can be stood up from nothing, from this
+  repository, in at most 60 minutes.
+- **It's self-hosted, not self-owned.** It spans a public cloud and the home lab. "Self-hosted"
+  means the operator controls it end to end, not that every part runs on hardware the operator
+  owns.
+- **It's run by one operator,** in at most 2 hours a week. A designated successor holds sealed
+  credentials and uses them only if the operator can't.
+- **Its tenants are the operator's capabilities.** Their end users reach the tenants, never the
+  platform.
 
-## Key Commands
+**infra is being rebuilt from scratch.** The charter,
+[Proposal: rebuilding infra from scratch](https://github.com/Zaba505/infra/discussions/970), and
+its revisions are the source of truth for what the platform is, the principles and rules every
+change is held to, and the order its parts come back in. Read it before proposing or
+implementing anything. Each part of the platform returns through its own stories, at the path
+its proposal names; until then, the repository holds no platform code.
 
-### Documentation (Hugo)
-```bash
-cd docs && hugo server                    # Local preview at localhost:1313
-hugo --gc --minify --baseURL "https://zaba505.github.io/infra/"  # Production build
-```
-Requires: Hugo 0.147.0+ extended, Dart Sass, Node.js (PostCSS)
+## Workflow
 
-### Terraform
-```bash
-terraform fmt -recursive -check          # Lint (enforced in CI)
-```
-No automated apply; manual deployment required. Modules in `cloud/` are reusable components, not root modules.
+Work moves from discussion to merged code in four steps:
 
-### Go Services
-```bash
-go test ./...                             # Run all tests
-go test ./services/machine/...            # Test specific service
-go mod tidy                               # Dependency management
-```
-**Go version**: 1.26.0 (use `sync.WaitGroup.Go()` — the classic `Add`/`Done` pattern is obsolete)
+1. **Proposal.** Each part of the platform is proposed in a discussion in General titled
+   "Proposal: …", with the sections Summary, Background, Proposed design, Design decisions,
+   Drill, Documentation, What it replaces, Open questions and Out of scope. It says where its
+   files live in the repository, and Documentation says where its pages sit in the docs site.
+   Review happens in comments; a revised proposal is posted as a comment, and the body gets a
+   note pointing to it.
+2. **Milestone.** An accepted proposal gets a milestone named `Wave N: <proposal>`, whose
+   description links to the proposal and to the charter. A milestone groups one proposal's
+   stories; the waves, not the milestones, set the delivery order.
+3. **Stories.** Stories are written from the accepted proposal only, with the `story` label, in
+   its milestone and on the infra project, and each links back to the discussion.
+4. **Backlog loop.** The backlog plugin's loop picks up eligible stories, implements them and
+   hands the merge to GitHub. Its configuration is `.claude/backlog.json`.
 
-**Module**: `github.com/Zaba505/infra`
+At each wave boundary the charter gets a revision saying which proposals are done, which stories
+landed them, and which wave starts.
 
-## Architecture Patterns
+## Issue tracking
 
-### Go Services
-
-Two services live under `services/`:
-- `machine/` — full chi-based HTTP service backed by Firestore; the reference shape for new services
-- `lb-sink/` — placeholder stub (a `main.go` that prints hello); exists to anchor a load-balancer backend
-
-Services do **not** use the humus framework. The current pattern (see `services/machine/`) is:
-
-```
-services/{service-name}/
-├── main.go          # Calls os.Exit(app.Main(context.Background()))
-├── app/
-│   └── app.go      # ConfigFromEnv(), Main(ctx) int — wires chi router + HTTP server
-├── endpoint/        # HTTP handlers; each registers routes on *chi.Mux
-│   └── endpointpb/  # Protobuf-generated types for request/response
-└── service/         # Backend service clients (e.g. Firestore)
-```
-
-**Key dependencies** (in `go.mod`):
-- `github.com/go-chi/chi/v5` — HTTP routing
-- `github.com/z5labs/bedrock` — config from environment (`config.Env`, `config.Default`, `config.Must`)
-- `github.com/sourcegraph/conc/pool` — structured concurrency
-- `google.golang.org/protobuf` — request/response serialization
-- `go.opentelemetry.io/otel` — tracing
-
-**Config** comes from environment variables via `ConfigFromEnv(ctx)`, not embedded YAML. (Note: `services/machine/config.yaml` is a vestigial humus-era artifact — the live config path is env vars.)
-```go
-func ConfigFromEnv(ctx context.Context) Config {
-    return Config{
-        HTTP: HTTPConfig{
-            Port: config.Must(ctx, config.Default(8080, config.IntFromString(config.Env("HTTP_PORT")))),
-        },
-        Firestore: FirestoreConfig{
-            ProjectID: config.Must(ctx, config.Env("GCP_PROJECT_ID")),
-        },
-    }
-}
-```
-
-**HTTP server** starts with self-signed TLS, listens on `HTTP_PORT` (default 8080):
-```go
-func Main(ctx context.Context) int {
-    sigCtx, cancel := signal.NotifyContext(ctx)
-    defer cancel()
-    // ... init deps, build chi mux, start TLS server via conc pool
-}
-```
-
-**Endpoint registration** — each handler file exposes a registration function:
-```go
-func RegisterMachines(mux *chi.Mux, firestoreClient FirestoreClient) {
-    handler := &registerMachinesHandler{...}
-    mux.Method(http.MethodPost, "/api/v1/machines", handler)
-}
-```
-
-**Request/response**: protobuf over HTTP. Content-Type is `application/x-protobuf`; errors use `application/problem+protobuf`.
-
-**Error handling**: use `pkg/errorpb` helpers — `NewInternalError`, `NewValidationError`, `NewConflictError` — then call `errorHandler(ctx, w, err)` which dispatches to `WriteHttpResponse`.
-
-**Service layer interfaces**: define a small interface in `endpoint/` (not in `service/`) for the backend client, then pass the concrete `service.*Client` at registration time. This keeps the endpoint package testable.
-
-### pkg/errorpb
-
-Shared error types generated from protobuf. Problems serialize to protobuf and are written as `application/problem+protobuf` responses. Three concrete types: `*Problem` (generic/internal), `*ValidationProblem` (400), `*ConflictProblem` (409).
-
-### Terraform Modules
-
-Each `cloud/*` directory is a reusable Terraform module (not a root module). The set spans ~14 GCP building blocks covering compute (`compute-engine`, `rest-api`), networking (`vpc-network`, `https-load-balancer`, `internal-application-load-balancer`, `network-load-balancer`, `ip`, `dns`), storage/data (`storage-bucket`, `firestore`, `artifact-registry`), IAM (`service-account`), and mTLS trust (`mtls/cloudflare-gcp`).
-
-All use GCP provider v7.11.0 with `create_before_destroy` lifecycle for zero-downtime.
-
-Resource naming:
-- Network endpoint groups: `{service}-{region}-neg`
-- Backend services: named after Cloud Run service names
-
-## Critical Go Patterns
-
-**Package declarations**: each `.go` file must have exactly ONE `package` line. Check existing files before creating new ones.
-
-**WaitGroup**: Go 1.26 — use `wg.Go(task)`, not `wg.Add(1); go func() { defer wg.Done() }()`.
-
-**Structured concurrency**: use `pool.New().WithErrors().WithContext(ctx)` from `github.com/sourcegraph/conc/pool`.
-
-**Error handling**: return early, wrap with `%w`, messages lowercase without trailing punctuation.
-
-**Interfaces**: define in the package that uses them (not where implemented), keep to 1–3 methods.
-
-## CI/CD Workflows
-
-- **build.yaml** — The one required check (`Build`) on every PR/push to main; runs `.claude/backlog.json`'s `verify` commands (`terraform fmt -recursive -check`, then the docs build)
-- **docs.yaml** — Auto-deploys Hugo to GitHub Pages on `docs/**` changes to main
-- **docs-preview.yaml** — PR preview sites for `docs/**` changes
-- **codeql.yaml** — Security analysis on `.go` changes
-- **Renovate** — Runs before 4am, auto-tidies go.mod, updates indirect dependencies
-
-## Commit & Branch Conventions
-
-- Branch: `story/issue-{number}/{description}` or `fix/issue-{number}/{description}`
-- Commit: `feat(issue-123): description` or `fix(issue-123): description`
-
-## Issue Tracking
-
-Work is tracked on the **[infra project board](https://github.com/users/Zaba505/projects/9)**
-(user-scoped, project number 9). Resolve it at run time rather than hard-coding the number:
+Stories live on the **[infra project board](https://github.com/users/Zaba505/projects/9)**
+(user-scoped). Resolve it at run time rather than hard-coding the number:
 
 ```bash
 OWNER=$(gh repo view --json owner --jq .owner.login)
@@ -149,36 +58,72 @@ PROJECT=$(gh project list --owner "$OWNER" --format json \
 
 Needs the `project` token scope — `gh auth refresh -s project`.
 
-- **Dependencies are native GitHub issue relationships**, written with
+- **Dependencies are native GitHub `blocked by` relationships**, written with
   `gh issue edit {issue} --add-blocked-by {prereq}` and read back from the `blockedBy` GraphQL
-  field. There is no `Depends on` section in issue bodies and no such field in
-  `.github/ISSUE_TEMPLATE/story.yaml` — do not reintroduce either. Prose in a body is not a
-  dependency; only a typed edge is.
-- **Grouping is the board's `Area` single-select**, not a label. The `epic:*` labels it
-  replaced were deleted. Never invent an `Area` value — the single-select rejects one; read the
-  options with `gh project field-list "$PROJECT" --owner "$OWNER"`.
-- **Milestones are a delivery sequence, not a grouping.** `00 · Authoring pipeline` through
-  `08 · Media storage as tenant`, each named for a demonstrable end state and ordered so that
-  every `blocked by` edge points backward or stays inside its own milestone. Adding an issue
-  means choosing where in that order it falls; if an edge would point *forward* into a later
-  milestone, one of the two is in the wrong place. The numeric prefix is what sorts them —
-  keep it.
-- When filing a batch of issues, create them all first, then wire `--add-blocked-by` in a second
-  pass. Bodies must never cite a sibling by `#N` — during drafting those numbers do not exist
-  yet, and `#8` links to whatever issue 8 happens to be.
+  field. Prose in a body is not a dependency, and there is no `Depends on` section in issue
+  bodies or in `.github/ISSUE_TEMPLATE/story.yaml` — do not introduce one.
+- **A batch of stories is created first and wired in a second pass.** Create every story, then
+  add the `--add-blocked-by` edges once they all have numbers.
+- **No story cites a sibling by number.** During drafting those numbers do not exist yet, and
+  `#8` links to whatever issue 8 happens to be. The typed edge is the only reference.
 
-## Important Files
+## Engineering rules
 
-- `.github/copilot-instructions.md` — Comprehensive AI agent instructions
-- `.github/instructions/go.instructions.md` — Detailed Go coding standards
-- `.github/agents/` — Agent definitions (e.g. `review-capability.agent.md`)
-- `.github/prompts/` — Reusable prompt templates (e.g. `new-adr.prompt.md`)
-- `docs/content/r&d/adrs/` — Architecture Decision Records (MADR 4.0.0 format)
+From the charter. These are enforced in CI rather than by review. Today `Build` runs only the
+docs build, because the repository holds no Go code or infrastructure modules yet; each other
+check is added to `Build` (and to `verify`) by the story that first lands code it applies to.
 
-## Common Pitfalls
+- **One required check.** A workflow named `Build` (`.github/workflows/build.yaml`) runs every
+  check below, and the `default` ruleset requires it. The `verify` commands in
+  `.claude/backlog.json` run the same checks, so a change that passes locally passes in CI.
+- **Infrastructure definitions are checked and tested.** Every module passes its tool's format
+  check, validation and a linter, and has tests that run without real credentials. The tool and
+  the linter are chosen in Proposal: infrastructure modules.
+- **Go code is held to humus's rules.** golangci-lint runs with bedrock's forbidigo list, on test
+  code too. Tests assert with `testify/require`. CI fails when a library package drops below 80%
+  statement coverage. A service the platform runs that is written in Go is a humus app.
+- **The docs site builds** on every pull request that touches it.
+- **Every vendor and third-party component is justified** in the proposal that adds it. The
+  operator must control its configuration, be able to export its data, and be able to revoke its
+  credentials.
 
-- **Terraform module confusion**: `cloud/` contains reusable modules; no `terraform.tfstate` here
-- **Hugo baseURL**: always include trailing slash for production builds
-- **Health check ports**: must match `HTTP_PORT` env var (default 8080)
-- **Secrets**: store in GCP Secret Manager, reference via `google_secret_manager_secret_version_access`
-- **humus framework**: not used in this repo — ignore any docs or examples referencing `rest.Run`, `rpc.Producer`, `rpc.Handler`, or embedded `config.yaml`
+## Docs site
+
+The Hugo site lives in `docs/` and is published at https://zaba505.dev/infra/.
+
+```bash
+cd docs && hugo server        # local preview at localhost:1313
+cd docs && npm install --no-save --no-audit --no-fund postcss postcss-cli autoprefixer \
+  && hugo --gc --minify       # the build the Build check runs
+```
+
+Requires Hugo 0.147.0+ extended, Dart Sass and Node.js (PostCSS).
+
+The layout is planned up front in the charter's Docs site section (revision 1). Its sections, in
+order: the home page (Overview), Getting started, Fundamentals, The platform, Operating, and
+Hosting a tenant. Each is a directory with an `_index.md` landing page whose `weight` sets the
+order; within a section, pages are weighted in steps of 10 in the sketch's order so later pages
+can be slotted in.
+
+- **The skeleton is fixed by the charter.** Each section's landing page says what its pages will
+  cover and in what order. The order comes from the skeleton, never from the order pages land in.
+- **Each proposal documents its own part.** A proposal's Documentation section names the pages
+  it adds or changes and where they sit. It may change the sketch when its design calls for it,
+  and the charter's next revision records the change.
+- **Pages are written while implementing.** Each story writes or updates the pages for what it
+  lands, so a story isn't done until its pages are.
+- **The site reads in order.** Each page links to the next one in the reading order, and the
+  last page of a section links to the first page of the next. A page's URL follows its place in
+  the sidebar.
+- **Pages document the platform as it is.** The home page is an overview of the platform, not a
+  log of the rebuild. No page describes the tree before the reset, or how to move off it. While
+  the charter is open, the home page has one line saying the platform is being rebuilt, with a
+  link to the charter; the charter's last revision removes it.
+- **Every page sets `type: docs`** in its front matter explicitly.
+- **Links between pages use `ref` or `relref`**, never raw paths, so a moved page fails the
+  build instead of breaking silently.
+
+## Commit & Branch Conventions
+
+- Branch: `story/issue-{number}/{description}` or `fix/issue-{number}/{description}`
+- Commit: `feat(issue-123): description` or `fix(issue-123): description`
