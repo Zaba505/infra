@@ -239,9 +239,51 @@ func TestUp_ResumeThroughAPhaseTheRunHasVerifiedRunsNothing(t *testing.T) {
 	applied := len(target.Calls())
 
 	_, err = run.Up(t.Context(), target, phases(nil), run.Resume(), run.Through("0"))
+	require.ErrorIs(t, err, run.ErrThroughVerified)
 	require.ErrorContains(t, err, "has already verified phase 0")
-	require.Equal(t, []string{"0 verify", "1a verify"}, target.Calls()[applied:])
+	require.Len(t, target.Calls(), applied, "the refusal is read from the record, before anything is verified again")
 	require.Equal(t, &run.Stop{Phase: "1a", Step: run.StepThrough}, lastRun(t, target).Stopped)
+}
+
+func TestUp_ResumeContinuesARunThatRecordedNoStop(t *testing.T) {
+	// A run whose up was killed partway leaves a record that says it is
+	// still going. The operator decides whether the target is fit to resume.
+	target := runtest.NewTarget(t, runtest.Drill)
+	require.NoError(t, target.Store().Write(t.Context(), run.Record{
+		ID:     "killed",
+		Phases: []run.PhaseRecord{{Name: "0", Verified: true}, {Name: "1a"}},
+	}))
+
+	_, err := run.Up(t.Context(), target, phases(nil))
+	require.ErrorIs(t, err, run.ErrUnfinishedRun)
+	require.ErrorContains(t, err, "run killed never recorded where it stopped")
+
+	sum, err := run.Up(t.Context(), target, phases(nil), run.Resume(), run.NoPause())
+	require.NoError(t, err)
+	require.Equal(t, "killed", sum.ID)
+	require.True(t, sum.Finished)
+	require.Equal(t, []string{"0 verify", "1a apply", "1a verify", "1b apply", "1b verify"}, target.Calls())
+}
+
+func TestUp_APhaseZeroFailureWithNoStateBackendCannotBeResumed(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill, runtest.NoBackend())
+	ps := phases(map[string][]runtest.PhaseOption{
+		"0": {runtest.ProvidesBackend(), runtest.FailApplyOnce(errNoEdge)},
+	})
+
+	sum, err := run.Up(t.Context(), target, ps)
+	require.ErrorIs(t, err, errNoEdge)
+	require.False(t, sum.Recorded)
+	require.Contains(t, sum.String(), "there is no run to resume. Start again with up, or tear the target down with down.")
+	require.NotContains(t, sum.String(), "up --resume")
+
+	_, err = run.Up(t.Context(), target, ps, run.Resume())
+	require.ErrorIs(t, err, run.ErrNoUnfinishedRun)
+
+	sum, err = run.Up(t.Context(), target, ps)
+	require.NoError(t, err, "up starts the run again")
+	require.True(t, sum.Recorded)
+	require.Equal(t, &run.Stop{Phase: "0", Step: run.StepCheckpoint}, sum.Stopped)
 }
 
 func TestUp_ResumeStopsWhenTheRunAppliedAPhaseNoLongerInTheOrder(t *testing.T) {
@@ -254,7 +296,7 @@ func TestUp_ResumeStopsWhenTheRunAppliedAPhaseNoLongerInTheOrder(t *testing.T) {
 	_, err := run.Up(t.Context(), target, phases(nil), run.Resume())
 	require.ErrorIs(t, err, run.ErrUnknownPhase)
 	require.ErrorContains(t, err, "phase 1z")
-	require.Equal(t, []string{"0 verify"}, target.Calls())
+	require.Empty(t, target.Calls(), "nothing is verified for a run that can't be resumed")
 }
 
 func TestUp_ResumeStopsWhenTheTargetsRecordsCannotBeRead(t *testing.T) {

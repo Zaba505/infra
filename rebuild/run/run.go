@@ -174,6 +174,10 @@ var (
 	// run finished, or the target holds no run at all.
 	ErrNoUnfinishedRun = errors.New("the target has no unfinished run to resume")
 
+	// ErrThroughVerified is returned by Up with Resume when Through names a
+	// phase the run has already verified, so there is nothing to run.
+	ErrThroughVerified = errors.New("the run has already verified the phase Through names")
+
 	// ErrDrift is returned by the preflight check when a phase the last run
 	// applied no longer verifies.
 	ErrDrift = errors.New("the target has drifted from what was last applied to it")

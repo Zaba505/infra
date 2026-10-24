@@ -25,11 +25,16 @@ type Summary struct {
 	Stopped  *Stop
 	Total    time.Duration
 	Over     bool
+
+	// Recorded is false when the target kept no record of the run, because
+	// it had no state backend to keep it in, as when phase 0 fails before
+	// making one. Such a run can't be resumed: the next up starts again.
+	Recorded bool
 }
 
 // summarize is the summary of a call that ran the phases in ran, leaving the
-// run's record as rec.
-func summarize(rec Record, ran []PhaseRecord) Summary {
+// run's record as rec, which the target kept when kept says so.
+func summarize(rec Record, ran []PhaseRecord, kept bool) Summary {
 	return Summary{
 		ID:       rec.ID,
 		Target:   rec.Target,
@@ -38,6 +43,7 @@ func summarize(rec Record, ran []PhaseRecord) Summary {
 		Stopped:  rec.Stopped,
 		Total:    rec.Total,
 		Over:     rec.Over,
+		Recorded: kept,
 	}
 }
 
@@ -74,6 +80,10 @@ func (s Summary) String() string {
 		b.WriteString("the run finished: every phase verified.\n")
 	case st == nil:
 		b.WriteString("the run is still going.\n")
+	case (st.Step == StepApply || st.Step == StepVerify) && !s.Recorded:
+		fmt.Fprintf(&b, "the run failed at phase %s's %s: %s\n", st.Phase, st.Step, st.Error)
+		b.WriteString("The target has no state backend to keep the run's record in, so there is no run to resume. " +
+			"Start again with up, or tear the target down with down.\n")
 	case st.Step == StepApply || st.Step == StepVerify:
 		fmt.Fprintf(&b, "the run failed at phase %s's %s: %s\n", st.Phase, st.Step, st.Error)
 		b.WriteString("Once the target is fit to resume, continue with up --resume, which applies phase " +

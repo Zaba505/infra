@@ -116,12 +116,18 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) (S
 		start int
 	)
 	if o.resume {
-		rec, start, err = resume(ctx, r, phases)
+		rec, start, err = unfinished(ctx, target, phases)
 		if err != nil {
 			return Summary{}, err
 		}
+		// Whether Through names a phase the run has verified is in the
+		// record, so it's refused before anything is verified again.
 		if o.through != "" && start > last {
-			return Summary{}, fmt.Errorf("through %s: run %s has already verified phase %s", o.through, rec.ID, o.through)
+			return Summary{}, fmt.Errorf("through %s: %w: run %s has already verified phase %s",
+				o.through, ErrThroughVerified, rec.ID, o.through)
+		}
+		if err := resume(ctx, r, phases, rec); err != nil {
+			return Summary{}, err
 		}
 		rec.Stopped = nil
 	} else {
@@ -138,7 +144,7 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) (S
 	rec.measure(o.clock.Now())
 	// Until the first phase, phase 0, has applied and verified, the target
 	// may have no state backend to keep the record in.
-	if err := write(wctx, store, rec, start == 0); err != nil {
+	if _, err := write(wctx, store, rec, start == 0); err != nil {
 		return Summary{}, err
 	}
 
@@ -167,9 +173,10 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) (S
 		rec.measure(now)
 		if err != nil {
 			rec.Stopped = &Stop{Phase: p.Name(), Step: step, Error: err.Error()}
-			return summarize(rec, ran), errors.Join(
+			kept, werr := write(wctx, store, rec, i == 0)
+			return summarize(rec, ran, kept), errors.Join(
 				fmt.Errorf("phase %s: %s: %w", p.Name(), step, err),
-				write(wctx, store, rec, i == 0),
+				werr,
 			)
 		}
 
@@ -181,16 +188,17 @@ func Up(ctx context.Context, target Target, phases []Phase, opts ...UpOption) (S
 		case !o.noPause:
 			rec.Stopped = &Stop{Phase: p.Name(), Step: StepCheckpoint}
 		}
-		if err := write(wctx, store, rec, false); err != nil {
-			return summarize(rec, ran), err
+		if _, err := write(wctx, store, rec, false); err != nil {
+			return summarize(rec, ran, false), err
 		}
 		if rec.Finished || rec.Stopped != nil {
-			return summarize(rec, ran), nil
+			return summarize(rec, ran, true), nil
 		}
 	}
 
 	// Only a run with no phase left to run gets here: one with an empty
 	// order, or a resumed one that had verified every phase in it.
 	rec.Finished = true
-	return summarize(rec, ran), write(wctx, store, rec, start == 0)
+	kept, err := write(wctx, store, rec, start == 0)
+	return summarize(rec, ran, kept), err
 }

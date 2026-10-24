@@ -186,15 +186,20 @@ func (rec *Record) measure(now time.Time) {
 	rec.Over = rec.Total > TimeTarget
 }
 
-// write saves rec. Until phase 0 has made the target's state backend there is
-// nowhere to keep it, and that is not a failure when beforeBackend says the
-// run hasn't got that far: the target then holds nothing a later run would
-// need explained. Once phase 0 has verified, a target with no backend is one
-// whose record would be lost, so the run stops.
-func write(ctx context.Context, store Store, rec Record, beforeBackend bool) error {
+// write saves rec, and reports whether the target kept it. Until phase 0 has
+// made the target's state backend there is nowhere to keep it, and that is
+// not a failure when beforeBackend says the run hasn't got that far: the
+// target then holds nothing a later run would need explained. Once phase 0
+// has verified, a target with no backend is one whose record would be lost,
+// so the run stops.
+func write(ctx context.Context, store Store, rec Record, beforeBackend bool) (bool, error) {
 	err := store.Write(ctx, rec)
-	if err == nil || beforeBackend && errors.Is(err, ErrNoBackend) {
-		return nil
+	switch {
+	case err == nil:
+		return true, nil
+	case beforeBackend && errors.Is(err, ErrNoBackend):
+		return false, nil
+	default:
+		return false, fmt.Errorf("writing run %s's record: %w", rec.ID, err)
 	}
-	return fmt.Errorf("writing run %s's record: %w", rec.ID, err)
 }

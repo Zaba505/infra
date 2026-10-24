@@ -67,7 +67,7 @@ func TestSummary_OfARunStoppedWhereThroughSaidSaysSo(t *testing.T) {
 }
 
 func TestSummary_OfARunStillGoingSaysSo(t *testing.T) {
-	sum := run.Summary{ID: "r1", Target: "scratch", Total: time.Minute}
+	sum := run.Summary{ID: "r1", Target: "scratch", Total: time.Minute, Recorded: true}
 
 	require.Equal(t, "run r1 against scratch\nthe run's time so far: 1m0s\nthe run is still going.\n", sum.String())
 }
