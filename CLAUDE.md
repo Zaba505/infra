@@ -125,7 +125,7 @@ Resource naming:
 
 ## CI/CD Workflows
 
-- **terraform.yml** — Lints `**.tf` on PR/push to main
+- **build.yaml** — The one required check (`Build`) on every PR/push to main; runs `.claude/backlog.json`'s `verify` commands (`terraform fmt -recursive -check`, then the docs build)
 - **docs.yaml** — Auto-deploys Hugo to GitHub Pages on `docs/**` changes to main
 - **docs-preview.yaml** — PR preview sites for `docs/**` changes
 - **codeql.yaml** — Security analysis on `.go` changes
