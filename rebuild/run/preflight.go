@@ -11,8 +11,9 @@ import (
 //  1. If the target has no state backend, this is a rebuild from nothing, and
 //     the check passes.
 //  2. If the target's last run is unfinished, the target holds a partial
-//     rebuild, and the check stops with ErrUnfinishedRun. The operator tears
-//     the target down first.
+//     rebuild, and the check stops with ErrUnfinishedRun. Up never starts a
+//     new run on top of an unfinished one: the operator resumes it with Up
+//     and Resume, or tears the target down with Down.
 //  3. Otherwise it runs Verify for every phase the last run applied. Any
 //     failure is drift, and the check stops with ErrDrift.
 func Preflight(ctx context.Context, target Target, phases []Phase) error {
@@ -38,7 +39,7 @@ func preflight(ctx context.Context, r *Run, phases []Phase) error {
 		return nil
 	}
 	if !last.Finished {
-		return fmt.Errorf("preflight: %w: run %s%s. Tear the target down with down first",
+		return fmt.Errorf("preflight: %w: run %s%s. Resume it with up --resume, or tear the target down with down",
 			ErrUnfinishedRun, last.ID, describeStop(last.Stopped))
 	}
 	for _, applied := range last.Phases {
@@ -55,11 +56,13 @@ func preflight(ctx context.Context, r *Run, phases []Phase) error {
 }
 
 // describeStop says where an unfinished run stopped, for the preflight
-// check's error.
+// check's error and the summary.
 func describeStop(s *Stop) string {
 	switch {
 	case s == nil:
 		return " never recorded where it stopped"
+	case s.Step == StepCheckpoint:
+		return fmt.Sprintf(" paused at the checkpoint after phase %s", s.Phase)
 	case s.Step == StepThrough:
 		return fmt.Sprintf(" stopped after phase %s, as it was asked to", s.Phase)
 	default:

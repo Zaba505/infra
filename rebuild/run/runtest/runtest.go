@@ -1,6 +1,7 @@
 // Package runtest holds fakes for testing code that uses package run: a
-// target that records every call made to it, phases that fail on demand, an
-// in-memory record store and a clock that moves only when it's told to.
+// target that records every call made to it, phases that fail on demand and
+// report what they made, an in-memory record store and a clock that moves only
+// when it's told to.
 //
 // A fake phase records each call on the target it runs against, as
 // "<name> apply", "<name> verify" or "<name> teardown", so a test reads the
@@ -108,7 +109,17 @@ func (t *Target) Kind() run.Kind { return t.kind }
 
 // Source returns the commits a run against the target is rebuilt from.
 func (t *Target) Source(context.Context) (run.Source, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	return t.source, t.sourceErr
+}
+
+// SetSource changes the commits the next run against the target is rebuilt
+// from, as a commit made between two calls of a run does.
+func (t *Target) SetSource(src run.Source) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	t.source = src
 }
 
 // Store returns the target's in-memory record store.
@@ -224,6 +235,9 @@ func (s *Store) check(ctx context.Context) error {
 // clone copies rec so the store shares nothing with the run that wrote it.
 func clone(rec run.Record) run.Record {
 	rec.Phases = slices.Clone(rec.Phases)
+	for i := range rec.Phases {
+		rec.Phases[i].Made = slices.Clone(rec.Phases[i].Made)
+	}
 	if rec.Stopped != nil {
 		stop := *rec.Stopped
 		rec.Stopped = &stop
@@ -269,6 +283,12 @@ func ProvidesBackend() PhaseOption {
 	return func(p *FakePhase) { p.backend = true }
 }
 
+// Makes makes every Apply report each of what through Run.Made, in order,
+// before it returns, whether it passes or fails.
+func Makes(what ...string) PhaseOption {
+	return func(p *FakePhase) { p.makes = what }
+}
+
 // Takes makes every Apply and every Verify move clock on by d, as though each
 // took that long.
 func Takes(clock *Clock, d time.Duration) PhaseOption {
@@ -287,6 +307,7 @@ type FakePhase struct {
 	clock    *Clock
 	takes    time.Duration
 	backend  bool
+	makes    []string
 }
 
 var _ run.Phase = (*FakePhase)(nil)
@@ -332,6 +353,11 @@ func (p *FakePhase) do(r *run.Run, method string, f *failure, timed bool) error 
 	}
 	err := f.next()
 	t.call(p.name, method, err)
+	if method == "apply" {
+		for _, what := range p.makes {
+			r.Made(what)
+		}
+	}
 	if p.backend && err == nil {
 		switch method {
 		case "apply":

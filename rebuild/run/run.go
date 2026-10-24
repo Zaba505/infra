@@ -1,6 +1,8 @@
 // Package run is the rebuild's phase model: the run loop that applies and
-// verifies phases in order, the teardown that unwinds them in reverse, the
-// preflight check, the targets a run is pointed at, its records and its time.
+// verifies phases in order, stopping at a checkpoint after each, the resume
+// that continues an unfinished run, the teardown that unwinds phases in
+// reverse, the preflight check, the targets a run is pointed at, its records
+// and its time.
 //
 // It is plain Go and imports nothing from Dagger; .golangci.yml keeps it that
 // way. The rebuild module builds each phase with the containers, secrets and
@@ -13,6 +15,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"sync"
 )
 
 // A Phase is one step of the rebuild. Every method runs against one target,
@@ -35,7 +38,11 @@ type Phase interface {
 
 // Run is what every phase method is handed: the target it runs against, the
 // run's ID and the commits being rebuilt. A phase reads every value it needs
-// from the target, and nothing from the environment it runs in.
+// from the target, and nothing from the environment it runs in, and reports
+// what it made with Made.
+//
+// A resumed run is the same run: it carries the ID the run started with, and
+// the commits of the call that resumed it.
 type Run struct {
 	// Target is the target the run is pointed at.
 	Target Target
@@ -46,6 +53,32 @@ type Run struct {
 	// Source is the commit of this repository being rebuilt, and the commit
 	// of the target's values, each with whether it had uncommitted changes.
 	Source Source
+
+	mu   sync.Mutex
+	made []string
+}
+
+// Made reports something the phase made, such as "the state backend, bucket
+// rebuild-state". Up puts what a phase reports, in the order it reported it,
+// in the phase's record and in the summary it returns at the checkpoint after
+// the phase. Anything reported while the preflight check or a resume verifies
+// an earlier phase is not the phase making anything, and is dropped.
+//
+// It is safe to call from more than one goroutine.
+func (r *Run) Made(what string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.made = append(r.made, what)
+}
+
+// takeMade returns what has been reported since it was last called, and
+// starts over.
+func (r *Run) takeMade() []string {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	made := r.made
+	r.made = nil
+	return made
 }
 
 // Source is what a run is rebuilt from.
@@ -134,8 +167,12 @@ var (
 	ErrNotConfirmed = errors.New("down was not confirmed with the target's name")
 
 	// ErrUnfinishedRun is returned by the preflight check when the target's
-	// last run did not finish.
+	// last run did not finish. Up with Resume continues it.
 	ErrUnfinishedRun = errors.New("the target's last run is unfinished")
+
+	// ErrNoUnfinishedRun is returned by Up with Resume when the target's last
+	// run finished, or the target holds no run at all.
+	ErrNoUnfinishedRun = errors.New("the target has no unfinished run to resume")
 
 	// ErrDrift is returned by the preflight check when a phase the last run
 	// applied no longer verifies.

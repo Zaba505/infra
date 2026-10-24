@@ -12,7 +12,7 @@ import (
 func TestDown_TearsDownEveryPhaseInReverseWithPhaseZeroLast(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 	ps := phases(nil)
-	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.NoError(t, up(t.Context(), target, ps, run.NoPause()))
 
 	require.NoError(t, run.Down(t.Context(), target, ps))
 	require.Equal(t, []string{
@@ -33,7 +33,7 @@ func TestDown_SucceedsWhenApplyNeverRan(t *testing.T) {
 func TestDown_SucceedsWhenRunTwice(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 	ps := phases(nil)
-	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.NoError(t, up(t.Context(), target, ps, run.NoPause()))
 
 	require.NoError(t, run.Down(t.Context(), target, ps))
 	require.NoError(t, run.Down(t.Context(), target, ps))
@@ -49,7 +49,7 @@ func TestDown_SucceedsAfterAnUpThatFailedAtEachPhaseInTurn(t *testing.T) {
 			t.Run(failing+" "+string(step), func(t *testing.T) {
 				target := runtest.NewTarget(t, runtest.Drill)
 				ps := phases(map[string][]runtest.PhaseOption{failing: {fail(errNoEdge)}})
-				require.ErrorIs(t, run.Up(t.Context(), target, ps), errNoEdge)
+				require.ErrorIs(t, up(t.Context(), target, ps, run.NoPause()), errNoEdge)
 				require.NotEmpty(t, target.Left())
 
 				require.NoError(t, run.Down(t.Context(), target, ps))
@@ -62,7 +62,7 @@ func TestDown_SucceedsAfterAnUpThatFailedAtEachPhaseInTurn(t *testing.T) {
 func TestDown_RunAgainAfterFailingPartwayFinishesTheTeardown(t *testing.T) {
 	target := runtest.NewTarget(t, runtest.Drill)
 	ps := phases(map[string][]runtest.PhaseOption{"1a": {runtest.FailTeardownOnce(errBroken)}})
-	require.NoError(t, run.Up(t.Context(), target, ps))
+	require.NoError(t, up(t.Context(), target, ps, run.NoPause()))
 	applied := len(target.Calls())
 
 	err := run.Down(t.Context(), target, ps)
@@ -139,15 +139,15 @@ func TestDown_AfterAFailedUpLetsTheNextUpStartFromNothing(t *testing.T) {
 			opts := map[string][]runtest.PhaseOption{"0": {runtest.ProvidesBackend()}}
 			opts[failing] = append(opts[failing], runtest.FailVerifyOnce(errNoEdge))
 			failed := phases(opts)
-			require.ErrorIs(t, run.Up(t.Context(), target, failed), errNoEdge)
-			require.ErrorIs(t, run.Up(t.Context(), target, failed), run.ErrUnfinishedRun)
+			require.ErrorIs(t, up(t.Context(), target, failed, run.NoPause()), errNoEdge)
+			require.ErrorIs(t, up(t.Context(), target, failed, run.NoPause()), run.ErrUnfinishedRun)
 
 			require.NoError(t, run.Down(t.Context(), target, failed))
 			_, ok, err := run.LastRun(t.Context(), target.Store())
 			require.NoError(t, err)
 			require.False(t, ok, "phase 0's teardown took the records with the backend")
 
-			require.NoError(t, run.Up(t.Context(), target, failed))
+			require.NoError(t, up(t.Context(), target, failed, run.NoPause()))
 			require.True(t, lastRun(t, target).Finished)
 		})
 	}
@@ -160,10 +160,10 @@ func TestDown_ThatFailedPartwayKeepsTheNextUpOffWhatIsLeft(t *testing.T) {
 		"1a": {runtest.FailTeardownOnce(errBroken)},
 		"1b": {runtest.FailVerify(errNoEdge)},
 	})
-	require.ErrorIs(t, run.Up(t.Context(), target, ps), errNoEdge)
+	require.ErrorIs(t, up(t.Context(), target, ps, run.NoPause()), errNoEdge)
 
 	require.ErrorIs(t, run.Down(t.Context(), target, ps), errBroken)
-	require.ErrorIs(t, run.Up(t.Context(), target, ps), run.ErrUnfinishedRun)
+	require.ErrorIs(t, up(t.Context(), target, ps, run.NoPause()), run.ErrUnfinishedRun)
 
 	require.NoError(t, run.Down(t.Context(), target, ps))
 	require.Empty(t, target.Left())

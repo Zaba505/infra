@@ -100,17 +100,48 @@ func TestStore_SharesNothingWithItsCallers(t *testing.T) {
 	ctx := t.Context()
 	rec := run.Record{
 		ID:      "a",
-		Phases:  []run.PhaseRecord{{Name: "0"}},
+		Phases:  []run.PhaseRecord{{Name: "0", Made: []string{"a bucket"}}},
 		Stopped: &run.Stop{Phase: "0"},
 	}
 	require.NoError(t, store.Write(ctx, rec))
 	rec.Phases[0].Name = "changed"
+	rec.Phases[0].Made[0] = "changed"
 	rec.Stopped.Phase = "changed"
 
 	recs, err := store.Records(ctx)
 	require.NoError(t, err)
 	require.Equal(t, "0", recs[0].Phases[0].Name)
+	require.Equal(t, []string{"a bucket"}, recs[0].Phases[0].Made)
 	require.Equal(t, "0", recs[0].Stopped.Phase)
+
+	recs[0].Phases[0].Made[0] = "changed again"
+	again, err := store.Records(ctx)
+	require.NoError(t, err)
+	require.Equal(t, []string{"a bucket"}, again[0].Phases[0].Made)
+}
+
+func TestPhase_ThatMakesThingsReportsThemThroughTheRunOnApply(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill)
+	ps := []run.Phase{
+		runtest.Phase("0", runtest.Makes("a bucket", "a key")),
+		runtest.Phase("1a", runtest.Makes("a network"), runtest.FailApply(errBroken)),
+	}
+
+	sum, err := run.Up(t.Context(), target, ps, run.NoPause())
+	require.ErrorIs(t, err, errBroken)
+	require.Len(t, sum.Phases, 2)
+	require.Equal(t, []string{"a bucket", "a key"}, sum.Phases[0].Made)
+	require.Equal(t, []string{"a network"}, sum.Phases[1].Made, "an apply that failed may still have made something")
+}
+
+func TestTarget_SetSourceChangesWhatTheNextRunIsRebuiltFrom(t *testing.T) {
+	target := runtest.NewTarget(t, runtest.Drill)
+	src := run.Source{Repo: run.Commit{SHA: "b"}, Values: run.Commit{SHA: "c", Uncommitted: true}}
+
+	target.SetSource(src)
+	got, err := target.Source(t.Context())
+	require.NoError(t, err)
+	require.Equal(t, src, got)
 }
 
 func TestStore_WithNoBackendKeepsNothing(t *testing.T) {
