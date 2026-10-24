@@ -8,7 +8,6 @@
     }
   },
   "enabledPlugins": {
-    "example-skills@anthropic-agent-skills": true,
     "backlog@z5labs-devex": true
   }
 }
