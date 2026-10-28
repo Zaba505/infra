@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Operating on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-1010/operating/</link><description>Recent content in Operating on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-1010/operating/index.xml" rel="self" type="application/rss+xml"/><item><title>Routine maintenance</title><link>https://zaba505.github.io/infra/pr-preview/pr-1010/operating/routine-maintenance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1010/operating/routine-maintenance/</guid><description>&lt;h2 id="keeping-dagger-current"&gt;Keeping Dagger current&lt;/h2&gt;
+&lt;p&gt;The rebuild entry point is a Dagger module, and these pin the Dagger it runs
+on:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;engineVersion&lt;/code&gt;&lt;/strong&gt;, in every &lt;code&gt;dagger-module.toml&lt;/code&gt;: the repository root&amp;rsquo;s,
+for the module, and &lt;code&gt;rebuild/tests/dagger-module.toml&lt;/code&gt;, for its tests. It
+pins the engine.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;DAGGER_VERSION&lt;/code&gt;&lt;/strong&gt;, in &lt;code&gt;.github/workflows/build.yaml&lt;/code&gt;: the CLI that &lt;code&gt;Build&lt;/code&gt;
+installs. &lt;a href="https://zaba505.github.io/infra/pr-preview/pr-1010/getting-started/prerequisites/"&gt;What you need&lt;/a&gt;
+tells the operator to install the same version.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;dagger.lock&lt;/code&gt;&lt;/strong&gt;: every image and git ref the workspace uses, by digest or
+commit. That includes the Go SDK that writes the module&amp;rsquo;s generated code, and
+devex&amp;rsquo;s modules, which the module&amp;rsquo;s checks run.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Nothing moves any of them except a pull request.&lt;/p&gt;</description></item></channel></rss>

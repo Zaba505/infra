@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Fundamentals on Zaba505's Home Lab</title><link>https://zaba505.github.io/infra/pr-preview/pr-1010/fundamentals/</link><description>Recent content in Fundamentals on Zaba505's Home Lab</description><generator>Hugo</generator><language>en-us</language><atom:link href="https://zaba505.github.io/infra/pr-preview/pr-1010/fundamentals/index.xml" rel="self" type="application/rss+xml"/><item><title>The rebuild and its phases</title><link>https://zaba505.github.io/infra/pr-preview/pr-1010/fundamentals/rebuild/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://zaba505.github.io/infra/pr-preview/pr-1010/fundamentals/rebuild/</guid><description>&lt;p&gt;The platform is rebuilt, not repaired. One module in this repository stands it
+up from nothing, one phase at a time, against one named target, and tears it
+down again in reverse.&lt;/p&gt;
+&lt;h2 id="the-command"&gt;The command&lt;/h2&gt;
+&lt;p&gt;The rebuild is three functions of the &lt;code&gt;rebuild&lt;/code&gt; Dagger module, which
+&lt;code&gt;dagger.toml&lt;/code&gt; makes the workspace&amp;rsquo;s entry point. Run them from this
+repository&amp;rsquo;s checkout:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-sh" data-lang="sh"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call up --target &amp;lt;name&amp;gt; &lt;span class="o"&gt;[&lt;/span&gt;--resume&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;--through &amp;lt;phase&amp;gt;&lt;span class="o"&gt;]&lt;/span&gt; &lt;span class="o"&gt;[&lt;/span&gt;--no-pause&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call down --target &amp;lt;name&amp;gt; &lt;span class="o"&gt;[&lt;/span&gt;--confirm &amp;lt;name&amp;gt;&lt;span class="o"&gt;]&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;dagger call preflight --target &amp;lt;name&amp;gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;up&lt;/code&gt;&lt;/strong&gt; runs the preflight check, then applies and verifies phases in
+order. It stops at a checkpoint after each phase. &lt;code&gt;--no-pause&lt;/code&gt; runs on
+without stopping, and &lt;code&gt;--through&lt;/code&gt; names the last phase it runs. With
+&lt;code&gt;--resume&lt;/code&gt;, it continues the target&amp;rsquo;s unfinished run instead of starting a
+new one.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;down&lt;/code&gt;&lt;/strong&gt; tears down every phase in reverse order, phase 0 last. It&amp;rsquo;s safe
+to run again after it fails partway, and it succeeds when there&amp;rsquo;s nothing
+left.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;preflight&lt;/code&gt;&lt;/strong&gt; runs only the preflight check, and changes nothing.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;There&amp;rsquo;s no default target: each function refuses to run without &lt;code&gt;--target&lt;/code&gt;.
+None of them is ever served from Dagger&amp;rsquo;s cache, and neither is any command a
+phase runs against a target, so every call really reads and changes the
+target it names.&lt;/p&gt;</description></item></channel></rss>
